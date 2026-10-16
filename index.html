@@ -1227,7 +1227,8 @@ function renderWechat(){
   var wx=D.wechat||{}, list=(wx.items||[]).filter(function(x){
     return !wxCat.size||wxCat.has(x.cat)});
   list.sort(function(a,b){return (b.d||'').localeCompare(a.d||'')});
-  el('wxMeta').textContent=(wx.updated?('采集于 '+wx.updated+' · 近 '+wx.days+' 天'):'')+
+  var _wm=el('wxMeta');
+  if(_wm) _wm.textContent=(wx.updated?('采集于 '+wx.updated+' · 近 '+wx.days+' 天'):'')+
     ' · 共 '+list.length+' 条';
   el('wxGrid').innerHTML=list.length?list.map(function(x){
     var cls=x.cat==='竞对动态'?'政策':'行业';
