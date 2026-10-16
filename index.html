@@ -176,12 +176,6 @@ details.sub li{padding:2px 0}
 .ntag.地方{background:#e9f7ef;color:#14713a}
 .ntag.市场{background:#fff2e0;color:#a85c10}
 .ntag.行业{background:#f3e9ff;color:#6a2fd0}
-.lv{display:inline-block;font-size:10.5px;font-weight:800;padding:0 6px;border-radius:5px;line-height:17px;vertical-align:1px}
-.lv.S{background:#fff1f0;color:#c0261a;border:1px solid #ffccc7}
-.lv.A{background:#fff7e6;color:#a85c10;border:1px solid #ffd591}
-.lv.B{background:#f0f2f5;color:#6b7280;border:1px solid #d9dde3}
-.ncard.hot{border-left:3px solid #c0261a}
-.kind{font-size:11px;padding:1px 6px;border-radius:5px;background:#f0f5ff;color:#1053c9}
 
 .plgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:11px}
 .pl{background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 13px}
@@ -386,26 +380,13 @@ details.sub li{padding:2px 0}
     <div class="news" id="newsGrid"></div>
   </div>
 
-  <!-- 7 情报精选 -->
+  <!-- 7 微信线索 -->
   <div class="panel" id="p-wechat">
-    <div class="sect">情报精选 <small id="dgMeta"></small></div>
-    <div class="hint" style="margin-bottom:8px">
-      <b>竞对官网</b>（自动抓，每周更新，直链稳定）+ <b>微信深度稿</b>（抓全文后按价值分级）。
-      <span class="lv S">S</span> 有明确规模或海外项目，与我们赛道直接相关；
-      <span class="lv A">A</span> 与主业相关但信息较粗；
-      <span class="lv B">B</span> 仅作背景参考。点标题直达原文。
-      <b style="color:#d4380d">本页不计入商机库主表，仅供发现线索，需人工核实。</b>
-    </div>
-    <div class="frow" style="padding:0 0 10px"><label>筛选</label><div class="chips" id="f-dg"></div></div>
-    <div class="news" id="dgGrid"></div>
-
-    <details id="wxFold" style="margin-top:16px;border-top:1px dashed var(--line);padding-top:10px">
-      <summary style="cursor:pointer;font-size:13px;color:var(--tx2);padding:4px 0">
-        展开标题快讯流（<span id="wxFoldN">0</span> 条 · 搜狗检索的标题流，链接为中转链已大面积失效，仅供捞线索）
-      </summary>
-      <div class="frow" style="padding:10px 0"><label>分类</label><div class="chips" id="f-wx"></div></div>
-      <div class="news" id="wxGrid"></div>
-    </details>
+    <div class="sect">微信公众号线索池 <small id="wxMeta"></small></div>
+    <div class="hint" style="margin-bottom:8px">来源为微信公众号文章（搜狗微信检索），分两类：<b>竞对动态</b>——对手/伙伴公众号自己发的中标喜报、签约、开工，比招标公告更早；<b>行业动态</b>——行业媒体号的政策、市场、项目快讯。
+      <b style="color:#d4380d">注意：微信文章没有金额、业主、截止时间等结构化字段，且按相关度排序、时效普遍滞后数周至数月，链接为检索中间链可能失效——本页仅供线索发现，需人工去官方渠道核实，不计入商机库主表。</b></div>
+    <div class="frow" style="padding:0 0 10px"><label>分类</label><div class="chips" id="f-wx"></div></div>
+    <div class="news" id="wxGrid"></div>
   </div>
 
   <!-- 8 招标平台 -->
@@ -525,13 +506,13 @@ details.sub li{padding:2px 0}
   </div>
 </div>
 
-<script src="data.js?v=202610151705"></script>
+<script src="data.js?v=202610161606"></script>
 <script>
 /* ==================== 状态 ==================== */
 var D = window.DATA;
 var TABS = [['p-items','商机库',0],['p-win','中标情报',0],['p-rival','竞争对手',0],
             ['p-partner','合作生态',0],['p-overseas','海外信号',0],
-            ['p-client','重点客户',0],['p-trend','行业动态',0],['p-wechat','情报精选',0],['p-plat','招标平台',0],['p-help','口径说明',0]];
+            ['p-client','重点客户',0],['p-trend','行业动态',0],['p-wechat','微信线索',0],['p-plat','招标平台',0],['p-help','口径说明',0]];
 var F = {rg:new Set(),biz:new Set(),ind:new Set(),sub:new Set(),g:new Set(),mode:new Set(),p:new Set(),
          st:'',q:'',sort:'sc',page:1,tab:0};
 var PS = 24;
@@ -587,7 +568,7 @@ function kpiGo(a){
 /* ==================== Tab ==================== */
 TABS[0][2]=meta.total; TABS[1][2]=D.rivals.length; TABS[2][2]=D.competitors.length;
 TABS[3][2]=D.partners.length; TABS[4][2]=D.overseas.length; TABS[5][2]=D.clients.length;
-TABS[6][2]=D.trends.length; TABS[7][2]=(((D.digest||{}).items||[]).length+((D.wechat||{}).items||[]).length); TABS[8][2]=D.platforms.length;
+TABS[6][2]=D.trends.length; TABS[7][2]=((D.wechat||{}).items||[]).length; TABS[8][2]=D.platforms.length;
 el('tabs').innerHTML=TABS.map(function(t,i){
   return '<button class="tab'+(i===0?' on':'')+'" data-t="'+i+'">'+t[1]+'<i>'+t[2]+'</i></button>'}).join('');
 function goTab(i){
@@ -1190,45 +1171,13 @@ el('f-tg').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
     '</b> 条（竞对喜报 + 行业快讯），见顶部「微信线索」页签。';
 })();
 
-/* ==================== 情报精选（上层） ==================== */
-var dgTag=new Set(), dgLv=new Set();
-function renderDigest(){
-  var dg=D.digest||{}, list=(dg.items||[]).filter(function(x){
-    return (!dgTag.size||dgTag.has(x.tag)) && (!dgLv.size||dgLv.has(x.level));});
-  var order={S:0,A:1,B:2};
-  list.sort(function(a,b){return (order[a.level]-order[b.level])||((b.d||'').localeCompare(a.d||''))});
-  el('dgMeta').textContent=(dg.updated?('更新于 '+dg.updated):'')+
-    ' · 共 '+list.length+' 条'+(dg.n_src?(' · 覆盖 '+dg.n_src+' 家竞对官网'):'');
-  el('dgGrid').innerHTML=list.length?list.map(function(x){
-    return '<div class="ncard'+(x.level==='S'?' hot':'')+'">'+
-      '<h3>'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">':'')+
-      '<span class="lv '+x.level+'">'+x.level+'</span> '+esc(x.t)+(x.url?' ↗</a>':'')+'</h3>'+
-      (x.sum?'<div class="nd">'+esc(x.sum)+'</div>':'')+
-      '<div class="ns"><span class="ntag 行业">'+esc(x.tag)+'</span>'+
-      '<span class="kind">'+esc(x.srcKind||'')+'</span>'+
-      '<span>'+esc(x.src)+'</span><span>'+esc(x.d||'')+'</span></div></div>';
-  }).join(''):'<div class="empty">暂无精选情报</div>';
-}
-function bindDigest(){
-  var box=el('f-dg'); if(!box) return;
-  var tags=uniq((D.digest||{}).items?D.digest.items.map(function(x){return x.tag}):[]);
-  var html=['<span class="chip" data-g="lv" data-v="S">S 级</span>',
-            '<span class="chip" data-g="lv" data-v="A">A 级</span>'];
-  tags.forEach(function(t){html.push('<span class="chip" data-g="tag" data-v="'+esc(t)+'">'+esc(t)+'</span>')});
-  box.innerHTML=html.join('');
-  box.onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
-    var set=c.dataset.g==='lv'?dgLv:dgTag;
-    toggle(set,c.dataset.v);c.classList.toggle('on');renderDigest()};
-}
-
 /* ==================== 微信线索 ==================== */
 var wxCat=new Set();
 function renderWechat(){
   var wx=D.wechat||{}, list=(wx.items||[]).filter(function(x){
     return !wxCat.size||wxCat.has(x.cat)});
   list.sort(function(a,b){return (b.d||'').localeCompare(a.d||'')});
-  var _wm=el('wxMeta');
-  if(_wm) _wm.textContent=(wx.updated?('采集于 '+wx.updated+' · 近 '+wx.days+' 天'):'')+
+  el('wxMeta').textContent=(wx.updated?('采集于 '+wx.updated+' · 近 '+wx.days+' 天'):'')+
     ' · 共 '+list.length+' 条';
   el('wxGrid').innerHTML=list.length?list.map(function(x){
     var cls=x.cat==='竞对动态'?'政策':'行业';
@@ -1272,7 +1221,7 @@ function searchFor(kw){
 }
 
 /* ==================== 启动 ==================== */
-render();renderRivals();renderCompetitors();renderPartners();renderOverseas();renderClients();renderTrends();renderMetals();renderMStrip();renderPlat();renderWechat();renderDigest();bindDigest();(function(){var n=((D.wechat||{}).items||[]).length,f=el('wxFold'),s2=el('wxFoldN');if(s2)s2.textContent=n;if(f&&!n)f.style.display='none';})();
+render();renderRivals();renderCompetitors();renderPartners();renderOverseas();renderClients();renderTrends();renderMetals();renderMStrip();renderPlat();renderWechat();
 /* 浏览器端实时行情已停用：各大行情源（新浪 hq.sinajs.cn、东方财富 push2、腾讯 qt.gtimg.cn）
    均拒绝跨站请求或不提供国内期货代码，页面只可能被 403。
    改为由服务端定时任务在每个工作日收盘 16:05 抓取并重新发布。
