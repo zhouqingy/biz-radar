@@ -389,7 +389,17 @@ details.sub li{padding:2px 0}
     <div class="news" id="wxGrid"></div>
   </div>
 
-  <!-- 8 招标平台 -->
+  <!-- 8 情报精选 -->
+  <div class="panel" id="p-digest">
+    <div class="sect">情报精选 <small id="dgMeta"></small></div>
+    <div class="hint" style="margin-bottom:8px">两个源合并去重：<b>竞对官网</b>——59 家竞争对手官网新闻栏目直抓的一手动态（中标喜报、签约、开工、技术发布），比招标公告早 1-8 周；<b>微信深度稿</b>——人工投喂的公众号深度文章。
+      <b style="color:#d4380d">微信公众号自动发现已实测全堵死（搜狗 antispider 全拦 / 搜索引擎 site: 无结果 / RSSHub 不可达），微信源只能人工投喂链接后批量抓取，无投喂时该源为 0 条属正常降级。</b>
+      同一篇稿子常被官网与公众号同时发布，已按标题相似度去重，只保留一条。</div>
+    <div class="frow" style="padding:0 0 10px"><label>来源</label><div class="chips" id="f-dg"></div></div>
+    <div class="news" id="dgGrid"></div>
+  </div>
+
+  <!-- 9 招标平台 -->
   <div class="panel" id="p-plat">
     <div class="sect">招标 / 审批信息平台导航 <small>日常监测入口，括号内为本库已收录条数</small></div>
     <div id="platWrap"></div>
@@ -506,13 +516,14 @@ details.sub li{padding:2px 0}
   </div>
 </div>
 
-<script src="data.js?v=202610161606"></script>
+<script src="data.js?v=202610190953"></script>
 <script>
 /* ==================== 状态 ==================== */
 var D = window.DATA;
 var TABS = [['p-items','商机库',0],['p-win','中标情报',0],['p-rival','竞争对手',0],
             ['p-partner','合作生态',0],['p-overseas','海外信号',0],
-            ['p-client','重点客户',0],['p-trend','行业动态',0],['p-wechat','微信线索',0],['p-plat','招标平台',0],['p-help','口径说明',0]];
+            ['p-client','重点客户',0],['p-trend','行业动态',0],['p-wechat','微信线索',0],
+            ['p-digest','情报精选',0],['p-plat','招标平台',0],['p-help','口径说明',0]];
 var F = {rg:new Set(),biz:new Set(),ind:new Set(),sub:new Set(),g:new Set(),mode:new Set(),p:new Set(),
          st:'',q:'',sort:'sc',page:1,tab:0};
 var PS = 24;
@@ -568,7 +579,8 @@ function kpiGo(a){
 /* ==================== Tab ==================== */
 TABS[0][2]=meta.total; TABS[1][2]=D.rivals.length; TABS[2][2]=D.competitors.length;
 TABS[3][2]=D.partners.length; TABS[4][2]=D.overseas.length; TABS[5][2]=D.clients.length;
-TABS[6][2]=D.trends.length; TABS[7][2]=((D.wechat||{}).items||[]).length; TABS[8][2]=D.platforms.length;
+TABS[6][2]=D.trends.length; TABS[7][2]=((D.wechat||{}).items||[]).length;
+TABS[8][2]=((D.digest||{}).items||[]).length; TABS[9][2]=D.platforms.length;
 el('tabs').innerHTML=TABS.map(function(t,i){
   return '<button class="tab'+(i===0?' on':'')+'" data-t="'+i+'">'+t[1]+'<i>'+t[2]+'</i></button>'}).join('');
 function goTab(i){
@@ -1171,6 +1183,33 @@ el('f-tg').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
     '</b> 条（竞对喜报 + 行业快讯），见顶部「微信线索」页签。';
 })();
 
+/* ==================== 情报精选 ==================== */
+var dgSrc=new Set();
+function renderDigest(){
+  var items=((D.digest||{}).items||[]);
+  var list=items.filter(function(x){return !dgSrc.size||dgSrc.has(x.src||'官网')});
+  list.sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
+  var box=el('dgGrid'); if(!box)return;
+  box.innerHTML=list.map(function(x){
+    var s=x.src||'官网';
+    return '<div class="ncard"><h3>'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">':'')+
+      esc(x.title)+(x.url?' ↗</a>':'')+'</h3>'+
+      (x.snip?'<div class="nd">'+esc(x.snip)+'</div>':'')+
+      '<div class="ns"><span class="ntag '+(s==='微信'?'市场':'行业')+'">'+esc(s)+'</span>'+
+      (x.source?'<span>'+esc(x.source)+'</span>':'')+'<span>'+esc(x.date||'')+'</span></div></div>'
+  }).join('')||'<div class="hint">本轮没有抓到情报精选条目。</div>';
+  var m=el('dgMeta');
+  if(m){
+    var n1=items.filter(function(x){return (x.src||'官网')==='官网'}).length;
+    var n2=items.length-n1;
+    m.innerHTML='官网 '+n1+' 条 · 微信 '+n2+' 条'+
+      ((D.digest||{}).updated?' · 更新 '+esc((D.digest||{}).updated):'');
+  }
+}
+chipsBox('f-dg',uniq(((D.digest||{}).items||[]).map(function(x){return x.src||'官网'})),null,'dsrc');
+if(el('f-dg')) el('f-dg').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
+  toggle(dgSrc,c.dataset.v);c.classList.toggle('on');renderDigest()};
+
 /* ==================== 微信线索 ==================== */
 var wxCat=new Set();
 function renderWechat(){
@@ -1221,7 +1260,7 @@ function searchFor(kw){
 }
 
 /* ==================== 启动 ==================== */
-render();renderRivals();renderCompetitors();renderPartners();renderOverseas();renderClients();renderTrends();renderMetals();renderMStrip();renderPlat();renderWechat();
+render();renderRivals();renderCompetitors();renderPartners();renderOverseas();renderClients();renderTrends();renderMetals();renderMStrip();renderPlat();renderWechat();renderDigest();
 /* 浏览器端实时行情已停用：各大行情源（新浪 hq.sinajs.cn、东方财富 push2、腾讯 qt.gtimg.cn）
    均拒绝跨站请求或不提供国内期货代码，页面只可能被 403。
    改为由服务端定时任务在每个工作日收盘 16:05 抓取并重新发布。
