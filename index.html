@@ -526,7 +526,7 @@ details.sub li{padding:2px 0}
   </div>
 </div>
 
-<script src="data.js?v=202610201027"></script>
+<script src="data.js?v=202610201607"></script>
 <script>
 /* ==================== 状态 ==================== */
 var D = window.DATA;
@@ -1131,18 +1131,6 @@ function renderClients(){
   var list=D.clients.filter(function(x){return !cRg.size||cRg.has(x.grp)});
   el('cliGrid').innerHTML=list.map(function(x){
     var hit=x.n>0, ab=x.abroad||[], open=cEx.has(x.name);
-    // 打通：客户卡片上带出「情报精选 + 行业动态」里提到该客户的内容（2026-10-20）
-    var nw=x.news||[], nwHtml='';
-    if(nw.length){
-      var nShow=open?nw:nw.slice(0,3);
-      nwHtml='<div class="cc-i"><div style="color:#1053c9;font-weight:700;margin-bottom:3px">相关情报 / 行业动态'+
-        (nw.length>3&&!open?'<span style="font-weight:400;color:#8a9099">（'+nw.length+' 条）</span>':'')+'</div><ul>'+
-        nShow.map(function(n){
-          return '<li>'+(n.url?'<a href="'+esc(n.url)+'" target="_blank" rel="noopener">':'')+
-            (n.lvl?'<span class="lv '+esc(n.lvl)+'">'+esc(n.lvl)+'</span> ':'')+
-            esc(n.t)+' <span class="sub-i">'+esc(n.d)+(n.src?' · '+esc(n.src):'')+'</span>'+
-            (n.url?'</a>':'')+'</li>'}).join('')+'</ul></div>';
-    }
     var abHtml='';
     if(ab.length){
       var abShow=open?ab:ab.slice(0,AB_SHOW);
@@ -1168,9 +1156,8 @@ function renderClients(){
     return '<div class="ccard"><div class="cc-h"><b>'+esc(x.name)+'</b>'+
       '<span class="cc-tag" style="background:'+(GTAG[x.grp]||'#f1f3f6')+';color:'+(GCOL[x.grp]||'#5a6270')+'">'+esc(x.grp)+'</span>'+
       (hit?'<span class="cc-tag" style="background:#fff2e0;color:#a85c10">'+x.n+' 条库内记录</span>'
-         :'<span class="cc-tag none">库内暂无</span>')+
-      (nw.length?'<span class="cc-tag" style="background:#e8f1ff;color:#1053c9">'+nw.length+' 条相关情报</span>':'')+'</div>'+
-      nwHtml+abHtml+hitHtml+
+         :'<span class="cc-tag none">库内暂无</span>')+'</div>'+
+      abHtml+hitHtml+
       '<div class="cc-i"><a href="javascript:searchFor(\''+esc(x.kw)+'\')">在商机库中搜索相关记录 ↗</a></div>'+
       '</div>'}).join('')||'<div class="empty">暂无</div>';
 }
