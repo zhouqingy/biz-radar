@@ -436,6 +436,43 @@ details.sub li{padding:2px 0}
 .rival-dw{margin-left:6px;font-size:11px;padding:1px 7px;border-radius:4px;border:1px solid #0f766e;
   background:#f0fdfa;color:#0f766e;cursor:pointer;line-height:1.6;vertical-align:1px;white-space:nowrap}
 .rival-dw:hover{background:#0f766e;color:#fff}
+/* ══════ 原文阅读抽屉 ══════
+   用户反馈「一点击一直新开我这个网页」。所以链接全部改成页内抽屉，
+   真要看原窗口再点「新窗口打开」。 */
+.drawer{position:fixed;inset:0;z-index:900;display:none}
+.drawer.on{display:block}
+.rd-mask{position:absolute;inset:0;background:rgba(10,20,40,.42);backdrop-filter:blur(2px)}
+.rd-panel{position:absolute;top:0;right:0;bottom:0;width:min(920px,94vw);background:#fff;
+  box-shadow:-8px 0 40px rgba(8,24,56,.24);display:flex;flex-direction:column;
+  animation:rdslide .22s cubic-bezier(.2,.8,.3,1)}
+@keyframes rdslide{from{transform:translateX(40px);opacity:.4}to{transform:none;opacity:1}}
+.rd-head{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);background:#fbfcfe}
+.rd-head b{font-size:13.5px;font-weight:700;color:var(--tx);flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rd-ops{display:flex;gap:7px;flex-shrink:0}
+.rd-ops a{font-size:12px;font-weight:600;color:var(--brand-d);background:#f2f7ff;border:1px solid #dce8fb;
+  border-radius:7px;padding:4px 10px;white-space:nowrap}
+.rd-ops a:hover{background:#e4eefe}
+.rd-ops a.rclose{background:#fff;border-color:#e2e6ec;color:var(--tx2)}
+.rd-warn:empty{display:none}
+.rd-warn{padding:8px 16px;background:#fff8ee;border-bottom:1px solid #f7e2c4}
+.dwarn{font-size:12px;color:#a8620a;line-height:1.6}
+.rd-body{flex:1;position:relative;overflow:hidden}
+.rd-frame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+.rd-fallback{padding:14px 18px;background:#fafbfd;border-bottom:1px solid var(--line)}
+.rsnip{font-size:12.5px;line-height:1.75;color:var(--tx2);margin:0 0 8px}
+.rfg{font-size:11.5px;color:var(--tx3);line-height:1.6}
+#toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%) translateY(10px);z-index:999;
+  background:#1f2b3d;color:#fff;font-size:12.5px;padding:8px 16px;border-radius:8px;opacity:0;
+  transition:.2s;pointer-events:none}
+#toast.on{opacity:1;transform:translateX(-50%)}
+/* 「原文」链接：统一样式，鼠标悬停给个下划线暗示可点 */
+.pj-t .go{font-size:11px;color:var(--brand);font-weight:600;white-space:nowrap;opacity:.75}
+/* 死链（转载站/空壳站）：标题降成灰色 + 虚线，一眼能看出「这条点了可能白屏」 */
+.pj-t.dead{color:var(--tx2)}
+.pj-t.dead .go{color:#b06a10;opacity:1}
+.pj-t:hover .go{opacity:1}
+
 </style>
 <script>
 /* 顶层报错兜底：写到 <html data-err> 便于定位 */
@@ -836,7 +873,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610212145';
+var VER='?v=202610212159';
 /* ── 全局状态 ──────────────────────────────────────────────
    注意：这些必须在 boot_main() 外面声明。boot_main 里用 var 声明的东西
    全是函数作用域，脚本外面看不见——调试时会发现 D / items 都是 undefined，
@@ -947,6 +984,117 @@ function mergeMod(mod){
 /* ==================== 工具 ==================== */
 function el(id){return document.getElementById(id)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+/* ══════════════════════════════════════════════════════════════════════
+   站内阅读器 openLink（2026-10-21）
+   ══════════════════════════════════════════════════════════════════════
+   用户反馈：「这两个我一点击一直新开我这个网页」。
+
+   原来的做法是每个链接 target="_blank"，于是点 5 条就开 5 个标签页，看完还得
+   一个个关。更麻烦的是知了标讯、谛听招标网这类站，新标签打开是白屏——
+   还占着一个页签，得自己找回来关掉。
+
+   现在改成：链接默认在**页内抽屉**里打开，抽屉顶部一条操作栏（新窗口打开 / 复制链接 / 关闭），
+   真想在独立窗口看再点。抽屉里用 iframe 嵌原站，嵌不了的（对方 X-Frame-Options）
+   会自动降级成「标题 + 摘要 + 操作按钮」，不会给你一片空白。
+   ══════════════════════════════════════════════════════════════════════ */
+var _drCb = null;
+function _drawer() { return document.getElementById('drawer'); }
+function openReader(title, url, extra) {
+  var d = _drawer();
+  if (!d) { if (url) window.open(url, '_blank', 'noopener'); return; }
+  extra = extra || {};
+  var isBid = /baohuabidding|ggzy|jsggzy|shggzy|ccgp|chinabidding|ahtba|hefei|suzhou/.test(url || '');
+  var warn = extra.dead
+    ? '<span class="dwarn">该来源是转载站，原文页可能打不开（实测空壳/需登录），已在下方列出标题与摘要</span>'
+    : '';
+  d.querySelector('.rd-head b').textContent = title || '原文';
+  d.querySelector('.rd-warn').innerHTML = warn;
+  d.querySelector('.rd-ops').innerHTML =
+    (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">新窗口打开 ↗</a>' : '') +
+    (url ? '<a href="javascript:void(0)" onclick="copyLink(\'' + esc(url.replace(/'/g, '')) + '\')">复制链接</a>' : '') +
+    '<a href="javascript:void(0)" onclick="closeReader()" class="rclose">关闭 ✕</a>';
+  var body = d.querySelector('.rd-body');
+  /* 摘要 + 说明永远放在最上面。原因是政府交易平台 99% 都发 X-Frame-Options: SAMEORIGIN，
+     iframe 一定是空白——与其让用户对着白框发愣，不如先把「这条讲什么」给他看，
+     再让他自己决定要不要跳出去。只有真能嵌的站（少数）iframe 才在下面露出来。 */
+  var fallback = '<div class="rd-fallback">' +
+    (extra.snip ? '<p class="rsnip">' + esc(extra.snip) + '</p>' : '<p class="rsnip">这条公告没有存摘要。</p>') +
+    '<div class="rfg">' + (extra.dead
+      ? '⚠ 这个来源是转载站/聚合站，原文页实测打不开（返回空白或要登录）。建议点右上「新窗口打开」试一次，不行就用标题搜官方源。'
+      : '多数政府交易平台禁止被其它网站嵌入，下面的预览可能是空白。请点右上「新窗口打开」看完整原文。') +
+    '</div></div>';
+  if (url) {
+    body.innerHTML = fallback +
+      '<iframe class="rd-frame" src="' + esc(url) + '" referrerpolicy="no-referrer" ' +
+      'sandbox="allow-same-origin allow-scripts allow-popups allow-forms" ' +
+      'loading="lazy" onload="rdLoaded(this)"></iframe>';
+    setTimeout(function () { rdCheck(url); }, 2800);
+  } else {
+    body.innerHTML = fallback;
+  }
+  d.classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+function rdLoaded(f) {
+  /* 关键：如果这个 iframe 载入的是**我们自己的页面**，说明目标 url 被浏览器
+     解析成了相对路径，或者站点 302 回来了。这种「自己嵌自己」必须先抓出来——
+     否则抽屉里会出现一个一模一样的商机雷达，用户以为点错了。
+     同源可读就检查 location；跨域读不到会抛异常，那才是正常的跨站加载。 */
+  try {
+    var loc = f.contentWindow.location.href;
+    if (!loc || loc === 'about:blank' || loc.indexOf(location.host) >= 0 ||
+        loc === location.href) {
+      f.remove();
+      var d = _drawer();
+      var tip = d && d.querySelector('.rfg');
+      if (tip) tip.innerHTML = '该站点不允许被嵌入（或重定向回了本页）。请点右上「<b>新窗口打开 ↗</b>」查看原文。';
+      return;
+    }
+  } catch (e) { /* 跨域：说明真的嵌进去了别的站，正常 */ }
+  f.classList.add('loaded');
+}
+function rdFail(f) { var d = _drawer(); if (d) d.querySelector('.rd-frame') && d.querySelector('.rd-frame').remove(); }
+function rdCheck(url) {
+  /* 跨域 iframe 被 X-Frame-Options 拒掉时，浏览器既不报错也不触发 onload，
+     我们也读不到它的内容——这是同源策略的硬限制，纯前端无解。
+     能做的是：2.8 秒后如果 iframe 还没 onload，就把它收掉，
+     免得用户盯着一个白框以为是我们坏了。 */
+  var d = _drawer();
+  if (!d || !d.classList.contains('on')) return;
+  var f = d.querySelector('.rd-frame');
+  if (f && !f.classList.contains('loaded')) {
+    f.style.display = 'none';
+    var tip = d.querySelector('.rfg');
+    if (tip) tip.innerHTML = '该站点拒绝了嵌入预览（政府交易平台普遍如此）。请点右上「<b>新窗口打开 ↗</b>」在新标签查看完整原文。';
+  }
+}
+function copyLink(u) {
+  try {
+    if (navigator.clipboard) navigator.clipboard.writeText(u);
+    else { var t = document.createElement('textarea'); t.value = u; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
+    toast('链接已复制');
+  } catch (e) { toast('复制失败，请手动选中'); }
+}
+function closeReader() {
+  var d = _drawer();
+  if (!d) return;
+  d.classList.remove('on');
+  document.body.style.overflow = '';
+  var f = d.querySelector('.rd-frame');
+  if (f) f.remove();          // 必须摘掉 iframe，否则视频/轮询还在后台跑
+  d.querySelector('.rd-body').innerHTML = '';
+  if (_drCb) { _drCb = null; }
+}
+var _toastT;
+function toast(msg) {
+  var t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(_toastT);
+  _toastT = setTimeout(function () { t.classList.remove('on'); }, 1800);
+}
 /* 金额统一按「亿元」为单位传入，显示时自动切万/亿。
    2026-10-21 修：原来 a<1 时输出 (a*10000).toFixed(0)+'万'，
    3260 万会显示成「3260万」看着没问题，但 0.326 亿四舍五入到 3260 万是对的，
@@ -1234,7 +1382,7 @@ function cardHtml(x){
   var allHist=(x.hist||[]).slice().sort(function(a,b){return (a.d||'').localeCompare(b.d||'')});
   if(allHist.length){
     chain='<div class="chain">阶段：'+allHist.map(function(h){
-      return h.url? '<a href="'+esc(h.url)+'" target="_blank" rel="noopener">'+esc(h.st)+' '+esc((h.d||'').slice(5))+'</a>'
+      return h.url? '<a href="'+esc(h.url)+'" onclick="return openLink(event,\''+esc(x.id)+'\',\''+esc(h.url.replace(/'/g,""))+'\',\''+esc(h.st)+'\')">'+esc(h.st)+' '+esc((h.d||'').slice(5))+'</a>'
                   : '<span>'+esc(h.st)+'</span>'}).join('')+'</div>';
   }
   // 业主/中标单位名里常混有括号注释（项目单位/采购代理/第一中标候选人/分公司归属等），
@@ -1265,7 +1413,7 @@ function cardHtml(x){
           'title="点开看这家单位在中标情报里的全部战绩">🏁 中标：' + esc(winMain) +
           (String(x.win || '').length > winMain.length ? ' 等' : '') + ' ↗</a>'
         : '<span class="act-none">中标单位未在公示正文中明确（原文页可查）</span>') +
-      (x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener" class="act-src">结果公告原文 ↗</a>' : '') +
+      (x.url ? '<a href="' + esc(x.url) + '" onclick="return openItem(event,\'' + esc(x.id) + '\')" class="act-src">结果公告原文 ↗</a>' : '') +
       '</div>';
   } else if (x.url || x.buyer) {
     var bq=qcName(x.buyer), wq=qcName(x.win);
@@ -1274,6 +1422,7 @@ function cardHtml(x){
     acts='<div class="pj-act">'+
       (nf?'<a href="javascript:void(0)" class="act-file" onclick="toggleFiles(\''+esc(x.id)+'\')" title="展开附件清单，自己挑要下的">📎 附件 '+nf+' 个</a>':'')+
       (bq?'<a href="https://www.qcc.com/web/search?key='+encodeURIComponent(bq)+'" target="_blank" rel="noopener nofollow" title="跳转企查查查该业主工商信息（外部站点，需自行登录）">查业主工商信息 ↗</a>':'')+
+      (x.linkbad?'<a href="https://www.baidu.com/s?wd='+encodeURIComponent(esc(x.t.replace(/[\[\]]/g,'')))+'" target="_blank" rel="noopener nofollow" class="act-src" title="这个来源是转载站，原文打不开。用标题去搜官方公告页">搜官方源 ↗</a>':'')+
 
       '</div>';
   }
@@ -1281,8 +1430,12 @@ function cardHtml(x){
     '<div class="pj-top"><span class="gbadge '+x.g+'">'+GTXT[x.g]+'</span>'+
       '<span class="gscore">'+x.sc+'分</span>'+
       (x.nw?'<span class="newdot">NEW</span>':'')+mv+'</div>'+
-    (x.url?'<a class="pj-t" href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.t)+' <span class="go">原文 ↗</span></a>'
-          :'<span class="pj-t">'+esc(x.t)+'</span>')+
+    (x.url
+      ? '<a class="pj-t'+(x.linkbad?' dead':'')+'" href="'+esc(x.url)+
+        '" onclick="return openItem(event,\''+esc(x.id)+'\')" '+
+        (x.linkbad?'title="这条来自转载站，原文页实测打不开（空壳/需登录）。点开可在页内看摘要，或用标题搜官方源"':'')+'>'+
+        esc(x.t)+' <span class="go">'+(x.linkbad?'链接可能失效':'原文')+' ↗</span></a>'
+      : '<span class="pj-t">'+esc(x.t)+'</span>')+
     '<div class="tags">'+tags+'</div>'+
     '<div class="pj-meta">'+meta+'</div>'+
     (x.snip?'<div class="pj-snip">'+esc(x.snip)+'</div>':'')+chain+
@@ -1333,16 +1486,39 @@ function fileList(x){
     var canDl=(it.ok===1 && it.u);
     var href=canDl?it.u:(x.url||it.u||'');
     if(!href)return '<li><span class="'+cls+'">'+esc(nm)+'</span></li>';
+    /* 附件：能直链下载的照旧新标签（浏览器要接管下载动作）；
+       只能去原文页下的，走抽屉，别再开新标签。 */
     var tip=canDl?('已校验可下载 · '+Math.round((it.sz||0)/1024)+' KB')
                 :'该附件需到公告原文页自行下载（直链未通过校验或源站已清空）';
+    var aClick = canDl ? '' : ' onclick="return openLink(event,\''+esc(x.id)+'\',\''+esc(href.replace(/'/g,""))+'\',\'附件下载\')"';
     return '<li><a class="'+cls+'" href="'+esc(href)+'" target="_blank" rel="noopener"'+
-      ' title="'+esc(tip)+'">'+esc(nm)+'<em class="go-src">'+
+      aClick+' title="'+esc(tip)+'">'+esc(nm)+'<em class="go-src">'+
       (canDl?'下载 ↓':'去原文页下 ↗')+'</em></a></li>';
   }).join('');
   return '<div class="pj-files" id="fl-'+esc(x.id)+'" style="display:none">'+
     '<div class="fh">附件清单 <small>'+f.length+' 个 · 点附件名跳到公告原文页，在源站下载</small></div>'+
     '<ul>'+rows+'</ul></div>';
 }
+/* 点卡片标题/原文 → 页内抽屉打开（阻止默认的新标签行为）
+   返回 false 才能拦住 <a> 的默认跳转。 */
+function openItem(ev, id) {
+  if (ev && ev.preventDefault) ev.preventDefault();
+  var x = null;
+  for (var i = 0; i < items.length; i++) if (items[i].id === id) { x = items[i]; break; }
+  if (!x) return false;
+  openReader(x.t, x.url, { dead: !!x.linkbad, snip: x.snip });
+  return false;
+}
+
+/* 通用：任意子链接（阶段链 / 附件）在抽屉里打开 */
+function openLink(ev, id, url, label) {
+  if (ev && ev.preventDefault) ev.preventDefault();
+  var x = null;
+  for (var i = 0; i < items.length; i++) if (items[i].id === id) { x = items[i]; break; }
+  openReader((x ? x.t + ' · ' : '') + (label || '原文'), url, { snip: x ? x.snip : '' });
+  return false;
+}
+
 function toggleFiles(id){
   var d=document.getElementById('fl-'+id);
   if(d)d.style.display=(d.style.display==='none'?'block':'none');
@@ -2342,10 +2518,23 @@ function boot_main(){
 
 /* 启动逻辑在 boot.js（defer，保证在数据脚本之后执行） */
 </script>
-<script defer src="data.core.js?v=202610212145"></script>
-<script defer src="data.items.js?v=202610212145"></script>
+<script defer src="data.core.js?v=202610212159"></script>
+<script defer src="data.items.js?v=202610212159"></script>
 <script defer src="boot.js?v=202610212029"></script>
 <!-- 竞对画像抽屉：点「画像」按钮从右侧滑出，不跳页 -->
 <script src="rival.js"></script>
+
+<!-- 原文阅读抽屉：点「原文」在页内打开，不再甩出一堆新标签页 -->
+<div class="drawer" id="drawer">
+  <div class="rd-mask" onclick="closeReader()"></div>
+  <div class="rd-panel">
+    <div class="rd-head">
+      <b>原文</b>
+      <div class="rd-ops"></div>
+    </div>
+    <div class="rd-warn"></div>
+    <div class="rd-body"></div>
+  </div>
+</div>
 </body>
 </html>
