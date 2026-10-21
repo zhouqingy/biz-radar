@@ -7,9 +7,13 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --brand:#1f6feb;--brand-d:#1053c9;--bg:#f4f6fa;--card:#fff;
-  --tx:#1f2329;--tx2:#5a6270;--tx3:#8a9099;--line:#e8ecf3;
-  --red:#d4380d;--amber:#b7791f;--green:#1a7f3c;--purple:#7b3fe4;
+  /* 2026-10-21 视觉重做：降低饱和度、拉开层级。
+     原配色偏亮偏杂（十几种色值同时出现），信息一多就显乱。 */
+  --brand:#2b6cb0;--brand-d:#1f4e8c;--bg:#f7f8fa;--card:#fff;
+  --tx:#16181d;--tx2:#525a66;--tx3:#8b929e;--line:#e6e9ef;
+  --line2:#d6dbe4;
+  --red:#c0392b;--amber:#a8620a;--green:#1a7f4b;--purple:#5b4bc4;
+  --sh:0 1px 2px rgba(20,30,50,.04),0 2px 8px rgba(20,30,50,.04);
 }
 body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
   background:var(--bg);color:var(--tx);font-size:14.5px;line-height:1.65;
@@ -50,11 +54,12 @@ button{font-family:inherit}
 
 /* ---------- 筛选器 ---------- */
 .fbar{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px 14px;margin-bottom:12px}
-.frow{display:flex;gap:8px;align-items:flex-start;padding:5px 0;flex-wrap:wrap}
-.frow>label{font-size:12px;color:var(--tx3);font-weight:700;flex:0 0 62px;padding-top:4px}
-.chips{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
-.chip{padding:4px 11px;border:1px solid var(--line);border-radius:16px;background:#fff;font-size:12.5px;
-  cursor:pointer;color:var(--tx2);transition:.12s;white-space:nowrap}
+/* 筛选区：行距收紧、标签右对齐、chip 减重，避免一屏塞不下 */
+.frow{display:flex;gap:6px;align-items:flex-start;padding:3px 0;flex-wrap:wrap}
+.frow>label{font-size:11.5px;color:var(--tx3);font-weight:600;flex:0 0 56px;padding-top:4px;text-align:right}
+.chips{display:flex;gap:5px;flex-wrap:wrap;flex:1;min-width:0}
+.chip{padding:3px 9px;border:1px solid var(--line);border-radius:14px;background:#fff;font-size:12px;
+  cursor:pointer;color:var(--tx2);transition:.12s;white-space:nowrap;line-height:1.5}
 .chip:hover{border-color:var(--brand);color:var(--brand)}
 .chip.on{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:600}
 .chip em{font-style:normal;opacity:.65;font-size:11px;margin-left:3px}
@@ -181,6 +186,16 @@ details.sub li{padding:2px 0}
 .pj-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line)}
 .pj-act a{font-size:11.5px;color:var(--brand-d);background:#f2f7ff;border:1px solid #dce8fb;border-radius:7px;padding:2px 9px;font-weight:600}
 .pj-act a:hover{background:#e4eefe;border-color:#b9d3f8}
+/* ---------- 客户卡的业主画像条 ---------- */
+.cc-prof{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.cc-prof .oi{background:#f6f8fc;border:1px solid var(--line);border-radius:7px;padding:3px 8px;font-size:11px;line-height:1.5}
+.cc-prof .oi i{font-style:normal;color:var(--tx3);margin-right:5px}
+.cc-prof .oi b{color:var(--tx);font-weight:700}
+.cc-wins{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:6px;font-size:11.5px}
+.cc-wins .wl{color:var(--tx3);font-weight:700;font-size:11px}
+.cc-wins .wp{background:#f4fbf7;border:1px solid #d3ecdd;color:#0a7a54;border-radius:6px;padding:1px 7px;font-weight:600}
+.cc-wins .wp:hover{background:#e6f6ec;border-color:#a9dfc0}
+.cc-wins .wp b{color:#0d9b6c;margin-left:2px}
 /* ---------- 原始发布平台 ---------- */
 .pj-org{margin-top:7px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:11.5px}
 .pj-org .ol{display:inline-flex;align-items:center;gap:5px;background:#f4fbf7;border:1px solid #d3ecdd;border-radius:7px;padding:2px 8px}
@@ -206,6 +221,8 @@ details.sub li{padding:2px 0}
 .pj-files a.ft{color:var(--brand-d);font-weight:600}
 .pj-files a.ft:hover{text-decoration:underline;color:var(--brand)}
 .pj-files .ft em{font-style:normal;font-size:10.5px;color:#b4620a;margin-left:6px;opacity:.9}
+.pj-files .ft em.go-src{color:#8a9099;font-weight:400}
+.pj-files a.ft:hover em.go-src{color:var(--brand)}
 .pj-act a.act-file{background:#fff8ee;border-color:#f7e2c4;color:#b4620a}
 .pj-act a.act-file:hover{background:#fdf0dd;border-color:#eccfa4}
 /* ---------- 业主画像 / 供应商图谱 ---------- */
@@ -695,7 +712,7 @@ details.sub li{padding:2px 0}
   </div>
 </div>
 
-<script src="data.js?v=202610211914"></script>
+<script src="data.js?v=202610211946"></script>
 <script>
 /* ==================== 状态 ==================== */
 var D = window.DATA;
@@ -863,6 +880,8 @@ function cardHtml(x){
   var meta='';
   if(x.buyer)meta+='<span class="mi"><i>业主</i><b>'+esc(x.buyer)+'</b></span>';
   if(x.win)meta+='<span class="mi win"><i>中标</i><b>'+esc(x.win)+'</b></span>';
+  // 未中标的才给「查中标单位」外部搜索，已中标的不重复给
+
   meta+='<span class="mi"><i>来源</i><b>'+esc(x.p||'—')+'</b> '+esc(x.d||'')+(x.dl?' · 截止 '+esc(x.dl):'')+'</span>';
   if(x.expect)meta+='<span class="mi" style="color:#0d9b6c"><i>预计招标</i><b>'+esc(x.expect)+'</b></span>';
   var chain='';
@@ -889,10 +908,9 @@ function cardHtml(x){
     // 附件数显性提示：有附件说明「招标文件/清单/图纸能拿到」，是点进去的强理由
     var nf=(x.files&&x.files.length)?x.files.length:0;
     acts='<div class="pj-act">'+
-      (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener" title="打开公告原文，页内通常有招标人联系人、电话、代理机构">查看公告原文 ↗</a>':'')+
       (nf?'<a href="javascript:void(0)" class="act-file" onclick="toggleFiles(\''+esc(x.id)+'\')" title="展开附件清单，自己挑要下的">📎 附件 '+nf+' 个</a>':'')+
       (bq?'<a href="https://www.qcc.com/web/search?key='+encodeURIComponent(bq)+'" target="_blank" rel="noopener nofollow" title="跳转企查查查该业主工商信息（外部站点，需自行登录）">查业主工商信息 ↗</a>':'')+
-      (wq?'<a href="https://www.qcc.com/web/search?key='+encodeURIComponent(wq)+'" target="_blank" rel="noopener nofollow" title="跳转企查查查中标单位工商信息（外部站点，需自行登录）">查中标单位 ↗</a>':'')+
+
       '</div>';
   }
   return '<div class="pj '+GCLASS[x.g]+'">'+
@@ -934,17 +952,31 @@ function originLine(x){
 function fileList(x){
   var f=x.files||[];
   if(!f.length)return '';
+  /* 附件策略（2026-10-21 用户反馈后改）：
+     实测浙江/江苏站的 PDF 直链大量返回 200 但 0 字节——文件名含中文括号（签章），
+     且老公告（2025 年）的附件常被源站清空。硬塞直链只会让用户下到空文件。
+     所以：默认把附件名做成「跳转到公告原文页」的链接，用户在源站自己点下载，
+     源站没被清空就能下；被清空也会当场看到提示，不会以为是我们给坏了。
+     直链仍保留在 title 里（鼠标悬停可见），确认可用的项目可右键复制。 */
   var rows=f.map(function(it,i){
     var nm=it.n||('附件'+(i+1));
-    var ext=(nm.match(/\.(\w{2,5})$/)||[])[1];
-    var cls='ft'+(ext?' ext-'+(ext.toLowerCase()==='pdf'?'pdf':(ext.toLowerCase().indexOf('doc')===0?'doc':(ext.toLowerCase().indexOf('xls')===0?'xls':'zip'))):'');
-    if(it.u){
-      return '<li><a class="'+cls+'" href="'+esc(it.u)+'" target="_blank" rel="noopener" title="直接下载/打开">'+esc(nm)+'</a></li>';
-    }
-    return '<li><span class="'+cls+'" title="该附件存在但没抓到直链，请到原文页下载">'+esc(nm)+'<em>需到原文页下</em></span></li>';
+    var ext=(nm.match(/\.(\w{2,5})$/)||[])[1]||'';
+    var e=ext.toLowerCase();
+    var cls='ft'+(e?' ext-'+(e==='pdf'?'pdf':(e.indexOf('doc')===0?'doc':(e.indexOf('xls')===0?'xls':'zip'))):'');
+    /* 已校验 ok=1：直链真能下，给「下载」；
+       ok=0 或未校验：给「跳原文页」，让用户自己在源站点。
+       两种情况都不让用户下到空文件。 */
+    var canDl=(it.ok===1 && it.u);
+    var href=canDl?it.u:(x.url||it.u||'');
+    if(!href)return '<li><span class="'+cls+'">'+esc(nm)+'</span></li>';
+    var tip=canDl?('已校验可下载 · '+Math.round((it.sz||0)/1024)+' KB')
+                :'该附件需到公告原文页自行下载（直链未通过校验或源站已清空）';
+    return '<li><a class="'+cls+'" href="'+esc(href)+'" target="_blank" rel="noopener"'+
+      ' title="'+esc(tip)+'">'+esc(nm)+'<em class="go-src">'+
+      (canDl?'下载 ↓':'去原文页下 ↗')+'</em></a></li>';
   }).join('');
   return '<div class="pj-files" id="fl-'+esc(x.id)+'" style="display:none">'+
-    '<div class="fh">附件清单 <small>'+f.length+' 个 · 招标文件/清单/图纸通常在这里</small></div>'+
+    '<div class="fh">附件清单 <small>'+f.length+' 个 · 点附件名跳到公告原文页，在源站下载</small></div>'+
     '<ul>'+rows+'</ul></div>';
 }
 function toggleFiles(id){
@@ -1434,6 +1466,23 @@ function renderDomestic(){
       '</div>'+
       '<div class="cc-m">本库 <b>'+x.n+'</b> 个项目'+(x.amt>0?' · 涉及金额 <b>'+money(x.amt)+'</b>':'')+
         (x.latest?' · 最新 '+esc(x.latest):'')+'</div>'+
+      /* 业主画像（2026-10-21 加）：采购习惯一眼看完——买什么、什么价位、爱发包给谁 */
+      (function(){
+        var bits=[];
+        if(x.rng)bits.push('<span class="oi"><i>单项目区间</i><b>'+esc(x.rng)+'</b></span>');
+        if(x.modes&&x.modes.length)bits.push('<span class="oi"><i>偏好模式</i><b>'+esc(x.modes.join(' / '))+'</b></span>');
+        if(x.recent)bits.push('<span class="oi"><i>近90天</i><b>'+x.recent+' 条新公告</b></span>');
+        var h=bits.length?'<div class="cc-prof">'+bits.join('')+'</div>':'';
+        if(x.wins&&x.wins.length){
+          h+='<div class="cc-wins"><span class="wl">常中标</span>'+
+            x.wins.map(function(w){
+              return '<a href="javascript:void(0)" class="wp" onclick="searchFor(\''+
+                String(w.n).replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')" title="在商机库中查该单位的中标记录">'+
+                esc(w.n)+(w.c>1?' <b>×'+w.c+'</b>':'')+'</a>';
+            }).join('')+'</div>';
+        }
+        return h;
+      })()+
       (x.items.length?'<div class="cc-i"><ul>'+its.map(function(it){
         return '<li>'+(it.url?'<a href="'+esc(it.url)+'" target="_blank" rel="noopener">':'')+
           esc(it.t)+(it.amt?' <b>'+money(it.amt)+'</b>':'')+
