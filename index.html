@@ -826,7 +826,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610212044';
+var VER='?v=202610212100';
 /* ── 全局状态 ──────────────────────────────────────────────
    注意：这些必须在 boot_main() 外面声明。boot_main 里用 var 声明的东西
    全是函数作用域，脚本外面看不见——调试时会发现 D / items 都是 undefined，
@@ -866,26 +866,59 @@ function need(mod,cb){
    首屏只带「能投的标 / 已出结果」两个库的关注档（约 400 条），
    立项线索 637 条 + 全部库 1954 条在用户点的时候才拉 data.items.all.js。
    实测 4Mbps 下，首屏从 3.2 秒降到 0.9 秒左右。 */
-var _allLoading=false, _allCbs=[];
-function loadAllItems(cb){
-  if(window.DATA_ITEMS_ALL||!window.__itemsSplit){ if(cb)cb(); return; }
-  if(cb)_allCbs.push(cb);
-  if(_allLoading) return;
-  _allLoading=true;
-  var sc=document.createElement('script');
-  sc.src='data.items.all.js'+VER;
-  sc.onload=function(){
-    _allLoading=false;
-    try{
-      items=packItems(window.DATA_ITEMS_ALL);
-      window.__itemsSplit=false;
+/* 分块按需加载：
+     首屏 data.items.js 自带 400 条（能投的标 / 已出结果 的关注档）；
+     💡 立项线索 → data.chunk-lead.js（637 条，约 396KB）
+     全部 / 搜索  → data.chunk-rest.js（917 条，约 567KB）
+   点哪块拉哪块，避免为了看 637 条立项线索去下 1.3MB。
+   合并方式：按 _i（全量下标）去重塞进 items，重复的直接覆盖。 */
+var _chunkState = {};       // name -> 'loading' | 'done'
+var _chunkCbs = {};         // name -> [fn]
+var _chunkByName = {};
+(function () {
+  var cs = (D.chunks || []);
+  for (var i = 0; i < cs.length; i++) _chunkByName[cs[i].name] = cs[i];
+})();
+
+function loadChunk(name, cb) {
+  if (!window.__itemsSplit) { if (cb) cb(); return; }        // 已经是全量/整包，不用拉
+  if (_chunkState[name] === 'done') { if (cb) cb(); return; }
+  (_chunkCbs[name] = _chunkCbs[name] || []).push(cb);
+  if (_chunkState[name] === 'loading') return;
+  _chunkState[name] = 'loading';
+  var info = _chunkByName[name];
+  var sc = document.createElement('script');
+  sc.src = (info ? info.file : 'data.chunk-' + name + '.js') + VER;
+  sc.onload = function () {
+    _chunkState[name] = 'done';
+    try {
+      var raw = window.DATA_CHUNK;
+      window.DATA_CHUNK = null;
+      var add = packItems(raw);
+      var have = {};
+      for (var i = 0; i < items.length; i++) have[items[i]._i] = i;
+      for (var j = 0; j < add.length; j++) {
+        var r = add[j];
+        if (have[r._i] === undefined) items.push(r); else items[have[r._i]] = r;
+      }
       refreshTabCounts();
-    }catch(e){ console.warn('[load] 全量明细合并失败',e); }
-    var fs=_allCbs.splice(0);
-    for(var i=0;i<fs.length;i++){ try{fs[i]()}catch(e){} }
+    } catch (e) { console.warn('[load] 分块合并失败', name, e); }
+    var fs = _chunkCbs[name].splice(0);
+    for (var k = 0; k < fs.length; k++) { try { fs[k]() } catch (e) { } }
   };
-  sc.onerror=function(){ _allLoading=false; console.warn('[load] data.items.all.js 加载失败'); };
+  sc.onerror = function () {
+    _chunkState[name] = 'err';
+    console.warn('[load] 分块加载失败', name);
+    var fs = _chunkCbs[name].splice(0);
+    for (var k = 0; k < fs.length; k++) { try { fs[k]() } catch (e) { } }
+  };
   document.head.appendChild(sc);
+}
+
+/* 兼容旧调用：需要「全部」时把两块都拉下来 */
+function loadAllItems(cb) {
+  if (!window.__itemsSplit) { if (cb) cb(); return; }
+  loadChunk('lead', function () { loadChunk('rest', cb); });
 }
 
 /* 把某个模块的数据合并进 D */
@@ -1062,10 +1095,16 @@ function buildFilters(){
         [].forEach.call(waBox.querySelectorAll('.ware'), function (x) {
           x.classList.toggle('on', x.dataset.bk === bk);
         });
-        /* 立项线索 / 全部：数据不在首屏切片里，先拉全量再渲 */
-        if (bk === 'lead' || bk === 'all') {
-          var box = el('grid');
+        /* 数据分块：立项线索只拉 lead 那块（637 条），
+           全部才把 rest 那块也拉下来（917 条）。 */
+        var box = el('grid');
+        if (bk === 'lead') {
           if (window.__itemsSplit && box) box.innerHTML = '<div class="empty">正在载入立项线索…</div>';
+          loadChunk('lead', function () { render(); });
+          return;
+        }
+        if (bk === 'all') {
+          if (window.__itemsSplit && box) box.innerHTML = '<div class="empty">正在载入全部项目…</div>';
           loadAllItems(function () { render(); });
           return;
         }
@@ -2230,8 +2269,8 @@ function boot_main(){
 
 /* 启动逻辑在 boot.js（defer，保证在数据脚本之后执行） */
 </script>
-<script defer src="data.core.js?v=202610212044"></script>
-<script defer src="data.items.js?v=202610212044"></script>
+<script defer src="data.core.js?v=202610212100"></script>
+<script defer src="data.items.js?v=202610212100"></script>
 <script defer src="boot.js?v=202610212029"></script>
 <!-- 竞对画像抽屉：点「画像」按钮从右侧滑出，不跳页 -->
 <script src="rival.js"></script>
