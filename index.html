@@ -1075,6 +1075,7 @@ function mineTag(x){
 }
 function compCard(x){
     return '<div class="ccard"><div class="cc-h"><b>'+esc(x.name)+'</b>'+
+      '<button class="rival-dw" onclick="Rival.open(\''+esc((x.name||'').replace(/'/g,''))+'\')" title="打开竞对画像：业绩明细 + 装机规模 + 企业资质，侧滑不跳页">画像</button>'+
       catTag(x.cat)+
       '<span class="cc-tag">'+esc(x.type)+'</span>'+
       (x.city?'<span class="cc-tag none">'+esc(x.city)+'</span>':'')+
