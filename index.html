@@ -712,7 +712,7 @@ details.sub li{padding:2px 0}
   </div>
 </div>
 
-<script src="data.js?v=202610211946"></script>
+<script src="data.js?v=202610212006"></script>
 <script>
 /* ==================== 状态 ==================== */
 var D = window.DATA;
@@ -799,10 +799,16 @@ el('tabs').onclick=function(e){
 /* ==================== 筛选器构建 ==================== */
 function chipsBox(id,vals,cntMap,key){
   var box=el(id); if(!box)return;
-  var vs=cntMap?vals.filter(function(v){return (cntMap[v]||0)>0}):vals;
-  box.innerHTML=vs.map(function(v){
-    var c=cntMap?cntMap[v]||0:'';
-    return '<span class="chip" data-k="'+key+'" data-v="'+esc(v)+'">'+esc(v)+
+  // vals 允许两种写法：纯字符串 ['S','A']，或对象 [{v:'S',t:'S 战略'}]（要显示中文名时用）
+  var norm=function(v){
+    if(v&&typeof v==='object')return {v:String(v.v==null?'':v.v),t:String(v.t==null?v.v:v.t)};
+    return {v:String(v==null?'':v),t:String(v==null?'':v)};
+  };
+  var all=vals.map(norm);
+  var vs=cntMap?all.filter(function(o){return (cntMap[o.v]||0)>0}):all;
+  box.innerHTML=vs.map(function(o){
+    var c=cntMap?cntMap[o.v]||0:'';
+    return '<span class="chip" data-k="'+esc(key)+'" data-v="'+esc(o.v)+'">'+esc(o.t)+
            (c!==''?'<em>'+c+'</em>':'')+'</span>'}).join('');
 }
 function countBy(f){var m={};items.forEach(function(x){var v=x[f];if(v)m[v]=(m[v]||0)+1});return m}
