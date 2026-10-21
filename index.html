@@ -148,6 +148,11 @@ button{font-family:inherit}
 .ware[data-bk="all"].on{background:#525a66;border-color:#525a66}
 .wtip{font-size:11.5px;color:var(--tx3);line-height:1.6;margin-left:2px}
 .wtip b{color:var(--tx2)}
+/* 「只看还能投的」：只在「全部」档出现，选中后灰底变绿，视觉上和分档按钮区分开 */
+.ware-tog{display:none;font-size:12px;color:var(--tx2);background:#f5f7fa;border:1px dashed #d3d9e2;
+  border-radius:8px;padding:6px 11px;cursor:pointer;user-select:none;font-weight:600;white-space:nowrap}
+.ware-tog:hover{border-color:var(--brand);color:var(--brand-d)}
+.ware-tog.on{display:inline-block;background:#eefaf3;border:1px solid #c6e8d6;color:#14713a;border-style:solid}
 @media(max-width:860px){.ware{padding:7px 11px;font-size:12.5px}.wtiP{width:100%}}
 /* ---------- 分页 ---------- */
 .pager{display:flex;gap:6px;justify-content:center;padding:20px 0 0;flex-wrap:wrap}
@@ -265,6 +270,11 @@ details.sub li{padding:2px 0}
 .pj-files a.ft:hover em.go-src{color:var(--brand)}
 .pj-act a.act-file{background:#fff8ee;border-color:#f7e2c4;color:#b4620a}
 .pj-act a.act-file:hover{background:#fdf0dd;border-color:#eccfa4}
+/* 「已出结果」卡片的按钮：中标情况用绿色（结论），原文用弱化灰（只作备查） */
+.pj-act a.act-win{background:#eefaf3;border-color:#c6e8d6;color:#14713a}
+.pj-act a.act-win:hover{background:#e0f5e9;border-color:#a9dcc1}
+.pj-act a.act-src{background:#f7f8fa;border-color:#e3e6ea;color:var(--tx2);font-weight:500}
+.pj-act .act-none{font-size:11.5px;color:var(--tx3);padding:2px 2px;font-weight:500}
 /* ---------- 业主画像 / 供应商图谱 ---------- */
 .gwrap{display:grid;grid-template-columns:300px 1fr;gap:14px;align-items:start}
 .gside{background:#fff;border:1px solid var(--line);border-radius:13px;padding:11px;position:sticky;top:10px}
@@ -826,7 +836,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610212124';
+var VER='?v=202610212145';
 /* ── 全局状态 ──────────────────────────────────────────────
    注意：这些必须在 boot_main() 外面声明。boot_main 里用 var 声明的东西
    全是函数作用域，脚本外面看不见——调试时会发现 D / items 都是 undefined，
@@ -840,7 +850,7 @@ var TABS = [['p-items','商机库',0],['p-win','中标情报',0],
             ['p-client','客户与业主',0],['p-trend','行业动态',0],
             ['p-wechat','情报精选',0],['p-plat','招标平台',0],['p-help','口径说明',0]];
 var F = {rg:new Set(),biz:new Set(),ind:new Set(),sub:new Set(),g:new Set(),mode:new Set(),p:new Set(),
-         st:'',q:'',sort:'sc',page:1,tab:0,bk:'tender'};
+         st:'',q:'',sort:'sc',page:1,tab:0,bk:'tender',hideWin:false};
 var PS = 24;
 
 /* 档位配色/文案：必须定义在所有渲染函数之前。
@@ -1090,7 +1100,8 @@ function buildFilters(){
       return '<div class="ware' + (b[0] === 'tender' ? ' on' : '') + '" data-bk="' + b[0] + '">' +
         b[1] + '<b>' + n + '</b></div>';
     }).join('') +
-      '<div class="ware" data-bk="all">全部 <b>' + (WA.all || 0) + '</b></div>' +
+      '<div class="ware" data-bk="all" id="waAllW">全部 <b>' + (WA.all || 0) + '</b></div>' +
+      '<span class="ware-tog" id="waHide" title="「全部」档里有一批已经开过标的，滤掉它们只剩还能投的">只看还能投的</span>' +
       '<div class="wtip">只看 <b>' + (WA.amt * 10000) + ' 万以上</b> 或 综合分 A/B 的项目' +
       '<a href="javascript:void(0)" id="waAll" style="margin-left:8px;color:var(--brand);font-weight:600">看全部含小项目</a></div>';
     waBox.onclick = function (e) {
@@ -1099,6 +1110,9 @@ function buildFilters(){
         [].forEach.call(waBox.querySelectorAll('.ware'), function (x) {
           x.classList.toggle('on', x.dataset.bk === bk);
         });
+        // 「只看还能投的」开关只在「全部」档下有意义
+        var hb = el('waHide');
+        if (hb) hb.style.display = (bk === 'all') ? 'inline-block' : 'none';
         /* 数据分块：立项线索只拉 lead 那块（637 条），
            全部才把 rest 那块也拉下来（917 条）。 */
         var box = el('grid');
@@ -1116,6 +1130,14 @@ function buildFilters(){
       };
       var a = e.target.closest('#waAll');
       if (a) { pick('all'); return; }
+      var h = e.target.closest('#waHide');
+      if (h) {
+        F.hideWin = !F.hideWin; F.page = 1;
+        h.classList.toggle('on', F.hideWin);
+        h.textContent = F.hideWin ? '只看还能投的 ✓' : '只看还能投的';
+        render();
+        return;
+      }
       var d = e.target.closest('.ware'); if (!d) return;
       pick(d.dataset.bk);
     };
@@ -1158,6 +1180,11 @@ function match(x){
   if (bk !== 'all') {
     if ((x.bk || 'tender') !== bk) return false;
     if (bk !== 'lead' && !x.w) return false;     // 立项线索本身就是机会池，不再卡金额
+  } else if (F.hideWin && (x.bk || 'tender') === 'win') {
+    /* 「全部」档里夹了一批已开标的，那些已经不存在「去投标」这回事，
+       并且都在中标情报里有出处。用户要做的是找能投的活，所以给个开关一键滤掉，
+       比让他自己一条条分辨强。 */
+    return false;
   }
   if(F.rg.size && !F.rg.has(x.rg))return false;
   if(F.biz.size && !F.biz.has(x.biz))return false;
@@ -1222,7 +1249,25 @@ function cardHtml(x){
     return s.replace(/\s+/g,'').trim();
   };
   var acts='';
-  if(x.url||x.buyer){
+  /* 「已出结果」的项目没有投标按钮——标都开完了，放个「查看招标公告」只会误导。
+     直接给中标结论 + 想看的话去中标情报看对手，这才是这条记录还有用的部分。
+     2026-10-21 用户原话：「商机库只需要看招标公告跳转即可，中标的有中标情况」。 */
+  var isWin = (x.bk === 'win') || (x.st && x.st.indexOf('中标') === 0);
+  /* 中标单位可能是联合体（「A公司、B公司、C公司」）或「A公司与B公司联合体」，
+     整串丢给 gotoUnit 是匹配不上的。取第一家当主中标人——名单太长也没人看。 */
+  var winMain = String(x.win || '')
+    .replace(/（[^）]*）/g, '').replace(/\([^)]*\)/g, '')
+    .split(/[、,，;；]|与|和|及/)[0].replace(/联合体.*$/, '').trim();
+  if (isWin) {
+    acts = '<div class="pj-act">' +
+      (winMain.length >= 4
+        ? '<a href="javascript:void(0)" class="act-win" onclick="gotoUnit(\'' + esc(winMain.replace(/'/g, '')) + '\')" ' +
+          'title="点开看这家单位在中标情报里的全部战绩">🏁 中标：' + esc(winMain) +
+          (String(x.win || '').length > winMain.length ? ' 等' : '') + ' ↗</a>'
+        : '<span class="act-none">中标单位未在公示正文中明确（原文页可查）</span>') +
+      (x.url ? '<a href="' + esc(x.url) + '" target="_blank" rel="noopener" class="act-src">结果公告原文 ↗</a>' : '') +
+      '</div>';
+  } else if (x.url || x.buyer) {
     var bq=qcName(x.buyer), wq=qcName(x.win);
     // 附件数显性提示：有附件说明「招标文件/清单/图纸能拿到」，是点进去的强理由
     var nf=(x.files&&x.files.length)?x.files.length:0;
@@ -2297,8 +2342,8 @@ function boot_main(){
 
 /* 启动逻辑在 boot.js（defer，保证在数据脚本之后执行） */
 </script>
-<script defer src="data.core.js?v=202610212124"></script>
-<script defer src="data.items.js?v=202610212124"></script>
+<script defer src="data.core.js?v=202610212145"></script>
+<script defer src="data.items.js?v=202610212145"></script>
 <script defer src="boot.js?v=202610212029"></script>
 <!-- 竞对画像抽屉：点「画像」按钮从右侧滑出，不跳页 -->
 <script src="rival.js"></script>
