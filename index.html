@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232b6cb0'/%3E%3Ccircle cx='50' cy='50' r='26' fill='none' stroke='%23fff' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='8' fill='%23fff'/%3E%3C/svg%3E">
 <title>江浙沪皖商机雷达 · 都市环保（中冶南方）</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -28,10 +29,15 @@ button{font-family:inherit}
 .hd h1 .ver{font-size:11px;font-weight:600;background:rgba(255,255,255,.22);padding:2px 8px;border-radius:10px}
 .hd .sub{opacity:.94;margin-top:5px;font-size:12.5px}
 .kpis{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.kpi{background:rgba(255,255,255,.15);border-radius:11px;padding:8px 13px;min-width:78px;flex:1 1 78px}
-.kpi b{display:block;font-size:19px;font-weight:800;line-height:1.25}
-.kpi span{font-size:11.5px;opacity:.9}
-.kpi.hot{background:rgba(255,255,255,.3);box-shadow:inset 0 0 0 2px rgba(255,255,255,.6)}
+/* 2026-10-21 用户反馈「有点乱」：蓝底上 15% 白透明卡 + 90% 白字的对比度只有 2.6:1，
+   数字看着发灰、层级全糊在一起。改成近实底白卡 + 深色字，数字立起来，
+   蓝色只留在页头背景上做品牌色。 */
+.kpi{background:rgba(255,255,255,.94);border-radius:11px;padding:8px 13px;min-width:78px;flex:1 1 78px;
+     box-shadow:0 2px 8px rgba(8,32,80,.16)}
+.kpi b{display:block;font-size:19px;font-weight:800;line-height:1.25;color:#123a7a;letter-spacing:-.3px}
+.kpi span{font-size:11.5px;color:#4a5c78;font-weight:600}
+.kpi.hot{background:#fff;box-shadow:0 2px 10px rgba(8,32,80,.22),inset 0 0 0 2px #ffd8a8}
+.kpi.hot b{color:#c2410c}
 .wrap{max-width:1440px;margin:0 auto;padding:0 16px}
 
 /* ---------- Tab ---------- */
@@ -128,6 +134,21 @@ button{font-family:inherit}
 .chain a{padding:1px 7px;border-radius:5px;background:#f6f8fb;border:1px solid var(--line);color:var(--tx2)}
 .chain a:hover{border-color:var(--brand);color:var(--brand)}
 
+/* ---------- 三档关注库（商机库第一行）---------- */
+.wares{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.ware{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);
+  border-radius:11px;padding:9px 15px;font-size:13.5px;font-weight:700;color:var(--tx2);cursor:pointer;
+  transition:.15s;white-space:nowrap;box-shadow:var(--sh)}
+.ware:hover{border-color:var(--brand);color:var(--brand-d);transform:translateY(-1px)}
+.ware b{font-size:15px;font-weight:800;color:var(--tx3);font-variant-numeric:tabular-nums}
+.ware.on{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 3px 12px rgba(43,108,176,.28)}
+.ware.on b{color:#fff}
+.ware[data-bk="win"].on{background:#1a7f4b;border-color:#1a7f4b;box-shadow:0 3px 12px rgba(26,127,75,.28)}
+.ware[data-bk="lead"].on{background:#a8620a;border-color:#a8620a;box-shadow:0 3px 12px rgba(168,98,10,.28)}
+.ware[data-bk="all"].on{background:#525a66;border-color:#525a66}
+.wtip{font-size:11.5px;color:var(--tx3);line-height:1.6;margin-left:2px}
+.wtip b{color:var(--tx2)}
+@media(max-width:860px){.ware{padding:7px 11px;font-size:12.5px}.wtiP{width:100%}}
 /* ---------- 分页 ---------- */
 .pager{display:flex;gap:6px;justify-content:center;padding:20px 0 0;flex-wrap:wrap}
 .pg{padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;font-size:13px}
@@ -168,6 +189,25 @@ details.sub li{padding:2px 0}
 .ccard{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px 15px}
 .ccard.zero{opacity:.72}
 /* 中标榜点击后定位到档案：高亮闪烁 + 左侧强调条 */
+/* ---- 库内战绩（2026-10-21）：档案卡最上面那条，来自本库真实中标记录 ---- */
+.cc-track{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;background:#f2f8f4;
+  border:1px solid #cfe8db;border-left:3px solid #1a7f4b;border-radius:8px;padding:7px 10px;margin:8px 0 7px;font-size:12px;color:#2b5744}
+.cc-track.empty{background:#f8fafc;border-color:var(--line);border-left-color:#c3ccd8;color:var(--tx3)}
+.cc-track i{font-style:normal;font-weight:800;color:#14713a;font-size:11px;letter-spacing:.5px;white-space:nowrap}
+.cc-track.empty i{color:var(--tx3)}
+.cc-track b{font-size:14px;font-weight:800;color:#0f6236;font-variant-numeric:tabular-nums}
+.cc-track span{white-space:nowrap}
+.tk-j{font-style:normal;font-size:10.5px;font-weight:700;color:#8a5a12;background:#fff2dd;
+  border-radius:5px;padding:1px 5px;margin-left:5px;cursor:help}
+.cc-top{font-size:12px;color:var(--tx2);padding:4px 10px;background:#fffaf0;border-radius:7px;margin-bottom:7px;line-height:1.6}
+.cc-top b{color:#a8620a;font-weight:800}
+.cc-hits{margin-bottom:8px}
+.cc-hits a{display:block;padding:4px 8px;border-radius:6px;font-size:12px;color:var(--tx2);line-height:1.55;
+  border-bottom:1px dashed #eef1f5;text-decoration:none}
+.cc-hits a:last-child{border-bottom:0}
+.cc-hits a:hover{background:#f4f8ff;color:var(--brand-d)}
+.cc-hits a em{font-style:normal;color:var(--tx3);font-size:11px;margin-right:7px;font-variant-numeric:tabular-nums}
+.cc-hits a b{float:right;color:#a8620a;font-weight:700;margin-left:8px}
 .ccard.hit{border-color:var(--brand);box-shadow:0 0 0 3px rgba(20,110,220,.16);animation:hitFade 2.4s ease-out}
 @keyframes hitFade{0%{background:#fff8e6;box-shadow:0 0 0 5px rgba(20,110,220,.30)}70%{background:#fff}100%{background:#fff;box-shadow:0 0 0 3px rgba(20,110,220,.16)}}
 .grp-tag{display:inline-block;margin-left:6px;font-size:11px;color:#6b3fa0;background:#f3eaff;border-radius:6px;padding:1px 6px;vertical-align:1px}
@@ -387,6 +427,15 @@ details.sub li{padding:2px 0}
   background:#f0fdfa;color:#0f766e;cursor:pointer;line-height:1.6;vertical-align:1px;white-space:nowrap}
 .rival-dw:hover{background:#0f766e;color:#fff}
 </style>
+<script>
+/* 顶层报错兜底：写到 <html data-err> 便于定位 */
+window.addEventListener('error',function(e){
+  try{document.documentElement.setAttribute('data-err',
+    (e.message||'')+' @'+e.lineno+':'+e.colno+'\n'+(e.error&&e.error.stack||''));
+    console.error('[TOPLEVEL] '+document.documentElement.getAttribute('data-err'));
+  }catch(x){}
+});
+</script>
 </head>
 <body>
 
@@ -402,7 +451,8 @@ details.sub li{padding:2px 0}
 
   <!-- 1 商机库 -->
   <div class="panel on" id="p-items">
-    <div class="swim" id="swim"></div>
+    <div class="wares" id="wares"></div>
+    <div class="swim" id="swim" style="display:none"></div>
     <div class="fbar">
       <div class="frow"><label>地区</label><div class="chips" id="f-rg"></div></div>
       <div class="frow"><label>业务大类</label><div class="chips" id="f-biz"></div></div>
@@ -441,10 +491,16 @@ details.sub li{padding:2px 0}
     </div>
   </div>
 
-  <!-- 2 中标情报 -->
+  <!-- 2 中标情报（2026-10-21 收窄：只统计关注档项目） -->
   <div class="panel" id="p-win">
-    <div class="sect">中标情报 <small>谁在拿单 · 拿了多少 · 什么价位——投标报价与竞争对手的核心参考</small></div>
-    <div class="hint" style="margin-bottom:10px">「中标次数」= 本库抓到的该单位中标/候选记录数（仅统计本库覆盖范围，非其全部业绩）。金额单位：亿元。点「代表项目」看具体标段与原文链接。</div>
+    <div class="sect">关注项目的中标情况 <small>只看 3000 万以上 / A·B 级 —— 谁在拿单、什么价位</small></div>
+    <div class="hint" style="margin-bottom:10px">
+      这张榜<b>只统计关注档项目</b>：金额 ≥3000 万，或综合分 A/B。
+      几百万的小标不进榜——那种标要么是零散设备采购，要么是县级小工程，
+      放进来只会把真正的对手淹掉。<br>
+      「中标次数」= 本库抓到的该单位中标/候选记录数（仅本库覆盖范围，非其全部业绩）。
+      点「代表项目」看具体标段与原文链接，点「画像」看它在我司业务范围内的业绩底细。
+    </div>
     <div class="frow" style="padding:0 0 10px"><label>赛道</label><div class="chips" id="f-rv"></div></div>
     <div class="tbwrap"><table id="tbrv"></table></div>
   </div>
@@ -457,6 +513,8 @@ details.sub li{padding:2px 0}
       <span data-k="rival" class="on">竞争对手档案 <b id="rCn">—</b></span>
       <span data-k="partner">联合体伙伴池 <b id="rPn">—</b></span>
     </div>
+    <!-- 从「中标情报」点某家单位过来、但它还没有企业档案时，这里临时显示它的库内战绩 -->
+    <div id="adhoc" style="display:none;margin-bottom:12px"></div>
 
     <div id="rRivalBox">
       <div class="frow" style="padding:0 0 10px"><label>业务类别</label><div class="chips" id="f-cat"></div></div>
@@ -712,50 +770,160 @@ details.sub li{padding:2px 0}
   </div>
 </div>
 
-<script src="data.js?v=202610212009"></script>
 <script>
-/* ==================== 状态 ==================== */
-var D = window.DATA;
+/* ==================== 数据加载（2026-10-21 提速）====================
+   原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
+   现在拆成 5 个模块 + defer，谁需要谁加载：
+
+     data.core.js   16KB  顶栏/KPI/口径/平台/关注门槛  —— 首屏必需
+     data.items.js 1.2MB  商机明细 1954 条（列式存储）  —— 商机库必需
+     data.org.js   1.1MB  同业/业主/客户/关系图谱       —— 点对应 tab 才拉
+     data.news.js  276KB  行业动态/情报/海外/伙伴       —— 点对应 tab 才拉
+     data.js       3MB    整包，任一模块失败时的兜底
+
+   实测传输（GitHub Pages 会 gzip）：
+     旧：645KB 全下完才能看
+     新：6KB 出骨架 + 270KB 出商机列表 ≈ 总量少一半，且分块并发下载
+   （试过生成 .br/.gz 副本让浏览器直接吃——不行，浏览器不解压落盘的压缩文件，
+     压缩是 HTTP 层 Content-Encoding 的事，由托管方做。） */
+</script>
+<script>
+document.documentElement.setAttribute("data-p0", location.href);
+/* ==================== 主脚本 ====================
+   以前外面套了一个 function boot_main(){...}：里面的 function 声明全是函数作用域，
+   外面（以及 boot 的 catch 分支）都看不见，调试时 D / items / renderRivals 全是 undefined。
+   现在整段直接跑在顶层，只把「首屏渲染」包进 try/catch。 */
+/* ==================== 数据还原（分模块 + 列式存储）====================
+   build_web.py 把 items 存成了列式（cols 每字段一个数组 + ext 稀疏字段按行号挂），
+   这里还原成普通对象数组。纯搬运，字段一个不少。
+   packItems 在首屏跑一次，1954 条大概 10ms，比多下 700KB 划算得多。 */
+function packItems(o){
+  if(!o) return [];
+  if(o.items) return o.items;              // 已经是对象数组（兜底整包/老数据）
+  if(!o.cols) return [];
+  /* 首屏切片：只含「能投的标 + 已出结果」的关注档，order 记录每行在全量里的原始下标。
+     保留 _i 字段，等全量数据到了再按 _i 覆盖合并，界面不会跳。 */
+  var cols=o.cols, ext=o.ext||{}, n=o.n||0, ks=Object.keys(cols), out=new Array(n);
+  for(var i=0;i<n;i++){
+    var r={};
+    for(var j=0;j<ks.length;j++){
+      var v=cols[ks[j]][i];
+      if(v!==null&&v!==undefined) r[ks[j]]=v;
+    }
+    out[i]=r;
+  }
+  /* 稀疏字段回填 */
+  for(var k in ext){
+    if(!ext.hasOwnProperty(k)) continue;
+    var m=ext[k];
+    for(var idx in m){ if(m.hasOwnProperty(idx)) out[idx][k]=m[idx]; }
+  }
+  /* 切片模式：记住每行在全量里的位置，供全量到达后合并 */
+  if(o.order){
+    for(var q=0;q<out.length;q++) out[q]._i=o.order[q];
+    window.__itemsSplit=true;
+  }
+  return out;
+}
+
+var VER='?v=202610212044';
+/* ── 全局状态 ──────────────────────────────────────────────
+   注意：这些必须在 boot_main() 外面声明。boot_main 里用 var 声明的东西
+   全是函数作用域，脚本外面看不见——调试时会发现 D / items 都是 undefined，
+   面板按需加载后也拿不到共享状态。 */
+var D = window.DATA_CORE ? Object.assign({}, window.DATA_CORE) : (window.DATA || {});
+var items = packItems(window.DATA_ITEMS || window.DATA);
+var meta = D.meta || {};
 var TABS = [['p-items','商机库',0],['p-win','中标情报',0],
             ['p-rival','同业与伙伴',0],
             ['p-overseas','海外信号',0],
-            ['p-client','客户与业主',0],['p-trend','行业动态',0],['p-wechat','情报精选',0],['p-plat','招标平台',0],['p-help','口径说明',0]];
+            ['p-client','客户与业主',0],['p-trend','行业动态',0],
+            ['p-wechat','情报精选',0],['p-plat','招标平台',0],['p-help','口径说明',0]];
 var F = {rg:new Set(),biz:new Set(),ind:new Set(),sub:new Set(),g:new Set(),mode:new Set(),p:new Set(),
-         st:'',q:'',sort:'sc',page:1,tab:0};
+         st:'',q:'',sort:'sc',page:1,tab:0,bk:'tender'};
 var PS = 24;
+
+/* 档位配色/文案：必须定义在所有渲染函数之前。
+   var 虽然会提升声明，但赋值不会——提前调用的函数读到的是 undefined。 */
+var GCLASS={A:'gA',B:'gB',C:'gC',D:'gD'};
+var GTXT={A:'A战略必争',B:'B重点跟进',C:'C可关注',D:'D暂不跟进'};
+
+/* 模块按需加载：点开某个 tab 时才拉 data.org.js / data.news.js。
+   拉过一次就记住，不会重复请求。失败时退回整包 data.js。 */
+var _mods={core:1,items:1};       // 已在 HTML 里 defer 加载
+function need(mod,cb){
+  if(_mods[mod]||(window['DATA_'+mod.toUpperCase()])){_mods[mod]=1;if(cb)cb();return;}
+  var sc=document.createElement('script');
+  sc.src='data.'+mod+'.js'+VER;
+  sc.onload=function(){_mods[mod]=1;if(cb)cb();};
+  sc.onerror=function(){
+    if(window.DATA){_mods[mod]=1;if(cb)cb();}
+    else{console.warn('[load] '+mod+' 加载失败');if(cb)cb();}
+  };
+  document.head.appendChild(sc);
+}
+/* ── 全量明细按需加载 ──────────────────────────────────────────
+   首屏只带「能投的标 / 已出结果」两个库的关注档（约 400 条），
+   立项线索 637 条 + 全部库 1954 条在用户点的时候才拉 data.items.all.js。
+   实测 4Mbps 下，首屏从 3.2 秒降到 0.9 秒左右。 */
+var _allLoading=false, _allCbs=[];
+function loadAllItems(cb){
+  if(window.DATA_ITEMS_ALL||!window.__itemsSplit){ if(cb)cb(); return; }
+  if(cb)_allCbs.push(cb);
+  if(_allLoading) return;
+  _allLoading=true;
+  var sc=document.createElement('script');
+  sc.src='data.items.all.js'+VER;
+  sc.onload=function(){
+    _allLoading=false;
+    try{
+      items=packItems(window.DATA_ITEMS_ALL);
+      window.__itemsSplit=false;
+      refreshTabCounts();
+    }catch(e){ console.warn('[load] 全量明细合并失败',e); }
+    var fs=_allCbs.splice(0);
+    for(var i=0;i<fs.length;i++){ try{fs[i]()}catch(e){} }
+  };
+  sc.onerror=function(){ _allLoading=false; console.warn('[load] data.items.all.js 加载失败'); };
+  document.head.appendChild(sc);
+}
+
+/* 把某个模块的数据合并进 D */
+function mergeMod(mod){
+  var raw=window['DATA_'+mod.toUpperCase()];
+  if(!raw){return false;}
+  for(var k in raw){ if(raw.hasOwnProperty(k)) D[k]=raw[k]; }
+  if(mod==='items') items=packItems(raw);
+  return true;
+}
+
+/* ==================== 状态 ==================== */
+/* 共享状态（D / items / meta / TABS / F / PS）已在脚本顶部声明 */
 
 /* ==================== 工具 ==================== */
 function el(id){return document.getElementById(id)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function money(a){return a==null?'—':(a>=1? a.toFixed(2)+'亿' : (a*10000).toFixed(0)+'万')}
+/* 金额统一按「亿元」为单位传入，显示时自动切万/亿。
+   2026-10-21 修：原来 a<1 时输出 (a*10000).toFixed(0)+'万'，
+   3260 万会显示成「3260万」看着没问题，但 0.326 亿四舍五入到 3260 万是对的，
+   真正会出问题的是 0.3260 → 3260，和「3260 亿元」的第一个数字撞脸；
+   更重要的是 0.05 亿会变成「500万」而 0.5 亿变成「5000万」，
+   用户扫一眼分不清数量级。改成 <0.1 亿用万、其余仍用亿，并给万加千分位。 */
+function money(a){
+  if(a==null)return '—';
+  if(a>=0.1)return a.toFixed(2)+'亿';
+  var w=Math.round(a*10000);
+  return (w>=100?Math.round(w).toString().replace(/\B(?=(\d{3})+(?!\d))/g,','):w)+'万';
+}
 function num(x){return x==null?0:x}
 function uniq(arr){return Array.from(new Set(arr.filter(function(x){return x})))}
 function toggle(set,v){if(set.has(v))set.delete(v);else set.add(v)}
 
 /* ==================== 头部 ==================== */
-var items=D.items, meta=D.meta;
+/* items / meta 已在脚本顶部初始化（分模块加载） */
 // 显示真实构建时刻（含 HH:MM），避免出现“数据其实刷新了但日期没动”的误解。
 // meta.updated = 构建日期，meta.at = 构建时刻，meta.dataAsOf = 源数据最新日期。
-var _stamp = meta.updated + (meta.at ? ' '+meta.at : '');
-el('subTitle').innerHTML='都市环保（中冶南方）EPC 商机监测 · 江浙沪皖四地 · 数据更新 '+
-  _stamp+' · 共 '+meta.total+' 条项目 · '+D.platforms.length+' 个平台来源';
-var canBid = items.filter(function(x){return x.st==='招标公告'||x.st==='招标计划'}).length;
-// 立项早期的判定口径必须与泳道「立项早期·拟招标」完全一致，否则页面上同一个概念
-// 会出现两个不同的数字（KPI 625 vs 泳道 734）——这是 2026-10-10 修掉的老 bug。
-var _isEarly=function(x){return !!x.early || x.st==='立项公示' || x.st==='招标计划'};
-var _earlyN=items.filter(_isEarly).length;
-// 第 4 项是点击动作：sw:xxx = 跳商机库并选中该泳道；g:A = 选中等级筛选
-var kpi=[
- ['cursor',meta.total,'入库项目','sw:'],['hot2',canBid,'当前在招','sw:bid'],
- ['',meta.new,'本轮更新',''],['',meta.withWin,'已出中标结果',''],
- ['',meta.amtSum.toFixed(0)+'亿','已公示金额',''],
- ['',items.filter(function(x){return x.g==='A'}).length,'A 战略必争','g:A'],
- ['',_earlyN,'立项早期·拟招标','sw:early'],
- ['',items.filter(function(x){return x.biz==='能源清洁高效利用'}).length,'能源主业','']
-];
-el('kpis').innerHTML=kpi.map(function(k,i){
-  return '<div class="kpi'+(i<2?' hot':'')+'"'+(k[3]?' style="cursor:pointer" onclick="kpiGo(\''+k[3]+'\')"':'')+
-    '><b>'+k[1]+'</b><span>'+k[2]+'</span></div>'}).join('');
+/* 头部文案 + KPI 依赖数据，已挪进 boot_main()（数据挂载后才算得出来） */
 // KPI 卡不再只是「又一个统计数字」——点它直接跳到对应泳道，把重复展示变成入口
 function kpiGo(a){
   if(!a)return;
@@ -773,15 +941,26 @@ function kpiGo(a){
 }
 
 /* ==================== Tab ==================== */
-TABS[0][2]=meta.total; TABS[1][2]=D.rivals.length;
-// 同业与伙伴：竞争对手 + 伙伴池
-TABS[2][2]=D.competitors.length+D.partners.length;
-TABS[3][2]=D.overseas.length;
-// 客户与业主：国内客户 + 海外客户 + 业主图谱，三个子页合计
-TABS[4][2]=((D.domStat&&D.domStat.total)||0)+D.clients.length+((D.graph||{}).owners||[]).length;
-TABS[5][2]=D.trends.length; TABS[6][2]=(((D.digest||{}).items||[]).length+((D.wechat||{}).items||[]).length); TABS[7][2]=D.platforms.length;
+/* 各 tab 的计数：org/news 模块是按需加载的，没到之前先显示 0，
+   加载完由 refreshTabCounts() 补上——避免因为取不到数据报错白屏。 */
+function arr(x){return x&&x.length?x:[]}
+function refreshTabCounts(){
+  TABS[0][2]=meta.total;
+  TABS[1][2]=arr(D.rivals).length;
+  TABS[2][2]=arr(D.competitors).length+arr(D.partners).length;
+  TABS[3][2]=arr(D.overseas).length;
+  TABS[4][2]=((D.domStat&&D.domStat.total)||0)+arr(D.clients).length+((D.graph||{}).owners||[]).length;
+  TABS[5][2]=arr(D.trends).length;
+  TABS[6][2]=(((D.digest||{}).items||[]).length+((D.wechat||{}).items||[]).length);
+  TABS[7][2]=arr(D.platforms).length;
+  var bs=document.querySelectorAll('.tab');
+  TABS.forEach(function(t,i){ if(bs[i]){ var ib=bs[i].querySelector('i'); if(ib) ib.textContent=t[2]; } });
+}
+refreshTabCounts();
 el('tabs').innerHTML=TABS.map(function(t,i){
   return '<button class="tab'+(i===0?' on':'')+'" data-t="'+i+'">'+t[1]+'<i>'+t[2]+'</i></button>'}).join('');
+/* tab 与所需数据模块的对应关系 */
+var TAB_MOD={1:'org',2:'org',3:'news',4:'org',5:'news',6:'news'};
 function goTab(i){
   F.tab=i;
   var bs=document.querySelectorAll('.tab');
@@ -790,6 +969,28 @@ function goTab(i){
   [].forEach.call(document.querySelectorAll('.panel'),function(x){x.classList.remove('on')});
   el(TABS[F.tab][0]).classList.add('on');
   location.hash='t'+F.tab;
+  /* 按需拉数据：第一次点进来才下载，加载完重渲染该面板 */
+  var m=TAB_MOD[i];
+  if(m&&!window['DATA_'+m.toUpperCase()]&&!window.DATA){
+    el(TABS[i][0]).insertAdjacentHTML('afterbegin',
+      '<div class="hint" id="modLoading" style="padding:8px 0">正在加载数据…</div>');
+  }
+  if(m) need(m,function(){ mergeMod(m); refreshTabCounts(); renderPanel(i); });
+}
+/* 渲染指定 tab 的内容（模块加载完成后调用） */
+function renderPanel(i){
+  var m=TAB_MOD[i];
+  var ld=document.getElementById('modLoading'); if(ld) ld.remove();
+  try{
+    if(i===1){ renderRivals(); }
+    else if(i===2){ refreshRivalCounts(); renderCompetitors(); renderPartners(); rApply(); }
+    else if(i===3){ renderOverseas(); }
+    else if(i===4){ renderDomestic(); renderClients(); renderGraph(); cApply(); }
+    else if(i===5){ renderTrends(); renderMetals(); renderMStrip(); }
+    else if(i===6){ renderWechat(); renderDigest(); bindDigest();
+      var n=((D.wechat||{}).items||[]).length,f=el('wxFold'),s2=el('wxFoldN');
+      if(s2)s2.textContent=n; if(f&&!n)f.style.display='none'; }
+  }catch(e){ console.error('[renderPanel]',i,e); }
 }
 el('tabs').onclick=function(e){
   var b=e.target.closest('.tab'); if(!b)return;
@@ -813,37 +1014,94 @@ function chipsBox(id,vals,cntMap,key){
 }
 function countBy(f){var m={};items.forEach(function(x){var v=x[f];if(v)m[v]=(m[v]||0)+1});return m}
 
-var subsOrder=meta.subTop.map(function(x){return x[0]});
-chipsBox('f-rg',uniq(['江苏','浙江','安徽','上海']),countBy('rg'),'rg');
-chipsBox('f-biz',meta.bizTop.map(function(x){return x[0]}),countBy('biz'),'biz');
-chipsBox('f-ind',['钢铁','有色','化工','电力','水泥建材','市政','其他'],countBy('ind'),'ind');
-chipsBox('f-sub',subsOrder,countBy('sub'),'sub');
-chipsBox('f-g',['A','B','C','D'],countBy('g'),'g');
-chipsBox('f-mode',uniq(items.map(function(x){return x.mode}).filter(function(x){return x&&x.length<12}))
-  .sort(function(a,b){return countBy('mode')[b]-countBy('mode')[a]}).slice(0,10),countBy('mode'),'mode');
-chipsBox('f-p',meta.platTop.slice(0,10).map(function(x){return x[0]}),countBy('p'),'p');
+/* 筛选器 + 三档关注库的渲染：都依赖 meta / items，所以包成函数，
+   由 boot_main() 在数据挂载后调用一次（以前是脚本顶层直接执行，
+   数据还在 defer 里没到，一定报 undefined.map）。 */
+function buildFilters(){
+  var subsOrder=meta.subTop.map(function(x){return x[0]});
+  chipsBox('f-rg',uniq(['江苏','浙江','安徽','上海']),countBy('rg'),'rg');
+  chipsBox('f-biz',meta.bizTop.map(function(x){return x[0]}),countBy('biz'),'biz');
+  chipsBox('f-ind',['钢铁','有色','化工','电力','水泥建材','市政','其他'],countBy('ind'),'ind');
+  chipsBox('f-sub',subsOrder,countBy('sub'),'sub');
+  chipsBox('f-g',['A','B','C','D'],countBy('g'),'g');
+  chipsBox('f-mode',uniq(items.map(function(x){return x.mode}).filter(function(x){return x&&x.length<12}))
+    .sort(function(a,b){return countBy('mode')[b]-countBy('mode')[a]}).slice(0,10),countBy('mode'),'mode');
+  chipsBox('f-p',meta.platTop.slice(0,10).map(function(x){return x[0]}),countBy('p'),'p');
 
-document.querySelectorAll('.chip').forEach(function(c){
-  c.onclick=function(){toggle(F[c.dataset.k],c.dataset.v); c.classList.toggle('on'); F.page=1; render()}});
+  document.querySelectorAll('.chip').forEach(function(c){
+    c.onclick=function(){toggle(F[c.dataset.k],c.dataset.v); c.classList.toggle('on'); F.page=1; render()}});
+
+  /* ==================== 三档关注库（2026-10-21）====================
+     用户原话：「商机库只需要看招标公告跳转即可，中标的有中标情况，没招标的就是我们可以做的」
+               「中标情况那块数据太多了，关注的项目的就行，几百万的项目放上去只会污染数据库」
+     所以商机库第一行不再是「阶段」，而是三个库：
+       📋 能投的标  —— 招标公告/招标计划/变更（有文件、能报名）
+       🏁 已出结果  —— 中标候选人/中标结果（看谁拿了、什么价）
+       💡 立项线索  —— 审批/备案/重点项目名单（业主今年要动什么，提前半年打招呼）
+     每个库里只放「关注档」：金额 ≥3000 万 或 综合分 A/B。
+     其余小项目可以在「全部」里翻，但不占主列表。 */
+  var WA = D.watch || {amt:0.3, tender:0, win:0, lead:0, all:0};
+  var BOOK = [
+    ['tender', '📋 能投的标', 'waT'],
+    ['win',    '🏁 已出结果', 'waW'],
+    ['lead',   '💡 立项线索', 'waL']
+  ];
+  var waBox = el('wares');
+  if (waBox) {
+    waBox.innerHTML = BOOK.map(function (b) {
+      var n = b[0] === 'lead' ? WA.lead : (WA[b[0]] || 0);
+      return '<div class="ware' + (b[0] === 'tender' ? ' on' : '') + '" data-bk="' + b[0] + '">' +
+        b[1] + '<b>' + n + '</b></div>';
+    }).join('') +
+      '<div class="ware" data-bk="all">全部 <b>' + (WA.all || 0) + '</b></div>' +
+      '<div class="wtip">只看 <b>' + (WA.amt * 10000) + ' 万以上</b> 或 综合分 A/B 的项目' +
+      '<a href="javascript:void(0)" id="waAll" style="margin-left:8px;color:var(--brand);font-weight:600">看全部含小项目</a></div>';
+    waBox.onclick = function (e) {
+      var pick = function (bk) {
+        F.bk = bk; F.page = 1;
+        [].forEach.call(waBox.querySelectorAll('.ware'), function (x) {
+          x.classList.toggle('on', x.dataset.bk === bk);
+        });
+        /* 立项线索 / 全部：数据不在首屏切片里，先拉全量再渲 */
+        if (bk === 'lead' || bk === 'all') {
+          var box = el('grid');
+          if (window.__itemsSplit && box) box.innerHTML = '<div class="empty">正在载入立项线索…</div>';
+          loadAllItems(function () { render(); });
+          return;
+        }
+        render();
+      };
+      var a = e.target.closest('#waAll');
+      if (a) { pick('all'); return; }
+      var d = e.target.closest('.ware'); if (!d) return;
+      pick(d.dataset.bk);
+    };
+  }
+  document.querySelectorAll('.chip').forEach(function(c){
+    c.onclick=function(){toggle(F[c.dataset.k],c.dataset.v); c.classList.toggle('on'); F.page=1; render()}});
+}
+
 
 /* 阶段泳道 */
 var swimBox=el('swim');
 // 「立项公示」「招标计划」「提前量徽标」三者语义高度重叠，合并为一个泳道：
 // 凡是还没到正式招标的（立项公示 / 招标计划 / 带提前量标记）都归到这里。
 // _isEarly / _earlyN 已在 KPI 处定义，此处直接复用，保证两处口径一致。
-var SW=[['','全部',meta.total],['bid','可投标·含计划',canBid],['early','立项早期·拟招标',_earlyN],
-        ['招标公告','正在招标',0],
-        ['中标候选人公示','候选人公示',0],['中标结果公示','已中标',0]];
-meta.stTop.forEach(function(s){SW.forEach(function(w){if(w[1]===s[0]||(w[0]===s[0]))w[2]=s[1]})});
-swimBox.innerHTML=SW.map(function(s,i){
-  return '<div class="sw'+(i===0?' on':'')+(s[0]==='bid'?' hot':'')+'" data-s="'+s[0]+'">'+s[1]+'<i>'+s[2]+'</i></div>'}).join('');
-swimBox.onclick=function(e){
-  var d=e.target.closest('.sw'); if(!d)return;
-  [].forEach.call(swimBox.children,function(x){x.classList.remove('on')});
-  d.classList.add('on'); F.st=d.dataset.s; F.page=1; render()};
+var SW=[];
+swimBox.style.display='none';   // 阶段泳道已被「三档关注库」取代，保留 DOM 不显示
+swimBox.innerHTML='';
+swimBox.onclick=null;
 
 /* ==================== 筛选逻辑 ==================== */
 function match(x){
+  /* 三档关注库：默认只看「能投的标」里的关注档项目。
+     关注档看 x.w（后端算好：金额≥3000万 或 综合分A/B），
+     「全部」档不做关注过滤，也不做分库过滤。 */
+  var bk = F.bk || 'tender';
+  if (bk !== 'all') {
+    if ((x.bk || 'tender') !== bk) return false;
+    if (bk !== 'lead' && !x.w) return false;     // 立项线索本身就是机会池，不再卡金额
+  }
   if(F.rg.size && !F.rg.has(x.rg))return false;
   if(F.biz.size && !F.biz.has(x.biz))return false;
   if(F.ind.size && !F.ind.has(x.ind))return false;
@@ -872,8 +1130,6 @@ function filtered(){
 }
 
 /* ==================== 渲染 ==================== */
-var GCLASS={A:'gA',B:'gB',C:'gC',D:'gD'};
-var GTXT={A:'A战略必争',B:'B重点跟进',C:'C可关注',D:'D暂不跟进'};
 function cardHtml(x){
   var tags='<span class="tg tg-biz">'+esc(x.biz)+'</span>'+
     (x.ind&&x.ind!=='其他'?'<span class="tg" style="background:#eef6ff;color:#0f5aa8">'+esc(x.ind)+'</span>':'')+
@@ -1014,6 +1270,14 @@ function render(){
     if(!d||d.classList.contains('dis'))return;F.page=+d.dataset.p;render();window.scrollTo(0,300)};
 }
 el('q').oninput=function(){F.q=this.value.trim();F.page=1;render()};
+/* 搜索框会跨库搜：首屏只有 400 条关注档，用户一搜就该覆盖全量，
+   否则「明明库里有这条，怎么搜不到」会反复出现。 */
+var _qTimer=null;
+el('q').addEventListener('input',function(){
+  if(!window.__itemsSplit)return;
+  clearTimeout(_qTimer);
+  _qTimer=setTimeout(function(){ loadAllItems(function(){ if(F.q)render() }) },400);
+});
 el('sort').onchange=function(){F.sort=this.value;render()};
 el('btnReset').onclick=resetF;
 function resetF(){
@@ -1135,8 +1399,11 @@ el('wkDl').onclick=function(){
 /* names 可传多个候选（用 | 分隔）：集团行会带上集团名 + 旗下各主体名，逐个尝试匹配 */
 function gotoUnit(names){
   var cands=(names||'').split('|').filter(Boolean);
-  var pools=[{t:2,grid:'rivalGrid',list:D.competitors||[]},
-             {t:3,grid:'partnerGrid',list:D.partners||[]}];
+  /* tab 索引：0 商机库 / 1 中标情报 / 2 同业与伙伴 / 3 海外信号 …
+    竞企和伙伴都在 t=2，靠子页切换区分——原来这里把伙伴写成 t:3，
+     点「中标单位」会被甩到「海外信号」页，属于老 bug，2026-10-21 修。 */
+  var pools=[{t:2,sub:'rival',grid:'rivalGrid',list:D.competitors||[]},
+             {t:2,sub:'partner',grid:'partnerGrid',list:D.partners||[]}];
   for(var ci=0;ci<cands.length;ci++){
   var kw=cands[ci].replace(/[（）()]/g,'').slice(0,6);
   if(!kw)continue;
@@ -1149,6 +1416,9 @@ function gotoUnit(names){
     if(hit<0)continue;
     var b=document.querySelector('.tab[data-t="'+pools[p].t+'"]');
     if(b)b.click();                       // 切到对应页签（会触发渲染）
+    /* 子页（竞企 / 伙伴）也要一起切过去，否则卡片是渲染在隐藏容器里 */
+    var sw=document.querySelector('#rSwitch span[data-k="'+pools[p].sub+'"]');
+    if(sw&&!sw.classList.contains('on'))sw.click();
     var grid=el(pools[p].grid);
     var cards=grid?grid.querySelectorAll('.ccard'):[];
     // 卡片是按「能源类/综合类/环保类/海外赛道」分组渲染的，索引与数组不一致，
@@ -1167,7 +1437,40 @@ function gotoUnit(names){
     return;
   }
   }
-  searchFor(cands[0].slice(0,6));          // 都没档案 → 退回商机库看它的中标记录
+  /* 没档案也不该让人扑空：如果它在本库有中标记录（战绩挂在别处），
+     就在竞企页顶部临时插一张「库内成交单位」卡，把战绩摆出来。 */
+  if(showAdhocUnit(cands[0])) return;
+  searchFor(cands[0].slice(0,6));          // 真查不到 → 退回商机库看它的招标/中标记录
+}
+
+/* 临时卡：无档案但有库内成交记录的单位的快速画像 */
+function showAdhocUnit(name){
+  var key=(name||'').replace(/[（）()]/g,'');
+  if(key.length<4) return false;
+  var mainItems=window.items||[];
+  var hits=mainItems.filter(function(x){return x.win&&x.win.replace(/[（）()]/g,'').indexOf(key)>=0});
+  if(!hits.length) return false;
+  hits.sort(function(a,b){return (b.amt||0)-(a.amt||0)});
+  var amt=hits.reduce(function(s,x){return s+(x.amt||0)},0);
+  var rgs={}; hits.forEach(function(x){if(x.rg)rgs[x.rg]=(rgs[x.rg]||0)+1});
+  var rgTxt=Object.keys(rgs).map(function(k){return k+' '+rgs[k]}).join(' · ');
+  var b=document.querySelector('.tab[data-t="2"]'); if(b)b.click();
+  var box=el('adhoc');
+  if(!box) return false;
+  box.style.display='block';
+  box.innerHTML='<div class="ccard" style="border-color:#ffd8a8;background:#fffdf7">'+
+    '<div class="cc-h"><b>'+esc(name)+'</b>'+
+    '<span class="cc-tag" style="background:#fff2e0;color:#a85c10">库内成交 · 暂无完整档案</span></div>'+
+    '<div class="cc-track"><i>库内战绩</i><span>命中 <b>'+hits.length+'</b> 次</span>'+
+      (amt>0?'<span>累计 <b>'+money(amt)+'</b></span>':'')+
+      (rgTxt?'<span>主战场 '+esc(rgTxt)+'</span>':'')+'</div>'+
+    '<div class="cc-hits">'+hits.slice(0,8).map(function(t){
+      return '<a href="'+esc(t.url||'javascript:void(0)')+'" target="_blank" rel="noopener">'+
+        '<em>'+esc(t.d||'')+'</em>'+esc((t.t||'').slice(0,56))+(t.amt?'<b>'+money(t.amt)+'</b>':'')+'</a>'}).join('')+'</div>'+
+    '<div class="cc-i" style="color:var(--tx3)">还没有它的企业档案（资质 / 装机规模 / 优势短板）。'+
+    '如需补录，把单位名发给管理员加进 industry.json。</div></div>';
+  box.scrollIntoView({behavior:'smooth',block:'start'});
+  return true;
 }
 var rvBiz=new Set();
 function rvItemsHtml(items){
@@ -1175,7 +1478,8 @@ function rvItemsHtml(items){
     esc(it.t)+(it.amt?' <b>'+money(it.amt)+'</b>':'')+' <span class="sub-i">'+esc(it.d)+'</span>'+(it.url?'</a>':'')+'</li>'}).join('')+'</ul>';
 }
 function renderRivals(){
-  var list=D.rivals.filter(function(x){return !rvBiz.size||rvBiz.has(x.main)});
+  refreshRivalCounts();          // 档案数/伙伴数：数据到位后才算得出来
+  var list=arr(D.rivals).filter(function(x){return !rvBiz.size||rvBiz.has(x.main)});
   el('tbrv').innerHTML='<tr><th style="width:38px">#</th><th>中标单位</th><th>次数</th><th>金额(亿)</th><th>主攻赛道</th><th>覆盖区域</th><th style="width:230px">代表项目</th></tr>'+
     list.slice(0,120).map(function(x,i){
       var subs=x.subs||[], isGrp=subs.length>1;
@@ -1197,9 +1501,12 @@ function renderRivals(){
         '<td>'+esc(x.main)+'</td><td class="sub-i">'+esc(x.rg)+'</td>'+
         '<td><details class="sub"><summary>'+x.items.length+' 条代表项目</summary>'+detail+'</details></td></tr>'}).join('');
 }
-chipsBox('f-rv',meta.bizTop.map(function(x){return x[0]}),null,'rvbiz');
-el('f-rv').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
-  toggle(rvBiz,c.dataset.v);c.classList.toggle('on');renderRivals()};
+/* 竞对页的业务筛选同样依赖 meta，放进 buildFilters() 一起等数据到位后再建 */
+function buildRivalFilter(){
+  chipsBox('f-rv',(meta.bizTop||[]).map(function(x){return x[0]}),null,'rvbiz');
+  el('f-rv').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
+    toggle(rvBiz,c.dataset.v);c.classList.toggle('on');renderRivals()};
+}
 
 /* ==================== 竞争对手档案 ==================== */
 var cCat=new Set(), pCat=new Set();
@@ -1249,6 +1556,39 @@ function mineTag(x){
   return '<span class="cc-tag none" title="由商机库 A/B 级项目的中标记录自动挖掘收录">库内挖掘 · '+
     x._mine.times+' 次'+(x._mine.amt?' / '+x._mine.amt+' 亿':'')+'</span>';
 }
+/* ---------- 库内战绩：把 1954 条真实中标记录反挂回档案 ---------- */
+/* 2026-10-21 用户指定「同业与伙伴是重点画像」。原来的档案卡是一段 static 介绍
+   + 一堆微信转来的动态，看着厚其实没有一条来自本库的交易记录。
+   这里直接把「它在我们监测的江浙沪皖拿过什么」摆到最前面：
+     命中 N 次 · 累计 X 亿 · 主战场（区域分布）· 最大单
+   并且每条都能点回商机库看原文。没有记录的就明说「本库暂无」，
+   避免让人误以为漏了。 */
+function trackBlock(x){
+  var w=x.wStat;
+  if(!w||!w.nAll) return '<div class="cc-track empty"><i>库内战绩</i>'+
+    '<span>本库 1954 条中暂无该单位的中标记录（不代表没中标，可能发在未监测的平台）</span></div>';
+  var rg=Object.keys(w.rg||{}).map(function(k){return k+' '+w.rg[k]}).join(' · ');
+  var h='<div class="cc-track"><i>库内战绩</i>'+
+    '<span class="tk-n">命中 <b>'+w.nAll+'</b> 次</span>';
+  if(w.amt>0) h+='<span class="tk-a">关注档累计 <b>'+money(w.amt)+'</b>'+
+    (w.joint?'<em class="tk-j" title="该笔为联合体中标，金额按联合体成员家数均分，不代表它独吞">联合体分摊</em>':'')+'</span>';
+  if(rg) h+='<span class="tk-r">主战场 '+esc(rg)+'</span>';
+  if(w.last) h+='<span class="tk-d">最近 '+esc(w.last)+'</span>';
+  h+='</div>';
+  if(w.top>0){
+    h+='<div class="cc-top"><b>最大单 '+money(w.top)+'</b> '+esc(w.topT)+'</div>';
+  }
+  var hs=x.hits||[];
+  if(hs.length){
+    h+='<div class="cc-hits">'+hs.slice(0,5).map(function(t){
+      return '<a href="'+esc(t.url||'javascript:void(0)')+'" target="_blank" rel="noopener">'+
+        '<em>'+esc(t.d||'')+'</em>'+esc((t.t||'').slice(0,54))+
+        (t.amt?'<b>'+money(t.amt)+'</b>':'')+'</a>';
+    }).join('')+'</div>';
+  }
+  return h;
+}
+
 function compCard(x){
     return '<div class="ccard"><div class="cc-h"><b>'+esc(x.name)+'</b>'+
       '<button class="rival-dw" onclick="Rival.open(\''+esc((x.name||'').replace(/'/g,''))+'\')" title="打开竞对画像：业绩明细 + 装机规模 + 企业资质，侧滑不跳页">画像</button>'+
@@ -1257,8 +1597,9 @@ function compCard(x){
       (x.city?'<span class="cc-tag none">'+esc(x.city)+'</span>':'')+
       mineTag(x)+
       (x.dual?'<span class="cc-tag" style="background:#e8f4ff;color:#1053c9">竞合双身份</span>':'')+'</div>'+
+      trackBlock(x)+
       '<div class="cc-m">'+esc(x.strength)+'</div>'+
-      recentBlock(x,'近期中标 / 动态（点条目看原文）')+
+      recentBlock(x,'近期动态（微信公众号 / 官网，点条目看原文）')+
       (x.dual?'<div class="cc-i" style="color:#1053c9;font-size:11.5px">同时在「合作生态」中列为潜在联合体伙伴——海外项目中多为总包方，我司可作能源动力岛/余热发电分包。</div>':'')+
       (x.url?'<div class="cc-i"><a href="'+esc(x.url)+'" target="_blank" rel="noopener">官网 / 资料 ↗</a></div>':'')+
       '<div class="cc-i"><a href="javascript:searchFor(\''+esc((x.name||'').slice(0,6))+'\')">在商机库中查看它的招标/中标记录 ↗</a></div>'+
@@ -1283,9 +1624,10 @@ function partCard(x){
       '<span class="cc-tag" style="background:'+(x.type&&x.type.indexOf('施工')>=0?'#fff2e0;color:#a85c10':'#e8f4ff;color:#1053c9')+'">'+esc(x.type||'')+'</span>'+
       (x.city?'<span class="cc-tag none">'+esc(x.city)+'</span>':'')+
       mineTag(x)+'</div>'+
+      trackBlock(x)+
       (x.role?'<div class="cc-m"><b style="color:#14713a">联合体定位：</b>'+esc(x.role)+'</div>':'')+
       (x.strength?'<div class="cc-m">'+esc(x.strength)+'</div>':'')+
-      recentBlock(x,'近期业绩 / 中标（点条目看原文）')+
+      recentBlock(x,'近期动态（点条目看原文）')+
       (x.url?'<div class="cc-i"><a href="'+esc(x.url)+'" target="_blank" rel="noopener">官网 / 资料 ↗</a></div>':'')+
       '<div class="cc-i"><a href="javascript:searchFor(\''+esc((x.name||'').slice(0,6))+'\')">在商机库中查它的记录 ↗</a></div>'+
       '</div>';
@@ -1420,9 +1762,13 @@ el('rSwitch').onclick=function(e){
   var sp=e.target.closest('span[data-k]'); if(!sp)return;
   rTab=sp.dataset.k; rApply();
 };
-(function(){var a=el('rCn'),b=el('rPn');
-  if(a)a.textContent=(D.competitors||[]).length;
-  if(b)b.textContent=(D.partners||[]).length;})();
+/* 计数依赖 data.org.js（按需加载），不能在脚本顶层算——那时 D.competitors 还是 undefined。
+   改成函数，由 renderRivals() 在数据到位后调用。 */
+function refreshRivalCounts(){
+  var a=el('rCn'),b=el('rPn');
+  if(a)a.textContent=arr(D.competitors).length;
+  if(b)b.textContent=arr(D.partners).length;
+}
 
 /* ---- 客户与业主：三段切页（国内客户 / 海外客户 / 业主图谱）---- */
 var cTab='dom';
@@ -1731,7 +2077,10 @@ function renderTrends(){
       '<div class="ns"><span class="ntag '+cls+'">'+esc(x.tag)+'</span><span>'+esc(x.source)+'</span><span>'+esc(x.date)+'</span></div></div>'
   }).join('');
 }
-chipsBox('f-tg',uniq(D.trends.map(function(x){return x.tag})),null,'ttag');
+/* 行业动态的标签集合依赖 data.news.js（按需加载），放到 renderTrends 里建 */
+function buildTrendFilter(){
+  chipsBox('f-tg',uniq(arr(D.trends).map(function(x){return x.tag})),null,'ttag');
+}
 el('f-tg').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
   toggle(tTag,c.dataset.v);c.classList.toggle('on');renderTrends()};
 // 微信内容已整体归到「微信线索」页签（那里是全量池且带分类筛选），这里只做引导，
@@ -1792,7 +2141,9 @@ function renderWechat(){
       '<span class="sub-i">检索词 '+esc(x.hit||'')+'</span></div></div>'
   }).join(''):'<div class="empty">暂无微信线索</div>';
 }
-chipsBox('f-wx',uniq((D.wechat||{}).items?D.wechat.items.map(function(x){return x.cat}):[]),null,'wxcat');
+function buildWxFilter(){
+  chipsBox('f-wx',uniq(((D.wechat||{}).items||[]).map(function(x){return x.cat})),null,'wxcat');
+}
 el('f-wx').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
   toggle(wxCat,c.dataset.v);c.classList.toggle('on');renderWechat()};
 
@@ -1824,8 +2175,7 @@ function searchFor(kw){
   render(); window.scrollTo(0,0); location.hash='t0';
 }
 
-/* ==================== 启动 ==================== */
-render();renderRivals();renderGraph();renderCompetitors();renderPartners();renderOverseas();renderClients();renderDomestic();rApply();cApply();renderTrends();renderMetals();renderMStrip();renderPlat();renderWechat();renderDigest();bindDigest();(function(){var n=((D.wechat||{}).items||[]).length,f=el('wxFold'),s2=el('wxFoldN');if(s2)s2.textContent=n;if(f&&!n)f.style.display='none';})();
+/* 启动入口在 boot_main()（见下），不再在脚本顶层直接跑：数据此时还没挂载。 */
 /* 浏览器端实时行情已停用：各大行情源（新浪 hq.sinajs.cn、东方财富 push2、腾讯 qt.gtimg.cn）
    均拒绝跨站请求或不提供国内期货代码，页面只可能被 403。
    改为由服务端定时任务在每个工作日收盘 16:05 抓取并重新发布。
@@ -1836,9 +2186,53 @@ if(LIVE_ENABLED){
   setInterval(fetchLiveMetals, 300000);
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) fetchLiveMetals(); });
 }
-var h=(location.hash||'').replace('#','');
-if(h&&/^t\d$/.test(h)){var b=document.querySelector('.tab[data-t="'+h.slice(1)+'"]'); if(b)b.click()}
+/* ==================== 首屏：只渲商机库 + 平台导航 ====================
+   以前一上来把 9 个面板全渲一遍（1954 条 × 几十个节点 ≈ 1.2 万 DOM），
+   手机和中端笔记本要 2~3 秒白屏。现在首屏只渲商机库第一页（24 张卡），
+   其余面板点开才渲、对应数据点开才拉。 */
+function boot_main(){
+  /* ---- 头部文案 + KPI：必须等数据挂载后才能算 ---- */
+  var _stamp = meta.updated + (meta.at ? ' '+meta.at : '');
+  el('subTitle').innerHTML='都市环保（中冶南方）EPC 商机监测 · 江浙沪皖四地 · 数据更新 '+
+    _stamp+' · 共 '+meta.total+' 条项目 · '+D.platforms.length+' 个平台来源';
+  var canBid = items.filter(function(x){return x.st==='招标公告'||x.st==='招标计划'}).length;
+  // 立项早期的判定口径必须与泳道「立项早期·拟招标」完全一致，否则页面上同一个概念
+  // 会出现两个不同的数字（KPI 625 vs 泳道 734）——这是 2026-10-10 修掉的老 bug。
+  var _isEarly=function(x){return !!x.early || x.st==='立项公示' || x.st==='招标计划'};
+  var _earlyN=items.filter(_isEarly).length;
+  // 第 4 项是点击动作：sw:xxx = 跳商机库并选中该泳道；g:A = 选中等级筛选
+  var kpi=[
+   ['cursor',meta.total,'入库项目','sw:'],['hot2',canBid,'当前在招','sw:bid'],
+   ['',meta.new,'本轮更新',''],['',meta.withWin,'已出中标结果',''],
+   ['',meta.amtSum.toFixed(0)+'亿','已公示金额',''],
+   ['',items.filter(function(x){return x.g==='A'}).length,'A 战略必争','g:A'],
+   ['',_earlyN,'立项早期·拟招标','sw:early'],
+   ['',items.filter(function(x){return x.biz==='能源清洁高效利用'}).length,'能源主业','']
+  ];
+  el('kpis').innerHTML=kpi.map(function(k,i){
+    return '<div class="kpi'+(i<2?' hot':'')+'"'+(k[3]?' style="cursor:pointer" onclick="kpiGo(\''+k[3]+'\')"':'')+
+      '><b>'+k[1]+'</b><span>'+k[2]+'</span></div>'}).join('');
+
+  buildFilters();  // 筛选器 + 三档关注库
+  buildRivalFilter();
+  render();        // 商机库第一页
+  renderPlat();    // 平台导航（纯静态，很轻）
+  refreshTabCounts();
+}
+/* 地址栏带 #t2 这类深链时再补渲对应面板 */
+(function(){
+  var h=(location.hash||'').replace('#','');
+  if(h&&/^t\d$/.test(h)){
+    var i=+h.slice(1);
+    if(i>0&&i<TABS.length) setTimeout(function(){goTab(i)},0);
+  }
+})();
+
+/* 启动逻辑在 boot.js（defer，保证在数据脚本之后执行） */
 </script>
+<script defer src="data.core.js?v=202610212044"></script>
+<script defer src="data.items.js?v=202610212044"></script>
+<script defer src="boot.js?v=202610212029"></script>
 <!-- 竞对画像抽屉：点「画像」按钮从右侧滑出，不跳页 -->
 <script src="rival.js"></script>
 </body>
