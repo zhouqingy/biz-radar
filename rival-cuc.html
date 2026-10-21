@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>竞对画像 · 中国联合工程有限公司</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--line:#e5e7eb;--tx:#111827;--mut:#6b7280;--acc:#0f766e;--acc2:#b45309;--red:#b91c1c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1240px;margin:0 auto;padding:28px 18px 90px}
+h1{font-size:23px;margin:0 0 4px;letter-spacing:-.4px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:22px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:15px 16px}
+.kpi .n{font-size:26px;font-weight:700;letter-spacing:-1px;line-height:1.15}
+.kpi .n sm{font-size:14px;font-weight:600;color:var(--mut);margin-left:3px}
+.kpi .l{font-size:12px;color:var(--mut);margin-top:3px}
+.kpi.a .n{color:var(--acc)}.kpi.b .n{color:var(--acc2)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:16px 18px;margin-bottom:18px}
+.panel h2{font-size:14px;margin:0 0 13px;display:flex;align-items:center;gap:8px;font-weight:600}
+.panel h2 i{width:3px;height:14px;background:var(--acc);border-radius:2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:820px){.two{grid-template-columns:1fr}}
+.bar{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12.5px;width:100%}
+.bar .bl{width:130px;flex:none;color:#4b5563;text-align:right;font-size:12px;line-height:1.35}
+.bar i{height:17px;background:linear-gradient(90deg,#0f766e,#14b8a6);border-radius:3px;min-width:3px;flex:0 1 auto;max-width:calc(100% - 200px)}
+.bar i.g{background:#94a3b8}
+.bar em{font-style:normal;color:var(--mut);font-size:12px;flex:none;white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:9px 8px;border-bottom:1.5px solid var(--line);font-size:12px;color:var(--mut);font-weight:600;white-space:nowrap}
+td{padding:10px 8px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+tr:hover td{background:#f9fafb}
+td.d{color:var(--mut);white-space:nowrap;font-variant-numeric:tabular-nums;font-size:12.5px}
+td.p{max-width:380px;line-height:1.5}
+td.p b{font-weight:600;color:#111827}
+td.p .sc{display:block;margin-top:3px;font-size:11.5px;color:#0f766e;background:#ecfdf5;border-left:2px solid #14b8a6;padding:2px 6px;border-radius:0 3px 3px 0}
+td.p .sc.none{color:#9ca3af;background:#f9fafb;border-left-color:#e5e7eb;font-style:italic}
+td.o{max-width:170px;color:#4b5563;font-size:12.5px}
+td.m{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+td.m big{font-size:14px;color:var(--acc2)}
+.tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:3px;background:#f1f5f9;color:#475569;white-space:nowrap}
+.tag.t1{background:#ecfdf5;color:#0f766e}
+.tag.t2{background:#fef3c7;color:#92400e}
+.tag.t3{background:#eef2ff;color:#3730a3}
+.btn{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;padding:3px 9px;border-radius:4px;
+border:1px solid #d1d5db;background:#fff;color:#374151;cursor:pointer;text-decoration:none;white-space:nowrap;line-height:1.6}
+.btn:hover{background:#f3f4f6;border-color:#9ca3af}
+.btn.pri{background:#0f766e;border-color:#0f766e;color:#fff}
+.btn.pri:hover{background:#115e59}
+.btn-group{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.qual{display:flex;gap:14px;align-items:flex-start;padding:13px 0;border-bottom:1px solid #f3f4f6}
+.qual:last-child{border-bottom:none;padding-bottom:0}
+.qual .ic{width:38px;height:38px;flex:none;border-radius:9px;background:linear-gradient(135deg,#0f766e,#14b8a6);
+display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;font-weight:700}
+.qual .bd{flex:1;min-width:0}
+.qual .nm{font-size:14px;font-weight:600;margin-bottom:2px}
+.qual .cd{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;color:#0f766e;background:#f0fdfa;
+display:inline-block;padding:1px 7px;border-radius:3px;margin:2px 0}
+.qual .nt{font-size:12.5px;color:#4b5563;line-height:1.55}
+.qual .sr{font-size:11.5px;color:#9ca3af;margin-top:3px}
+.co{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:9px 26px;font-size:13px}
+.co div{display:flex;gap:9px;min-width:0}
+.co dt{color:var(--mut);flex:none;width:92px;font-size:12.5px;text-align:right;line-height:1.75}
+.co dd{margin:0;color:#1f2937;line-height:1.75;min-width:0;word-break:break-word}
+.co dd.mono{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;letter-spacing:.2px}
+.note{font-size:12px;color:var(--mut);line-height:1.65;background:#fafafa;border-radius:7px;padding:11px 13px;margin-top:12px}
+.note b{color:#374151}
+.toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%) translateY(20px);background:#111827;color:#fff;
+padding:10px 20px;border-radius:8px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:9999}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.legend{font-size:11.5px;color:var(--mut);margin-top:8px}
+</style></head><body>
+<div class="wrap">
+<h1>中国联合 · 竞对画像</h1>
+<div class="sub">中国联合工程有限公司 ｜ 数据源：南通市公共资源交易平台「中标候选人公示 · 企业业绩」表<br>
+数据更新 2026-10-21 17:24 ｜ 接口实时拉取</div>
+
+<div class="kpis">
+  <div class="kpi a"><div class="n">23<sm>条</sm></div><div class="l">可查业绩</div></div>
+  <div class="kpi b"><div class="n">24.74<sm>亿</sm></div><div class="l">合同额合计</div></div>
+  <div class="kpi"><div class="n">4<sm>条</sm></div><div class="l">亿元级大单（占 92%）</div></div>
+  <div class="kpi"><div class="n">12<sm>省</sm></div><div class="l">业务覆盖</div></div>
+  <div class="kpi"><div class="n">23<sm>家</sm></div><div class="l">服务业主</div></div>
+</div>
+
+<div class="panel">
+  <h2><i></i>企业资质</h2>
+  <div class="qual"><div class="ic">资</div><div class="bd"><div class="nm">工程设计综合资质甲级</div><div class="cd">证书编号 A133000033</div><div class="nt">全国首批获得，设计领域最高等级，可承接全部21个行业</div><div class="sr">来源：宜昌公共资源交易中心 2026-01-15 中标结果公告</div></div></div>
+  <div class="note">
+    <b>为什么这条重要：</b>工程设计综合资质甲级是设计领域最高等级，全国持证企业仅数十家，
+    可承接全部 21 个行业。这意味着对方<b>不受行业限制</b>——热电、垃圾焚烧、污泥固废、建筑市政都能投，
+    在任何一个标段遇到它都不奇怪。证书编号 A133000033 可在四库一平台核验。
+  </div>
+</div>
+
+<div class="panel">
+  <h2><i></i>企业基本信息</h2>
+  <div class="co">
+    <div><dt>全称</dt><dd>中国联合工程有限公司</dd></div>
+    <div><dt>母公司</dt><dd>中国机械工业集团有限公司（国机集团，世界500强）</dd></div>
+    <div><dt>信用代码</dt><dd class="mono">913300001000016335</dd></div>
+    <div><dt>成立</dt><dd>1953（原机械工业第二设计研究院）</dd></div>
+    <div><dt>总部</dt><dd>杭州市滨江区滨安路1060号</dd></div>
+    <div><dt>人员</dt><dd>专业技术人员 7000 余人</dd></div>
+    <div><dt>核心赛道</dt><dd>综合能源工程 / 新型工业化 / 城市更新</dd></div>
+    <div><dt>累计业绩</dt><dd>累计完成国内外工程项目 30000 多个，设计建设 300 多座电厂</dd></div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2><i></i>业绩明细 <span style="font-weight:400;color:#9ca3af;font-size:12px">（按合同额降序，含装机规模）</span></h2>
+  <table>
+    <thead><tr><th>日期</th><th>项目 / 装机规模</th><th>建设单位</th><th style="text-align:right">合同额</th><th>原文</th></tr></thead>
+    <tbody>
+<tr><td class="d">2018-04-27</td><td class="p"><b>神华榆林循环经济煤炭综合利用项目（一阶段工程）动力装置设计、采购、施工（EPC）总承包项目</b><span class="sc">2×480t/h 高温高压煤粉锅炉 + 1×100MW 抽凝式空冷发电机组 · 总投资 一阶段工程 136 亿元</span><div style="margin-top:5px"><span class="tag t1">燃煤/煤电</span> <span class="tag">陕西</span></div></td><td class="o">神华榆林能源化工有限公司</td><td class="m"><big>7.31亿</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2021-12-27</td><td class="p"><b>玉林白平产业园热电联产一期项目EPC工程</b><span class="sc">2×410t/h + 1×240t/h 高温高压循环流化床锅炉 + 2×30MW 抽背式汽轮发电机组 · 总投资 11.8 亿元 · 2025-08 建成</span><div style="margin-top:5px"><span class="tag t1">热电联产</span> <span class="tag">广西</span></div></td><td class="o">玉林时代聚能热力能源有限公司</td><td class="m"><big>6.61亿</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2023-06-14</td><td class="p"><b>山发龙城静脉产业园污泥资源化处置项目工程总承包</b><span class="sc">日处理含水率60%污泥 1200 吨（2 条焚烧线），年供热 36.3 万 GJ、发电 3284.4 万 kWh · 总投资 5.99 亿元 · 2025 投产 建成</span><div style="margin-top:5px"><span class="tag t2">污泥/固废处置</span> <span class="tag">山东</span></div></td><td class="o">山发（诸城）环保能源有限公司</td><td class="m"><big>4.90亿</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2023-02-06</td><td class="p"><b>浙江巨化热电有限公司节能增效技改项目#12、#13机组EPC总承包项目</b><span class="sc">2×280t/h 亚临界超高温循环流化床锅炉 + 2×CB50 汽轮发电机组 · 2024-11 建成</span><div style="margin-top:5px"><span class="tag t2">热电联产</span> <span class="tag">浙江</span></div></td><td class="o">浙江巨化热电有限公司</td><td class="m"><big>4.05亿</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2021-03-25</td><td class="p"><b>智造谷产业服务综合体项目设计</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">其他（园区/建筑设计）</span> <span class="tag">浙江</span></div></td><td class="o">杭州高新智造谷开发运营有限公司</td><td class="m"><big>5090万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20250616/70b11639-1897-4f87-8cd3-0d3f9c743a4b.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20250616/70b11639-1897-4f87-8cd3-0d3f9c743a4b.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2026-01-01</td><td class="p"><b>贵州友山热电联产一期项目</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">热电联产</span> <span class="tag">贵州</span></div></td><td class="o">友山新材料科技(贵州)有限公司</td><td class="m"><big>2200万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2019-09-12</td><td class="p"><b>佛山市生活垃圾资源化处理提质改造项目（第一阶段）</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">生活垃圾焚烧</span> <span class="tag">广东</span></div></td><td class="o">光大环保（中国）有限公司</td><td class="m"><big>1800万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2025-03-06</td><td class="p"><b>阿拉尔经济技术开发区背压热电联产项目</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">热电联产</span> <span class="tag">新疆</span></div></td><td class="o">南疆能源（集团）有限责任公司</td><td class="m"><big>1440万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2021-07-09</td><td class="p"><b>浙江盛元化纤有限公司设计项目</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">其他（园区/建筑设计）</span> <span class="tag">浙江</span></div></td><td class="o">浙江盛元化纤有限公司</td><td class="m"><big>1250万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2024-07-20</td><td class="p"><b>宁东临河基地综合园区动力岛二期工程设计</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">集中供热/热网</span> <span class="tag">宁夏</span></div></td><td class="o">宁夏宝丰能源集团股份有限公司</td><td class="m"><big>850万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2021-04-30</td><td class="p"><b>潜江经济开发区热电联产项目</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">热电联产</span> <span class="tag">湖北</span></div></td><td class="o">浙江省工业设备安装集团有限公司</td><td class="m"><big>750万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2020-08-18</td><td class="p"><b>海盐经济开发区浙江物产山鹰热电有限公司公用热电项目设计服务</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">热电联产</span> <span class="tag">浙江</span></div></td><td class="o">浙江物产山鹰热电有限公司</td><td class="m"><big>660万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2025-02-17</td><td class="p"><b>叶县先进制造业开发区聚碳材料公司3×350t/h+2×40MW热电联产项目一期（1炉1机）项目</b><span class="sc">3×350t/h 锅炉 + 2×40MW 机组（一期 1 炉 1 机）</span><div style="margin-top:5px"><span class="tag t3">热电联产</span> <span class="tag">河南</span></div></td><td class="o">河南平煤神马聚碳材料有限责任公司</td><td class="m"><big>650万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2021-01-01</td><td class="p"><b>印尼煤制甲醇项目电站基础设计</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">其他（园区/建筑设计）</span> <span class="tag">北京</span></div></td><td class="o">中国寰球工程有限公司北京分公司</td><td class="m"><big>600万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2022-04-02</td><td class="p"><b>孟州市污泥与工业固废资源化综合处置中心项目</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">污泥/固废处置</span> <span class="tag">河南</span></div></td><td class="o">孟州市冠中环保能源有限公司</td><td class="m"><big>585万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2019-09-15</td><td class="p"><b>绍兴远东热电有限公司四期扩建工程</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">热电联产</span> <span class="tag">浙江</span></div></td><td class="o">绍兴远东热电有限公司</td><td class="m"><big>568万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2018-08-15</td><td class="p"><b>浙江省嘉兴市海宁第二期生活垃圾焚烧发电厂项目</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">生活垃圾焚烧</span> <span class="tag">浙江</span></div></td><td class="o">海宁绿动海云环保能源有限公司</td><td class="m"><big>560万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2018-01-31</td><td class="p"><b>浙江华川实业集团有限公司集中供热二期改造工程</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">集中供热/热网</span> <span class="tag">浙江</span></div></td><td class="o">浙江华川实业集团有限公司</td><td class="m"><big>450万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2020-07-24</td><td class="p"><b>浙江龙德环保热电有限公司热电联产扩建工程四期</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">热电联产</span> <span class="tag">浙江</span></div></td><td class="o">浙江龙德环保热电有限公司</td><td class="m"><big>326万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2019-07-25</td><td class="p"><b>阿斯福特纺织（漳州）有限公司热电联产项目</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">热电联产</span> <span class="tag">福建</span></div></td><td class="o">阿斯福特纺织（漳州）有限公司</td><td class="m"><big>320万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2021-07-05</td><td class="p"><b>广西田东锦盛化工有限公司电厂扩建工程</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">燃煤/煤电</span> <span class="tag">广西</span></div></td><td class="o">广西田东锦盛化工有限公司</td><td class="m"><big>316万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20260423/938bcdcd-8453-4338-924c-e9e2d4355bb0.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2018-01-25</td><td class="p"><b>福州市元洪投资区集中供热技改扩建项目</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">集中供热/热网</span> <span class="tag">福建</span></div></td><td class="o">福州和特新能源有限公司</td><td class="m"><big>192万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html',this)">复制链接</button></div></td></tr>
+<tr><td class="d">2018-03-06</td><td class="p"><b>宁波众茂杭州湾热电有限公司三期二阶段工程</b><span class="sc none">未公开（原表无此列）</span><div style="margin-top:5px"><span class="tag t3">热电联产</span> <span class="tag">浙江</span></div></td><td class="o">宁波众茂杭州湾热电有限公司</td><td class="m"><big>185万</big></td><td><div class="btn-group"><a class="btn pri" href="https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html" target="_blank" rel="noopener">打开公示原文</a><button class="btn" onclick="cp('https://zfcg.nantong.gov.cn/jyxx/003001/003001004/20230721/b6dd47da-55cc-46bb-b350-e24ee74987e6.html',this)">复制链接</button></div></td></tr>
+    </tbody>
+  </table>
+  <div class="legend">
+    ※ 「未公开（原表无此列）」表示原公示的业绩表本身只列了工程名与金额，没有规模信息；
+    亿元级项目已按项目名反查原招标公告或业主官网补录。
+    「打开公示原文」在新标签页打开；若被浏览器拦截，点「复制链接」手动粘贴。
+  </div>
+</div>
+
+<div class="two">
+  <div class="panel">
+    <h2><i></i>赛道分布</h2>
+    <div class="bar"><span class="bl">热电联产</span><i style="width:92.0%"></i><em>11 项 · 11.37亿</em></div><div class="bar"><span class="bl">燃煤/煤电</span><i style="width:59.4%"></i><em>2 项 · 7.34亿</em></div><div class="bar"><span class="bl">污泥/固废处置</span><i style="width:40.1%"></i><em>2 项 · 4.95亿</em></div><div class="bar"><span class="bl">其他（园区/建筑设计）</span><i style="width:5.6%"></i><em>3 项 · 6940万</em></div><div class="bar"><span class="bl">生活垃圾焚烧</span><i style="width:1.9%"></i><em>2 项 · 2360万</em></div><div class="bar"><span class="bl">集中供热/热网</span><i style="width:1.2%"></i><em>3 项 · 1492万</em></div>
+    <div class="legend">按合同额统计。一条业绩只归一个赛道（先具体后笼统）。</div>
+  </div>
+  <div class="panel">
+    <h2><i></i>地域分布</h2>
+    <div class="bar"><span class="bl">陕西</span><i class="g" style="width:92.0%"></i><em>1 项 · 7.31亿</em></div><div class="bar"><span class="bl">广西</span><i class="g" style="width:83.6%"></i><em>2 项 · 6.64亿</em></div><div class="bar"><span class="bl">浙江</span><i class="" style="width:62.4%"></i><em>9 项 · 4.96亿</em></div><div class="bar"><span class="bl">山东</span><i class="g" style="width:61.6%"></i><em>1 项 · 4.90亿</em></div><div class="bar"><span class="bl">贵州</span><i class="g" style="width:2.8%"></i><em>1 项 · 2200万</em></div><div class="bar"><span class="bl">广东</span><i class="g" style="width:2.3%"></i><em>1 项 · 1800万</em></div><div class="bar"><span class="bl">新疆</span><i class="g" style="width:1.8%"></i><em>1 项 · 1440万</em></div><div class="bar"><span class="bl">河南</span><i class="g" style="width:1.6%"></i><em>2 项 · 1235万</em></div><div class="bar"><span class="bl">宁夏</span><i class="g" style="width:1.1%"></i><em>1 项 · 850万</em></div><div class="bar"><span class="bl">湖北</span><i class="g" style="width:0.9%"></i><em>1 项 · 750万</em></div><div class="bar"><span class="bl">北京</span><i class="g" style="width:0.8%"></i><em>1 项 · 600万</em></div><div class="bar"><span class="bl">福建</span><i class="g" style="width:0.6%"></i><em>2 项 · 512万</em></div>
+    <div class="legend">陕西、广西单项金额高，是因为各有 1 个亿元级 EPC 落子，不代表当地业务多。</div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2><i></i>年份分布</h2>
+  <div class="bar"><span class="bl">2018</span><i class="g" style="width:76.7%"></i><em>5 项</em></div><div class="bar"><span class="bl">2019</span><i class="g" style="width:46.0%"></i><em>3 项</em></div><div class="bar"><span class="bl">2020</span><i class="g" style="width:30.7%"></i><em>2 项</em></div><div class="bar"><span class="bl">2021</span><i class="g" style="width:92.0%"></i><em>6 项</em></div><div class="bar"><span class="bl">2022</span><i class="g" style="width:15.3%"></i><em>1 项</em></div><div class="bar"><span class="bl">2023</span><i class="g" style="width:30.7%"></i><em>2 项</em></div><div class="bar"><span class="bl">2024</span><i class="g" style="width:15.3%"></i><em>1 项</em></div><div class="bar"><span class="bl">2025</span><i class="g" style="width:30.7%"></i><em>2 项</em></div><div class="bar"><span class="bl">2026</span><i class="g" style="width:15.3%"></i><em>1 项</em></div>
+</div>
+
+<div class="panel">
+  <h2><i></i>打法判断</h2>
+  <div class="note" style="margin-top:0;background:#fff">
+    <b>1. 集中度极高。</b>4 条亿元级项目合计 22.87 亿，占全部合同额的 92%。
+    拿下一个大 EPC 胜过几十个小设计——投标时不必在百万级小单上死磕价格。<br><br>
+    <b>2. 主业是热电联产，但不受行业约束。</b>热电联产 11 条是基本盘，
+    但持综合甲级资质意味着它能随时切入垃圾焚烧、污泥固废、建筑市政——常州、南通这类
+    「热电+固废」打捆项目要特别留意。<br><br>
+    <b>3. 浙江是基本盘，正在向外扩。</b>浙江 9 条、4.96 亿；
+    但广西、陕西、山东、新疆都有亿元级落子。南通这单（498 万初步设计）对它只是小单，
+    <b>真正要防的是它顺着这个项目继续接后续 EPC</b>。<br><br>
+    <b>4. 报价不拼低价。</b>南通西部供热片区初步设计，江苏院 380 万最低、河北院 480 万、
+    河南院 318 万，<b>中国联合 498 万最高价中标</b>——靠技术标 49.9/50 分拉开差距。
+    跟它竞争要靠技术方案，不是靠降价。
+  </div>
+</div>
+
+</div>
+<div class="toast" id="toast"></div>
+<script>
+function cp(txt, btn){
+  var done = function(){
+    var t = document.getElementById('toast');
+    t.textContent = '链接已复制，可粘贴到浏览器打开';
+    t.classList.add('on');
+    setTimeout(function(){ t.classList.remove('on'); }, 2200);
+    if(btn){ var o = btn.textContent; btn.textContent = '已复制'; setTimeout(function(){ btn.textContent = o; }, 1600); }
+  };
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(txt).then(done).catch(function(){ fb(); });
+  } else { fb(); }
+  function fb(){
+    var ta = document.createElement('textarea');
+    ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); }catch(e){ prompt('手动复制：', txt); }
+    document.body.removeChild(ta);
+  }
+}
+</script>
+</body></html>
