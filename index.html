@@ -761,8 +761,8 @@ window.addEventListener('error',function(e){
     <div class="sect">客户与业主 <small>谁在买 · 买了什么 · 找谁做的</small></div>
     <!-- 三段切页：国内客户 / 海外客户 / 业主图谱 -->
     <div class="cswitch" id="cTop">
-      <span data-k="dom" class="on">国内重点客户 <b id="cDomN">—</b></span>
-      <span data-k="ab">海外中资出海 <b id="cAbN">—</b></span>
+      <span data-k="dom" class="on">国内重点客户 <b id="cDomN"></b></span>
+      <span data-k="ab">海外中资出海 <b id="cAbN"></b></span>
       <!-- 2026-10-22：初始值留空，不再写「—」。
            线上 data.graph.js 是按需加载的，首屏拿不到图谱数据时，
            写死「—」就会一直显示破折号，看着像数据没同步。
@@ -2465,12 +2465,12 @@ function refreshClientCounts(){
         : (window.DATA_GRAPH && window.DATA_GRAPH.owners) ? window.DATA_GRAPH
         : null;
   /* ⚠ 线上是**按需加载**：data.graph.js 要等用户点开图谱段才去拉（675KB）。
-     这时上面三处都取不到，gAll 是 0。以前在这里写 gAll||'—'，
-     于是线上一直显示「业主画像图谱 —」，而本地单文件版是 871 ——
-     两边不一致，用户会以为是数据没同步。
-     正确做法：拿不到就**保持原样（不覆盖成 —）**，等 _gDraw 里的
-     refreshClientCounts() 在图谱加载完后再填上去。 */
-  var gAll = g ? (((g.nOwner||0)||(g.owners||[]).length) + ((g.nSupplier||0)||(g.suppliers||[]).length)) : 0;
+     这时三处都取不到。以前在这里写 gAll||'—'，于是线上一直显示
+     「业主画像图谱 —」，而本地单文件版是 871 —— 两边不一致，用户会以为是数据没同步。
+     正确做法：拿不到就**不覆盖**，等 _gDraw 里的 refreshClientCounts()
+     在图谱加载完后再填上去。KPI 那一格的初始值也留空（不写「—」），
+     宁可暂时空白，也不要显示一个错的状态。 */
+  var gAll = graphTotal();
   /* 图谱那段显示「业主+供应商」总家数（650+221=871），比只写业主数更能说明图谱规模 */
   if(gAll > 0){
     document.querySelectorAll('#cGrN').forEach(function(x){x.textContent=gAll});
@@ -2578,6 +2578,17 @@ var AB_GRP_ORDER=['有色冶炼','水泥','数据中心','钢铁','化工化纤'
    不归一会导致同一个行业在筛选器里出现两次、各带一半数据。 */
 var AB_GRP_ALIAS={'有色':'有色冶炼','水泥建材':'水泥'};
 function abGrp(g){ return AB_GRP_ALIAS[g] || g || '其他制造' }
+
+/* 图谱总家数（业主 + 供应商）。抽成公共函数的原因见下面 _gTotal 处的注释：
+   客户页有三个地方要这个数，各自写一遍必然出现「有的地方有、有的地方是破折号」。 */
+function graphTotal(){
+  var g = (D.graph && D.graph.owners) ? D.graph
+        : (window.DATA_GRAPH && window.DATA_GRAPH.graph) ? window.DATA_GRAPH.graph
+        : (window.DATA_GRAPH && window.DATA_GRAPH.owners) ? window.DATA_GRAPH
+        : null;
+  if(!g) return 0;
+  return ((g.nOwner||0)||(g.owners||[]).length) + ((g.nSupplier||0)||(g.suppliers||[]).length);
+}
 
 function renderClients(){
   var all=D.clients||[];
