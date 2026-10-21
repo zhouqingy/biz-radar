@@ -1,5 +1,6 @@
 /* 商机雷达 · 竞对画像抽屉
- * 挂进主站：<link rel="stylesheet" href="rival.css"><script src="rival.js"></script>
+ * 挂进主站：在 index.html 末尾引 rival.js 即可（注释里不要写闭合的 script 标签，
+ * 否则浏览器解析外部 JS 时会把它当结束标记，整个文件被截断）
  * 调用：Rival.open('中国联合工程有限公司')
  */
 (function () {
