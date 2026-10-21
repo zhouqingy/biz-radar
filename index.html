@@ -2413,7 +2413,21 @@ function _gDraw(){
       try{ refreshClientCounts(); }catch(e){ console.warn('[graph] count',e); }
       try{ refreshTabCounts(); }catch(e){ console.warn('[graph] tabcount',e); }
     }else{
-      cGrBox.innerHTML='<div class="empty">正在载入业主图谱…</div>';
+      /* ⚠⚠ 2026-10-22 修了一个**把整个图谱段擦空**的严重 bug（线上必现）：
+         这里原来写的是 `cGrBox.innerHTML = ...`。没写 var 的 cGrBox 会被浏览器
+         当成全局变量（HTML 里 id="cGrBox" 的那个 div），于是这一行直接
+         **清空整个图谱段的 DOM**——grTip / grSeg / grList / grMain 全被抹掉。
+         接着 need('graph') 回调里 renderGraph() 执行到
+             el('grTip').innerHTML = ...
+         时元素已经不存在，抛
+             TypeError: Cannot set properties of null (setting 'innerHTML')
+         renderGraph 当场中断，页面就永远停在「正在载入业主图谱…」。
+         单文件版本地看是正常的，因为那里数据已经内联、走的是上面 _gDraw 的
+         同步分支，根本不会进到这一行——所以本地永远复现不出来。
+         正确做法：只往**右侧主区**里写占位，不动外层容器。 */
+      var _gm=el('grMain');
+      if(_gm) _gm.innerHTML='<div class="empty">正在载入业主图谱…</div>';
+      else if(el('cGrBox')) el('cGrBox').innerHTML='<div class="empty">正在载入业主图谱…</div>';
       /* 2026-10-21 修：这里原来把 refreshClientCounts 包在同一个 try 里，
          renderGraph 一抛错就整段跳过，计数永远不动。改成各自独立 try。 */
       need('graph',function(){
