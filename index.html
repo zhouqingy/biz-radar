@@ -326,6 +326,10 @@ details.sub li{padding:2px 0}
   .kpi b{font-size:17px}
   .frow>label{flex:0 0 100%}
 }
+/* 竞对画像入口按钮 */
+.rival-dw{margin-left:6px;font-size:11px;padding:1px 7px;border-radius:4px;border:1px solid #0f766e;
+  background:#f0fdfa;color:#0f766e;cursor:pointer;line-height:1.6;vertical-align:1px;white-space:nowrap}
+.rival-dw:hover{background:#0f766e;color:#fff}
 </style>
 </head>
 <body>
@@ -1001,7 +1005,8 @@ function renderRivals(){
       var subs=x.subs||[], isGrp=subs.length>1;
       // 集团行把集团名 + 旗下主体名都作为匹配候选，任何一手命中都能定位到档案
       var cands=[x.name].concat(subs.map(function(s){return s.name})).join('|').replace(/'/g,'');
-      var nm='<a href="javascript:gotoUnit(\''+esc(cands)+'\')" style="color:inherit" title="查看该单位档案（无档案则查其商机库记录）">'+esc(x.name)+'</a>';
+      var nm='<a href="javascript:gotoUnit(\''+esc(cands)+'\')" style="color:inherit" title="查看该单位档案（无档案则查其商机库记录）">'+esc(x.name)+'</a>'+
+             '<button class="rival-dw" onclick="Rival.open(\''+esc((x.name||'').replace(/'/g,''))+'\')" title="打开竞对画像（业绩+资质+装机规模，侧滑不跳页）">画像</button>';
       if(isGrp){
         nm+='<span class="grp-tag">集团合并 · '+subs.length+' 个主体</span><div class="rv-sub">'+subs.map(function(s){
           return esc(s.name)+(s.amt>0?' <b>'+money(s.amt)+'</b>':'')}).join(' ｜ ')+'</div>';
@@ -1552,5 +1557,7 @@ if(LIVE_ENABLED){
 var h=(location.hash||'').replace('#','');
 if(h&&/^t\d$/.test(h)){var b=document.querySelector('.tab[data-t="'+h.slice(1)+'"]'); if(b)b.click()}
 </script>
+<!-- 竞对画像抽屉：点「画像」按钮从右侧滑出，不跳页 -->
+<script src="rival.js"></script>
 </body>
 </html>
