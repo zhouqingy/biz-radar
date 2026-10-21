@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>竞对画像 · 联动效果演示</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--line:#e5e7eb;--tx:#111827;--mut:#6b7280;--acc:#0f766e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:32px 20px 80px}
+h1{font-size:22px;margin:0 0 6px;letter-spacing:-.4px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:26px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
+.card h2{font-size:14px;margin:0 0 12px;font-weight:600;display:flex;align-items:center;gap:8px}
+.card h2 i{width:3px;height:14px;background:var(--acc);border-radius:2px}
+.dbg{display:flex;gap:10px;flex-wrap:wrap}
+.b{padding:9px 18px;border-radius:8px;border:1px solid var(--acc);background:var(--acc);color:#fff;
+  font-size:13.5px;cursor:pointer;font-weight:500}
+.b:hover{background:#115e59}
+.b.gh{background:#fff;color:var(--acc)}
+.b.gh:hover{background:#f0fdfa}
+.tip{font-size:12.5px;color:var(--mut);line-height:1.8;background:#fafafa;border-radius:8px;padding:12px 14px;margin-top:4px}
+.tip b{color:#374151}
+.tip code{background:#eef2f7;padding:1px 5px;border-radius:3px;font-size:12px;color:#0f766e}
+.arrow{text-align:center;color:#cbd5e1;font-size:22px;margin:6px 0}
+.mock{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.mock .hd{background:#f9fafb;padding:9px 14px;font-size:12px;color:var(--mut);border-bottom:1px solid var(--line);
+  display:flex;gap:8px;align-items:center}
+.mock .hd b{color:#374151;font-weight:600}
+.mock .dot{width:8px;height:8px;border-radius:50%;background:#22c55e}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 13px;font-size:11.5px;color:var(--mut);font-weight:600;border-bottom:1px solid var(--line);background:#fcfcfd}
+td{padding:9px 13px;border-bottom:1px solid #f3f4f6}
+td.nm{font-weight:500}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.rival-dw{margin-left:6px;font-size:11px;padding:1px 7px;border-radius:4px;border:1px solid #0f766e;
+  background:#f0fdfa;color:#0f766e;cursor:pointer;line-height:1.6;vertical-align:1px;white-space:nowrap}
+.rival-dw:hover{background:#0f766e;color:#fff}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>竞对画像 · 联动效果演示</h1>
+<div class="sub">这是主站「竞争对手」页签的样子。点表格里的「画像」按钮，从右侧滑出面板 —— <b>不跳页、不离开当前列表</b>。</div>
+
+<div class="card">
+  <h2><i></i>主站实际效果（模拟）</h2>
+  <div class="mock">
+    <div class="hd"><span class="dot"></span><b>商机雷达</b> · 竞争对手</div>
+    <table>
+      <thead><tr><th>#</th><th>中标单位</th><th>次数</th><th style="text-align:right">金额(亿)</th><th>主攻赛道</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td class="nm">中国联合工程有限公司
+            <button class="rival-dw" onclick="Rival.open('中国联合工程有限公司')">画像</button>
+          </td>
+          <td>23</td><td class="num">24.74</td><td>热电联产 · 综合能源</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td class="nm">江苏省电力设计院有限公司
+            <button class="rival-dw" onclick="Rival.open('江苏省电力设计院')">画像</button>
+          </td>
+          <td>10</td><td class="num">—</td><td>燃煤/煤电</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td class="nm">河北省电力勘测设计研究院
+            <button class="rival-dw" onclick="Rival.open('河北省电力勘测设计研究院')">画像</button>
+          </td>
+          <td>8</td><td class="num">—</td><td>热电联产</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="tip">
+    <b>点上面任意「画像」按钮</b>，右侧会滑出面板，内容包含：企业资质、KPI、23 条业绩明细（带装机规模）、赛道分布、地域分布、打法提示。
+    按 <code>ESC</code> 或点遮罩关闭。
+  </div>
+</div>
+
+<div class="card">
+  <h2><i></i>四种打开方式</h2>
+  <div class="dbg">
+    <button class="b" onclick="Rival.open('中国联合工程有限公司')">打开中国联合画像</button>
+    <button class="b gh" onclick="Rival.open('江苏省电力设计院')">打开江苏院（无数据）</button>
+    <button class="b gh" onclick="Rival.close()">关闭面板</button>
+  </div>
+  <div class="tip">
+    <b>注意第二个按钮：</b>故意点了一个没有业绩数据的单位，用来验证「查不到时是什么表现」——它会返回 0 条，页面显示空列表而不是报错。
+    这意味着画像接口对未知单位是安全的，不会崩。
+  </div>
+</div>
+
+<div class="card">
+  <h2><i></i>技术说明</h2>
+  <div class="tip">
+    <b>数据链路：</b><code>GitHub Pages 页面</code> → <code>HTTPS</code> → <code>CloudBase HTTP 网关</code> → <code>云函数 api</code> → <code>data.json</code><br>
+    <b>接口：</b><code>https://getinfo-d3ghutir5752f2749-1342254874.ap-shanghai.app.tcloudbase.com/api</code><br>
+    <b>缓存：</b>同一单位第二次打开走内存缓存，不再请求；接口侧 CDN 缓存 300 秒。<br>
+    <b>为什么用抽屉而不是跳页：</b>你在看商机列表时，看到一个项目想查对手，跳走就丢失了列表位置和筛选状态。抽屉滑出，关掉就回到原处。
+  </div>
+</div>
+</div>
+
+<script src="rival.js"></script>
+</body>
+</html>
