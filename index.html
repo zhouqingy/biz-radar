@@ -41,13 +41,35 @@ button{font-family:inherit}
 .wrap{max-width:1440px;margin:0 auto;padding:0 16px}
 
 /* ---------- Tab ---------- */
-.tabs{display:flex;gap:6px;padding:12px 0 0;overflow-x:auto;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
-.tab{padding:9px 15px;border:1px solid var(--line);border-radius:9px;background:#fff;font-size:13.5px;
-  cursor:pointer;font-weight:600;color:var(--tx2);white-space:nowrap;display:flex;align-items:center;gap:6px;flex:none}
+/* ---------- 导航（2026-10-22 重做：两级） ----------
+   原来 8 个页签平铺一排，主次不分——用户要的「导航结构调整」指的就是这个。
+   用户原话把网站目的说得很清楚，就三件事：
+     ① 有哪些标我们能投   ② 近期哪些要发、提前打招呼   ③ 已招完的谁拿了，建对手/业主画像
+   所以导航按这三件事分主次：
+     一级（4 个，大按钮、带副标题）：找商机 / 同业与伙伴 / 客户与业主 / 海外机会
+     二级（3 个，右侧小链接）：行业动态 / 情报精选 / 招标平台·口径
+   一级是「今天打开就要做的事」，二级是「查资料时才点」。
+   页签文字也统一成用户的语言：同业与伙伴（不是「竞争对手」）、客户与业主（不是「画像」）。 */
+.tabs{display:flex;align-items:stretch;gap:8px;padding:14px 0 0;flex-wrap:wrap}
+.tab{padding:8px 15px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:13.5px;
+  cursor:pointer;font-weight:600;color:var(--tx2);white-space:nowrap;display:flex;align-items:center;gap:6px;
+  flex:none;transition:all .15s}
+.tab:hover{border-color:#c9d6ea}
 .tab i{font-style:normal;font-size:11.5px;font-weight:700;color:var(--tx3);background:#f0f2f6;border-radius:9px;padding:0 6px}
-.tab.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.tab i:empty{display:none}
+.tab.on{background:var(--brand);color:#fff;border-color:var(--brand);box-shadow:0 2px 10px rgba(16,83,201,.22)}
 .tab.on i{background:rgba(255,255,255,.26);color:#fff}
+/* 一级：更高更宽，带副标题 */
+.tab.mv{padding:10px 18px;font-size:14.5px;border-radius:11px;flex-direction:column;align-items:flex-start;gap:1px}
+.tab.mv .tt{display:flex;align-items:center;gap:7px;font-weight:800}
+.tab.mv .td{font-size:11px;font-weight:500;color:var(--tx3);line-height:1.3}
+.tab.mv.on .td{color:rgba(255,255,255,.8)}
+/* 二级：右侧小链接，明显次一级 */
+.tabs .sp{flex:1}
+.tab.sub{padding:5px 11px;font-size:12.5px;border-radius:8px;background:transparent;border-color:transparent;color:var(--tx3);font-weight:600}
+.tab.sub:hover{background:#fff;border-color:var(--line);color:var(--tx2)}
+.tab.sub.on{background:#eef3fb;color:var(--brand);border-color:#c9dcf8;box-shadow:none}
+.tab.sub.on i{background:rgba(16,83,201,.12);color:var(--brand)}
 
 /* ---------- 通用块 ---------- */
 .panel{display:none;padding:14px 0 40px}
@@ -178,7 +200,14 @@ details.sub ul{margin:5px 0 0 14px;font-size:12px;color:var(--tx2)}
 details.sub li{padding:2px 0}
 
 /* ---------- 客户 / 竞企 / 动态 卡片 ---------- */
-.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;align-items:start}
+/* 2026-10-21 改：align-items 从 start 改成 stretch。
+   原来是「每张卡各自高度」，同一行里短卡旁边就空一块，看着参差（用户截图反馈）。
+   改成 stretch 后同一行等高，底部动作条也对齐了。 */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;align-items:stretch}
+/* 海外卡：内容比国内卡长（为什么跟 + 基地 + 动态），400px 起才不至于一行字断成两截；
+   align-items:start 让同排卡片各自高度、不被最高的那张撑出一片空白
+   （之前用 stretch 时，「为什么要跟」只有一行的公司会被拉到和下面带 4 条动态的一样高，很难看）。 */
+#cliGrid{grid-template-columns:repeat(auto-fill,minmax(400px,1fr));align-items:start}
 /* 国内 / 海外 切换条 */
 .cswitch{display:inline-flex;gap:4px;background:#eef1f6;border-radius:11px;padding:4px;margin:0 0 12px}
 .cswitch span{font-size:12.5px;font-weight:600;color:var(--tx2);padding:6px 15px;border-radius:8px;cursor:pointer;transition:.15s;user-select:none}
@@ -191,12 +220,19 @@ details.sub li{padding:2px 0}
 .kpirow .kpi{background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 14px;min-width:130px;flex:1 1 130px;display:flex;flex-direction:column;gap:2px}
 .kpirow .kpi b{font-size:19px;font-weight:800;color:var(--tx1);line-height:1.2;letter-spacing:-.4px}
 .kpirow .kpi span{font-size:11px;color:var(--tx3);line-height:1.35}
-.ccard{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px 15px}
+.ccard{background:#fff;border:1px solid var(--line);border-radius:13px;padding:16px 18px;
+  display:flex;flex-direction:column;line-height:1.72}
+/* 卡片内的正文块：给足行距，11.5px 太挤了，统一 12.5px / 1.75 */
+.ccard .cc-body{font-size:12.5px;line-height:1.78;color:var(--tx2);margin-top:9px}
+.ccard .cc-body p{margin:0 0 8px}
+.ccard .cc-body p:last-child{margin-bottom:0}
+/* 让最后一块永远沉底，这样同行卡片的动作条在同一条水平线上 */
+.ccard > .cc-i:last-child,.ccard > .pj-act:last-child{margin-top:auto}
 .ccard.zero{opacity:.72}
 /* 中标榜点击后定位到档案：高亮闪烁 + 左侧强调条 */
 /* ---- 库内战绩（2026-10-21）：档案卡最上面那条，来自本库真实中标记录 ---- */
 .cc-track{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;background:#f2f8f4;
-  border:1px solid #cfe8db;border-left:3px solid #1a7f4b;border-radius:8px;padding:7px 10px;margin:8px 0 7px;font-size:12px;color:#2b5744}
+  border:1px solid #cfe8db;border-left:3px solid #1a7f4b;border-radius:8px;padding:9px 12px;margin:11px 0 9px;font-size:12px;color:#2b5744}
 .cc-track.empty{background:#f8fafc;border-color:var(--line);border-left-color:#c3ccd8;color:var(--tx3)}
 .cc-track i{font-style:normal;font-weight:800;color:#14713a;font-size:11px;letter-spacing:.5px;white-space:nowrap}
 .cc-track.empty i{color:var(--tx3)}
@@ -218,15 +254,32 @@ details.sub li{padding:2px 0}
 .grp-tag{display:inline-block;margin-left:6px;font-size:11px;color:#6b3fa0;background:#f3eaff;border-radius:6px;padding:1px 6px;vertical-align:1px}
 .rv-sub{color:#5a6270;font-size:11.5px;margin:2px 0 0 0}
 .rv-subname{color:#1053c9;font-weight:600}
-.cc-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.cc-h b{font-size:14px;font-weight:700}
+.cc-h{display:flex;align-items:flex-start;gap:7px;flex-wrap:wrap;margin-bottom:3px}
+.cc-h b{font-size:15px;font-weight:700;line-height:1.5;letter-spacing:-.1px}
 .cc-tag{font-size:11px;padding:1px 7px;border-radius:6px;background:#e8f0ff;color:var(--brand);font-weight:600}
 .cc-tag.none{background:#f1f3f6;color:#8a9099}
-.cc-m{font-size:12.5px;color:var(--tx2);margin-top:5px}
+.cc-m{font-size:12.5px;color:var(--tx2);margin-top:8px;line-height:1.78}
 .cc-m b{color:var(--red)}
-.cc-i{font-size:12px;color:var(--tx3);margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+.cc-i{font-size:12px;color:var(--tx3);margin-top:10px;padding-top:9px;border-top:1px dashed var(--line);line-height:1.75}
 .cc-i li{padding:2px 0;list-style:none}
 .cc-i a:hover{color:var(--brand)}
+/* ---------- 海外客户卡：为什么跟 + 海外基地（2026-10-21） ---------- */
+/* 这两行是整张卡最该先看的：先说「他为什么会缺电缺热」，再说「他在哪建厂」。
+   没有这两行，89 家名单只是一堆公司名，看不出值不值得跟。 */
+.ab-card{display:flex;flex-direction:column}
+.ab-why{font-size:12.5px;line-height:1.75;color:#7a4a0a;background:#fffaf0;
+  border:1px solid #f3e3c3;border-left:3px solid #d99a2b;border-radius:0 7px 7px 0;
+  padding:7px 10px;margin-top:8px}
+.ab-why-t{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.4px;
+  color:#a85c10;background:#fff2e0;border-radius:4px;padding:0 5px;margin-right:6px;
+  vertical-align:1px;white-space:nowrap}
+.ab-proj{font-size:12px;line-height:1.7;color:#1a5c3a;background:#f2fbf6;
+  border:1px solid #cfeedd;border-left:3px solid #2f9e63;border-radius:0 7px 7px 0;
+  padding:6px 10px;margin-top:6px}
+.ab-proj-t{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.4px;
+  color:#1a7a45;background:#dff5e8;border-radius:4px;padding:0 5px;margin-right:6px;
+  vertical-align:1px;white-space:nowrap}
+.ab-rg{float:right;color:#7b8494;font-size:11.5px}
 /* ---------- 卡片底部动作条：跳原文 / 跳企查查核对工商信息 ---------- */
 .pj-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line)}
 .pj-act a{font-size:11.5px;color:var(--brand-d);background:#f2f7ff;border:1px solid #dce8fb;border-radius:7px;padding:2px 9px;font-weight:600}
@@ -311,6 +364,135 @@ details.sub li{padding:2px 0}
 .gpill:hover{border-color:var(--brand);color:var(--brand)}
 .gpill b{font-weight:700}.gpill em{font-style:normal;color:var(--tx3);font-size:11px;margin-left:3px}
 .grel{display:grid;grid-template-columns:1fr auto;gap:6px;font-size:12.5px;padding:5px 0;border-bottom:1px dashed var(--line);align-items:center}
+/* ── 业主画像里的供应商 A/B 分组（2026-10-21）──
+   A 类=设计院/工程公司（同行也是对手），蓝调；B 类=建材/施工/设备（引路人），
+   暖调。两个色系分开，扫一眼就知道该找谁谈技术、该找谁打听关系。 */
+.gsub{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
+.gsub:first-child{margin-top:4px}
+.gsubtag{font-size:11px;font-weight:800;letter-spacing:.3px;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.gsubA{background:#e8f0ff;color:#1053c9;border:1px solid #cfe0fb}
+.gsubB{background:#fff4e6;color:#a85c10;border:1px solid #f3ddbd}
+.gsubtip{font-size:11px;color:#8a9099;line-height:1.5;flex:1 1 200px;min-width:0}
+/* 潜在业主列表：比有效业主弱一档，故意做得灰一点，不抢主位 */
+.gli .gl-item.latent{opacity:.78}
+.gli .gl-item.latent .gl-n{font-weight:500;color:#5a6270}
+
+/* ================= 深度档案 prof（2026-10-21，统一业主/供应商/对手） =================
+   版式对标「中国联合」竞对画像：KPI 条 → 身份信息 → 业绩明细表 → 分布 → 看法。
+   字号比卡片更小一号，因为这一页信息密度高、行又多，用 14px 会撑得很长。 */
+.prof{padding:2px 2px 8px}
+.prof-hd{padding:2px 2px 12px;border-bottom:1px solid var(--line);margin-bottom:14px}
+.prof-hd h3{font-size:19px;font-weight:800;letter-spacing:-.3px;margin:0 0 5px;line-height:1.35}
+.prof-sub{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.kbadge{font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;letter-spacing:.2px}
+.kbadge.own{background:#fff2e0;color:#a85c10}
+.kbadge.sup{background:#e8f4ff;color:#1053c9}
+.kbadge.riv{background:#f3eaff;color:#6b3fa0}
+.pm-i{font-size:12px;color:var(--tx3)}
+
+.prof-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:9px;margin-bottom:16px}
+.prof-kpi .k{background:#fbfcfe;border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.prof-kpi .n{font-size:21px;font-weight:800;letter-spacing:-.6px;line-height:1.2;color:var(--tx)}
+.prof-kpi .k.acc .n{color:#b45309}
+.prof-kpi .k.txt .n{font-size:14px;letter-spacing:0;font-weight:700;line-height:1.5}
+.prof-kpi .l{font-size:11px;color:var(--tx3);margin-top:2px;line-height:1.35}
+
+.prof-sec{margin-bottom:16px}
+.prof-sec h4{font-size:13px;font-weight:800;color:var(--tx);margin:0 0 9px;
+  display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.prof-sec h4 i{width:3px;height:13px;background:var(--brand);border-radius:2px;flex:none}
+.prof-sec h4 small{font-weight:500;color:var(--tx3);font-size:11.5px}
+.prof-two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:900px){.prof-two{grid-template-columns:1fr}}
+
+.prof-co{display:grid;grid-template-columns:minmax(76px,auto) 1fr;gap:5px 12px;margin:0;font-size:12.5px}
+.prof-co dt{color:var(--tx3);text-align:right;line-height:1.8}
+.prof-co dd{margin:0;color:var(--tx);line-height:1.8;word-break:break-word}
+.prof-co dd.na{color:#a0a6b0;font-style:italic}
+
+.pbars{display:flex;flex-direction:column;gap:5px}
+.pbar{display:flex;align-items:center;gap:8px;font-size:12px}
+.pbar .l{width:112px;flex:none;color:var(--tx2);text-align:right;line-height:1.35;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pbar .t{flex:1;height:15px;background:#f4f6fa;border-radius:3px;overflow:hidden;min-width:2px}
+.pbar .t i{display:block;height:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:3px}
+.pbar .t i.t1{background:linear-gradient(90deg,#0e7490,#22b8cf)}
+.pbar .t i.t2{background:linear-gradient(90deg,#b45309,#f59e0b)}
+.pbar .t i.t3{background:#b9c0cb}
+.pbar .v{flex:none;width:52px;color:var(--tx2);font-variant-numeric:tabular-nums;font-size:11.5px}
+
+.prof-tbwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+.prof-tb{width:100%;border-collapse:collapse;font-size:12.5px;min-width:560px}
+.prof-tb th{background:#f8fafc;text-align:left;padding:7px 9px;font-size:11.5px;
+  color:var(--tx3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap}
+.prof-tb td{padding:8px 9px;border-bottom:1px solid #f1f3f7;vertical-align:top}
+.prof-tb tr:last-child td{border-bottom:none}
+.prof-tb tr:hover td{background:#fafcff}
+.prof-tb td.d{color:var(--tx3);white-space:nowrap;font-variant-numeric:tabular-nums;font-size:11.5px}
+.prof-tb td.p{line-height:1.55}
+.prof-tb td.p b{font-weight:600;display:block;margin-bottom:3px}
+.prof-tb td.o{color:var(--tx2);font-size:12px;line-height:1.5}
+.prof-tb td.m{text-align:right;white-space:nowrap;font-weight:700;color:#b45309;font-variant-numeric:tabular-nums}
+.tg2{display:inline-block;font-size:10.5px;padding:0 6px;border-radius:4px;margin-right:4px;font-weight:600}
+.tg2.t1{background:#e3f5f8;color:#0e7490}
+.tg2.t2{background:#fdf0dc;color:#b45309}
+.tg2.t3{background:#f1f3f6;color:#6b7280}
+.tg3{display:inline-block;font-size:10.5px;padding:0 6px;border-radius:4px;background:#f1f3f6;color:#8a9099}
+.lk{color:var(--brand);font-weight:700;text-decoration:none}
+.pm-na{color:#a0a6b0;font-style:italic;font-size:11.5px}
+.pm-empty{padding:14px;text-align:center;color:var(--tx3);font-size:12.5px;background:#fafbfd;border-radius:8px}
+
+.prof-rel{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:12.5px;flex-wrap:wrap}
+.prof-rel:last-child{border-bottom:none}
+.prof-rel .nm{color:var(--brand);cursor:pointer;font-weight:600}
+.prof-rel .nm:hover{text-decoration:underline}
+.prof-rel .rt{color:var(--tx3);font-size:11.5px;margin-left:auto}
+.prof-grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0 2px}
+.prof-grp .gt{font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.prof-grp .gt.a{background:#e8f4ff;color:#1053c9;border:1px solid #cfe0fb}
+.prof-grp .gt.b{background:#fff4e6;color:#a85c10;border:1px solid #f3ddbd}
+.prof-grp .gd{font-size:11px;color:var(--tx3);line-height:1.5;flex:1 1 200px}
+
+.prof-ins .ins{display:flex;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:12.8px;line-height:1.8;color:var(--tx2)}
+.prof-ins .ins:last-of-type{border-bottom:none}
+.prof-ins .ins .no{flex:none;width:19px;height:19px;border-radius:50%;background:var(--brand);
+  color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.prof-ins .ins b{color:var(--tx);font-weight:700}
+.prof-note{font-size:11.5px;color:var(--tx3);line-height:1.75;background:#fafbfd;
+  border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-top:10px}
+.prof-note b{color:var(--tx2)}
+.prof-note code{background:#eef1f6;padding:0 4px;border-radius:3px;font-size:11px}
+.plegend{font-size:11.5px;color:var(--tx3);margin-top:6px;line-height:1.6}
+.prof-act{display:flex;gap:7px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--line)}
+.prof-act a{font-size:11.5px;color:var(--brand-d);background:#f2f7ff;border:1px solid #dce8fb;
+  border-radius:7px;padding:4px 10px;font-weight:600}
+.prof-act a:hover{background:#e4eefe;border-color:#b9d3f8}
+.prof-back{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;
+  background:#f7faff;border:1px solid #dce8fb;border-radius:9px;padding:8px 12px;font-size:11.5px;color:var(--tx3)}
+.prof-back a{color:var(--brand);font-weight:700}
+/* ---------- 业务信号卡（2026-10-21）----------
+   信号卡要比普通新闻卡「重」：左侧色条 + 大标题 + 「为什么判进来」一行。
+   用户扫一眼就该知道「哪里、什么厂、什么动作、我们能不能接」。 */
+.siggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:13px}
+.sigc{background:#fff;border:1px solid var(--line);border-left:3px solid #146edc;
+  border-radius:10px;padding:13px 15px;display:flex;flex-direction:column}
+.sig-h{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:7px}
+.sig-lv{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:5px;letter-spacing:.3px}
+.sig-seg{font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;background:#eaf3ff;color:#1053c9}
+.sig-rg{font-size:11px;padding:2px 7px;border-radius:5px;background:#f1f3f6;color:#5a6270}
+.sig-ov{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:5px;background:#eaf7ef;color:#14713a;
+  border:1px solid #cbe8d6}
+.sigc h3{font-size:14px;font-weight:700;line-height:1.55;margin:0 0 7px}
+.sigc h3 a{color:var(--tx1)}
+.sigc h3 a:hover{color:var(--brand)}
+.sig-why{font-size:12px;color:#7a4a0a;background:#fffaf0;border:1px solid #f3e3c3;
+  border-radius:6px;padding:5px 9px;line-height:1.65;margin-bottom:7px}
+.sig-d{font-size:12px;color:var(--tx2);line-height:1.75;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.sig-f{display:flex;gap:10px;font-size:11px;color:var(--tx3);margin-top:auto;padding-top:8px}
+.nr{display:inline-block;font-size:10.5px;color:#a0a6b0;background:#f7f8fa;border-radius:4px;
+  padding:0 5px;margin-left:4px}
+.rv-acts{display:flex;flex-direction:column;gap:4px;align-items:flex-start}
 .grel:last-child{border-bottom:none}
 .grel .nm{color:var(--brand-d);cursor:pointer;font-weight:600}
 .grel .nm:hover{text-decoration:underline}
@@ -424,7 +606,10 @@ details.sub li{padding:2px 0}
 .grpt:first-child{margin-top:0}
 .grpt::after{content:'';flex:1;height:1px;background:var(--line)}
 .grpt::before{content:'';width:4px;height:14px;border-radius:2px;background:var(--brand)}
-.grpd{font-size:11.5px;font-weight:500;color:#8a9099;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.grpd{font-size:11.5px;font-weight:500;color:#8a9099;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+/* 分组标题在卡片之间的节奏：上间距大、下间距小，视觉上「罩住」下面这组卡 */
+.grpt{margin:22px 0 10px}
+.grpt:first-child{margin-top:2px}
 
 @media(max-width:860px){
   .hd h1{font-size:18px}
@@ -436,32 +621,11 @@ details.sub li{padding:2px 0}
 .rival-dw{margin-left:6px;font-size:11px;padding:1px 7px;border-radius:4px;border:1px solid #0f766e;
   background:#f0fdfa;color:#0f766e;cursor:pointer;line-height:1.6;vertical-align:1px;white-space:nowrap}
 .rival-dw:hover{background:#0f766e;color:#fff}
-/* ══════ 原文阅读抽屉 ══════
-   用户反馈「一点击一直新开我这个网页」。所以链接全部改成页内抽屉，
-   真要看原窗口再点「新窗口打开」。 */
-.drawer{position:fixed;inset:0;z-index:900;display:none}
-.drawer.on{display:block}
-.rd-mask{position:absolute;inset:0;background:rgba(10,20,40,.42);backdrop-filter:blur(2px)}
-.rd-panel{position:absolute;top:0;right:0;bottom:0;width:min(920px,94vw);background:#fff;
-  box-shadow:-8px 0 40px rgba(8,24,56,.24);display:flex;flex-direction:column;
-  animation:rdslide .22s cubic-bezier(.2,.8,.3,1)}
-@keyframes rdslide{from{transform:translateX(40px);opacity:.4}to{transform:none;opacity:1}}
-.rd-head{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);background:#fbfcfe}
-.rd-head b{font-size:13.5px;font-weight:700;color:var(--tx);flex:1;min-width:0;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rd-ops{display:flex;gap:7px;flex-shrink:0}
-.rd-ops a{font-size:12px;font-weight:600;color:var(--brand-d);background:#f2f7ff;border:1px solid #dce8fb;
-  border-radius:7px;padding:4px 10px;white-space:nowrap}
-.rd-ops a:hover{background:#e4eefe}
-.rd-ops a.rclose{background:#fff;border-color:#e2e6ec;color:var(--tx2)}
-.rd-warn:empty{display:none}
-.rd-warn{padding:8px 16px;background:#fff8ee;border-bottom:1px solid #f7e2c4}
+/* ══════ 原文跳转（2026-10-21 重写）══════
+   用户要求「链接跳转即可」，不要 iframe 嵌套。原来的 .drawer / .rd-panel /
+   .rd-frame 一整套样式已删除——点标题直接新标签打开原文，页面里不留任何嵌入容器。
+   这里只剩死链/本地相对路径时用的一行小提示。 */
 .dwarn{font-size:12px;color:#a8620a;line-height:1.6}
-.rd-body{flex:1;position:relative;overflow:hidden}
-.rd-frame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
-.rd-fallback{padding:14px 18px;background:#fafbfd;border-bottom:1px solid var(--line)}
-.rsnip{font-size:12.5px;line-height:1.75;color:var(--tx2);margin:0 0 8px}
-.rfg{font-size:11.5px;color:var(--tx3);line-height:1.6}
 #toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%) translateY(10px);z-index:999;
   background:#1f2b3d;color:#fff;font-size:12.5px;padding:8px 16px;border-radius:8px;opacity:0;
   transition:.2s;pointer-events:none}
@@ -502,10 +666,10 @@ window.addEventListener('error',function(e){
     <div class="swim" id="swim" style="display:none"></div>
     <div class="fbar">
       <div class="frow"><label>地区</label><div class="chips" id="f-rg"></div></div>
-      <div class="frow"><label>业务大类</label><div class="chips" id="f-biz"></div></div>
+      <div class="frow"><label>业务分层</label><div class="chips" id="f-sg"></div></div>
       <div class="frow"><label>下游行业</label><div class="chips" id="f-ind"></div></div>
-      <div class="frow"><label>细分赛道</label><div class="chips" id="f-sub"></div></div>
       <div class="frow"><label>优先级</label><div class="chips" id="f-g"></div></div>
+      <div class="frow"><label>范围</label><div class="chips" id="f-side"></div></div>
       <div class="frow"><label>承包模式</label><div class="chips" id="f-mode"></div></div>
       <div class="frow"><label>来源平台</label><div class="chips" id="f-p"></div></div>
       <div class="srow">
@@ -538,30 +702,35 @@ window.addEventListener('error',function(e){
     </div>
   </div>
 
-  <!-- 2 中标情报（2026-10-21 收窄：只统计关注档项目） -->
-  <div class="panel" id="p-win">
-    <div class="sect">关注项目的中标情况 <small>只看 3000 万以上 / A·B 级 —— 谁在拿单、什么价位</small></div>
-    <div class="hint" style="margin-bottom:10px">
-      这张榜<b>只统计关注档项目</b>：金额 ≥3000 万，或综合分 A/B。
-      几百万的小标不进榜——那种标要么是零散设备采购，要么是县级小工程，
-      放进来只会把真正的对手淹掉。<br>
-      「中标次数」= 本库抓到的该单位中标/候选记录数（仅本库覆盖范围，非其全部业绩）。
-      点「代表项目」看具体标段与原文链接，点「画像」看它在我司业务范围内的业绩底细。
-    </div>
-    <div class="frow" style="padding:0 0 10px"><label>赛道</label><div class="chips" id="f-rv"></div></div>
-    <div class="tbwrap"><table id="tbrv"></table></div>
-  </div>
-
   <!-- 3 竞争对手 -->
   <!-- 同业与伙伴（原「竞争对手」+「合作生态」合并，2026-10-21） -->
   <div class="panel" id="p-rival">
     <div class="sect">同业与伙伴 <small>同一批单位，既可能是对手，也可能是联合体伙伴</small></div>
     <div class="cswitch" id="rSwitch">
-      <span data-k="rival" class="on">竞争对手档案 <b id="rCn">—</b></span>
+      <span data-k="board" class="on">按战绩排序 <b id="rBn">—</b></span>
+      <span data-k="rival">竞争对手档案 <b id="rCn">—</b></span>
       <span data-k="partner">联合体伙伴池 <b id="rPn">—</b></span>
+    </div>
+    <!-- 战绩榜（原「中标情报」页签，2026-10-22 并入） -->
+    <div id="rBoardBox">
+      <div class="hint" style="margin-bottom:10px">
+        这是<b>同一批单位换一种看法</b>：上面「竞争对手档案」看的是这家单位<b>是谁</b>（做什么、什么资质、优势短板），
+        这张榜看的是它<b>在本库拿了多少单、什么价位</b>。<br>
+        只统计<b>关注档项目</b>（金额 ≥3000 万，或综合分 A/B）——几百万的小标不进榜，
+        那种标要么是零散设备采购、要么是县级小工程，放进来只会把真正的对手淹掉。<br>
+        「中标次数」= 本库抓到的该单位中标/候选记录数（仅本库覆盖范围，非其全部业绩）。
+        想看某家在本库的<b>全部业绩明细</b>，点「深度档案」；想看它在我司业务范围外的底细，点「四库一平台」直接跳建设部库查资质。
+      </div>
+      <div class="frow" style="padding:0 0 10px"><label>赛道</label><div class="chips" id="f-rv"></div></div>
+      <div class="tbwrap"><table id="tbrv"></table></div>
     </div>
     <!-- 从「中标情报」点某家单位过来、但它还没有企业档案时，这里临时显示它的库内战绩 -->
     <div id="adhoc" style="display:none;margin-bottom:12px"></div>
+
+    <!-- 同业深度档案（2026-10-22 新增）：就地方在原位展开，不再借「客户与业主」的容器。
+         原来这里的「深度档案」点了会整页跳去客户那边，用户反馈「有点奇怪哦」——
+         怪得有道理：我在同业页点的，凭什么跳走。现在档案直接长在本页顶部。 -->
+    <div id="rProfBox" style="display:none"></div>
 
     <div id="rRivalBox">
       <div class="frow" style="padding:0 0 10px"><label>业务类别</label><div class="chips" id="f-cat"></div></div>
@@ -596,10 +765,6 @@ window.addEventListener('error',function(e){
       <span data-k="ab">海外中资出海 <b id="cAbN">—</b></span>
       <span data-k="graph">业主画像图谱 <b id="cGrN">—</b></span>
     </div>
-    <div class="cswitch" id="cSwitch" style="display:none">
-      <span data-k="dom" class="on">国内重点客户 <b id="cDomN">—</b></span>
-      <span data-k="ab">海外中资出海 <b id="cAbN">—</b></span>
-    </div>
 
     <!-- 国内 -->
     <div id="cDomBox">
@@ -617,10 +782,12 @@ window.addEventListener('error',function(e){
     <!-- 海外 -->
     <div id="cAbBox" style="display:none">
       <div class="hint" style="margin-bottom:10px">
-        跟踪中资企业<b>海外矿山 / 园区 / 建厂</b>动向。海外园区落地必然要配套<b>自备电厂、余热发电、海水淡化</b>——
-        这正是我司海外业务方向（有色企业用热用电 + 配套海水淡化）。客户出海即是我司出海机会。
+        <b>口径</b>：中资企业（<b>江浙沪皖优先</b>，外地大厂也算）去海外建厂，配套的<b>自备电厂 / 动力岛 / 余热发电 / 燃气发电 / 海水淡化</b>——
+        这些配套就是我们的活。所以这一块看的不是「新闻」，是<b>谁要在海外建厂、我们能不能去配套能源岛</b>。
       </div>
-      <div class="frow" style="padding:0 0 10px"><label>行业</label><div class="chips" id="f-cgrp"></div></div>
+      <div class="kpirow" id="cAbKpi"></div>
+      <div class="frow" style="padding:0 0 10px"><label>优先级</label><div class="chips" id="f-cpri"></div>
+        <label style="margin-left:16px">行业</label><div class="chips" id="f-cgrp"></div></div>
       <div class="cgrid" id="cliGrid"></div>
     </div>
     <!-- 第三段：业主画像图谱 -->
@@ -636,8 +803,17 @@ window.addEventListener('error',function(e){
       <div class="gwrap">
         <div class="gside">
           <input class="gsearch" id="grQ" placeholder="搜业主 / 供应商名称…">
-          <div class="gs-h" id="grListH">业主名单</div>
+          <div class="gs-h" id="grListH">有效业主名单</div>
           <div class="gli" id="grList"></div>
+          <!-- 潜在业主（2026-10-21 用户口径）：名字/行业像我们的客户，但本库历史上
+               从没发过我们的标（只在污水/土壤这类分公司业务发过标，或者压根没发过）。
+               按用户要求「保留一个潜在业主标签，放在二级位置简单展示项目」——
+               这里只列名字、地区、发过什么，点不进深度画像，也不参与排序。 -->
+          <div class="gs-h" id="grLatentH" style="margin-top:14px">潜在业主 <b id="grLatentN" style="font-weight:600;color:#8a9099"></b></div>
+          <div class="hint" style="font-size:11.5px;color:#8a9099;background:#fafbfc;border-left:2px solid #dde2e8;padding:5px 8px;margin:0 0 6px;border-radius:0 5px 5px 0;line-height:1.6">
+            名字像我们的客户，但本库历史上<b>没发过</b>我们主场的标（只发过污水/土壤这类分公司业务，或者一条都没有）。仅作备查，<b>不参与排序、不给深度画像</b>。
+          </div>
+          <div class="gli" id="grLatent"></div>
         </div>
         <div class="gmain" id="grMain"></div>
       </div>
@@ -647,13 +823,26 @@ window.addEventListener('error',function(e){
 
   <!-- 5 行业动态 -->
   <div class="panel" id="p-trend">
-    <div class="sect">下游景气仪表盘 · 有色金属与黑色系期货 <small id="mtDate"></small></div>
+    <div class="sect">业务信号监测 <small>哪里有厂要建 · 这活我们能不能接</small></div>
+    <div class="hint" id="tSigTip" style="margin-bottom:10px"></div>
+    <div class="kpirow" id="tSigKpi"></div>
+    <div class="frow" style="padding:0 0 10px"><label>业务切口</label><div class="chips" id="f-sigseg"></div>
+      <label style="margin-left:14px">强度</label><div class="chips" id="f-siglvl"></div></div>
+    <div class="siggrid" id="sigGrid"></div>
+
+    <div class="sect" style="margin-top:22px">下游景气仪表盘 · 有色金属与黑色系期货 <small id="mtDate"></small></div>
     <div class="hint" style="margin-bottom:8px">金属价格是客户扩产意愿与项目造价的先行指标：镍/铝/氧化铝走强 → 印尼/几内亚冶炼扩张与自备电厂需求上升；铜价直接影响电缆/电机设备成本；螺/卷/矿/焦煤反映钢厂利润与技改意愿。价格在每次数据更新时刷新，非盘中实时。</div>
     <div class="mtgrid" id="mtGrid"></div>
-    <div class="sect" style="margin-top:18px">行业动态与政策 <small>点标题看原文</small></div>
-    <div class="hint" id="wxTip" style="margin-bottom:8px"></div>
-    <div class="frow" style="padding:0 0 10px"><label>分类</label><div class="chips" id="f-tg"></div></div>
-    <div class="news" id="newsGrid"></div>
+
+    <details style="margin-top:18px;border-top:1px dashed var(--line);padding-top:12px">
+      <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2)">
+        行业动态与政策 <span id="newsCnt" style="font-weight:400;color:var(--tx3)"></span>
+        <span style="font-weight:400;color:var(--tx3);font-size:11.5px">（不构成业务机会，作背景参考；点开才看）</span>
+      </summary>
+      <div class="hint" id="wxTip" style="margin:10px 0 8px"></div>
+      <div class="frow" style="padding:0 0 10px"><label>分类</label><div class="chips" id="f-tg"></div></div>
+      <div class="news" id="newsGrid"></div>
+    </details>
   </div>
 
   <!-- 7 情报精选 -->
@@ -870,10 +1059,18 @@ function packItems(o){
     for(var q=0;q<out.length;q++) out[q]._i=o.order[q];
     window.__itemsSplit=true;
   }
+  /* 统一把编码过的原文地址还原成完整 URL（#zj/... → https://ggzy.zj.gov.cn/...）。
+     放在这里而不是各处渲染函数里，是因为 url 有 10+ 个使用点（卡片标题、阶段链、
+     原文按钮、CSV 导出、周报、附件区），漏一个就是一条死链。 */
+  for(var u=0;u<out.length;u++){
+    if(out[u].url) out[u].url=fullUrl(out[u].url);
+    var hs=out[u].hist;
+    if(hs&&hs.length){ for(var h2=0;h2<hs.length;h2++){ if(hs[h2].url) hs[h2].url=fullUrl(hs[h2].url); } }
+  }
   return out;
 }
 
-var VER='?v=202610212159';
+var VER='?v=202610220116';
 /* ── 全局状态 ──────────────────────────────────────────────
    注意：这些必须在 boot_main() 外面声明。boot_main 里用 var 声明的东西
    全是函数作用域，脚本外面看不见——调试时会发现 D / items 都是 undefined，
@@ -881,13 +1078,39 @@ var VER='?v=202610212159';
 var D = window.DATA_CORE ? Object.assign({}, window.DATA_CORE) : (window.DATA || {});
 var items = packItems(window.DATA_ITEMS || window.DATA);
 var meta = D.meta || {};
-var TABS = [['p-items','商机库',0],['p-win','中标情报',0],
-            ['p-rival','同业与伙伴',0],
-            ['p-overseas','海外信号',0],
-            ['p-client','客户与业主',0],['p-trend','行业动态',0],
-            ['p-wechat','情报精选',0],['p-plat','招标平台',0],['p-help','口径说明',0]];
-var F = {rg:new Set(),biz:new Set(),ind:new Set(),sub:new Set(),g:new Set(),mode:new Set(),p:new Set(),
-         st:'',q:'',sort:'sc',page:1,tab:0,bk:'tender',hideWin:false};
+/* ⚠ 索引是全局契约：renderPanel / TAB_MOD / gotoUnit / gPick 里到处写着 i===N。
+   2026-10-22 把「中标情报」并进「同业与伙伴」后，9 个页签变 8 个，索引整体前移：
+     0 商机库 / 1 同业与伙伴 / 2 海外信号 / 3 客户与业主 / 4 行业动态 / 5 情报精选 / 6 招标平台 / 7 口径说明
+   以后再增删页签，必须全文搜一遍 `i===`、`tabEls[`、`TABS[`。 */
+/* [面板 id, 名称, 计数, 图标, 副标题, 主/次]
+   副标题是给一级页签用的——光看「同业与伙伴」不知道点进去干嘛，
+   下面一行小字说清楚。二级页签（sub）不显示副标题，用「·」分隔并排靠右。 */
+var TABS = [
+  ['p-items',   '找商机',    0, '◆', '能投的标 · 已出结果 · 立项线索', 'mv'],
+  ['p-rival',   '同业与伙伴', 0, '◈', '谁在拿单 · 对手档案 · 联合体',   'mv'],
+  ['p-client',  '客户与业主', 0, '▣', '业主买什么 · 找过谁 · 海外建厂', 'mv'],
+  ['p-overseas', '海外机会',  0, '◎', '中资出海配套能源岛',            'mv'],
+  ['p-trend',   '行业动态',   0, '', '', 'sub'],
+  ['p-wechat',  '情报精选',   0, '', '', 'sub'],
+  ['p-plat',    '招标平台',   0, '', '', 'sub'],
+  ['p-help',    '口径说明',   0, '', '', 'sub']
+];
+/* 2026-10-21：biz/sub 换成 sg（业务分层短码）；新增 side=是否显示兼营（三级分公司业务） */
+var F = {rg:new Set(),sg:new Set(),ind:new Set(),g:new Set(),mode:new Set(),p:new Set(),
+         st:'',q:'',sort:'sc',page:1,tab:0,bk:'tender',hideWin:false,side:false};
+
+/* 业务分层短码 → 显示名。顺序就是用户定的优先级，别按字母重排。
+   一级主攻 4 个（有色冶炼供能合同额第一）→ 二级 3 个 → 三级 3 个（分公司业务）→ 降级 */
+var SEG_NAME = {
+  youse:'有色冶炼供能', steelgas:'钢铁煤气发电', wasteheat:'余热余压利用', cogen:'热电联产·集中供热',
+  chemheat:'化工余热回收', selfplant:'自备电厂·能源站', datactr:'数据中心供能',
+  soil:'土壤与场地修复', zero:'废水零排放', sewage:'市政污水',
+  wte:'垃圾焚烧发电', oversea:'中资出海能源岛', other:'其他'
+};
+var SEG_ORDER = ['youse','steelgas','wasteheat','cogen','chemheat','selfplant','datactr',
+                 'soil','zero','sewage','wte'];
+/* 三级业务（分公司业务）标记，用于「兼营」判断 */
+var SEG_SIDE = {soil:1, zero:1, sewage:1};
 var PS = 24;
 
 /* 档位配色/文案：必须定义在所有渲染函数之前。
@@ -902,9 +1125,16 @@ function need(mod,cb){
   if(_mods[mod]||(window['DATA_'+mod.toUpperCase()])){_mods[mod]=1;if(cb)cb();return;}
   var sc=document.createElement('script');
   sc.src='data.'+mod+'.js'+VER;
-  sc.onload=function(){_mods[mod]=1;if(cb)cb();};
+  sc.onload=function(){
+    _mods[mod]=1;
+    // siku 模块是「进档案页才拉」的，拉到之后要把全局引用换成刚加载的那份，
+    // 否则 SIKU_UI 还停在脚本执行时的空对象，档案里永远显示「尚未查询」。
+    if(mod==='siku' && window.DATA_SIKU) _sikuApply();
+    if(cb)cb();
+  };
   sc.onerror=function(){
-    if(window.DATA){_mods[mod]=1;if(cb)cb();}
+    // 四库模块拉不到不影响主流程（档案里降级成「尚未查询 · 去四库一平台查」链接）
+    if(window.DATA||mod==='siku'){_mods[mod]=1;if(mod==='siku')_sikuApply();if(cb)cb();}
     else{console.warn('[load] '+mod+' 加载失败');if(cb)cb();}
   };
   document.head.appendChild(sc);
@@ -930,9 +1160,27 @@ var _chunkByName = {};
 function loadChunk(name, cb) {
   if (!window.__itemsSplit) { if (cb) cb(); return; }        // 已经是全量/整包，不用拉
   if (_chunkState[name] === 'done') { if (cb) cb(); return; }
-  (_chunkCbs[name] = _chunkCbs[name] || []).push(cb);
-  if (_chunkState[name] === 'loading') return;
   _chunkState[name] = 'loading';
+  /* 单文件预览版（双击打开，没服务器）：分块数据已经被预注入到 window.__CHUNKS__，
+     这里直接从队列里取，不去发请求——否则 file:// 下必然 404，界面卡在「正在载入」。 */
+  if (window.__CHUNKS__ && window.__CHUNKS__.length) {
+    var raw0 = window.__CHUNKS__.shift();
+    _chunkState[name] = 'done';
+    try {
+      var add0 = packItems(raw0);
+      var have0 = {};
+      for (var i0 = 0; i0 < items.length; i0++) have0[items[i0]._i] = i0;
+      for (var j0 = 0; j0 < add0.length; j0++) {
+        var r0 = add0[j0];
+        if (have0[r0._i] === undefined) items.push(r0); else items[have0[r0._i]] = r0;
+      }
+      refreshTabCounts();
+      try { refreshFilterCounts(); } catch (e) { }
+    } catch (e) { console.warn('[load] 预注入分块合并失败', name, e); }
+    if (cb) cb();
+    return;
+  }
+  (_chunkCbs[name] = _chunkCbs[name] || []).push(cb);
   var info = _chunkByName[name];
   var sc = document.createElement('script');
   sc.src = (info ? info.file : 'data.chunk-' + name + '.js') + VER;
@@ -983,91 +1231,64 @@ function mergeMod(mod){
 
 /* ==================== 工具 ==================== */
 function el(id){return document.getElementById(id)}
+
+/* ══════════════════════════════════════════════════════════════════════
+   原文地址还原（2026-10-21）
+   ══════════════════════════════════════════════════════════════════════
+   build_web.py 为了压缩 items 体积，把省市级站的公共前缀换成了一个短码：
+     https://ggzy.zj.gov.cn/jyxxgk/...  →  #zj/jyxxgk/...
+   但前端一直没写还原逻辑，结果有 168 条（占 8.6%）卡片点开是这个样子：
+     file:///…/商机雷达.html#zb/s-zb-67533516.html    ← 本地
+     https://zhouqingy.github.io/biz-radar/#zb/...    ← 线上，也只是个锚点
+   这是**线上也存在的 bug**，不只是本地。这里补上还原表，必须和 build_web.py 的
+   SITE_PREFIX 一一对应；改一边就得改另一边。
+   ══════════════════════════════════════════════════════════════════════ */
+var SITE_PREFIX = {
+  js: 'http://jsggzy.jszwfw.gov.cn',
+  zj: 'https://ggzy.zj.gov.cn',
+  hf: 'https://ggzy.hefei.gov.cn',
+  sz: 'https://ggzy.suzhou.gov.cn',
+  cz: 'https://ggzy.changzhou.gov.cn',
+  sh: 'https://www.shggzy.com',
+  zb: 'https://www.zbytb.com',
+  gx: 'https://www.gxxszb.com'
+};
+/* 把 '#zj/jyxxgk/xxx' 还原成 'https://ggzy.zj.gov.cn/jyxxgk/xxx'。
+   已经是 http(s) 的原样返回；认不出的短码返回原值（宁可点了没反应，也不要拼出个假地址）。 */
+function fullUrl(u) {
+  u = String(u == null ? '' : u);
+  if (!u || u.charAt(0) !== '#') return u;
+  var i = u.indexOf('/');
+  if (i < 0) return u;
+  var code = u.slice(1, i), rest = u.slice(i);
+  return SITE_PREFIX[code] ? (SITE_PREFIX[code] + rest) : u;
+}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 
 /* ══════════════════════════════════════════════════════════════════════
-   站内阅读器 openLink（2026-10-21）
+   原文跳转（2026-10-21 重写，按用户要求）
    ══════════════════════════════════════════════════════════════════════
-   用户反馈：「这两个我一点击一直新开我这个网页」。
+   用户原话：「你为什么要自做主张给做成 iframe 嵌套的，我要求不是链接跳转即可吗？」
 
-   原来的做法是每个链接 target="_blank"，于是点 5 条就开 5 个标签页，看完还得
-   一个个关。更麻烦的是知了标讯、谛听招标网这类站，新标签打开是白屏——
-   还占着一个页签，得自己找回来关掉。
+   这句批评是对的。之前我猜「用户是不想开新标签」，于是做了页内抽屉 + iframe 嵌入，
+   结果更糟：政府交易平台 99% 发 X-Frame-Options: SAMEORIGIN，嵌进去只有白屏或者
+   对方的验证码页，比直接跳转还难用，还多了一层「这个站能嵌、那个站不能嵌」的心智负担。
 
-   现在改成：链接默认在**页内抽屉**里打开，抽屉顶部一条操作栏（新窗口打开 / 复制链接 / 关闭），
-   真想在独立窗口看再点。抽屉里用 iframe 嵌原站，嵌不了的（对方 X-Frame-Options）
-   会自动降级成「标题 + 摘要 + 操作按钮」，不会给你一片空白。
+   现在的做法就一句话：**链接就是链接**。所有原文入口（卡片标题、结果公告原文、
+   阶段链、附件）都是普通 <a target="_blank">，点一下在新标签打开对方页面。
+   本站不做任何嵌入、不做任何预览渲染。
+
+   配套只有一件事必须做对：地址还原。构建时为了压体积把域名前缀换成了短码
+   （https://ggzy.zj.gov.cn/... → #zj/...），前端以前一直没还原，168 条点开是死锚点。
+   还原逻辑在 fullUrl()，packItems 里一次性把 items 的 url 都过一遍。
    ══════════════════════════════════════════════════════════════════════ */
-var _drCb = null;
-function _drawer() { return document.getElementById('drawer'); }
-function openReader(title, url, extra) {
-  var d = _drawer();
-  if (!d) { if (url) window.open(url, '_blank', 'noopener'); return; }
-  extra = extra || {};
-  var isBid = /baohuabidding|ggzy|jsggzy|shggzy|ccgp|chinabidding|ahtba|hefei|suzhou/.test(url || '');
-  var warn = extra.dead
-    ? '<span class="dwarn">该来源是转载站，原文页可能打不开（实测空壳/需登录），已在下方列出标题与摘要</span>'
-    : '';
-  d.querySelector('.rd-head b').textContent = title || '原文';
-  d.querySelector('.rd-warn').innerHTML = warn;
-  d.querySelector('.rd-ops').innerHTML =
-    (url ? '<a href="' + esc(url) + '" target="_blank" rel="noopener">新窗口打开 ↗</a>' : '') +
-    (url ? '<a href="javascript:void(0)" onclick="copyLink(\'' + esc(url.replace(/'/g, '')) + '\')">复制链接</a>' : '') +
-    '<a href="javascript:void(0)" onclick="closeReader()" class="rclose">关闭 ✕</a>';
-  var body = d.querySelector('.rd-body');
-  /* 摘要 + 说明永远放在最上面。原因是政府交易平台 99% 都发 X-Frame-Options: SAMEORIGIN，
-     iframe 一定是空白——与其让用户对着白框发愣，不如先把「这条讲什么」给他看，
-     再让他自己决定要不要跳出去。只有真能嵌的站（少数）iframe 才在下面露出来。 */
-  var fallback = '<div class="rd-fallback">' +
-    (extra.snip ? '<p class="rsnip">' + esc(extra.snip) + '</p>' : '<p class="rsnip">这条公告没有存摘要。</p>') +
-    '<div class="rfg">' + (extra.dead
-      ? '⚠ 这个来源是转载站/聚合站，原文页实测打不开（返回空白或要登录）。建议点右上「新窗口打开」试一次，不行就用标题搜官方源。'
-      : '多数政府交易平台禁止被其它网站嵌入，下面的预览可能是空白。请点右上「新窗口打开」看完整原文。') +
-    '</div></div>';
-  if (url) {
-    body.innerHTML = fallback +
-      '<iframe class="rd-frame" src="' + esc(url) + '" referrerpolicy="no-referrer" ' +
-      'sandbox="allow-same-origin allow-scripts allow-popups allow-forms" ' +
-      'loading="lazy" onload="rdLoaded(this)"></iframe>';
-    setTimeout(function () { rdCheck(url); }, 2800);
-  } else {
-    body.innerHTML = fallback;
-  }
-  d.classList.add('on');
-  document.body.style.overflow = 'hidden';
-}
-function rdLoaded(f) {
-  /* 关键：如果这个 iframe 载入的是**我们自己的页面**，说明目标 url 被浏览器
-     解析成了相对路径，或者站点 302 回来了。这种「自己嵌自己」必须先抓出来——
-     否则抽屉里会出现一个一模一样的商机雷达，用户以为点错了。
-     同源可读就检查 location；跨域读不到会抛异常，那才是正常的跨站加载。 */
-  try {
-    var loc = f.contentWindow.location.href;
-    if (!loc || loc === 'about:blank' || loc.indexOf(location.host) >= 0 ||
-        loc === location.href) {
-      f.remove();
-      var d = _drawer();
-      var tip = d && d.querySelector('.rfg');
-      if (tip) tip.innerHTML = '该站点不允许被嵌入（或重定向回了本页）。请点右上「<b>新窗口打开 ↗</b>」查看原文。';
-      return;
-    }
-  } catch (e) { /* 跨域：说明真的嵌进去了别的站，正常 */ }
-  f.classList.add('loaded');
-}
-function rdFail(f) { var d = _drawer(); if (d) d.querySelector('.rd-frame') && d.querySelector('.rd-frame').remove(); }
-function rdCheck(url) {
-  /* 跨域 iframe 被 X-Frame-Options 拒掉时，浏览器既不报错也不触发 onload，
-     我们也读不到它的内容——这是同源策略的硬限制，纯前端无解。
-     能做的是：2.8 秒后如果 iframe 还没 onload，就把它收掉，
-     免得用户盯着一个白框以为是我们坏了。 */
-  var d = _drawer();
-  if (!d || !d.classList.contains('on')) return;
-  var f = d.querySelector('.rd-frame');
-  if (f && !f.classList.contains('loaded')) {
-    f.style.display = 'none';
-    var tip = d.querySelector('.rfg');
-    if (tip) tip.innerHTML = '该站点拒绝了嵌入预览（政府交易平台普遍如此）。请点右上「<b>新窗口打开 ↗</b>」在新标签查看完整原文。';
-  }
+
+/* 死链专用：这个来源是空壳站，点了也是白屏。改为用标题去搜官方公告页 */
+function searchOfficial(ev, title) {
+  if (ev && ev.preventDefault) ev.preventDefault();
+  var q = String(title || '').replace(/\[[^\]]*\]/g, '').trim();
+  window.open('https://www.baidu.com/s?wd=' + encodeURIComponent(q), '_blank', 'noopener,nofollow');
+  return false;
 }
 function copyLink(u) {
   try {
@@ -1076,16 +1297,9 @@ function copyLink(u) {
     toast('链接已复制');
   } catch (e) { toast('复制失败，请手动选中'); }
 }
-function closeReader() {
-  var d = _drawer();
-  if (!d) return;
-  d.classList.remove('on');
-  document.body.style.overflow = '';
-  var f = d.querySelector('.rd-frame');
-  if (f) f.remove();          // 必须摘掉 iframe，否则视频/轮询还在后台跑
-  d.querySelector('.rd-body').innerHTML = '';
-  if (_drCb) { _drCb = null; }
-}
+/* 原文抽屉已按用户要求移除（2026-10-21）：点标题直接新标签跳原文，不做 iframe 嵌入。
+   这里保留一个空壳，仅为防止别处误调 closeReader 报错。 */
+function closeReader() {}
 var _toastT;
 function toast(msg) {
   var t = document.getElementById('toast');
@@ -1136,28 +1350,73 @@ function kpiGo(a){
 /* 各 tab 的计数：org/news 模块是按需加载的，没到之前先显示 0，
    加载完由 refreshTabCounts() 补上——避免因为取不到数据报错白屏。 */
 function arr(x){return x&&x.length?x:[]}
+/* ⚠ 2026-10-22 踩过的坑，别再犯：页签合并后索引整体前移（海外 3→2、客户 4→3），
+   但这里还按旧顺序写，结果 118 条海外动态被算到「客户与业主」头上，
+   「海外机会」显示了客户家数 36 —— 数字看着有、全是错的，比显示 0 更糟。
+   现在改成按 id 找位置，不再依赖硬编码下标。 */
+function _tabIdx(id){
+  for(var i=0;i<TABS.length;i++) if(TABS[i][0]===id) return i;
+  return -1;
+}
+function _setTab(id,v){ var i=_tabIdx(id); if(i>=0) TABS[i][2]=v; }
 function refreshTabCounts(){
-  TABS[0][2]=meta.total;
-  TABS[1][2]=arr(D.rivals).length;
-  TABS[2][2]=arr(D.competitors).length+arr(D.partners).length;
-  TABS[3][2]=arr(D.overseas).length;
-  TABS[4][2]=((D.domStat&&D.domStat.total)||0)+arr(D.clients).length+((D.graph||{}).owners||[]).length;
-  TABS[5][2]=arr(D.trends).length;
-  TABS[6][2]=(((D.digest||{}).items||[]).length+((D.wechat||{}).items||[]).length);
-  TABS[7][2]=arr(D.platforms).length;
+  /* 全部按面板 id 定位，顺序怎么变都不会串 */
+  _setTab('p-items',   meta.total);
+  _setTab('p-rival',   arr(D.competitors).length+arr(D.partners).length);
+  _setTab('p-overseas',arr(D.overseas).length);          /* 海外机会 = 海外动态条数 */
+  _setTab('p-client',  ((D.domStat&&D.domStat.total)||0)+arr(D.clients).length+((D.graph||{}).owners||[]).length);
+  _setTab('p-trend',   arr(D.trends).length);
+  _setTab('p-wechat',  (((D.digest||{}).items||[]).length+((D.wechat||{}).items||[]).length));
+  _setTab('p-plat',    arr(D.platforms).length);
   var bs=document.querySelectorAll('.tab');
-  TABS.forEach(function(t,i){ if(bs[i]){ var ib=bs[i].querySelector('i'); if(ib) ib.textContent=t[2]; } });
+  /* 计数为 0 的模块（还没点开过、按需加载的数据还没到）显示「·」不显示 0。
+     原来 0 挂在那里，用户第一眼看到「海外信号 0」「行业动态 0」，
+     会以为这些板块是空的——其实只是没点开、数据还没拉。 */
+  TABS.forEach(function(t,i){
+    if(!bs[i]) return;
+    var ib=bs[i].querySelector('i'); if(!ib) return;
+    ib.textContent = t[2] ? t[2] : '';
+    ib.style.display = t[2] ? '' : 'none';
+  });
 }
 refreshTabCounts();
-el('tabs').innerHTML=TABS.map(function(t,i){
-  return '<button class="tab'+(i===0?' on':'')+'" data-t="'+i+'">'+t[1]+'<i>'+t[2]+'</i></button>'}).join('');
+el('tabs').innerHTML=(function(){
+  var mv=[],sub=[];
+  TABS.forEach(function(t,i){
+    var cls='tab'+(t[5]==='mv'?' mv':' sub')+(i===0?' on':'')+(F.tab===i?' on':'');
+    var n='<i>'+(t[2]||'')+'</i>';
+    if(t[5]==='mv'){
+      mv.push('<button class="'+cls+'" data-t="'+i+'"><span class="tt">'+(t[3]||'')+' '+t[1]+n+'</span>'+
+              '<span class="td">'+(t[4]||'')+'</span></button>');
+      /* ⚠ 计数 i 必须在 .tt 里、副标题里不能有 i —— refreshTabCounts 用
+         bs[i].querySelector('i') 抓页面上的第一个 <i>，位置错了数字就串行。 */
+    }else{
+      sub.push('<button class="'+cls+'" data-t="'+i+'">'+t[1]+n+'</button>');
+    }
+  });
+  /* 一级占左边，中间 flex:1 撑开，二级靠右——视觉上就是「主菜单」和「工具入口」两档 */
+  return mv.join('')+'<span class="sp"></span>'+sub.join('');
+})();
 /* tab 与所需数据模块的对应关系 */
-var TAB_MOD={1:'org',2:'org',3:'news',4:'org',5:'news',6:'news'};
+/* 页签索引 → 依赖的数据模块（2026-10-22 页签合并后重排，索引变了必须同步这里）
+     0 找商机    —— core + items（HTML 里 defer，不在此表）
+     1 同业与伙伴 —— org  （竞企 / 伙伴）
+     2 客户与业主 —— org  （业主图谱；graph 进子段再拉）
+     3 海外机会  —— news （海外动态在 news 模块里）
+     4 行业动态  —— news
+     5 情报精选  —— news
+   ⚠ 踩过的坑：页签合并后我按旧顺序写成 {1:'org',2:'org',3:'news'}，
+     结果点「客户与业主」去拉了 news，DATA_ORG 永远是 undefined，
+     国内客户 0 张卡、海外客户 0 家——数据没坏，是模块拉错了。
+     以后动页签顺序，第一件事就是回来核这张表。 */
+var TAB_MOD={1:'org',2:'org',3:'news',4:'news',5:'news'};
 function goTab(i){
   F.tab=i;
-  var bs=document.querySelectorAll('.tab');
-  [].forEach.call(bs,function(x){x.classList.remove('on')});
-  if(bs[i]) bs[i].classList.add('on');
+  /* 用 [data-t] 定位，不用 querySelectorAll('.tab') 的下标——
+     菜单里除了按钮还有分隔元素，下标和页签索引不是一回事 */
+  [].forEach.call(document.querySelectorAll('#tabs .tab'),function(x){x.classList.remove('on')});
+  var _cur=document.querySelector('#tabs > [data-t="'+i+'"]');
+  if(_cur) _cur.classList.add('on');
   [].forEach.call(document.querySelectorAll('.panel'),function(x){x.classList.remove('on')});
   el(TABS[F.tab][0]).classList.add('on');
   location.hash='t'+F.tab;
@@ -1174,12 +1433,16 @@ function renderPanel(i){
   var m=TAB_MOD[i];
   var ld=document.getElementById('modLoading'); if(ld) ld.remove();
   try{
-    if(i===1){ renderRivals(); }
-    else if(i===2){ refreshRivalCounts(); renderCompetitors(); renderPartners(); rApply(); }
+    if(i===1){ rApply(); }
+    else if(i===2){ renderDomestic(); buildAbFilters(); renderClients(); renderGraph(); cApply(); refreshClientCounts();
+      /* org 模块可能分两次到位（core 里有 domStat、org 里有 domestic）：
+         这里再补一次延时重绘，保证 KPI 和卡片说的是同一批数据。 */
+      setTimeout(function(){
+        try{ renderDomestic(); refreshClientCounts(); refreshTabCounts(); }catch(e){}
+      }, 400); }
     else if(i===3){ renderOverseas(); }
-    else if(i===4){ renderDomestic(); renderClients(); renderGraph(); cApply(); }
-    else if(i===5){ renderTrends(); renderMetals(); renderMStrip(); }
-    else if(i===6){ renderWechat(); renderDigest(); bindDigest();
+    else if(i===4){ buildSigFilter(); renderTrends(); renderMetals(); renderMStrip(); }
+    else if(i===5){ renderWechat(); renderDigest(); bindDigest();
       var n=((D.wechat||{}).items||[]).length,f=el('wxFold'),s2=el('wxFoldN');
       if(s2)s2.textContent=n; if(f&&!n)f.style.display='none'; }
   }catch(e){ console.error('[renderPanel]',i,e); }
@@ -1213,18 +1476,37 @@ function buildFilters(){
   /* 筛选器选项 + 每个选项的命中数都来自 items。分块加载会让 items 变多，
      所以这里只负责「建 chips」，计数刷新交给 refreshFilterCounts()，
      由分块合并完成后调用——否则会出现「地区 江苏 134」但实际有 615 条。 */
-  var subsOrder=(meta.subTop||[]).map(function(x){return x[0]});
   chipsBox('f-rg',uniq(['江苏','浙江','安徽','上海']),countBy('rg'),'rg');
-  chipsBox('f-biz',(meta.bizTop||[]).map(function(x){return x[0]}),countBy('biz'),'biz');
+  /* 2026-10-21 改：原来「业务大类 + 细分赛道」两个筛选框是老五大类口径
+     （能源清洁高效利用 / 废气 / 废水 / 环境修复 / 其他非主业），
+     跟用户确认的 5 层业务分层对不上。现在合并成一个「业务分层」筛选，
+     顺序按用户定的优先级：一级主攻 → 二级 → 三级 → 降级。 */
+  /* 中文名直接显示（chipsBox 支持 {v,t}），不用让人记 youse/cogen 这种短码 */
+  chipsBox('f-sg', SEG_ORDER.map(function(k){return {v:k,t:SEG_NAME[k]||k}}), countBy('sg'), 'sg');
   chipsBox('f-ind',['钢铁','有色','化工','电力','水泥建材','市政','其他'],countBy('ind'),'ind');
-  chipsBox('f-sub',subsOrder,countBy('sub'),'sub');
   chipsBox('f-g',['A','B','C','D'],countBy('g'),'g');
+  /* 范围：默认「只看主场」，勾「含兼营」把三级分公司业务（污水/土壤/零排放）也放出来。
+     这不是普通的多选 Set，是单选开关，所以不挂 F 的 Set，用 F.side 布尔。 */
+  el('f-side').innerHTML='<span class="chip'+(F.side?' on':'')+'" data-k="side" data-v="1">'
+    +'含兼营（污水/土壤/零排放）<em>'+items.filter(function(x){return !x.hm}).length+'</em></span>';
+  el('f-side').onclick=function(e){
+    var c=e.target.closest('.chip'); if(!c)return;
+    F.side=!F.side; c.classList.toggle('on',F.side); F.page=1; render();
+  };
   chipsBox('f-mode',uniq(items.map(function(x){return x.mode}).filter(function(x){return x&&x.length<12}))
     .sort(function(a,b){return countBy('mode')[b]-countBy('mode')[a]}).slice(0,10),countBy('mode'),'mode');
   chipsBox('f-p',(meta.platTop||[]).slice(0,10).map(function(x){return x[0]}),countBy('p'),'p');
 
-  document.querySelectorAll('.chip').forEach(function(c){
-    c.onclick=function(){toggle(F[c.dataset.k],c.dataset.v); c.classList.toggle('on'); F.page=1; render()}});
+  /* 只给「多选筛选项」绑通用 toggle。
+     ⚠ 别改回 querySelectorAll('.chip') 一把抓：
+       f-side 是布尔开关，F.side 不是 Set，被误绑后会抛 set.has is not a function，
+       而且点击报错会让整个筛选区看起来「点不动」。 */
+  ['f-rg','f-sg','f-ind','f-g','f-mode','f-p'].forEach(function(id){
+    var box=el(id); if(!box)return;
+    [].forEach.call(box.querySelectorAll('.chip'),function(c){
+      c.onclick=function(){toggle(F[c.dataset.k],c.dataset.v); c.classList.toggle('on'); F.page=1; render()};
+    });
+  });
 
   /* ==================== 三档关注库（2026-10-21）====================
      用户原话：「商机库只需要看招标公告跳转即可，中标的有中标情况，没招标的就是我们可以做的」
@@ -1290,13 +1572,21 @@ function buildFilters(){
       pick(d.dataset.bk);
     };
   }
-  document.querySelectorAll('.chip').forEach(function(c){
-    c.onclick=function(){toggle(F[c.dataset.k],c.dataset.v); c.classList.toggle('on'); F.page=1; render()}});
+  /* 只给「多选筛选项」绑通用 toggle。
+     ⚠ 别改回 querySelectorAll('.chip') 一把抓：
+       f-side 是布尔开关，F.side 不是 Set，被误绑后会抛 set.has is not a function，
+       而且点击报错会让整个筛选区看起来「点不动」。 */
+  ['f-rg','f-sg','f-ind','f-g','f-mode','f-p'].forEach(function(id){
+    var box=el(id); if(!box)return;
+    [].forEach.call(box.querySelectorAll('.chip'),function(c){
+      c.onclick=function(){toggle(F[c.dataset.k],c.dataset.v); c.classList.toggle('on'); F.page=1; render()};
+    });
+  });
 }
 
 /* 只更新每个 chip 后面的数字，不重建 DOM（重建会丢掉已选中的 on 状态） */
 function refreshFilterCounts(){
-  ['rg','biz','ind','sub','g','mode','p'].forEach(function(k){
+  ['rg','sg','ind','g','mode','p'].forEach(function(k){
     var m=countBy(k);
     var box=el('f-'+k); if(!box)return;
     [].forEach.call(box.querySelectorAll('.chip'),function(c){
@@ -1335,9 +1625,11 @@ function match(x){
     return false;
   }
   if(F.rg.size && !F.rg.has(x.rg))return false;
-  if(F.biz.size && !F.biz.has(x.biz))return false;
+  if(F.sg.size && !F.sg.has(x.sg))return false;
   if(F.ind.size && !F.ind.has(x.ind))return false;
-  if(F.sub.size && !F.sub.has(x.sub))return false;
+  /* 主场/兼营：三级业务（土壤修复/废水零排/市政污水）是分公司业务，
+     用户说「不作为最主要的去关注」。默认只看主场，勾上「含兼营」才显示。 */
+  if(!F.side && !x.hm)return false;
   if(F.g.size && !F.g.has(x.g))return false;
   if(F.mode.size && !F.mode.has(x.mode))return false;
   if(F.p.size && !F.p.has(x.p))return false;
@@ -1363,11 +1655,16 @@ function filtered(){
 
 /* ==================== 渲染 ==================== */
 function cardHtml(x){
-  var tags='<span class="tg tg-biz">'+esc(x.biz)+'</span>'+
+  /* 业务分层标签：一级业务用实心强调色，三级分公司业务用灰色（一眼看出不是主攻） */
+  var _segN=SEG_NAME[x.sg]||'其他';
+  var _segBg = x.hm ? 'background:#eaf3ff;color:#1053c9'
+                    : 'background:#f2f4f7;color:#7b8494';
+  var tags='<span class="tg" style="'+_segBg+'">'+esc(_segN)+'</span>'+
     (x.ind&&x.ind!=='其他'?'<span class="tg" style="background:#eef6ff;color:#0f5aa8">'+esc(x.ind)+'</span>':'')+
     '<span class="tg tg-st">'+esc(x.st)+'</span>'+
     (x.mode?'<span class="tg tg-mode">'+esc(x.mode)+'</span>':'')+
-    (x.sub?'<span class="tg tgo">'+esc(x.sub)+'</span>':'')+
+    /* 命中词很有用：一眼看出「为什么判成这个分层」，也方便复核规则准不准 */
+    (x.sG?'<span class="tg" style="background:#fff7e6;color:#a86612" title="按这个词判进这一层">'+esc(x.sG)+'</span>':'')+
     (x.early?'<span class="tg tg-early">提前量 · '+esc(x.early)+'</span>':'');
   var mv=(x.amt!=null?'<div class="pj-money">'+money(x.amt)+
     (x.amtTxt?'<small title="'+esc(x.amtTxt)+'">'+esc(x.amtTxt)+'</small>':'')+'</div>':'');
@@ -1382,7 +1679,7 @@ function cardHtml(x){
   var allHist=(x.hist||[]).slice().sort(function(a,b){return (a.d||'').localeCompare(b.d||'')});
   if(allHist.length){
     chain='<div class="chain">阶段：'+allHist.map(function(h){
-      return h.url? '<a href="'+esc(h.url)+'" onclick="return openLink(event,\''+esc(x.id)+'\',\''+esc(h.url.replace(/'/g,""))+'\',\''+esc(h.st)+'\')">'+esc(h.st)+' '+esc((h.d||'').slice(5))+'</a>'
+      return h.url? '<a href="'+esc(fullUrl(h.url))+'" target="_blank" rel="noopener" title="在新标签打开这一阶段的公告原文">'+esc(h.st)+' '+esc((h.d||'').slice(5))+'</a>'
                   : '<span>'+esc(h.st)+'</span>'}).join('')+'</div>';
   }
   // 业主/中标单位名里常混有括号注释（项目单位/采购代理/第一中标候选人/分公司归属等），
@@ -1413,7 +1710,7 @@ function cardHtml(x){
           'title="点开看这家单位在中标情报里的全部战绩">🏁 中标：' + esc(winMain) +
           (String(x.win || '').length > winMain.length ? ' 等' : '') + ' ↗</a>'
         : '<span class="act-none">中标单位未在公示正文中明确（原文页可查）</span>') +
-      (x.url ? '<a href="' + esc(x.url) + '" onclick="return openItem(event,\'' + esc(x.id) + '\')" class="act-src">结果公告原文 ↗</a>' : '') +
+      (x.url ? '<a href="' + esc(fullUrl(x.url)) + '" target="_blank" rel="noopener" class="act-src">结果公告原文 ↗</a>' : '') +
       '</div>';
   } else if (x.url || x.buyer) {
     var bq=qcName(x.buyer), wq=qcName(x.win);
@@ -1431,10 +1728,15 @@ function cardHtml(x){
       '<span class="gscore">'+x.sc+'分</span>'+
       (x.nw?'<span class="newdot">NEW</span>':'')+mv+'</div>'+
     (x.url
-      ? '<a class="pj-t'+(x.linkbad?' dead':'')+'" href="'+esc(x.url)+
-        '" onclick="return openItem(event,\''+esc(x.id)+'\')" '+
-        (x.linkbad?'title="这条来自转载站，原文页实测打不开（空壳/需登录）。点开可在页内看摘要，或用标题搜官方源"':'')+'>'+
-        esc(x.t)+' <span class="go">'+(x.linkbad?'链接可能失效':'原文')+' ↗</span></a>'
+      /* 直接给完整 href（fullUrl 已在 packItems 里还原过），target=_blank 就是普通链接跳转。
+         不再走 JS 抽屉，也不做任何嵌入——用户要的就是「点一下，原文在新标签打开」。 */
+      ? (x.linkbad
+          ? '<a class="pj-t dead" href="' + esc(fullUrl(x.url)) + '" target="_blank" rel="noopener" ' +
+            'title="这条来自转载站，原文页实测是空壳/要登录。右下角「搜官方源」可以用标题找到官方公告页">' +
+            esc(x.t) + ' <span class="go">链接可能失效</span></a>'
+          : '<a class="pj-t" href="' + esc(fullUrl(x.url)) + '" target="_blank" rel="noopener" ' +
+            'title="在新标签打开这条公告的原文页面">' +
+            esc(x.t) + ' <span class="go">原文 ↗</span></a>')
       : '<span class="pj-t">'+esc(x.t)+'</span>')+
     '<div class="tags">'+tags+'</div>'+
     '<div class="pj-meta">'+meta+'</div>'+
@@ -1490,7 +1792,7 @@ function fileList(x){
        只能去原文页下的，走抽屉，别再开新标签。 */
     var tip=canDl?('已校验可下载 · '+Math.round((it.sz||0)/1024)+' KB')
                 :'该附件需到公告原文页自行下载（直链未通过校验或源站已清空）';
-    var aClick = canDl ? '' : ' onclick="return openLink(event,\''+esc(x.id)+'\',\''+esc(href.replace(/'/g,""))+'\',\'附件下载\')"';
+    var aClick = '';   /* 统一直链跳转，不再拦截 */
     return '<li><a class="'+cls+'" href="'+esc(href)+'" target="_blank" rel="noopener"'+
       aClick+' title="'+esc(tip)+'">'+esc(nm)+'<em class="go-src">'+
       (canDl?'下载 ↓':'去原文页下 ↗')+'</em></a></li>';
@@ -1499,25 +1801,7 @@ function fileList(x){
     '<div class="fh">附件清单 <small>'+f.length+' 个 · 点附件名跳到公告原文页，在源站下载</small></div>'+
     '<ul>'+rows+'</ul></div>';
 }
-/* 点卡片标题/原文 → 页内抽屉打开（阻止默认的新标签行为）
-   返回 false 才能拦住 <a> 的默认跳转。 */
-function openItem(ev, id) {
-  if (ev && ev.preventDefault) ev.preventDefault();
-  var x = null;
-  for (var i = 0; i < items.length; i++) if (items[i].id === id) { x = items[i]; break; }
-  if (!x) return false;
-  openReader(x.t, x.url, { dead: !!x.linkbad, snip: x.snip });
-  return false;
-}
-
-/* 通用：任意子链接（阶段链 / 附件）在抽屉里打开 */
-function openLink(ev, id, url, label) {
-  if (ev && ev.preventDefault) ev.preventDefault();
-  var x = null;
-  for (var i = 0; i < items.length; i++) if (items[i].id === id) { x = items[i]; break; }
-  openReader((x ? x.t + ' · ' : '') + (label || '原文'), url, { snip: x ? x.snip : '' });
-  return false;
-}
+/* 点卡片标题 → 新标签打开原文（openItem 已在上面的「原文跳转」段定义） */
 
 function toggleFiles(id){
   var d=document.getElementById('fl-'+id);
@@ -1559,7 +1843,7 @@ el('q').addEventListener('input',function(){
 el('sort').onchange=function(){F.sort=this.value;render()};
 el('btnReset').onclick=resetF;
 function resetF(){
-  ['rg','biz','ind','sub','g','mode','p'].forEach(function(k){F[k].clear()});
+  ['rg','sg','ind','g','mode','p'].forEach(function(k){F[k].clear()});
   F.st='';F.q='';F.page=1;
   document.querySelectorAll('.chip.on').forEach(function(x){x.classList.remove('on')});
   var f=swimBox.firstElementChild;
@@ -1567,8 +1851,8 @@ function resetF(){
   f.classList.add('on'); el('q').value=''; render();
 }
 el('btnCsv').onclick=function(){
-  var head=['项目名称','地区','城市','阶段','优先级','业务大类','细分','业主','中标单位','金额(亿元)','金额原文','日期','截止','承包模式','来源平台','原始发布平台','附件数','附件清单','链接'];
-  var rows=LAST.map(function(x){return [x.t,x.rg,x.city,x.st,x.g,x.biz,x.sub,x.buyer,x.win,
+  var head=['项目名称','地区','城市','阶段','优先级','业务分层','是否主场','命中词','业主','中标单位','金额(亿元)','金额原文','日期','截止','承包模式','来源平台','原始发布平台','附件数','附件清单','链接'];
+  var rows=LAST.map(function(x){return [x.t,x.rg,x.city,x.st,x.g,SEG_NAME[x.sg]||'',(x.hm?'主场':'兼营'),x.sG||'',x.buyer,x.win,
     (x.amt==null?'':x.amt),x.amtTxt,x.d,x.dl,x.mode,x.p,
     (x.org&&x.org.n?x.org.n:''),
     (x.files&&x.files.length?x.files.length:''),
@@ -1677,11 +1961,12 @@ el('wkDl').onclick=function(){
 /* names 可传多个候选（用 | 分隔）：集团行会带上集团名 + 旗下各主体名，逐个尝试匹配 */
 function gotoUnit(names){
   var cands=(names||'').split('|').filter(Boolean);
-  /* tab 索引：0 商机库 / 1 中标情报 / 2 同业与伙伴 / 3 海外信号 …
-    竞企和伙伴都在 t=2，靠子页切换区分——原来这里把伙伴写成 t:3，
-     点「中标单位」会被甩到「海外信号」页，属于老 bug，2026-10-21 修。 */
-  var pools=[{t:2,sub:'rival',grid:'rivalGrid',list:D.competitors||[]},
-             {t:2,sub:'partner',grid:'partnerGrid',list:D.partners||[]}];
+  /* tab 索引（2026-10-22 前移后）：0 商机库 / 1 同业与伙伴 / 2 海外信号 …
+    竞企和伙伴都在 t=1，靠子页切换区分。
+    ⚠ 这里踩过两次：先是把伙伴写成 t:3 甩到「海外信号」，后是页签合并没同步索引。
+      改页签结构时务必回来核一遍这个数字。 */
+  var pools=[{t:1,sub:'rival',grid:'rivalGrid',list:D.competitors||[]},
+             {t:1,sub:'partner',grid:'partnerGrid',list:D.partners||[]}];
   for(var ci=0;ci<cands.length;ci++){
   var kw=cands[ci].replace(/[（）()]/g,'').slice(0,6);
   if(!kw)continue;
@@ -1732,7 +2017,9 @@ function showAdhocUnit(name){
   var amt=hits.reduce(function(s,x){return s+(x.amt||0)},0);
   var rgs={}; hits.forEach(function(x){if(x.rg)rgs[x.rg]=(rgs[x.rg]||0)+1});
   var rgTxt=Object.keys(rgs).map(function(k){return k+' '+rgs[k]}).join(' · ');
-  var b=document.querySelector('.tab[data-t="2"]'); if(b)b.click();
+  var b=document.querySelector('.tab[data-t="1"]'); if(b)b.click();
+  // 临时卡挂在「同业与伙伴」页的公共区，所以还要把子页切到任一实段之外不掉内容——
+  // adhoc 是独立容器，三段都隐藏它也照样显示，不用切子页。
   var box=el('adhoc');
   if(!box) return false;
   box.style.display='block';
@@ -1758,13 +2045,12 @@ function rvItemsHtml(items){
 function renderRivals(){
   refreshRivalCounts();          // 档案数/伙伴数：数据到位后才算得出来
   var list=arr(D.rivals).filter(function(x){return !rvBiz.size||rvBiz.has(x.main)});
-  el('tbrv').innerHTML='<tr><th style="width:38px">#</th><th>中标单位</th><th>次数</th><th>金额(亿)</th><th>主攻赛道</th><th>覆盖区域</th><th style="width:230px">代表项目</th></tr>'+
+  el('tbrv').innerHTML='<tr><th style="width:38px">#</th><th>中标单位</th><th>次数</th><th>金额(亿)</th><th>主攻赛道</th><th>覆盖区域</th><th style="width:230px">代表项目</th><th style="width:132px">档案</th></tr>'+
     list.slice(0,120).map(function(x,i){
       var subs=x.subs||[], isGrp=subs.length>1;
       // 集团行把集团名 + 旗下主体名都作为匹配候选，任何一手命中都能定位到档案
       var cands=[x.name].concat(subs.map(function(s){return s.name})).join('|').replace(/'/g,'');
-      var nm='<a href="javascript:gotoUnit(\''+esc(cands)+'\')" style="color:inherit" title="查看该单位档案（无档案则查其商机库记录）">'+esc(x.name)+'</a>'+
-             '<button class="rival-dw" onclick="Rival.open(\''+esc((x.name||'').replace(/'/g,''))+'\')" title="打开竞对画像（业绩+资质+装机规模，侧滑不跳页）">画像</button>';
+      var nm='<a href="javascript:gotoUnit(\''+esc(cands)+'\')" style="color:inherit" title="查看该单位档案（无档案则查其商机库记录）">'+esc(x.name)+'</a>';
       if(isGrp){
         nm+='<span class="grp-tag">集团合并 · '+subs.length+' 个主体</span><div class="rv-sub">'+subs.map(function(s){
           return esc(s.name)+(s.amt>0?' <b>'+money(s.amt)+'</b>':'')}).join(' ｜ ')+'</div>';
@@ -1774,10 +2060,20 @@ function renderRivals(){
       var detail = isGrp
         ? subs.map(function(s){return '<div class="rv-subname">'+esc(s.name)+'（'+s.n+' 条'+(s.amt>0?' / '+money(s.amt)+'亿':'')+'）</div>'+rvItemsHtml(s.items)}).join('')
         : rvItemsHtml(x.items);
+      /* 只留一个画像入口（2026-10-22）。
+         原来这里有两个都叫"画像"的按钮：一个是本库深度档案（覆盖全库 59 家），
+         一个是 rival.js 的「平台画像」（云端只有 3 家数据，点别人就跳"这家还没有画像数据"）。
+         两个按钮名字一样、一个能开一个不能开，用户当然会撞上打不开的那个。
+         取舍：删掉平台画像，只留深度档案；它的"资质证书"这一层，改成直链四库一平台。 */
+      var acts='<div class="rv-acts">'+
+        '<button class="rival-dw" onclick="gPick(\'rival\',\''+esc((x.name||'').replace(/'/g,''))+'\')" title="打开深度档案：KPI + 业绩明细 + 赛道/地域/年份分布 + 看法">深度档案</button>'+
+        '<a class="rival-dw" style="display:block;text-align:center;text-decoration:none;margin-top:5px" href="https://jzsc.mohurd.gov.cn/data/company?complexname='+encodeURIComponent(x.name||'')+'" target="_blank" rel="noopener nofollow" title="跳住建部四库一平台查它的资质证书、注册人员">查资质 ↗</a>'+
+        '</div>';
       return '<tr><td>'+(i+1)+'</td><td class="nm">'+nm+'</td>'+
         '<td class="cnt">'+x.n+'</td><td class="num">'+(x.amt>0?money(x.amt):'—')+'</td>'+
         '<td>'+esc(x.main)+'</td><td class="sub-i">'+esc(x.rg)+'</td>'+
-        '<td><details class="sub"><summary>'+x.items.length+' 条代表项目</summary>'+detail+'</details></td></tr>'}).join('');
+        '<td><details class="sub"><summary>'+x.items.length+' 条代表项目</summary>'+detail+'</details></td>'+
+        '<td>'+acts+'</td></tr>'}).join('');
 }
 /* 竞对页的业务筛选同样依赖 meta，放进 buildFilters() 一起等数据到位后再建 */
 function buildRivalFilter(){
@@ -1869,18 +2165,24 @@ function trackBlock(x){
 
 function compCard(x){
     return '<div class="ccard"><div class="cc-h"><b>'+esc(x.name)+'</b>'+
-      '<button class="rival-dw" onclick="Rival.open(\''+esc((x.name||'').replace(/'/g,''))+'\')" title="打开竞对画像：业绩明细 + 装机规模 + 企业资质，侧滑不跳页">画像</button>'+
+      '<button class="rival-dw" onclick="gPick(\'rival\',\''+esc((x.name||'').replace(/'/g,''))+'\')" title="打开深度档案（与业主/供应商同一套版式）">深度档案</button>'+
+      '<a class="rival-dw" style="text-decoration:none" href="https://jzsc.mohurd.gov.cn/data/company?complexname='+encodeURIComponent(x.name||'')+'" target="_blank" rel="noopener nofollow" title="跳住建部四库一平台查资质证书与注册人员（本库不含资质数据）">查资质 ↗</a>'+
       catTag(x.cat)+
       '<span class="cc-tag">'+esc(x.type)+'</span>'+
       (x.city?'<span class="cc-tag none">'+esc(x.city)+'</span>':'')+
       mineTag(x)+
       (x.dual?'<span class="cc-tag" style="background:#e8f4ff;color:#1053c9">竞合双身份</span>':'')+'</div>'+
       trackBlock(x)+
-      '<div class="cc-m">'+esc(x.strength)+'</div>'+
+      '<div class="cc-body">'+
+        (x.strength?'<p>'+esc(x.strength)+'</p>':'')+
+        (x.dual?'<p style="color:#1053c9">同时在「合作生态」中列为潜在联合体伙伴——海外项目中多为总包方，我司可作能源动力岛/余热发电分包。</p>':'')+
+      '</div>'+
       recentBlock(x,'近期动态（微信公众号 / 官网，点条目看原文）')+
-      (x.dual?'<div class="cc-i" style="color:#1053c9;font-size:11.5px">同时在「合作生态」中列为潜在联合体伙伴——海外项目中多为总包方，我司可作能源动力岛/余热发电分包。</div>':'')+
-      (x.url?'<div class="cc-i"><a href="'+esc(x.url)+'" target="_blank" rel="noopener">官网 / 资料 ↗</a></div>':'')+
-      '<div class="cc-i"><a href="javascript:searchFor(\''+esc((x.name||'').slice(0,6))+'\')">在商机库中查看它的招标/中标记录 ↗</a></div>'+
+      /* 动作条统一收进 .pj-act，配合 margin-top:auto 沉底，同一行卡片按钮对齐 */
+      '<div class="pj-act">'+
+        (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">官网 / 资料 ↗</a>':'')+
+        '<a href="javascript:searchFor(\''+esc((x.name||'').slice(0,6))+'\')">库内招标/中标记录 ↗</a>'+
+      '</div>'+
       '</div>';
 }
 
@@ -1898,16 +2200,25 @@ function renderPartners(){
 }
 function partCard(x){
     return '<div class="ccard"><div class="cc-h"><b>'+esc(x.name)+'</b>'+
+      /* 2026-10-22 补：伙伴卡原来没有「深度档案」，可它和竞争对手是同一批单位，
+         用户在对手栏能点开、在伙伴栏点不开，会以为伙伴的档案没做。
+         伙伴里有一部分确实没有业绩记录（rv 会退化成空档案），那种情况档案页里
+         会明说「本库暂无」，也不算骗人。 */
+      '<button class="rival-dw" onclick="gPick(\'rival\',\''+esc((x.name||'').replace(/'/g,''))+'\')" title="打开深度档案（与业主/供应商同一套版式）">深度档案</button>'+
       catTag(x.cat)+
       '<span class="cc-tag" style="background:'+(x.type&&x.type.indexOf('施工')>=0?'#fff2e0;color:#a85c10':'#e8f4ff;color:#1053c9')+'">'+esc(x.type||'')+'</span>'+
       (x.city?'<span class="cc-tag none">'+esc(x.city)+'</span>':'')+
       mineTag(x)+'</div>'+
       trackBlock(x)+
-      (x.role?'<div class="cc-m"><b style="color:#14713a">联合体定位：</b>'+esc(x.role)+'</div>':'')+
-      (x.strength?'<div class="cc-m">'+esc(x.strength)+'</div>':'')+
+      '<div class="cc-body">'+
+        (x.role?'<p><b style="color:#14713a">联合体定位：</b>'+esc(x.role)+'</p>':'')+
+        (x.strength?'<p>'+esc(x.strength)+'</p>':'')+
+      '</div>'+
       recentBlock(x,'近期动态（点条目看原文）')+
-      (x.url?'<div class="cc-i"><a href="'+esc(x.url)+'" target="_blank" rel="noopener">官网 / 资料 ↗</a></div>':'')+
-      '<div class="cc-i"><a href="javascript:searchFor(\''+esc((x.name||'').slice(0,6))+'\')">在商机库中查它的记录 ↗</a></div>'+
+      '<div class="pj-act">'+
+        (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">官网 / 资料 ↗</a>':'')+
+        '<a href="javascript:searchFor(\''+esc((x.name||'').slice(0,6))+'\')">库内记录 ↗</a>'+
+      '</div>'+
       '</div>';
 }
 /* ==================== 实时行情（浏览器直连，每 5 分钟自动刷新） ==================== */
@@ -2027,29 +2338,52 @@ function renderMStrip(){
 }
 
 /* ==================== 重点客户 ==================== */
-var cRg=new Set(), cEx=new Set();
-/* ---- 同业与伙伴：两段切页（竞争对手 / 伙伴池）---- */
-var rTab='rival';
+/* cRg / cPri / cEx 在下面的「海外中资出海客户」段落里统一定义（2026-10-21 合并，
+   原来这里声明过一份 cRg，重复声明会让海外页的筛选状态被前一份覆盖，坑过一次）。*/
+/* ---- 同业与伙伴：三段切页（战绩榜 / 竞争对手档案 / 伙伴池）----
+   2026-10-22：用户说「中标情况与同行伙伴是不是重复了」——确实是重复。
+   原来「中标情报」页单独挂一整套赛道筛选 + 对手表格，数据和「同业与伙伴」同源
+   （都是 D.rivals / D.competitors 那批单位），只是换个角度展示。
+   合并方式：同一页签内三段切页，第一段「按战绩排序」就是原来的中标榜。
+   ⚠ 默认段改成了 board（战绩榜）：进来先看「谁在拿单」，这是用户最关心的那一层；
+     看不过瘾再切到档案看「这家到底是谁」。 */
+var rTab='board';
 function rApply(){
-  el('rRivalBox').style.display=(rTab==='rival'?'block':'none');
-  el('rPartnerBox').style.display=(rTab==='partner'?'block':'none');
+  var m={board:'rBoardBox', rival:'rRivalBox', partner:'rPartnerBox'};
+  Object.keys(m).forEach(function(k){
+    var b=el(m[k]); if(b) b.style.display=(k===rTab?'block':'none');
+  });
   Array.prototype.forEach.call(el('rSwitch').querySelectorAll('span[data-k]'),
     function(x){x.classList.toggle('on',x.dataset.k===rTab)});
+  /* 各段的数据是按需渲染的：切到哪段才画哪段，避免一进页面就把 59 张卡片全画出来 */
+  try{
+    if(rTab==='board'){ buildRivalFilter(); renderRivals(); }
+    else if(rTab==='rival'){ renderCompetitors(); }
+    else if(rTab==='partner'){ renderPartners(); }
+  }catch(e){ console.error('[rApply]',rTab,e); }
+  refreshRivalCounts();
 }
 el('rSwitch').onclick=function(e){
   var sp=e.target.closest('span[data-k]'); if(!sp)return;
-  rTab=sp.dataset.k; rApply();
+  rTab=sp.dataset.k;
+  /* 换段就把档案收起来：档案是「某一家单位」的，跟着段切走会
+     让人以为这张档案同时属于竞争对手和伙伴两栏。 */
+  var _pb=document.getElementById('rProfBox');
+  if(_pb){ _pb.style.display='none'; _pb.innerHTML=''; }
+  rApply();
 };
 /* 计数依赖 data.org.js（按需加载），不能在脚本顶层算——那时 D.competitors 还是 undefined。
-   改成函数，由 renderRivals() 在数据到位后调用。 */
+   改成函数，由 rApply() 在数据到位后调用。 */
 function refreshRivalCounts(){
-  var a=el('rCn'),b=el('rPn');
+  var a=el('rCn'),b=el('rPn'),c=el('rBn');
   if(a)a.textContent=arr(D.competitors).length;
   if(b)b.textContent=arr(D.partners).length;
+  if(c)c.textContent=arr(D.rivals).length;
 }
 
 /* ---- 客户与业主：三段切页（国内客户 / 海外客户 / 业主图谱）---- */
 var cTab='dom';
+var _gDrawn=0;   // 图谱段是否已画过（原来挂在 DOM 节点的自定义属性上，某些浏览器内联后取不到，改全局变量）
 function cApply(){
   el('cDomBox').style.display=(cTab==='dom'?'block':'none');
   el('cAbBox').style.display =(cTab==='ab' ?'block':'none');
@@ -2057,31 +2391,78 @@ function cApply(){
   var bs=el('cTop').querySelectorAll('span[data-k]');
   Array.prototype.forEach.call(bs,function(x){x.classList.toggle('on',x.dataset.k===cTab)});
   // 首次进图谱页时才渲染；图谱数据（665KB）也是这时候才拉
-  if(cTab==='graph' && !cGrBox._drawn){
-    cGrBox._drawn=1;
+  if(cTab==='graph' && !_gDrawn){
+    _gDrawn=1;
+    /* 四库信用代码（data.siku.js，约 300KB）也在这时候拉——它是档案里「身份信息」那一块用的，
+       不进图谱就等于永远不出现。拉不到也照样画，只是那几行降级成跳转链接。 */
+    if(!window.DATA_SIKU && !window.DATA_ALL){ need('siku', _gDraw); }
+    else { _sikuApply(); _gDraw(); }
+  }
+}
+function _gDraw(){
     if(window.DATA_GRAPH || (D.graph&&D.graph.owners&&D.graph.owners.length)){
-      try{renderGraph()}catch(e){}
+      /* 数据已经在内存里（单文件版就是这种）：合并 + 渲染 + 刷计数，三步各自兜错，
+         一步失败不能连带把计数也跳过。 */
+      try{ mergeMod('graph'); }catch(e){ console.warn('[graph] merge',e); }
+      try{ renderGraph(); }catch(e){ console.warn('[graph] render',e); }
+      try{ refreshClientCounts(); }catch(e){ console.warn('[graph] count',e); }
+      try{ refreshTabCounts(); }catch(e){ console.warn('[graph] tabcount',e); }
     }else{
       cGrBox.innerHTML='<div class="empty">正在载入业主图谱…</div>';
+      /* 2026-10-21 修：这里原来把 refreshClientCounts 包在同一个 try 里，
+         renderGraph 一抛错就整段跳过，计数永远不动。改成各自独立 try。 */
       need('graph',function(){
-        try{ mergeMod('graph'); renderGraph(); }catch(e){ console.warn(e); }
+        try{ mergeMod('graph'); }catch(e){ console.warn('[graph] merge',e); }
+        try{ renderGraph(); }catch(e){ console.warn('[graph] render',e); }
+        try{ refreshClientCounts(); }catch(e){ console.warn('[graph] count',e); }
+        /* 图谱数据（650 业主 + 221 供应商）到位后，页签上的「客户与业主」
+           和子段上的「业主画像图谱」两个数都得重算——原来这里漏了，
+           表现为：能进图谱、列表也有，但数字停在 0。 */
+        try{ refreshTabCounts(); }catch(e){ console.warn('[graph] tabcount',e); }
       });
     }
-  }
 }
 el('cTop').onclick=function(e){
   var sp=e.target.closest('span[data-k]'); if(!sp)return;
   cTab=sp.dataset.k; cApply();
 };
-/* 兼容旧的 cSwitch（已隐藏，仅防其它代码引用报错） */
-el('cSwitch').onclick=function(){};
-/* 计数注入 */
-(function(){
-  var a=el('cDomN'), b=el('cAbN'), c=el('cGrN');
-  if(a)a.textContent=((D.domStat&&D.domStat.total)||0);
-  if(b)b.textContent=(D.clients||[]).length;
-  if(c)c.textContent=(((D.graph||{}).owners)||[]).length;
-})();
+/* 旧的 cSwitch 已于 2026-10-21 物理删除（它和 cTop 里有重复的 id，导致 cDomN 永远拿不到值，
+   客户页三个数字一直显示「—」）。这里留空防其它代码引用报错。 */
+/* 计数注入（2026-10-21 修正：这段原来是 IIFE，在脚本加载时就跑，
+   那时 org 模块还没合并进 D，三个数字永远是 0。改成函数，由 renderPanel 在数据到位后调用。 */
+function refreshClientCounts(){
+  /* 2026-10-21 排查踩坑记录，别重犯：
+     1) 不能用 el() —— 它内部 getElementById，拿到的是**文档里第一个**同名节点；
+     2) 更不能用 window.cGrN —— 全局 id 变量在部分浏览器里是静态快照，内联后拿到的
+        可能是脚本执行那一刻的旧节点引用，textContent 改了也不显示。
+     直接用 querySelectorAll 全量刷，稳妥。 */
+  /* ⚠ 顺序不能反：以前写成 D.domStat.total || D.domestic.length，
+     但 domStat 在 core 模块、domestic 在 org 模块，core 先到——
+     于是永远拿到 domStat 那个"看似有值"的数字，而卡片是从 domestic 画的。
+     两个数一旦不同源，就会出现「页签 0 / 卡片 36」或者反过来。
+     现在一律以**手里实际的数组**为准，domStat 只在数组为空时兜底。 */
+  var dom=arr(D.domestic).length || ((D.domStat&&D.domStat.total)||0);
+  var ab=arr(D.clients).length;
+  document.querySelectorAll('#cDomN').forEach(function(x){x.textContent=dom});
+  document.querySelectorAll('#cAbN').forEach(function(x){x.textContent=ab});
+  /* ⚠⚠「业主画像图谱」这个数为什么一直是 0（2026-10-22 定位到根因）：
+     ① 单文件版里 data.graph.js 挂在 window.DATA_GRAPH 上，而它的结构是
+        **{graph:{nOwner,nSupplier,owners,suppliers}}** —— 多套了一层 graph。
+        这里原来直接读 D.graph.nOwner，可 D.graph 只有在**点进图谱段**时才由
+        mergeMod('graph') 合并出来。用户停在「国内客户」段看，D.graph 就是 undefined，
+        于是 650+221 算出来是 0。
+     ② 也就解释了为什么「能进图谱、名单也有，数字却停在 0」——
+        不是数据没到，是数字懒得去别处找。
+     现在三处都查：已合并的 D.graph → 未合并的 window.DATA_GRAPH.graph → window.GR。
+     任何一个有就一定算得出来，跟用户点没点进图谱段无关。 */
+  var g = (D.graph && D.graph.owners) ? D.graph
+        : (window.DATA_GRAPH && window.DATA_GRAPH.graph) ? window.DATA_GRAPH.graph
+        : (window.DATA_GRAPH && window.DATA_GRAPH.owners) ? window.DATA_GRAPH
+        : null;
+  var gAll = g ? (((g.nOwner||0)||(g.owners||[]).length) + ((g.nSupplier||0)||(g.suppliers||[]).length)) : 0;
+  /* 图谱那段显示「业主+供应商」总家数（650+221=871），比只写业主数更能说明图谱规模 */
+  document.querySelectorAll('#cGrN').forEach(function(x){x.textContent=gAll||'—'});
+}
 /* ---- 国内重点客户 ---- */
 var dTier=new Set(), dRg=new Set();
 var TIER_TXT={S:'战略',A:'重点',B:'观察'};
@@ -2090,12 +2471,24 @@ var TIER_FG={S:'#c0392b',A:'#a8620a',B:'#5a6270'};
 function renderDomestic(){
   var L=(D.domestic||[]).filter(function(x){
     return (!dTier.size||dTier.has(x.tier)) && (!dRg.size||dRg.has(x.rg))});
-  var st=D.domStat||{};
+  /* KPI 自己从 domestic 数组算，不要依赖后端给的 domStat ——
+     domStat 在 core 模块、domestic 在 org 模块，两个文件到的时间不一样：
+     先到 core 时 domStat 是有的，但 DOM 里 KPI 已经按"没数据"画过一次；
+     等 org 到了再画卡片，KPI 不会自动重画，于是出现
+     「36 张卡片摆在那里、上面四个格子全是 0」——
+     用户截图反馈的「怎么是 0」就是这个。
+     现在全部从手里的数组现算：数组有几条就是几条，永远和下面的卡片一致。 */
+  var all=D.domestic||[];
+  var st={total:all.length,
+          S:all.filter(function(x){return x.tier==='S'}).length,
+          A:all.filter(function(x){return x.tier==='A'}).length,
+          B:all.filter(function(x){return x.tier==='B'}).length};
+  if(!st.total && D.domStat) st=D.domStat;   // 真没数据时退回后端统计（可能只是还没加载）
   el('cDomKpi').innerHTML=
     '<div class="kpi"><b>'+(st.total||0)+'</b><span>国内重点客户</span></div>'+
     '<div class="kpi"><b>'+(st.S||0)+'</b><span>战略级（≥3亿 或 ≥5项目）</span></div>'+
     '<div class="kpi"><b>'+(st.A||0)+'</b><span>重点级</span></div>'+
-    '<div class="kpi"><b>'+L.reduce(function(s,x){return s+x.amt},0).toFixed(1)+'亿</b><span>筛选结果涉及金额</span></div>';
+    '<div class="kpi"><b>'+L.reduce(function(s,x){return s+(x.amt||0)},0).toFixed(1)+'亿</b><span>筛选结果涉及金额</span></div>';
   el('domGrid').innerHTML=L.map(function(x){
     var open=cEx.has('d:'+x.name);
     var its=open?x.items:x.items.slice(0,3);
@@ -2152,10 +2545,77 @@ var AB_SHOW=2, IT_SHOW=3;
 function ccMore(key,cnt,open){
   return '<div class="cc-more" data-ck="'+esc(key)+'">'+(open?'收起 ▴':'展开更多（还有 '+cnt+' 条）▾')+'</div>';
 }
+/* ==================== 海外中资出海客户（2026-10-21 重做）====================
+   用户口径：「海外 = 中国企业（江浙沪皖）去海外建厂，配套能源岛」。所以要回答的是
+   「谁要在海外建厂、他缺不缺电和热、我能不能去配套」，不是罗列新闻。
+
+   三个来源合在一张卡上：
+     ① 人工名单（oversea_clients.py，pri=1 江浙沪皖 / pri=2 外地大厂）
+        → 带「为什么这家会有海外能源需求」一句话 + 已知基地，这是判断值不值得跟的依据
+     ② 自动发现的（pri=3，从公告/新闻里挖出来的）
+        → 标「待确认」，不跟人工名单混排
+     ③ 本库国内记录 + 海外动态新闻
+        → 证明「这家确实在花钱」，而不是纸面名单
+
+   排序：pri → 行业（有色→水泥→数据中心→钢铁→化工→造纸→玻璃）→ 库内命中数。
+   行业顺序是用户点名的重点业务顺序，别按字母排。 */
+var cRg=new Set(), cPri=new Set(), cEx=new Set();
+var AB_GRP_ORDER=['有色冶炼','水泥','数据中心','钢铁','化工化纤','造纸','玻璃'];
+/* 行业别名归一：历史数据里同时存在「有色」和「有色冶炼」、「水泥」和「水泥建材」，
+   不归一会导致同一个行业在筛选器里出现两次、各带一半数据。 */
+var AB_GRP_ALIAS={'有色':'有色冶炼','水泥建材':'水泥'};
+function abGrp(g){ return AB_GRP_ALIAS[g] || g || '其他制造' }
+
 function renderClients(){
-  var list=D.clients.filter(function(x){return !cRg.size||cRg.has(x.grp)});
+  var all=D.clients||[];
+  /* KPI：先给「名单规模」，再给「多少有真凭据」，最后给「重点在哪」。
+     第二格是关键——89 家里只有一部分在本库或新闻里真的有动向，
+     不区分的话看名单会以为 89 家全都在等我们。 */
+  (function(){
+    var p1=all.filter(function(x){return (x.pri||2)===1}).length;
+    var p2=all.filter(function(x){return (x.pri||2)===2}).length;
+    var p3=all.filter(function(x){return (x.pri||2)===3}).length;
+    var withAb=all.filter(function(x){return (x.abroad||[]).length}).length;
+    var withN=all.filter(function(x){return (x.n||0)>0}).length;
+    var grps={}; all.forEach(function(x){grps[abGrp(x.grp)]=1});
+    if(el('cAbKpi')) el('cAbKpi').innerHTML=
+      '<div class="kpi"><b>'+all.length+'</b><span>出海客户名单（江浙沪皖 '+p1+' · 外地 '+p2+' · 待确认 '+p3+'）</span></div>'+
+      '<div class="kpi"><b>'+withAb+'</b><span>已有海外建厂动向</span></div>'+
+      '<div class="kpi"><b>'+withN+'</b><span>本库有国内记录</span></div>'+
+      '<div class="kpi"><b>'+Object.keys(grps).length+'</b><span>覆盖行业数</span></div>';
+  })();
+  var list=all.filter(function(x){
+    if(cRg.size && !cRg.has(abGrp(x.grp)))return false;
+    if(cPri.size && !cPri.has(String(x.pri||2)))return false;
+    return true;
+  });
+  /* 排序：优先级 → 行业重点顺序 → 库内命中数。没命中任何库内记录的排后面，
+     因为那种只有「纸面身份」，没有花钱的证据。 */
+  list.sort(function(a,b){
+    var pa=a.pri||2, pb=b.pri||2;
+    if(pa!==pb) return pa-pb;
+    var ga=AB_GRP_ORDER.indexOf(abGrp(a.grp)), gb=AB_GRP_ORDER.indexOf(abGrp(b.grp));
+    if(ga<0)ga=99; if(gb<0)gb=99;
+    if(ga!==gb) return ga-gb;
+    return (b.n||0)-(a.n||0);
+  });
   el('cliGrid').innerHTML=list.map(function(x){
     var hit=x.n>0, ab=x.abroad||[], open=cEx.has(x.name);
+    var pri=x.pri||2;
+    var priTag = pri===1
+      ? '<span class="cc-tag" style="background:#e8f1ff;color:#1053c9">江浙沪皖 · 优先</span>'
+      : (pri===2 ? '<span class="cc-tag" style="background:#f1f3f6;color:#5a6270">外地大厂</span>'
+                 : '<span class="cc-tag none">自动发现 · 待确认</span>');
+    /* 「为什么要跟这家」——这是整张卡最该先看的一句，放最上面 */
+    var whyHtml = x.why
+      ? '<div class="ab-why"><span class="ab-why-t">为什么要跟</span>'+esc(x.why)+'</div>'
+      : '';
+    /* 已知海外基地：一眼看出他在哪几个国家建厂，我们的人该去哪 */
+    var projHtml = x.proj
+      ? '<div class="ab-proj"><span class="ab-proj-t">海外基地</span>'+esc(x.proj)+
+        (x.rg?'<span class="ab-rg">集团所在地 '+esc(x.rg)+'</span>':'')+'</div>'
+      : (x.rg?'<div class="ab-proj"><span class="ab-proj-t">集团所在地</span>'+esc(x.rg)+'</div>':'');
+
     // 打通：客户卡片上带出「情报精选 + 行业动态」里提到该客户的内容（2026-10-20）
     var nw=x.news||[], nwHtml='';
     if(nw.length){
@@ -2171,7 +2631,7 @@ function renderClients(){
     var abHtml='';
     if(ab.length){
       var abShow=open?ab:ab.slice(0,AB_SHOW);
-      abHtml='<div class="cc-i"><div style="color:#a85c10;font-weight:700;margin-bottom:3px">海外 / 扩张动态'+(ab.length>AB_SHOW&&!open?'<span style="font-weight:400;color:#8a9099">（'+ab.length+' 条，默认显示 '+AB_SHOW+'）</span>':'')+'</div><ul>'+
+      abHtml='<div class="cc-i"><div style="color:#a85c10;font-weight:700;margin-bottom:3px">海外建厂 / 扩张动态'+(ab.length>AB_SHOW&&!open?'<span style="font-weight:400;color:#8a9099">（'+ab.length+' 条，默认显示 '+AB_SHOW+'）</span>':'')+'</div><ul>'+
         abShow.map(function(a){
           return '<li'+(a.desc?' title="'+esc(a.desc)+'"':'')+'>'+(a.url?'<a href="'+esc(a.url)+'" target="_blank" rel="noopener">':'')+
             '<span class="cc-tag" style="background:#fff2e0;color:#a85c10">'+esc(a.tag||'动态')+'</span> '+
@@ -2182,22 +2642,23 @@ function renderClients(){
         (ab.length>AB_SHOW?ccMore('ab:'+x.name,ab.length-abShow.length,open):'')+'</div>';
     }
     var hitHtml = hit ?
-      '<div class="cc-m">'+(x.amt>0?'本库涉及金额 <b>'+money(x.amt)+'</b> · ':'')+'最新 '+esc(x.latest)+'</div>'+
+      '<div class="cc-m">本库国内涉及金额 <b>'+money(x.amt)+'</b> · 最新 '+esc(x.latest)+'</div>'+
       '<div class="cc-i"><ul>'+(open?x.items:x.items.slice(0,IT_SHOW)).map(function(it){
         return '<li>'+(it.url?'<a href="'+esc(it.url)+'" target="_blank" rel="noopener">':'')+
           esc(it.t)+(it.amt?' <b>'+money(it.amt)+'</b>':'')+
           ' <span class="sub-i">'+esc(it.st)+' '+esc(it.d)+(it.win?' · 中:'+esc(it.win):'')+'</span>'+
           (it.url?'</a>':'')+'</li>'}).join('')+'</ul>'+
       (x.items.length>IT_SHOW?ccMore('it:'+x.name,x.items.length-(open?x.items.length:IT_SHOW),open):'')+'</div>'
-      :'<div class="cc-m">本库（国内公开渠道）暂无该客户招标/中标记录。'+(ab.length?'海外动向见上。':'建议直接对接跟进，或补充其专属采购平台到监测清单。')+'</div>';
-    return '<div class="ccard"><div class="cc-h"><b>'+esc(x.name)+'</b>'+
-      '<span class="cc-tag" style="background:'+(GTAG[x.grp]||'#f1f3f6')+';color:'+(GCOL[x.grp]||'#5a6270')+'">'+esc(x.grp)+'</span>'+
-      (hit?'<span class="cc-tag" style="background:#fff2e0;color:#a85c10">'+x.n+' 条库内记录</span>'
-         :'<span class="cc-tag none">库内暂无</span>')+
+      :'<div class="cc-m" style="color:#8a9099">本库（国内公开渠道）暂无该客户记录——不代表没机会，'+
+        '海外建厂信息通常先在集团官网/行业媒体发布，不在国内招标平台。</div>';
+    return '<div class="ccard ab-card"><div class="cc-h"><b>'+esc(x.name)+'</b>'+
+      '<span class="cc-tag" style="background:'+(GTAG[abGrp(x.grp)]||'#f1f3f6')+';color:'+(GCOL[abGrp(x.grp)]||'#5a6270')+'">'+esc(abGrp(x.grp))+'</span>'+
+      priTag+
+      (hit?'<span class="cc-tag" style="background:#fff2e0;color:#a85c10">'+x.n+' 条库内记录</span>':"")+
       (nw.length?'<span class="cc-tag" style="background:#e8f1ff;color:#1053c9">'+nw.length+' 条相关情报</span>':'')+'</div>'+
-      nwHtml+abHtml+hitHtml+
-      '<div class="cc-i"><a href="javascript:searchFor(\''+esc(x.kw)+'\')">在商机库中搜索相关记录 ↗</a></div>'+
-      '</div>'}).join('')||'<div class="empty">暂无</div>';
+      whyHtml+projHtml+nwHtml+abHtml+hitHtml+
+      '<div class="cc-i"><a href="javascript:searchFor(\''+esc(x.kw)+'\')">在商机库中搜索该客户国内记录 ↗</a></div>'+
+      '</div>'}).join('')||'<div class="empty">没有匹配的客户，换个筛选条件试试</div>';
 }
 el('cliGrid').onclick=function(e){
   var m=e.target.closest('.cc-more'); if(!m)return;
@@ -2205,14 +2666,41 @@ el('cliGrid').onclick=function(e){
   if(cEx.has(k))cEx.delete(k);else cEx.add(k);
   renderClients();
 };
-chipsBox('f-cgrp',['钢铁','有色','化工化纤','水泥建材','其他制造'],null,'cgrp');
-el('f-cgrp').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
-  toggle(cRg,c.dataset.v);c.classList.toggle('on');renderClients()};
+/* 筛选器：优先级 + 行业。行业用归一后的名字，避免「有色 / 有色冶炼」重复出现。 */
+function buildAbFilters(){
+  var all=D.clients||[];
+  var pc={}; all.forEach(function(x){var p=String(x.pri||2);pc[p]=(pc[p]||0)+1});
+  el('f-cpri').innerHTML=[[1,'江浙沪皖优先'],[2,'外地大厂'],[3,'自动发现·待确认']].map(function(p){
+    var n=pc[String(p[0])]||0; if(!n)return '';
+    return '<span class="chip'+(cPri.has(String(p[0]))?' on':'')+'" data-k="cpri" data-v="'+p[0]+'">'+
+      p[1]+'<em>'+n+'</em></span>';
+  }).join('');
+  var gc={}; all.forEach(function(x){var g=abGrp(x.grp);gc[g]=(gc[g]||0)+1});
+  var keys=AB_GRP_ORDER.filter(function(k){return gc[k]}).concat(
+    Object.keys(gc).filter(function(k){return AB_GRP_ORDER.indexOf(k)<0}));
+  el('f-cgrp').innerHTML=keys.map(function(k){
+    return '<span class="chip'+(cRg.has(k)?' on':'')+'" data-k="cgrp" data-v="'+k+'">'+k+'<em>'+gc[k]+'</em></span>'
+  }).join('');
+}
+['f-cpri','f-cgrp'].forEach(function(id){
+  var box=el(id); if(!box)return;
+  box.onclick=function(e){
+    var c=e.target.closest('.chip'); if(!c)return;
+    var set=(c.dataset.k==='cpri')?cPri:cRg;
+    if(set.has(c.dataset.v))set.delete(c.dataset.v);else set.add(c.dataset.v);
+    c.classList.toggle('on'); renderClients();
+  };
+});
 
 /* ==================== 业主画像 · 供应商关系图谱 ==================== */
 /* 数据来自 build_owner_graph.py：把商机库 1475 条记录按「业主」和「中标单位」两个维度折叠。
    领导要的是「该联系谁」——所以每条记录必须能一键跳到公告原文，公告页里有招标人联系人/电话。 */
-var GR = D.graph || {owners:[],suppliers:[]};
+/* 2026-10-21 修正：GR 原来在脚本加载时一次性取值，那时 graph 模块还没合并进 D，
+   结果永远是空数组，业主图谱怎么点都是一片空白。改成 getter，每次读都取最新。 */
+Object.defineProperty(window, 'GR', {
+  configurable: true,
+  get: function () { return D.graph || window.DATA_GRAPH || { owners: [], suppliers: [] }; }
+});
 var gSt = {m:'owner', q:'', sel:'', rg:''};
 var GR_RG={江苏:'js',浙江:'zj',上海:'sh',安徽:'ah'};
 function gRgOf(x){ return x.rgAll?Object.keys(x.rgAll):(x.rgs||[]).map(function(r){return r.k}) }
@@ -2254,56 +2742,500 @@ function gContacts(o){
   return '<div class="gblk"><h4>公告披露的联系方式 <small style="font-weight:400;color:var(--tx3)">从公告原文抽取，拨打前请自行核对</small></h4>'+
     '<div style="font-size:12.5px;color:var(--tx2);line-height:1.85">'+rows.join('')+'</div></div>';
 }
-function renderGraphOwner(o){
-  var rgTag=(o.rgAll?Object.keys(o.rgAll):[]).map(function(k){
-    return '<span class="gtag '+(GR_RG[k]||'')+'">'+esc(k)+'</span>'}).join('');
-  var sub=o.subs||[];
-  var rel=(o.sups||[]).map(function(s){
-    return '<div class="grel"><span class="nm" onclick="gPick(\'sup\',\''+esc(s.name).replace(/'/g,"\\'")+'\')">'+esc(s.name)+'</span>'+
-      '<span class="rt">合作 '+s.n+' 次'+(s.amt?' · '+money(s.amt):'')+' · 最近 '+esc(s.last||'—')+'</span></div>'}).join('');
-  return '<div class="ccard" style="padding:16px 18px">'+
-    '<div class="cc-h"><b style="font-size:17px">'+esc(o.name)+'</b>'+rgTag+
-      '<span class="cc-tag" style="background:#fff2e0;color:#a85c10">业主 / 招标人</span></div>'+
-    '<div class="pj-act" style="border-top:none;padding-top:6px;margin-top:6px">'+
-      '<a href="https://www.qcc.com/web/search?key='+encodeURIComponent(o.name)+'" target="_blank" rel="noopener nofollow" title="外部站点，需自行登录；接入企查查 API 后此处将直接显示工商信息">企查查：查工商 / 股东 / 诉讼 ↗</a>'+
-      '<a href="javascript:searchFor(\''+esc(o.name).replace(/'/g,"\\'")+'\')">在商机库中搜它的项目 ↗</a></div>'+
-    '<div class="gmet">'+
-      '<div><b>'+o.n+'</b><span>本库项目数</span></div>'+
-      '<div><b>'+gMoney(o.amt)+'</b><span>已公示金额</span></div>'+
-      '<div><b>'+o.nWin+'</b><span>已出中标结果</span></div>'+
-      '<div><b>'+o.nSup+'</b><span>合作供应商</span></div>'+
-      '<div><b style="font-size:13px">'+esc(o.latest||'—')+'</b><span>最近动态</span></div>'+
-    '</div>'+
-    '<div class="gblk"><h4>主要供应商 / 中标单位 <small style="font-weight:400;color:var(--tx3)">点名字看该供应商档案</small></h4>'+
-      (rel||'<div class="gempty">本库尚未抓到该业主的中标结果公告（多为仍在招标或未公示）</div>')+'</div>'+
-    '<div class="gblk"><h4>采购方向 / 细分赛道分布</h4>'+gBars(sub)+'</div>'+
-    '<div class="gblk"><h4>阶段分布</h4>'+gBars(Object.keys(o.st||{}).sort(function(a,b){return o.st[b]-o.st[a]})
-      .map(function(k){return {k:k,n:o.st[k]}}))+'</div>'+
-    '<div class="gblk"><h4>项目记录 <small style="font-weight:400;color:var(--tx3)">点标题直达公告原文</small></h4>'+gItems(o.items,15)+'</div>'+
-    gContacts(o)+'</div>';
+/* ==================== 深度档案（统一模板，2026-10-21）====================
+   用户要求：「对手画像和业主画像统一成中国联合那种」。
+
+   中国联合那页之所以好，不是因为排版，是因为它有五个区块：
+     ① KPI 条  ② 企业档案（含资质证书编号）  ③ 业绩明细表（带规模/赛道/原文直链）
+     ④ 赛道 + 地域 + 年份分布  ⑤ 打法判断（人话结论）
+
+   这里的实现原则：
+     · ①②③④ 全部由本库数据程序化算出，**不手写任何数字**；
+     · ⑤「看法」只做「基于本库数据的观察」，每条结论必须带可核对的数字，
+       不做「这家公司实力雄厚」这种套话 —— 那种话没有任何决策价值；
+     · **企业资质证书编号我们库里没有**（中国联合那条 A133000033 是人工查的）。
+       这里给的是「待补录」占位 + 去哪查，绝不留一个看起来像真的假证书号。
+
+   一次做成通用函数 profPage(kind, item)，业主 / 供应商 / 对手三类共用，
+   以后加字段只改一处，不会出现「业主页新了、对手页还是老样子」。 */
+
+var PROF_KIND = {
+  owner:      {label:'业主 / 招标人',       cls:'own', verb:'发包'},
+  sup:        {label:'供应商 / 中标单位',    cls:'sup', verb:'投标'},
+  rival:      {label:'同业 / 竞争对手',      cls:'riv', verb:'投标'}
+};
+var SEG_TONE = {'热电联产·集中供热':'t1','余热余压利用':'t1','钢铁煤气发电':'t1',
+  '有色冶炼供能':'t2','自备电厂·能源站':'t2','化工余热回收':'t2','数据中心供能':'t2',
+  '土壤与场地修复':'t3','废水零排放':'t3','市政污水':'t3','垃圾焚烧发电':'t1','其他':'t3'};
+
+function profMoney(a){ return (a==null||a<=0) ? '<span class="pm-na">未公示</span>' : money(a); }
+function profRank(arr,n){ return arr.slice(0,n).map(function(r,i){
+  return '<span class="prk'+(i===0?' p1':'')+'">'+esc(r)+'</span>' }).join(''); }
+
+/* 分布条：单条 0~100%，带数值。统一口径，避免「有的按金额、有的按条数」看不出差别。 */
+function profBars(rows,tip){
+  if(!rows||!rows.length) return '<div class="pm-empty">暂无</div>';
+  var mx=Math.max.apply(null,rows.map(function(r){return r.v}))||1;
+  return '<div class="pbars">'+rows.map(function(r){
+    return '<div class="pbar"><span class="l" title="'+esc(r.k)+'">'+esc(r.k)+'</span>'+
+      '<span class="t"><i class="'+(r.tone||'')+'" style="width:'+Math.max(4,Math.round(r.v/mx*100))+'%"></i></span>'+
+      '<span class="v">'+esc(r.txt||r.v)+'</span></div>'}).join('')+'</div>'+
+    (tip?'<div class="plegend">'+tip+'</div>':'');
 }
-function renderGraphSup(s){
-  // 地域分布优先用后端预聚合的 rgs（items 里不一定带 rg 字段）
-  var rgSeg=(s.rgs&&s.rgs.length)?s.rgs:gSeg(s.items||[]);
-  var own=(s.owners||[]).map(function(o){
-    return '<div class="grel"><span class="nm" onclick="gPick(\'owner\',\''+esc(o.name).replace(/'/g,"\\'")+'\')">'+esc(o.name)+'</span>'+
-      '<span class="rt">中标 '+o.n+' 次</span></div>'}).join('');
-  return '<div class="ccard" style="padding:16px 18px">'+
-    '<div class="cc-h"><b style="font-size:17px">'+esc(s.name)+'</b>'+
-      '<span class="cc-tag">供应商 / 中标单位</span></div>'+
-    '<div class="gmet">'+
-      '<div><b>'+s.n+'</b><span>本库中标次数</span></div>'+
-      '<div><b>'+gMoney(s.amt)+'</b><span>中标金额合计</span></div>'+
-      '<div><b>'+s.nOwners+'</b><span>服务业主数</span></div>'+
-      '<div><b style="font-size:13px">'+esc(s.last||'—')+'</b><span>最近中标</span></div>'+
-    '</div>'+
-    '<div class="gblk"><h4>服务过的业主 <small style="font-weight:400;color:var(--tx3)">点名字看该业主档案</small></h4>'+
-      (own||'<div class="gempty">暂无</div>')+'</div>'+
-    '<div class="gblk"><h4>擅长方向（按我司细分赛道归类本库中标记录）</h4>'+gBars(s.subs||[])+'</div>'+
-    '<div class="gblk"><h4>地域分布</h4>'+gBars(rgSeg,'own')+'</div>'+
-    '<div class="gblk"><h4>中标记录 <small style="font-weight:400;color:var(--tx3)">点标题直达公告原文</small></h4>'+gItems(s.items,15)+'</div></div>';
+
+/* 从记录数组里聚合：赛道 / 地域 / 年份 / 阶段 / 金额分布
+   ⚠ 字段名踩过坑，别按直觉改：
+     · 赛道在数据里叫 sub（不是 sg）—— segmented 版 items 才用 sg；
+     · 业主 items 里**没有 rg 字段**，地域只能用业主级的 rgAll（见 profAgg 第二参数）；
+     · 供应商 items 里业主叫 owner（不是 buyer/o）。
+   写错一个字不会报错，只会静默变成「全部未标注」，然后看法里就会出现
+   「11 条记录 100% 是其他」「只在未标注」这种一眼假的结论。 */
+function profAgg(items, rgFallback){
+  var seg={}, rg={}, yr={}, st={}, withAmt=0, amtSum=0, maxItem=null, bigN=0;
+  (items||[]).forEach(function(x){
+    var s=x.sub||x.sg||'未分类';
+    seg[s]=(seg[s]||0)+1;
+    var r=x.rg||'';
+    if(r) rg[r]=(rg[r]||0)+1;
+    var y=(x.d||'').slice(0,4) || '未标注'; yr[y]=(yr[y]||0)+1;
+    if(x.st) st[x.st]=(st[x.st]||0)+1;
+    if(x.amt>0){
+      withAmt++; amtSum+=x.amt;
+      if(x.amt>=1) bigN++;
+      if(!maxItem || x.amt>maxItem.amt) maxItem=x;
+    }
+  });
+  /* 记录里没有地域 → 用实体级的地域分布兜底（一个业主 11 条全在安徽，那就把 11 条都记到安徽） */
+  if(!Object.keys(rg).length && rgFallback){
+    Object.keys(rgFallback).forEach(function(k){ rg[k]=rgFallback[k] });
+  }
+  function toRows(m,order){
+    var ks=Object.keys(m);
+    if(order) ks.sort(function(a,b){
+      var ia=order.indexOf(a), ib=order.indexOf(b);
+      if(ia<0)ia=99; if(ib<0)ib=99;
+      return ia!==ib ? ia-ib : m[b]-m[a];
+    });
+    else ks.sort(function(a,b){return m[b]-m[a]});
+    return ks.map(function(k){ return {k:k, v:m[k], txt:m[k]+' 条', tone:SEG_TONE[k]||''} });
+  }
+  return {
+    seg: toRows(seg, Object.keys(SEG_NAME).map(function(k){return SEG_NAME[k]}).concat(['其他','未分类'])),
+    rg:  toRows(rg),
+    yr:  toRows(yr).sort(function(a,b){return a.k.localeCompare(b.k)}),
+    st:  toRows(st),
+    n: (items||[]).length, withAmt: withAmt, amtSum: amtSum,
+    maxItem: maxItem, bigN: bigN,
+    amtCov: (items||[]).length ? Math.round(withAmt/(items||[]).length*100) : 0
+  };
 }
+
+/* ---------- ⑤ 看法：只写能从数据里读出来的话，每条带数字 ---------- */
+function profInsight(kind, o){
+  var A=profAgg(o.items||[], o.rgAll || (o.rg&&typeof o.rg==='object'?o.rg:null)), out=[];
+  var kn=PROF_KIND[kind]||PROF_KIND.owner;
+  if(!A.n) return ['<b>本库暂无记录。</b>这不代表它没业务，只说明它'+(kind==='owner'?'发包':'投标')+'的平台不在我们已监测的 49 个渠道里。要判断它，只能另找数据源。'];
+
+  // 1) 集中度：大单是不是基本盘
+  if(A.withAmt>0){
+    var bigAmt=0;
+    (o.items||[]).forEach(function(x){ if(x.amt>=1) bigAmt+=x.amt; });
+    var share=Math.round(bigAmt/A.amtSum*100);
+    if(share>=60 && A.bigN>0){
+      out.push('<b>集中度极高。</b>'+A.bigN+' 条亿元级项目合计 '+money(bigAmt)+'，占已公示金额的 '+share+
+        '%。拿下一个大单胜过几十个小单 —— '+(kind==='owner'?'给它报价时，方案质量比小项降价重要'
+        :'跟它抢标时别在几百万的小单上死磕价格')+'。');
+    }else if(A.bigN===0){
+      out.push('<b>没有亿元级大单。</b>已公示 '+A.withAmt+' 条记录里最大一笔 '+
+        (A.maxItem?money(A.maxItem.amt):'—')+'，'+(kind==='owner'
+        ?'这类业主预算偏紧，投标时方案要压投资、算清回收期，技术标堆配置反而失分。'
+        :'这家单位做的是中小单，不太可能跟我们在大 EPC 上正面撞，防它的场景主要在分包层。'));
+    }
+  }else{
+    out.push('<b>全部记录都没有金额。</b>本库 '+A.n+' 条记录一条金额都没公示，'+
+      '没法判断盘子大小 —— 这是上游公告不写金额造成的，不是我们漏抓。');
+  }
+
+  // 2) 赛道集中度：是不是只做一类
+  if(A.seg.length){
+    var top=A.seg[0], tot=A.seg.reduce(function(s,r){return s+r.v},0);
+    var pct=Math.round(top.v/tot*100);
+    if(A.seg.length===1){
+      out.push('<b>只做一类。</b>'+A.n+' 条记录 100% 是「'+esc(top.k)+'」。'+
+        (kind==='owner'?'客户结构单一，只要它这条线还在投，我们就有稳定机会；反过来说它一旦停产检修，这个口子就断了。'
+        :'能力面很窄，撞单场景很清楚：只在「'+esc(top.k)+'」标段会遇到它。'));
+    }else if(pct>=60){
+      out.push('<b>主业是「'+esc(top.k)+'」。</b>'+top.v+' / '+tot+' 条（'+pct+'%）集中在这一类，其余分散在 '+
+        (A.seg.length-1)+' 个方向。'+(kind==='owner'?'我们的主力业务正对着它的主要采购口。':'这个方向是它的基本盘，要赢它得靠这方面更硬的业绩。'));
+    }else{
+      out.push('<b>需求比较分散。</b>最大一类「'+esc(top.k)+'」也只占 '+pct+'%，涉及 '+A.seg.length+
+        ' 个方向 —— 这种客户/对手不好用一个标段去概括，要按项目逐个看。');
+    }
+  }
+
+  // 3) 地域：是不是只在本地
+  if(A.rg.length){
+    var r1=A.rg[0], rpct=Math.round(r1.v/A.n*100);
+    if(A.rg.length===1){
+      out.push('<b>只在'+esc(r1.k)+'。</b>本库 '+A.n+' 条记录全部落在'+esc(r1.k)+'，没有跨省。');
+    }else if(rpct>=70){
+      out.push('<b>'+esc(r1.k)+'是基本盘。</b>'+r1.v+' / '+A.n+' 条（'+rpct+'%）在'+esc(r1.k)+
+        '，另外 '+A.rg.length+' 个省市有零星记录。');
+    }else{
+      out.push('<b>地域分散。</b>覆盖 '+A.rg.length+' 个省市，最多的'+esc(r1.k)+'也只占 '+rpct+'%。');
+    }
+  }
+
+  // 4) 供应商关系（只对业主有意义）：关系是不是集中在少数几家
+  if(kind==='owner' && (o.sups||[]).length){
+    var ss=o.sups.slice().sort(function(a,b){return (b.n||0)-(a.n||0)});
+    var A1=ss.filter(function(s){return s.cls==='A'}), B1=ss.filter(function(s){return s.cls!=='A'});
+    var topN=ss[0].n||0, allN=ss.reduce(function(s,x){return s+(x.n||0)},0);
+    var tp=allN?Math.round(topN/allN*100):0;
+    if(ss.length===1){
+      out.push('<b>只有 1 家供应商。</b>「'+esc(ss[0].name)+'」包了它全部的活'+
+        (ss[0].n>1?'（'+ss[0].n+' 次）':'')+'。这种关系很硬，短期难撬 —— '+
+        (ss[0].cls==='A'?'而它本身就是设计院/工程公司，是我们正面竞争对手。':'可以试着先跟这家联手，或者等它做不下来的大项目。'));
+    }else if(tp>=50){
+      out.push('<b>关系集中在 1 家。</b>「'+esc(ss[0].name)+'」占了 '+tp+
+        '% 的合作次数（'+topN+' 次 / 全 '+allN+' 次）。想进这家业主，先看能不能跟它搭，硬闯性价比低。');
+    }
+    if(A1.length && B1.length){
+      out.push('<b>两类供应商同时存在。</b>A 类 '+A1.length+' 家（设计院/工程公司，同行兼对手，会跟我们抢 EPC）、B 类 '+
+        B1.length+' 家（建材/施工/设备，不投 EPC，但跟业主熟）。'+
+        '<b>找 B 类引路、防 A 类抢标</b>，是进这家业主最短的两条路。');
+    }
+  }
+
+  // 5) 时间：最近还动不动
+  if(o.latest){
+    var days=Math.round((new Date('2026-10-21') - new Date(o.latest))/86400000);
+    if(days<=90) out.push('<b>最近很活跃。</b>最新一条是 '+esc(o.latest)+'，距今 '+days+' 天，值得马上跟进。');
+    else if(days<=365) out.push('<b>一年内有动作。</b>最新 '+esc(o.latest)+'（'+days+' 天前），不算冷。');
+    else out.push('<b>最近较冷。</b>最新一条是 '+esc(o.latest)+'，距今 '+days+' 天 —— '+
+      (kind==='owner'?'它可能已经改走不公开渠道，或者这条线停了。':'要么业务收缩，要么换了不公开的渠道。'));
+  }
+  return out;
+}
+
+/* ---------- 整页组装 ---------- */
+/* 工商字段：能接的接，接不了的直说 + 给跳转（用户原话：
+   「证书不是有企查查或者四库一平台吗？能接入数据就接入，接不了直接跳转过去」）。
+   ⚠ 这里刻意只显示一个字段：统一社会信用代码。
+     四库一平台的企业列表接口实测能免 token 拿到它，但详情接口（资质证书、注册人员）
+     全部返回 code:408 token失效，要过人机验证 —— 那属于该人工做的事，不该硬爬。
+     所以：代码给真的（有就显示，没有就说没有），资质等级给链接让人自己去看。 */
+var SIKU_UI = (window.DATA_SIKU && window.DATA_SIKU.items) ? window.DATA_SIKU.items : {};
+function _sikuApply(){
+  SIKU_UI = (window.DATA_SIKU && window.DATA_SIKU.items) ? window.DATA_SIKU.items : SIKU_UI;
+}
+function _skuKey(n){ return (n||'').replace(/[（）()\s]/g,'') }
+function skuOf(name){
+  var k=_skuKey(name);
+  if(SIKU_UI[name]) return SIKU_UI[name];
+  for(var n in SIKU_UI){ if(_skuKey(n)===k) return SIKU_UI[n]; }
+  return null;
+}
+/* 集团汇总行（如「华光环能系」由 2 个主体合并而成）不是企业实体，
+   四库按这个名字查必然查不到。这时候要从它的成员里挑一个有信用代码的拿出来。
+   返回 {hit, via}：hit 是四库记录，via 是实际查到的那家公司名。 */
+function skuOfAny(name, members){
+  var r=skuOf(name);
+  if(r && r.found) return {hit:r, via:name};
+  var list=members||[];
+  for(var i=0;i<list.length;i++){
+    var m=typeof list==='string'?list:(list[i]&&list[i].name);
+    var rr=skuOf(m);
+    if(rr && rr.found) return {hit:rr, via:m};
+  }
+  return {hit:r, via:name};
+}
+function skuHtml(name, K, members){
+  var _s=skuOfAny(name, members), r=_s.hit, via=_s.via;
+  var jz='https://jzsc.mohurd.gov.cn/data/company?complexname='+encodeURIComponent(name||'');
+  var qcc='https://www.qcc.com/web/search?key='+encodeURIComponent(name||'');
+  var h='';
+  if(r && r.found && r.credit){
+    h+='<dt>统一信用代码</dt><dd><code style="background:#eef1f6;padding:1px 5px;border-radius:3px;font-size:12px">'+esc(r.credit)+'</code>'+
+       '<span class="pm-i" style="margin-left:6px">四库一平台'+
+       (via!==name?'（按主体「'+esc(via)+'」查的）':'')+'</span></dd>';
+    // 四库列表接口只给信用代码 / 地区 / 收录时间；法人、注册资本、资质证书号都在详情页（要 token）。
+    // 不显示空字段——宁可少一行，也不要一个「法定代表人：—」让人以为数据坏了。
+    if(r.region) h+='<dt>四库登记地区</dt><dd>'+esc(r.region)+'</dd>';
+  }else if(r && r.found===false && !r.err){
+    h+='<dt>统一信用代码</dt><dd class="na">四库一平台未收录（该库只收有建筑/设计/监理资质的企业，纯设备商、贸易商查不到）</dd>';
+  }else{
+    h+='<dt>统一信用代码</dt><dd class="na">尚未查询 · <a href="'+jz+'" target="_blank" rel="noopener nofollow">去四库一平台查 ↗</a></dd>';
+  }
+  h+='<dt>资质等级</dt><dd class="na">需人机验证，本站不代查 · '+
+     '<a href="'+jz+'" target="_blank" rel="noopener nofollow">四库一平台 ↗</a></dd>';
+  h+='<dt>注册资本 / 股东 / 诉讼</dt><dd class="na">需甲方账号 · '+
+     '<a href="'+qcc+'" target="_blank" rel="noopener nofollow">企查查 ↗</a></dd>';
+  return h;
+}
+function skuNote(name, members){
+  var _s=skuOfAny(name, members), r=_s.hit, via=_s.via;
+  var head='<b>这几项是怎么来的：</b>信用代码和法定代表人来自<b>住建部四库一平台</b>公开查询接口（免登录）；'+
+           '资质等级、注册人员要过人机验证，注册资历/股东要企查查付费账号 —— 这两类本站不代抓，给你直达链接自己点。';
+  if(r && r.found && r.credit){
+    var cmp = via!==name ? ('它旗下的「'+esc(via)+'」') : ('「'+esc(name)+'」');
+    return head+'<br><b>注意：</b>四库收录的是'+cmp+'这个企业主体，'+
+      '公告里写的是『'+esc(name)+'』'+(r.exact?'，名称完全一致':'，<b style="color:#d4380d">名称不完全一致</b>，核对过再用')+'。'+
+      (r.collected?'<br>四库这条记录自己的收录时间是 <b>'+esc(r.collected)+'</b>，'+
+        '资质可能已变更，看资质以详情页为准。':'');
+  }
+  return head+'<br>这家没查到信用代码，不代表它不存在 —— 多半是它不是建筑业企业，四库本来就不收。';
+}
+
+function profPage(kind, o){
+  if(!o) return '<div class="gempty">暂无数据</div>';
+  var K=PROF_KIND[kind]||PROF_KIND.owner;
+  var A=profAgg(o.items||[], o.rgAll || (o.rg&&typeof o.rg==='object'?o.rg:null));
+  var ins=profInsight(kind,o);
+  var nm=esc(o.name);
+
+  /* ① KPI 条 */
+  var kpi=[];
+  if(kind==='owner'){
+    kpi.push(['n', o.n||A.n, '本库项目数', '']);
+    kpi.push(['a', profMoney(o.amt), '已公示金额', 'acc']);
+    kpi.push(['', o.nWin!=null?o.nWin:'—', '已出中标结果', '']);
+    kpi.push(['', o.nSup!=null?o.nSup:'—', '合作供应商', '']);
+    if(o.nSupA!=null) kpi.push(['', o.nSupA+' / '+(o.nSupB||0), 'A 类 / B 类供应商', '']);
+    kpi.push(['', A.rg.length, '涉及地区', '']);
+  }else if(kind==='sup'){
+    kpi.push(['n', o.n, '本库中标次数', '']);
+    kpi.push(['a', profMoney(o.amt), '中标金额合计', 'acc']);
+    kpi.push(['', o.nOwners||'—', '服务业主数', '']);
+    kpi.push(['', A.rg.length, '覆盖地区', '']);
+    kpi.push(['', esc(o.last||'—'), '最近中标', 'txt']);
+  }else{
+    kpi.push(['n', o.n, '本库中标次数', '']);
+    kpi.push(['a', profMoney(o.amt), '中标金额合计', 'acc']);
+    kpi.push(['', o.hm!=null?o.hm:0, '主场中标（一级/二级业务）', '']);
+    kpi.push(['', A.rg.length, '覆盖地区', '']);
+    kpi.push(['', esc(o.last||o.latest||'—'), '最近中标', 'txt']);
+  }
+  var kpiHtml='<div class="prof-kpi">'+kpi.map(function(x){
+    return '<div class="k '+(x[3]||'')+'"><div class="n">'+x[1]+'</div><div class="l">'+x[2]+'</div></div>'}).join('')+'</div>';
+
+  /* ② 身份卡（工商信息 · 本库暂无 → 明说） */
+  var idRows=[];
+  idRows.push(['全称', nm]);
+  if(o.rg) idRows.push(['地区', esc(Array.isArray(o.rg)?o.rg.join(' / '):o.rg)]);
+  if(kind==='rival' && o.main) idRows.push(['主攻赛道', esc(o.main)]);
+  /* 「集团成员」只在真的是集团合并行时显示（o.subs 里是 {name,...}）。
+     ⚠ rivalAsProfile 现在也可能往 o.subs 里塞赛道 {k,n}——
+       所以这里必须判 s.name 存不存在，否则会把赛道名当成公司名列出来。 */
+  var _mem=(o.subs||[]).filter(function(s){return s && s.name});
+  if(kind==='rival' && _mem.length>1)
+    idRows.push(['集团成员', _mem.map(function(s){return esc(s.name)}).join('<br>')]);
+  /* ⚠ 别图省事把 "+skuHtml(...)" 直接接在 join('') 后面 ——
+     JS 会把 `... + +skuHtml(...)` 解析成「加一个+号一元运算」，
+     字符串被转成数字、转不了就是 NaN，结果是整块工商信息**静默消失**，
+     页面不报错、也没人知道少了什么。必须先算出来存变量。 */
+  var _subs=(o.subs||[]).filter(function(x){return x&&x.name}).map(function(x){return x.name});
+  var skuLine=skuHtml(nm, K, _subs);
+  var skuText=skuNote(nm, _subs);
+  var idHtml='<div class="prof-sec"><h4><i></i>身份信息</h4><dl class="prof-co">'+
+    idRows.map(function(r){return '<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>'}).join('')+
+    skuLine+
+    '</dl>'+
+    '<div class="prof-note">'+skuText+'</div></div>';
+
+  /* ③ 业绩明细表 */
+  /* 供应商：地域用后端预聚合的 rgs=[{k,n}]，转成 {地域:条数} 给分布图用 */
+  (function(){
+    if(kind==='sup' && o.rgs && o.rgs.length && !o.rgAll){
+      var m={}; o.rgs.forEach(function(r){ m[r.k]=(m[r.k]||0)+r.n }); o.rgAll=m;
+    }
+  })();
+  var items=(o.items||[]).map(function(x){
+    return {t:x.t, amt:parseAmtAny(x.amt), d:x.d, rg:cleanRg(x.rg), url:x.url,
+            st:x.st, sub:x.sub||x.sg, win:x.win, owner:x.owner||x.buyer||x.o, buyer:x.buyer};
+  }).sort(function(a,b){return (b.amt||0)-(a.amt||0)});
+  var tb='<div class="prof-sec"><h4><i></i>'+(kind==='owner'?'发包记录':'中标业绩')+
+    ' <small>按金额降序 · 无金额的排后 · 共 '+items.length+' 条</small></h4>'+
+    '<div class="prof-tbwrap"><table class="prof-tb"><thead><tr>'+
+    '<th style="width:88px">日期</th><th>项目 / 赛道</th>'+
+    (kind==='owner'?'<th style="width:150px">中标单位</th>':'<th style="width:140px">业主</th>')+
+    '<th style="width:80px;text-align:right">金额</th><th style="width:60px">原文</th></tr></thead><tbody>'+
+    (items.length?items.map(function(x){
+      return '<tr><td class="d">'+esc(x.d||'—')+'</td>'+
+        '<td class="p"><b>'+esc(x.t||'')+'</b>'+
+          '<span class="tg2 '+(SEG_TONE[x.sub||x.sg]||'t3')+'">'+esc(x.sub||x.sg||'未分类')+'</span>'+
+          (x.st?'<span class="tg3">'+esc(x.st)+'</span>':'')+'</td>'+
+        (kind==='owner'
+          ? '<td class="o">'+(x.win?esc(x.win):'<span class="pm-na">未公示</span>')+'</td>'
+          : '<td class="o">'+esc(x.owner||x.buyer||x.o||'—')+'</td>')+
+        '<td class="m">'+profMoney(x.amt)+'</td>'+
+        '<td>'+(x.url?'<a class="lk" href="'+esc(x.url)+'" target="_blank" rel="noopener" title="打开公告原文">↗</a>':'—')+'</td></tr>';
+    }).join(''):'<tr><td colspan="5" class="pm-empty">本库暂无记录</td></tr>')+
+    '</tbody></table></div>'+
+    (A.amtCov<100?'<div class="plegend">金额覆盖率 '+A.amtCov+'%（'+A.withAmt+' / '+A.n+
+      ' 条有金额）—— 上游公告本身不写金额，不是我们漏抓。</div>':'')+'</div>';
+
+  /* ④ 分布 */
+  var distHtml='<div class="prof-two">'+
+    '<div class="prof-sec"><h4><i></i>'+(kind==='owner'?'采购方向':'擅长方向')+'</h4>'+profBars(A.seg)+'</div>'+
+    '<div class="prof-sec"><h4><i></i>地域分布</h4>'+profBars(A.rg)+'</div></div>'+
+    '<div class="prof-two">'+
+    '<div class="prof-sec"><h4><i></i>年份分布</h4>'+profBars(A.yr)+'</div>'+
+    '<div class="prof-sec"><h4><i></i>阶段分布</h4>'+profBars(A.st)+'</div></div>';
+
+  /* 关系网：业主→供应商 A/B；供应商→服务过的业主 */
+  var relHtml='';
+  if(kind==='owner'){
+    var ss=(o.sups||[]).slice().sort(function(a,b){return (b.n||0)-(a.n||0)});
+    var AA=ss.filter(function(s){return s.cls==='A'}), BB=ss.filter(function(s){return s.cls!=='A'});
+    var line=function(s,cls){
+      return '<div class="prof-rel"><span class="nm" onclick="gPick(\'sup\',\''+esc(s.name).replace(/'/g,"\\'")+'\')">'+esc(s.name)+'</span>'+
+        '<span class="tg2 '+(cls==='A'?'t1':'t2')+'">'+(cls==='A'?'A 类':'B 类')+'</span>'+
+        '<span class="rt">合作 '+s.n+' 次'+(s.amt?' · '+money(s.amt):'')+' · 最近 '+esc(s.last||'—')+'</span></div>'};
+    relHtml='<div class="prof-sec"><h4><i></i>供应商关系 · A/B 两类 <small>按在这家业主手里的中标次数排序，点名字看档案</small></h4>'+
+      (AA.length?'<div class="prof-grp"><span class="gt a">A 类 · 设计院 / 工程公司</span>'+
+        '<span class="gd">同行也是对手，会抢 EPC 总包；同时列在「同业与伙伴」</span></div>'+
+        AA.map(function(s){return line(s,'A')}).join(''):'')+
+      (BB.length?'<div class="prof-grp"><span class="gt b">B 类 · 建材 / 施工 / 设备</span>'+
+        '<span class="gd">不投 EPC，但参与得多说明跟这家业主关系好 —— 要打进去先找他们</span></div>'+
+        BB.map(function(s){return line(s,'B')}).join(''):'')+
+      (!AA.length&&!BB.length?'<div class="pm-empty">本库还没抓到这家业主的中标结果公告</div>':'')+
+      '</div>';
+  }else if(kind==='sup'){
+    var own=(o.owners||[]).slice().sort(function(a,b){return (b.n||0)-(a.n||0)});
+    relHtml='<div class="prof-sec"><h4><i></i>服务过的业主 <small>按中标次数排序，点名字看该业主档案</small></h4>'+
+      (own.length?own.map(function(x){
+        return '<div class="prof-rel"><span class="nm" onclick="gPick(\'owner\',\''+esc(x.name).replace(/'/g,"\\'")+'\')">'+esc(x.name)+'</span>'+
+          '<span class="rt">中标 '+x.n+' 次</span></div>'}).join(''):
+        '<div class="pm-empty">本库未抓到该单位中标</div>')+'</div>';
+  }
+
+  /* ⑤ 联系人与代理机构（2026-10-22 真正接上）
+     ⚠ gContacts() 早就写好了，但**从来没被调用过** ——
+       前端有这个函数、后端没有 contacts 字段，两边各自"不报错"，
+       结果业主档案里那块「公告披露的联系方式」永远是空的，
+       而它恰恰是用户最想要的（"该联系谁"）。
+       这一轮后端补齐了 contacts/agent，这里必须真的插进页面。
+       位置放在「供应商关系」之前：联系方式比关系网更急用。 */
+  var ctcHtml=gContacts(o);
+
+  /* ⑤ 看法 */
+  var insHtml='<div class="prof-sec prof-ins"><h4><i></i>基于本库数据的看法 <small>每条结论都带可核对的数字，不做无依据的判断</small></h4>'+
+    (ins.length?ins.map(function(t,i){
+      return '<div class="ins"><span class="no">'+(i+1)+'</span><div>'+t+'</div></div>'}).join(''):
+      '<div class="pm-empty">数据太少，下不了判断</div>')+
+    '<div class="prof-note">以上全部由本库 '+A.n+' 条公开公告聚合得出。'+
+    '「打法判断」这类需要行业经验的内容（比如它报价习惯、技术标得分）本库没有数据，'+
+    '不在这里硬编 —— 那要靠竞标现场记录，或者接第三方招投标数据库。</div></div>';
+
+  /* 动作条 */
+  var act='<div class="prof-act">'+
+    '<a href="javascript:searchFor(\''+esc((o.name||'').slice(0,8)).replace(/'/g,"\\'")+'\')">在商机库搜它的全部记录 ↗</a>'+
+    '<a href="https://www.qcc.com/web/search?key='+encodeURIComponent(o.name||'')+'" target="_blank" rel="noopener nofollow">企查查：工商 / 股东 / 诉讼 ↗</a>'+
+    '<a href="https://jzsc.mohurd.gov.cn/data/company?complexname='+encodeURIComponent(o.name||'')+'" target="_blank" rel="noopener nofollow">四库一平台：资质证书 ↗</a>'+
+
+    '</div>';
+
+  return '<div class="prof">'+
+    '<div class="prof-hd"><div><h3>'+nm+'</h3>'+
+      '<div class="prof-sub"><span class="kbadge '+K.cls+'">'+K.label+'</span>'+
+      (kind==='owner'?'<span class="pm-i">共 '+A.n+' 条发包记录</span>':'<span class="pm-i">共 '+A.n+' 条中标记录</span>')+
+      (o.latest?'<span class="pm-i">最近动态 '+esc(o.latest)+'</span>':'')+
+      '</div></div></div>'+
+    kpiHtml+idHtml+ctcHtml+tb+distHtml+relHtml+insHtml+act+'</div>';
+}
+
+/* 对手：从 rivals 数据转成通用档案结构
+   ⚠ 金额解析踩过的坑：competitors 的 recent[].amount 是**中文字符串**
+     （"2.3亿" / "17,339万" / ""），不是数字。直接塞进 amt 会变成 NaN，
+     页面上就会出现「NaN万」这种明显错误，而且「金额覆盖率 0%」和
+     「表里有 2.3亿」会自相矛盾。必须统一转成「亿元」为单位的数字。 */
+function parseAmtAny(v){
+  if(v==null || v==='') return null;
+  if(typeof v==='number') return v>0 ? v : null;
+  var s=String(v).replace(/[,\s，]/g,'');
+  var m=s.match(/([0-9]+(?:\.[0-9]+)?)\s*(亿元|亿|万元|万|元)?/);
+  if(!m) return null;
+  var n=parseFloat(m[1]);
+  if(!(n>0)) return null;
+  var u=m[2]||'';
+  if(u==='亿'||u==='亿元') return n;
+  if(u==='万'||u==='万元') return n/10000;
+  if(u==='元') return n/1e8;
+  /* 没有单位：这种一般是「金额」栏只写了数字，按元处理风险太大，
+     宁可当成未知，也不要编出一个亿级数字。 */
+  return null;
+}
+/* 地域字段里混了来源名（"微信·路桥工程即时通"、"微信·路讯网-华北讯"），
+   那是采集来源不是地域。直接当地区显示会让「地域分布」变成来源统计，毫无意义。 */
+function cleanRg(v){
+  if(!v) return '';
+  if(/微信|公众号|路讯|路桥|讯|网$|\.com/i.test(v)) return '';
+  return String(v).trim();
+}
+function rivalAsProfile(r){
+  /* ⚠ 赛道字段在 rivals 里叫 segs，是个 {赛道:条数} 的字典，不是数组；
+     而 items 里根本没有 sub 字段。原来写 x.sub||x.sg||r.main，
+     等于给每条记录都硬塞了「主攻赛道」，于是档案里
+     「擅长方向」100% 是同一类、看法里还会煞有介事地写「能力面很窄」——
+     一个纯粹由代码造成的假结论。现在按 segs 把每条记录对到具体赛道，
+     对不上就留空，让 profAgg 如实说「未标注」。 */
+  var segs=r.segs||{};
+  var segNames=Object.keys(segs);
+  /* 单赛道单位：所有记录都归到这个赛道；多赛道且 items 无细分时留空不猜 */
+  var onlyOne = segNames.length===1 ? segNames[0] : '';
+  var items=(r.items||[]).map(function(x){
+    return {t:x.t, amt:parseAmtAny(x.amt!=null?x.amt:x.amount), d:x.d||x.date,
+            rg:cleanRg(x.rg||x.region), url:x.url, st:x.st||'中标',
+            sub:x.sub||x.sg||onlyOne||'', owner:x.buyer||x.owner||''};
+  });
+  var amtSum=0, withAmt=0;
+  items.forEach(function(x){ if(x.amt>0){amtSum+=x.amt;withAmt++;} });
+  /* subs：给分布图用。segs 有就直接用（条数是后端算好的），
+     没有就从 items 里的 sub 聚合。 */
+  var subs = (r.subs&&r.subs.length) ? r.subs
+           : (segNames.length ? segNames.map(function(k){return {k:k,n:segs[k]}}) : []);
+  return {name:r.name, n:items.length||r.n||0,
+          amt: amtSum>0 ? Math.round(amtSum*1000)/1000 : (r.amt||0),
+          hm:r.hm, latest:r.latest||(items[0]&&items[0].d)||'',
+          items:items, subs:subs, main:r.main||r.cat, rg:r.rg||r.city,
+          nOwners:r.nOwners};
+}
+
+/* 「收起档案」：把同业页自己的档案区清掉，回到名单。
+   （2026-10-22 之前的版本叫 gRivalBack，是给"跳去客户页"那套用的，现在不跳页了，
+     那个函数保留着兼容，但同业这边改用下面这个。） */
+function rRivalBack(){
+  var pb=document.getElementById('rProfBox');
+  if(pb){ pb.style.display='none'; pb.innerHTML=''; }
+  /* 收起来之后滚回档案列表顶部，让人看到「我刚才在看哪张卡」 */
+  var box=document.getElementById('rRivalBox');
+  if(box && box.style.display!=='none') box.scrollIntoView({block:'start',behavior:'smooth'});
+}
+
+/* 「返回业主名单」：清掉同业档案、回到业主图谱的默认列表。
+   顺带把页签切回同业——用户是从那儿点进来的，看完对手应该回对手页，
+   而不是被丢在一个陌生的业主图谱里。 */
+function gRivalBack(){
+  gSt.fromRival=1;
+  var box=document.getElementById('grMain');
+  if(box){ box.innerHTML=''; box.dataset.tmp=''; }
+  gSt.m='owner'; gSt.sel='';
+  renderGraph();
+}
+function renderGraphOwner(o){ return profPage('owner', o); }
+function renderGraphSup(s){ return profPage('sup', s); }
 function renderGraph(){
+  /* 从同业深度档案「返回业主名单」时，把来源页签也切回去，
+     否则用户看到的是业主档案、人还站在同业那一页，会以为点错了。 */
+  /* 「返回业主名单」：从同业档案跳过来的，回同业页签。
+     用 gSt.fromRival 而不是 gPick._from——后者在 gPick 开始时就设了，
+     renderGraph 一看就立刻弹走，会把用户刚切过去的客户页顶掉（踩过）。 */
+  if(gSt.fromRival){
+    gSt.fromRival=0;
+    var _rt=document.querySelector('#tabs > [data-t="1"]');
+    if(_rt && !_rt.classList.contains('on')) _rt.click();
+  }
   var pool = gSt.m==='owner' ? (GR.owners||[]) : (GR.suppliers||[]);
   if(el('grMeta')) el('grMeta').textContent = '业主 '+(GR.owners||[]).length+' 家 · 供应商 '+(GR.suppliers||[]).length+
     ' 家 · 可关联记录 '+(GR.nRel||0)+' 条';
@@ -2328,11 +3260,141 @@ function renderGraph(){
   if(!cur)cur=list[0];
   if(!cur){el('grMain').innerHTML='<div class="gempty">暂无数据，请先运行 build_owner_graph.py</div>';return}
   el('grMain').innerHTML = gSt.m==='owner' ? renderGraphOwner(cur) : renderGraphSup(cur);
+  renderLatent();
 }
-function gPick(mode,name){ gSt.m=mode; gSt.sel=name; gSt.q=''; el('grQ').value=''; renderGraph(); }
+/* 潜在业主（2026-10-21）：用户要求「保留一个潜在业主标签，放在二级位置简单展示项目」。
+   只列名字 + 地区 + 发过什么赛道 + 1 条样例，点不进深度画像，也不参与排序。
+   放在有效业主名单下面，灰一档，一眼能看出「这些人暂时不是我们的客户」。 */
+function renderLatent(){
+  var box=el('grLatent'); if(!box)return;
+  var list=(D.latent||[]).filter(function(x){
+    return !gSt.q || (x.name||'').toLowerCase().indexOf(gSt.q.toLowerCase())>=0;
+  });
+  var nEl=el('grLatentN'); if(nEl) nEl.textContent=list.length?('· '+list.length+' 家'):'';
+  // 只在「按业主看」时显示，切到供应商视图就藏起来
+  var hdr=el('grLatentH'); if(hdr) hdr.style.display = gSt.m==='owner'?'':'none';
+  box.style.display = gSt.m==='owner'?'':'none';
+  box.innerHTML=list.slice(0,60).map(function(x){
+    var segs=Object.keys(x.segs||{}).slice(0,2).join('/');
+    return '<div class="row latent" data-latent="1" title="本库只在三级业务（分公司业务）发过标，未发过我们主场的标">'+
+      esc(x.name)+'<em>'+x.n+' 条'+(segs?' · '+esc(segs):'')+'</em></div>';
+  }).join('')||'<div class="gempty">没有匹配的潜在业主</div>';
+}
+function gPick(mode,name){
+  /* mode='rival' 是 2026-10-21 新增：同业与伙伴那一页要打开同一套深度档案。
+     那边不在客户页签里，所以先把页签切过去（index 4 = 客户与业主），
+     再切到「业主画像图谱」子页，最后按名字选中。用户点了就应该直接看到东西，
+     不能要求他自己先找对页签。 */
+  if(mode==='rival'){
+    /* ⚠ 数据源选错踩过坑：同业与伙伴卡片上的名字来自 competitors / partners，
+       而 rivals 是「按中标次数排的业绩榜」，两边名字根本对不上
+       （卡片写「中国能建江苏院」，rivals 里压根没这条）。
+       所以先按 competitors → partners → rivals 的顺序找，找到谁算谁。 */
+    var nm0=name||'';
+    function pickFrom(list){
+      if(!list) return null;
+      for(var i=0;i<list.length;i++){
+        if(list[i].name===nm0) return list[i];
+      }
+      // 名称带后缀（如「…有限公司（含…）」）时按前缀再找一次
+      var base=nm0.split(/[（(]/)[0];
+      for(var j=0;j<list.length;j++){
+        var n2=list[j].name||'';
+        if(n2.indexOf(base)===0 || base.indexOf(n2.split(/[（(]/)[0])===0) return list[j];
+      }
+      return null;
+    }
+    /* ⚠ 两个数据源分工不同，别再把它们当同一种东西：
+       · competitors / partners = **人工整理的企业档案**（strength 一段话、recent 近期动态、
+         cat 业务类别）。**没有业绩 items、没有 segs 赛道统计。**
+       · rivals = **从公告里聚合出来的业绩榜**（items 逐条中标记录、segs{赛道:条数}、amt 合计）。
+       所以必须以 rivals 为骨、competitors 为肉：
+         业绩、赛道、金额 ← rivals
+         企业描述、近期动态、业务类别 ← competitors
+       原来优先拿 competitors 当主体，结果档案里业绩表只有几条新闻、
+       「擅长方向」全是"未分类"——数据源拿反了。 */
+    var rv=pickFrom(arr(D.rivals));
+    var src=pickFrom(arr(D.competitors)) || pickFrom(arr(D.partners));
+    if(!rv && src){
+      /* 没有业绩记录，但有人工档案：也能出一页，只是业绩表会是空的 */
+      rv={name:nm0, n:0, amt:0, items:[], main:src.cat, rg:src.city};
+    }
+    if(!rv){
+      /* 两边都没有：给一页「空档案」，把身份和查询入口给出来，
+         比直接跳去搜商机库更有用 —— 用户至少知道这家确实还没数据。 */
+      rv={name:nm0, n:0, amt:0, items:[], main:'', rg:''};
+    }
+    /* 人工档案里的企业描述、类别，补到业绩数据上（有就覆盖，没有就留空，不编） */
+    if(src){
+      if(src.cat && !rv.main) rv.main=src.cat;
+      if(src.city && !rv.rg) rv.rg=src.city;
+      rv.strength=src.strength||'';
+      rv.type=src.type||'';
+    }
+    /* 业绩为空时，才退而用近期动态充数（并且明确标成「动态」，不当业绩） */
+    if(src && !(rv.items||[]).length && Array.isArray(src.recent)){
+      rv.items=src.recent.filter(function(x){return x && (x.title||x.t)}).map(function(x){
+        /* amount 是 "2.3亿"这类中文字符串，必须走 parseAmtAny；
+           region 里混着「微信·xxx」这种来源名，必须过 cleanRg 才当地域。 */
+        return {t:x.title||x.t, amt:parseAmtAny(x.amount), d:x.date||'',
+                rg:cleanRg(x.region), url:x.url||'', st:'动态'};
+      });
+    }
+    /* 原来这里设 gPick._from='rival'，本意是让「返回业主名单」时切回同业页。
+       但它副作用很大：renderGraph 开头看到 m==='owner' && _from==='rival' 就立刻
+       把页签弹回同业，导致下面刚切过去的「客户与业主」又被顶回来——
+       档案明明渲染了，用户却什么都看不到。改成用 gSt 上的临时标记，只在
+       「用户主动点返回」那一步才消费它。 */
+    /* 深度档案就放在「同业与伙伴」本页，不跳页。
+       ── 2026-10-22 用户反馈：「同业与伙伴这里点击完深度档案怎么直接跳转到客户业主那一栏去了 有点奇怪哦」
+          原来这段的做法是**借**客户页的 #grMain 当容器：先 goTab(2) 跳到客户页，再点开图谱段，
+          等 renderGraph 把 #grMain 画好，再把同业档案覆盖上去（为此还写了 40 次 × 120ms 的轮询）。
+          能显示，但代价是用户眼前整页闪一下换了个地方，而且那条轮询一旦先到/后到就会白屏或覆盖。
+          现在给它自己的 #rProfBox，就地展开 —— 不跳页、不轮询、不跟 renderGraph 抢 DOM。
+          ⚠ 记住这个教训：需要显示内容时先看有没有**自己的**容器，别去借别人的。 */
+    if(!window.DATA_SIKU && !window.DATA_ALL){ need('siku', function(){ _sikuApply(); }); }
+    else { _sikuApply(); }
+    var profHtml='<div class="prof-back"><a href="javascript:void(0)" onclick="rRivalBack()">← 收起档案，回到名单</a>'+
+      '<span>这是「同业与伙伴」里的 '+esc(nm0)+'，和业主 / 供应商是同一套深度档案</span></div>'+
+      profPage('rival', rivalAsProfile(rv));
+    var pb=document.getElementById('rProfBox');
+    if(pb){
+      /* 档案就在本页（#rProfBox 在 #rBoardBox 下面），不要在表格里滚，
+         也不要让用户以为没反应 —— scrollIntoView 直接带他过去。 */
+      pb.innerHTML=profHtml;
+      pb.style.display='block';
+      pb.scrollIntoView({block:'start',behavior:'smooth'});
+      /* 档案里「关联单位」那几行是可点的（gPick('owner'/'sup')），
+         那种点击仍然要跳去客户页 —— 那是换业主/供应商，本来就该换页。 */
+    }else{
+      console.warn('[gPick] 找不到 #rProfBox，同业档案无处可放');
+    }
+    return;
+  }
+  gSt.m=mode; gSt.sel=name; gSt.q='';
+  if(el('grQ')) el('grQ').value='';
+  renderGraph();
+}
 el('grSeg').onclick=function(e){var s=e.target.closest('span');if(!s)return;gSt.m=s.dataset.m;gSt.sel='';renderGraph()};
 el('grQ').oninput=function(){gSt.q=this.value.trim();renderGraph()};
 el('grList').onclick=function(e){var r=e.target.closest('.row');if(!r)return;gSt.sel=r.dataset.n;renderGraph()};
+el('grLatent').onclick=function(e){
+  var r=e.target.closest('.row'); if(!r)return;
+  /* 潜在业主没有深度画像（它没发过我们的标，画像里全是空的，给出来反而误导）。
+     点了就在右侧给一句说明 + 直接搜库，看它到底发过什么。 */
+  var nm=r.textContent.replace(/\d+\s*条.*$/,'').trim();
+  el('grMain').innerHTML='<div class="ccard" style="padding:16px 18px">'+
+    '<div class="cc-h"><b style="font-size:17px">'+esc(nm)+'</b>'+
+      '<span class="cc-tag" style="background:#f1f3f6;color:#7b8494">潜在业主</span></div>'+
+    '<div class="cc-body"><p>本库历史上<b>没有</b>这家业主发过我们主场标（一级/二级业务）的记录。'+
+      '它可能只买过分公司的污水/土壤业务，也可能根本没在这个区域招过标。</p>'+
+      '<p>按你定的口径，这类业主<b>只作备查</b>：不参与重点客户排序，也不给深度画像——'+
+      '避免「看个名字差不多就以为是客户」。</p></div>'+
+    '<div class="pj-act">'+
+      '<a href="javascript:searchFor(\''+esc(nm.slice(0,8)).replace(/'/g,"\\'")+'\')">在商机库搜它发过的全部记录 ↗</a>'+
+      '<a href="https://www.qcc.com/web/search?key='+encodeURIComponent(nm)+'" target="_blank" rel="noopener nofollow">企查查看工商信息 ↗</a>'+
+    '</div></div>';
+};
 /* 地区筛选：江浙沪皖是主战场，领导要「我江浙沪皖业主」——先按地区圈定范围再看名单 */
 (function(){
   var box=el('f-grg'); if(!box)return;
@@ -2351,26 +3413,228 @@ el('grList').onclick=function(e){var r=e.target.closest('.row');if(!r)return;gSt
   };
 })();
 
-/* ==================== 行业动态 ==================== */
-var tTag=new Set();
+/* ==================== 行业动态 · 业务信号监测（2026-10-21 重做）====================
+   用户原话：「你这种是不是就可以帮我了解，哪里有氧化铝的建厂需求」
+
+   原来这一页是「新闻流」——179 条按日期倒排，看完还是不知道哪里有活。
+   现在改成按「信号」筛选，判定规则和后端 signal.py 完全一致：
+
+     一条新闻要成为信号，必须同时有：
+       ① 建厂/扩产动作（开工/投产/核准/环评/签约/中标…）
+       ② 业务切口（氧化铝/电解铝/镍铁RKEF/水泥窑余热/数据中心/自备电厂…）
+       ③ 具体项目实体（项目/工程/年产X万吨/机组…）
+     再排除：政策方案类文件、设备采购、规划评估、人事股价。
+
+   ⚠ 必须说清楚的现实：现有 179 条里只有 3 条能判成信号，
+     氧化铝 0 条、镍铁 0 条、RKEF 0 条、数据中心 0 条。
+     不是判定逻辑的问题 —— 现在的采集源（北极星电力网）是电力垂直媒体，
+     根本不报有色冶炼建厂。真正的信号源在各省发改委环评公示、有色协会、
+     青山/华友/力勤集团官网、印尼能矿部批文。这一块要等线 B 补采集源。
+     所以页面上明确写出「框架已就绪，数据源待补」，而不是假装信号很多。 */
+
+var SIG_TECH = {
+  youse:    ['镍铁','RKEF','矿热炉','回转窑-矿热炉','红土镍矿','高冰镍','电解铝','铝电解',
+             '预焙阳极','氧化铝','拜耳法','铜冶炼','闪速炉','闪锌炉','富氧侧吹','铅锌冶炼',
+             '有色冶炼','多晶硅','工业硅','硅铁','锰系','铬铁'],
+  steelgas: ['煤气发电','高炉煤气','焦炉煤气','转炉煤气','CCPP','煤气高效利用','副产煤气'],
+  wasteheat:['余热发电','余热锅炉','烧结环冷','干熄焦','CDQ','TRT','水泥窑余热','窑尾余热',
+             '窑头余热','SP炉','AQC炉','熟料线','熟料生产线','玻璃窑余热','ORC'],
+  cogen:    ['热电联产','背压机组','抽背','抽凝','集中供热'],
+  selfplant:['自备电厂','自备电站','动力岛','能源岛','能源站','锅炉岛','CFB锅炉','循环流化床'],
+  datactr:  ['数据中心','IDC','算力中心','智算中心','超算中心','云基地']
+};
+var SIG_DC_ENERGY = ['发电','燃机','燃气','柴油','柴发','三联供','冷热电','余热制冷','供配电',
+                     '变电站','配电','机电','暖通','制冷','冷却','储能','UPS'];
+var SIG_SEG_CN = {youse:'有色冶炼供能', steelgas:'钢铁煤气发电', wasteheat:'余热余压利用',
+                  cogen:'热电联产/集中供热', selfplant:'自备电厂/能源站', datactr:'数据中心供能'};
+var SIG_SEG_ORDER = ['youse','steelgas','wasteheat','cogen','selfplant','datactr'];
+var SIG_ACT = {
+  strong: ['开工','动工','奠基','土建施工','点火','投产','试生产','达产','建成','竣工验收','并网发电','首台机组'],
+  mid:    ['环评','环境影响评价','受理','公示','拟建','新建','扩建','技改','立项','备案','核准',
+           '签约','协议','中标','EPC','总承包','招标','勘察设计','可行性研究','可研'],
+  weak:   ['规划','拟投资','计划投资','布局','洽谈','意向','框架协议']
+};
+var SIG_EXCLUDE = ['中期评估','评估方案','专题研究','课题','咨询服务','环评报告编制','公示牌',
+  '社会稳定风险','钢结构','制安','安装施工','保温','防腐','土建','桩基','设备采购','系统采购',
+  '集中采购','物资采购','设备供货','光伏组件','风电整机','电池片','组件招标','人事','招聘',
+  '股价','涨停','减持','分红','财报','业绩预告'];
+var SIG_DOC = ['方案','办法','意见','通知','细则','标准','规范','指南','条例','规定','规划',
+               '白皮书','蓝皮书','报告','计划'];
+var SIG_PROJ_EXEMPT = ['项目获核准','项目核准','项目开工','项目投产','项目中标','项目招标',
+                       '项目备案','工程开工','工程中标'];
+var SIG_POLICY = ['分配方案','实施方案','管理办法','指导意见','行动计划','工作方案','征求意见',
+  '通知','公告','细则','标准','规范','贴息','贷款','补贴','配额','碳市场','碳交易','价格机制',
+  '规划','十四五','十五五','年度报告','白皮书','蓝皮书','督察','整改销号','约谈','处罚','罚款'];
+var SIG_ENTITY = ['项目','工程','一期','二期','三期','年产','万吨','生产线','装置','机组',
+                  '基地','园区','工厂','厂区','EPC','总承包','中标','招标','核准','备案','开工','投产'];
+/* 地域：只取省级粒度 + 海外国家，够定位到「派谁去」就行，不必精确到市 */
+var SIG_REGION = [
+  ['印尼',['印尼','苏拉威西','摩罗瓦利','纬达贝','巴淡','青山园区']],['马来',['马来','柔佛']],
+  ['越南',['越南']],['几内亚',['几内亚']],['印度',['印度']],['沙特',['沙特']],['老挝',['老挝']],
+  ['江苏',['江苏','南京','无锡','常州','苏州','南通','徐州','盐城','泰州','扬州','镇江','连云港','淮安','宿迁','溧阳']],
+  ['浙江',['浙江','杭州','宁波','温州','嘉兴','湖州','绍兴','金华','衢州','舟山','台州','丽水']],
+  ['上海',['上海']],
+  ['安徽',['安徽','合肥','芜湖','蚌埠','淮南','马鞍山','淮北','铜陵','安庆','黄山','滁州','阜阳','宿州','六安','亳州','池州','宣城']],
+  ['广西',['广西','百色','防城港']],['云南',['云南','文山']],['新疆',['新疆','昌吉','石河子']],
+  ['内蒙古',['内蒙古','内蒙','包头','鄂尔多斯']],['甘肃',['甘肃','嘉峪关']],['四川',['四川','攀枝花']],
+  ['河南',['河南','郑州','洛阳','三门峡']],['山东',['山东','济南','淄博','聊城','滨州']],
+  ['山西',['山西','太原','运城']],['贵州',['贵州','遵义']],['青海',['青海','西宁']],
+  ['湖北',['湖北','武汉','宜昌']],['湖南',['湖南','长沙','株洲','湘潭']],['江西',['江西','赣州']],
+  ['福建',['福建','厦门','宁德']],['广东',['广东','广州','深圳','佛山']],['河北',['河北','唐山']],
+  ['辽宁',['辽宁','大连','鞍山']],['宁夏',['宁夏','银川']],['重庆',['重庆']]
+];
+var SIG_OVERSEA = {印尼:1,马来:1,越南:1,几内亚:1,印度:1,沙特:1,老挝:1};
+
+function sigHas(text, words){ for(var i=0;i<words.length;i++){ if(text.indexOf(words[i])>=0) return words[i]; } return ''; }
+function sigJudge(n){
+  var title=n.title||'', desc=n.desc||'', text=title+' '+desc;
+  var r={sig:false, lvl:'', seg:'', segcn:'', kw:'', act:'', region:[], oversea:false, why:''};
+  if(sigHas(text,SIG_EXCLUDE)){ r.why='服务/货物采购或非工程内容'; return r; }
+  // 三层拦截政策文件（与 signal.py 一致）
+  var docHit=sigHas(title,SIG_DOC), exempt=sigHas(title,SIG_PROJ_EXEMPT);
+  if(docHit && !exempt){ r.why='政策/方案类文件，不是具体项目'; return r; }
+  /* 第三层拦截：POLICY 词命中但没有项目实体。
+     ⚠ 前后端必须完全一致 —— 之前少这一层，「浙江省督察整改销号」被前端判成信号
+     （它命中「抽凝」+「公示」），后端 signal.py 判掉了，两边条数对不上。
+     规则不一致比规则不完善更糟：用户会怀疑到底哪个数是对的。 */
+  /* 用 title 判实体，不用全文 —— 督察整改稿的正文里总会带「项目」二字，
+     用全文判断等于没判。标题才决定这条新闻到底是什么。 */
+  if(sigHas(title,SIG_POLICY) && !sigHas(title,SIG_ENTITY)){
+    r.why='政策/督察类内容，不是具体项目'; return r;
+  }
+  // 业务切口
+  var seg='', kw='';
+  for(var i=0;i<SIG_SEG_ORDER.length;i++){
+    var k=SIG_SEG_ORDER[i], h=sigHas(text,SIG_TECH[k]);
+    if(!h) continue;
+    if(k==='datactr' && !sigHas(text,SIG_DC_ENERGY)) continue;
+    seg=k; kw=h; break;
+  }
+  if(!seg){ r.why='没有命中我们的业务切口'; return r; }
+  r.seg=seg; r.segcn=SIG_SEG_CN[seg]; r.kw=kw;
+  // 动作
+  var lvl='', act='';
+  ['strong','mid','weak'].forEach(function(L){ if(!lvl){ var a=sigHas(text,SIG_ACT[L]); if(a) {lvl=L; act=a;} } });
+  if(!lvl){ r.why='提到「'+kw+'」，但没有建厂/扩产动作，是存量新闻'; return r; }
+  if(!sigHas(text,SIG_ENTITY)){ r.why='没有落到具体项目/厂/机组上，属行业趋势不是建厂信号'; return r; }
+  // 地域
+  SIG_REGION.forEach(function(p){ for(var j=0;j<p[1].length;j++){ if(text.indexOf(p[1][j])>=0){ r.region.push(p[0]); break; } } });
+  r.oversea = r.region.some(function(x){return SIG_OVERSEA[x]});
+  r.sig=true; r.lvl=lvl; r.act=act;
+  var lvcn={strong:'已动土/已投产',mid:'已进程序',weak:'仅意向'}[lvl];
+  r.why=(r.region.length?r.region.slice(0,2).join('、'):'地点未标明')+' · '+r.segcn+
+        ' —— 命中「'+kw+'」，动作是「'+act+'」';
+  return r;
+}
+
+var tTag=new Set(), tSig=new Set(), tLvl=new Set();
 function renderTrends(){
-  var list=D.trends.filter(function(x){return !tTag.size||tTag.has(x.tag)});
-  list.sort(function(a,b){return (b.date||'').localeCompare(a.date||'')});
-  el('newsGrid').innerHTML=list.map(function(x){
+  var all=(D.trends||[]).map(function(x){ var j=sigJudge(x); j.x=x; return j; });
+  var sigs=all.filter(function(j){return j.sig});
+  var news=all.filter(function(j){return !j.sig});
+
+  /* KPI：先说清「有几条真信号」，再说「池子里有多少条」，
+     避免用户以为 179 条都是机会。 */
+  var kp=el('tSigKpi');
+  if(kp){
+    var byLvl={strong:0,mid:0,weak:0}, bySeg={};
+    sigs.forEach(function(j){ byLvl[j.lvl]++; bySeg[j.segcn]=(bySeg[j.segcn]||0)+1 });
+    kp.innerHTML=
+      '<div class="kpi"><b>'+sigs.length+'</b><span>业务信号（可跟进）</span></div>'+
+      '<div class="kpi"><b>'+byLvl.strong+'</b><span>已动土 / 已投产</span></div>'+
+      '<div class="kpi"><b>'+byLvl.mid+'</b><span>已进程序（可提前介入）</span></div>'+
+      '<div class="kpi"><b>'+sigs.filter(function(j){return j.oversea}).length+'</b><span>海外</span></div>'+
+      '<div class="kpi"><b>'+news.length+'</b><span>普通动态（不构成机会）</span></div>';
+  }
+
+  /* 说明条：把「为什么只有 3 条」讲明白，这是数据现状不是功能缺陷 */
+  var tip=el('tSigTip');
+  if(tip){
+    var segN=Object.keys(bySegOf(sigs)).length;
+    tip.innerHTML='<b>怎么算「信号」</b>：必须同时有 ①建厂/扩产动作（开工/投产/核准/环评/中标）'+
+      ' ②我们的业务切口（有色冶炼·RKEF·电解铝·水泥窑余热·数据中心·自备电厂…）③具体项目实体。'+
+      '政策方案、设备采购、人事股价一律不算。<br>'+
+      '<b style="color:#d4380d">目前只有 '+sigs.length+' 条</b>，其中覆盖 '+segN+' 个业务方向 —— '+
+      '<b>这是采集源的问题，不是判定逻辑的问题</b>：现有渠道（北极星电力网等）是电力垂直媒体，'+
+      '根本不报「青山在印尼建镍铁厂」这类消息。真正的信号源是各省发改委环评公示、有色协会、'+
+      '青山/华友/力勤等集团官网、印尼能矿部批文 —— <b>这些要等数据采集补齐后才会真正有用</b>。'+
+      '判定框架已经就绪，接上源立刻能出结果。';
+  }
+
+  // 信号区
+  var sg=sigs.filter(function(j){
+    if(tSig.size && !tSig.has(j.seg)) return false;
+    if(tLvl.size && !tLvl.has(j.lvl)) return false;
+    return true;
+  });
+  var box=el('sigGrid');
+  if(box){
+    box.innerHTML=sg.map(function(j){
+      var x=j.x;
+      var lvTxt={strong:'已动土',mid:'已进程序',weak:'仅意向'}[j.lvl];
+      var lvBg={strong:'#eaf7ef;#14713a',mid:'#fff4e6;#a85c10',weak:'#f1f3f6;#6b7280'}[j.lvl].split(';');
+      return '<div class="sigc">'+
+        '<div class="sig-h">'+
+          '<span class="sig-lv" style="background:'+lvBg[0]+';color:'+lvBg[1]+'">'+lvTxt+'</span>'+
+          '<span class="sig-seg">'+esc(j.segcn)+'</span>'+
+          (j.region.length?'<span class="sig-rg">'+esc(j.region.slice(0,2).join(' / '))+'</span>':'')+
+          (j.oversea?'<span class="sig-ov">海外</span>':'')+
+        '</div>'+
+        '<h3>'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.title)+' ↗</a>':esc(x.title))+'</h3>'+
+        '<div class="sig-why">'+esc(j.why)+'</div>'+
+        (x.desc?'<div class="sig-d">'+esc(x.desc)+'</div>':'')+
+        '<div class="sig-f"><span>'+esc(x.source||'')+'</span><span>'+esc(x.date||'')+'</span></div>'+
+      '</div>';
+    }).join('')||'<div class="empty">当前筛选下没有信号。'+
+      '<a href="javascript:void 0" onclick="tSig.clear();tLvl.clear();renderTrends()" style="color:#146edc">清空筛选看全部</a></div>';
+  }
+
+  // 普通动态（默认折叠，点开才看）
+  var list=news.filter(function(j){return !tTag.size||tTag.has(j.x.tag)});
+  list.sort(function(a,b){return (b.x.date||'').localeCompare(a.x.date||'')});
+  el('newsGrid').innerHTML=list.map(function(j){
+    var x=j.x;
     var cls=x.tag&&x.tag.indexOf('政策')>=0?'政策':(x.tag&&x.tag.indexOf('地方')>=0?'地方':
       (x.tag&&x.tag.indexOf('市场')>=0?'市场':'行业'));
     return '<div class="ncard"><h3>'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">':'')+
       esc(x.title)+(x.url?' ↗</a>':'')+'</h3>'+
       '<div class="nd">'+esc(x.desc)+'</div>'+
-      '<div class="ns"><span class="ntag '+cls+'">'+esc(x.tag)+'</span><span>'+esc(x.source)+'</span><span>'+esc(x.date)+'</span></div></div>'
+      '<div class="ns"><span class="ntag '+cls+'">'+esc(x.tag)+'</span><span>'+esc(x.source)+'</span><span>'+esc(x.date)+'</span>'+
+      '<span class="nr" title="'+esc(j.why)+'">未判为信号：'+esc((j.why||'').slice(0,14))+'</span></div></div>'
   }).join('');
+  var cnt=el('newsCnt');
+  if(cnt) cnt.textContent='· '+list.length+' 条';
 }
+function bySegOf(list){ var m={}; list.forEach(function(j){m[j.segcn]=1}); return m; }
 /* 行业动态的标签集合依赖 data.news.js（按需加载），放到 renderTrends 里建 */
 function buildTrendFilter(){
   chipsBox('f-tg',uniq(arr(D.trends).map(function(x){return x.tag})),null,'ttag');
 }
 el('f-tg').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
   toggle(tTag,c.dataset.v);c.classList.toggle('on');renderTrends()};
+/* 信号筛选：业务切口 + 强度。用 id 白名单单独绑，不要并入通用 chip 绑定
+   （那边假定 chip 都对应 Set，这里两个 Set 名不同）。 */
+function buildSigFilter(){
+  var all=(D.trends||[]).map(sigJudge).filter(function(j){return j.sig});
+  var sc={}; all.forEach(function(j){sc[j.seg]=(sc[j.seg]||0)+1});
+  var lc={strong:0,mid:0,weak:0}; all.forEach(function(j){lc[j.lvl]++});
+  if(el('f-sigseg')) el('f-sigseg').innerHTML=SIG_SEG_ORDER.filter(function(k){return sc[k]}).map(function(k){
+    return '<span class="chip'+(tSig.has(k)?' on':'')+'" data-k="sigseg" data-v="'+k+'">'+SIG_SEG_CN[k]+'<em>'+sc[k]+'</em></span>'}).join('')
+    ||'<span class="chip off" style="cursor:default;opacity:.6">暂无信号</span>';
+  var LN={strong:'已动土/已投产',mid:'已进程序',weak:'仅意向'};
+  if(el('f-siglvl')) el('f-siglvl').innerHTML=['strong','mid','weak'].filter(function(k){return lc[k]}).map(function(k){
+    return '<span class="chip'+(tLvl.has(k)?' on':'')+'" data-k="siglvl" data-v="'+k+'">'+LN[k]+'<em>'+lc[k]+'</em></span>'}).join('')
+    ||'<span class="chip off" style="cursor:default;opacity:.6">—</span>';
+}
+['f-sigseg','f-siglvl'].forEach(function(id){
+  var box=el(id); if(!box)return;
+  box.onclick=function(e){
+    var c=e.target.closest('.chip'); if(!c||!c.dataset.v)return;
+    var set=(c.dataset.k==='sigseg')?tSig:tLvl;
+    if(set.has(c.dataset.v))set.delete(c.dataset.v);else set.add(c.dataset.v);
+    c.classList.toggle('on'); renderTrends();
+  };
+});
 // 微信内容已整体归到「微信线索」页签（那里是全量池且带分类筛选），这里只做引导，
 // 不再重复展示同一批条目——之前 62 条里有 36 条和微信页签一模一样。
 (function(){
@@ -2495,7 +3759,8 @@ function boot_main(){
    ['',meta.amtSum.toFixed(0)+'亿','已公示金额',''],
    ['',items.filter(function(x){return x.g==='A'}).length,'A 战略必争','g:A'],
    ['',_earlyN,'立项早期·拟招标','sw:early'],
-   ['',items.filter(function(x){return x.biz==='能源清洁高效利用'}).length,'能源主业','']
+   ['',items.filter(function(x){return x.hm}).length,'主场业务',''],
+   ['',items.filter(function(x){return x.sg==='youse'}).length,'有色冶炼供能','sg:youse']
   ];
   el('kpis').innerHTML=kpi.map(function(k,i){
     return '<div class="kpi'+(i<2?' hot':'')+'"'+(k[3]?' style="cursor:pointer" onclick="kpiGo(\''+k[3]+'\')"':'')+
@@ -2518,23 +3783,15 @@ function boot_main(){
 
 /* 启动逻辑在 boot.js（defer，保证在数据脚本之后执行） */
 </script>
-<script defer src="data.core.js?v=202610212159"></script>
-<script defer src="data.items.js?v=202610212159"></script>
+<script defer src="data.core.js?v=202610220116"></script>
+<script defer src="data.items.js?v=202610220116"></script>
 <script defer src="boot.js?v=202610212029"></script>
 <!-- 竞对画像抽屉：点「画像」按钮从右侧滑出，不跳页 -->
-<script src="rival.js"></script>
+<!-- rival.js 已于 2026-10-22 停用：它调的腾讯云函数只有 3 家单位有数据（中国联合/江苏院/河北院），
+     点其它任何一家都显示「这家还没有画像数据」，而页面上同时还有个「深度档案」能开——
+     两个都叫画像、一个能开一个不能开，是体验上的硬伤。统一到「深度档案」后这里不再加载。
+     文件保留在磁盘上，将来那批数据补齐了可以再接回来。 -->
 
-<!-- 原文阅读抽屉：点「原文」在页内打开，不再甩出一堆新标签页 -->
-<div class="drawer" id="drawer">
-  <div class="rd-mask" onclick="closeReader()"></div>
-  <div class="rd-panel">
-    <div class="rd-head">
-      <b>原文</b>
-      <div class="rd-ops"></div>
-    </div>
-    <div class="rd-warn"></div>
-    <div class="rd-body"></div>
-  </div>
-</div>
+<!-- 原文阅读抽屉已于 2026-10-21 移除：用户要求「链接跳转即可」，不要 iframe 嵌套。 -->
 </body>
 </html>
