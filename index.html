@@ -826,7 +826,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610212100';
+var VER='?v=202610212105';
 /* ── 全局状态 ──────────────────────────────────────────────
    注意：这些必须在 boot_main() 外面声明。boot_main 里用 var 声明的东西
    全是函数作用域，脚本外面看不见——调试时会发现 D / items 都是 undefined，
@@ -1817,8 +1817,18 @@ function cApply(){
   var g=el('cGrBox'); if(g)g.style.display=(cTab==='graph'?'block':'none');
   var bs=el('cTop').querySelectorAll('span[data-k]');
   Array.prototype.forEach.call(bs,function(x){x.classList.toggle('on',x.dataset.k===cTab)});
-  // 首次进图谱页时才渲染，避免每次开页面都算一遍
-  if(cTab==='graph' && !cGrBox._drawn){ cGrBox._drawn=1; try{renderGraph()}catch(e){} }
+  // 首次进图谱页时才渲染；图谱数据（665KB）也是这时候才拉
+  if(cTab==='graph' && !cGrBox._drawn){
+    cGrBox._drawn=1;
+    if(window.DATA_GRAPH || (D.graph&&D.graph.owners&&D.graph.owners.length)){
+      try{renderGraph()}catch(e){}
+    }else{
+      cGrBox.innerHTML='<div class="empty">正在载入业主图谱…</div>';
+      need('graph',function(){
+        try{ mergeMod('graph'); renderGraph(); }catch(e){ console.warn(e); }
+      });
+    }
+  }
 }
 el('cTop').onclick=function(e){
   var sp=e.target.closest('span[data-k]'); if(!sp)return;
@@ -2269,8 +2279,8 @@ function boot_main(){
 
 /* 启动逻辑在 boot.js（defer，保证在数据脚本之后执行） */
 </script>
-<script defer src="data.core.js?v=202610212100"></script>
-<script defer src="data.items.js?v=202610212100"></script>
+<script defer src="data.core.js?v=202610212105"></script>
+<script defer src="data.items.js?v=202610212105"></script>
 <script defer src="boot.js?v=202610212029"></script>
 <!-- 竞对画像抽屉：点「画像」按钮从右侧滑出，不跳页 -->
 <script src="rival.js"></script>
