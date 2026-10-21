@@ -886,8 +886,7 @@ function cardHtml(x){
   var meta='';
   if(x.buyer)meta+='<span class="mi"><i>业主</i><b>'+esc(x.buyer)+'</b></span>';
   if(x.win)meta+='<span class="mi win"><i>中标</i><b>'+esc(x.win)+'</b></span>';
-  // 2026-10-21 用户反馈：底部「查看公告原文」「查中标单位」两个按钮是冗余——
-  // 标题本身已是原文链接，中标单位也已在上面的 meta 区显示。均已删除，只留附件与企查查。
+  // 2026-10-21 用户反馈：底部那两个跳转按钮与标题/ meta 区重复，已删除，只留附件与企查查。
 
   meta+='<span class="mi"><i>来源</i><b>'+esc(x.p||'—')+'</b> '+esc(x.d||'')+(x.dl?' · 截止 '+esc(x.dl):'')+'</span>';
   if(x.expect)meta+='<span class="mi" style="color:#0d9b6c"><i>预计招标</i><b>'+esc(x.expect)+'</b></span>';
