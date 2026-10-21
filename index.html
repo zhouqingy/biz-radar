@@ -826,7 +826,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610212105';
+var VER='?v=202610212124';
 /* ── 全局状态 ──────────────────────────────────────────────
    注意：这些必须在 boot_main() 外面声明。boot_main 里用 var 声明的东西
    全是函数作用域，脚本外面看不见——调试时会发现 D / items 都是 undefined，
@@ -902,6 +902,7 @@ function loadChunk(name, cb) {
         if (have[r._i] === undefined) items.push(r); else items[have[r._i]] = r;
       }
       refreshTabCounts();
+      try{ refreshFilterCounts(); }catch(e){}
     } catch (e) { console.warn('[load] 分块合并失败', name, e); }
     var fs = _chunkCbs[name].splice(0);
     for (var k = 0; k < fs.length; k++) { try { fs[k]() } catch (e) { } }
@@ -1051,15 +1052,18 @@ function countBy(f){var m={};items.forEach(function(x){var v=x[f];if(v)m[v]=(m[v
    由 boot_main() 在数据挂载后调用一次（以前是脚本顶层直接执行，
    数据还在 defer 里没到，一定报 undefined.map）。 */
 function buildFilters(){
-  var subsOrder=meta.subTop.map(function(x){return x[0]});
+  /* 筛选器选项 + 每个选项的命中数都来自 items。分块加载会让 items 变多，
+     所以这里只负责「建 chips」，计数刷新交给 refreshFilterCounts()，
+     由分块合并完成后调用——否则会出现「地区 江苏 134」但实际有 615 条。 */
+  var subsOrder=(meta.subTop||[]).map(function(x){return x[0]});
   chipsBox('f-rg',uniq(['江苏','浙江','安徽','上海']),countBy('rg'),'rg');
-  chipsBox('f-biz',meta.bizTop.map(function(x){return x[0]}),countBy('biz'),'biz');
+  chipsBox('f-biz',(meta.bizTop||[]).map(function(x){return x[0]}),countBy('biz'),'biz');
   chipsBox('f-ind',['钢铁','有色','化工','电力','水泥建材','市政','其他'],countBy('ind'),'ind');
   chipsBox('f-sub',subsOrder,countBy('sub'),'sub');
   chipsBox('f-g',['A','B','C','D'],countBy('g'),'g');
   chipsBox('f-mode',uniq(items.map(function(x){return x.mode}).filter(function(x){return x&&x.length<12}))
     .sort(function(a,b){return countBy('mode')[b]-countBy('mode')[a]}).slice(0,10),countBy('mode'),'mode');
-  chipsBox('f-p',meta.platTop.slice(0,10).map(function(x){return x[0]}),countBy('p'),'p');
+  chipsBox('f-p',(meta.platTop||[]).slice(0,10).map(function(x){return x[0]}),countBy('p'),'p');
 
   document.querySelectorAll('.chip').forEach(function(c){
     c.onclick=function(){toggle(F[c.dataset.k],c.dataset.v); c.classList.toggle('on'); F.page=1; render()}});
@@ -1118,6 +1122,20 @@ function buildFilters(){
   }
   document.querySelectorAll('.chip').forEach(function(c){
     c.onclick=function(){toggle(F[c.dataset.k],c.dataset.v); c.classList.toggle('on'); F.page=1; render()}});
+}
+
+/* 只更新每个 chip 后面的数字，不重建 DOM（重建会丢掉已选中的 on 状态） */
+function refreshFilterCounts(){
+  ['rg','biz','ind','sub','g','mode','p'].forEach(function(k){
+    var m=countBy(k);
+    var box=el('f-'+k); if(!box)return;
+    [].forEach.call(box.querySelectorAll('.chip'),function(c){
+      var em=c.querySelector('em');
+      var n=m[c.dataset.v]||0;
+      if(em) em.textContent=n;
+      c.style.display=n?'':'none';   // 没命中的选项藏起来，少点干扰
+    });
+  });
 }
 
 
@@ -2279,8 +2297,8 @@ function boot_main(){
 
 /* 启动逻辑在 boot.js（defer，保证在数据脚本之后执行） */
 </script>
-<script defer src="data.core.js?v=202610212105"></script>
-<script defer src="data.items.js?v=202610212105"></script>
+<script defer src="data.core.js?v=202610212124"></script>
+<script defer src="data.items.js?v=202610212124"></script>
 <script defer src="boot.js?v=202610212029"></script>
 <!-- 竞对画像抽屉：点「画像」按钮从右侧滑出，不跳页 -->
 <script src="rival.js"></script>
