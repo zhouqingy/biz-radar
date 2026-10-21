@@ -148,6 +148,18 @@ details.sub li{padding:2px 0}
 
 /* ---------- 客户 / 竞企 / 动态 卡片 ---------- */
 .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;align-items:start}
+/* 国内 / 海外 切换条 */
+.cswitch{display:inline-flex;gap:4px;background:#eef1f6;border-radius:11px;padding:4px;margin:0 0 12px}
+.cswitch span{font-size:12.5px;font-weight:600;color:var(--tx2);padding:6px 15px;border-radius:8px;cursor:pointer;transition:.15s;user-select:none}
+.cswitch span:hover{color:var(--brand-d)}
+.cswitch span.on{background:#fff;color:var(--brand-d);box-shadow:0 1px 4px rgba(20,40,80,.12)}
+.cswitch b{font-size:11px;font-weight:700;color:#8a9099;margin-left:3px}
+.cswitch span.on b{color:var(--brand)}
+.pnote{font-size:11.5px;color:#8a6100;background:#fffbf0;border-left:2px solid #f0d9a8;padding:5px 8px;margin-top:6px;border-radius:0 5px 5px 0;line-height:1.6}
+.kpirow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.kpirow .kpi{background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 14px;min-width:130px;flex:1 1 130px;display:flex;flex-direction:column;gap:2px}
+.kpirow .kpi b{font-size:19px;font-weight:800;color:var(--tx1);line-height:1.2;letter-spacing:-.4px}
+.kpirow .kpi span{font-size:11px;color:var(--tx3);line-height:1.35}
 .ccard{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px 15px}
 .ccard.zero{opacity:.72}
 /* 中标榜点击后定位到档案：高亮闪烁 + 左侧强调条 */
@@ -169,6 +181,33 @@ details.sub li{padding:2px 0}
 .pj-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line)}
 .pj-act a{font-size:11.5px;color:var(--brand-d);background:#f2f7ff;border:1px solid #dce8fb;border-radius:7px;padding:2px 9px;font-weight:600}
 .pj-act a:hover{background:#e4eefe;border-color:#b9d3f8}
+/* ---------- 原始发布平台 ---------- */
+.pj-org{margin-top:7px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:11.5px}
+.pj-org .ol{display:inline-flex;align-items:center;gap:5px;background:#f4fbf7;border:1px solid #d3ecdd;border-radius:7px;padding:2px 8px}
+.pj-org .ol i{font-style:normal;color:#0d9b6c;font-weight:700;font-size:10.5px}
+.pj-org .ol a{color:#0a7a54;font-weight:600}
+.pj-org .ol a:hover{text-decoration:underline}
+.pj-org .onm{color:#0a7a54;font-weight:600}
+.pj-org .os{color:#6b7a8d;font-weight:600;font-size:10.5px;padding:0 5px;border-left:1px solid #d3ecdd}
+.pj-org .os:hover{color:var(--brand)}
+.pj-org .rp{background:#fff6ec;color:#b4620a;border:1px solid #f6dfc4;border-radius:6px;padding:1px 7px;font-size:10.5px;font-weight:600;cursor:help}
+/* ---------- 附件清单 ---------- */
+.pj-files{margin-top:7px;background:#fbfcfe;border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+.pj-files .fh{font-size:11.5px;font-weight:700;color:var(--tx2);margin-bottom:5px}
+.pj-files .fh small{font-weight:500;color:var(--tx3);font-size:10.5px;margin-left:4px}
+.pj-files ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.pj-files li{display:flex}
+.pj-files .ft{font-size:11.5px;color:var(--tx2);padding:2px 0 2px 20px;position:relative;word-break:break-all;line-height:1.5}
+.pj-files .ft::before{content:"📄";position:absolute;left:0;font-size:11px}
+.pj-files .ft.ext-pdf::before{content:"📕"}
+.pj-files .ft.ext-doc::before{content:"📘"}
+.pj-files .ft.ext-xls::before{content:"📗"}
+.pj-files .ft.ext-zip::before{content:"🗜"}
+.pj-files a.ft{color:var(--brand-d);font-weight:600}
+.pj-files a.ft:hover{text-decoration:underline;color:var(--brand)}
+.pj-files .ft em{font-style:normal;font-size:10.5px;color:#b4620a;margin-left:6px;opacity:.9}
+.pj-act a.act-file{background:#fff8ee;border-color:#f7e2c4;color:#b4620a}
+.pj-act a.act-file:hover{background:#fdf0dd;border-color:#eccfa4}
 /* ---------- 业主画像 / 供应商图谱 ---------- */
 .gwrap{display:grid;grid-template-columns:300px 1fr;gap:14px;align-items:start}
 .gside{background:#fff;border:1px solid var(--line);border-radius:13px;padding:11px;position:sticky;top:10px}
@@ -394,19 +433,25 @@ details.sub li{padding:2px 0}
   </div>
 
   <!-- 3 竞争对手 -->
+  <!-- 同业与伙伴（原「竞争对手」+「合作生态」合并，2026-10-21） -->
   <div class="panel" id="p-rival">
-    <div class="sect">主要竞争对手档案 <small>江浙沪皖做同类工程的设计院 / 工程公司 / 设备商</small></div>
-    <div class="frow" style="padding:0 0 10px"><label>业务类别</label><div class="chips" id="f-cat"></div></div>
-    <div class="hint" style="margin-bottom:10px">按我司业务口径划分：<b style="color:#a85c10">能源类</b>=火电/煤气发电/余热发电/热电联产/储能等能源清洁高效利用主线；<b style="color:#14713a">环保类</b>=废水、废气（脱硫脱硝除尘）、固废与土壤修复主线；<b style="color:#1053c9">综合类</b>=两条线都做、都可能正面撞上。</div>
-    <div class="cgrid" id="rivalGrid"></div>
-  </div>
+    <div class="sect">同业与伙伴 <small>同一批单位，既可能是对手，也可能是联合体伙伴</small></div>
+    <div class="cswitch" id="rSwitch">
+      <span data-k="rival" class="on">竞争对手档案 <b id="rCn">—</b></span>
+      <span data-k="partner">联合体伙伴池 <b id="rPn">—</b></span>
+    </div>
 
-  <!-- 3b 合作生态 -->
-  <div class="panel" id="p-partner">
-    <div class="sect">合作生态 <small>联合体伙伴池 · 设计资质互补 + 施工资源</small></div>
-    <div class="frow" style="padding:0 0 10px"><label>业务类别</label><div class="chips" id="f-pcat"></div></div>
-    <div class="hint" style="margin-bottom:10px">EPC 联合体投标是行业常态：设计院补资质、施工单位补资源和当地关系。以下伙伴均核实了 2025-2026 年在江浙沪皖的能源/环保类真实业绩（带原文链接），点名称可查其在本库的招标/中标记录。东华、中机一院、合肥煤炭院与我司业务有重叠——既是对手也是潜在联合体对象。</div>
-    <div class="cgrid" id="partnerGrid"></div>
+    <div id="rRivalBox">
+      <div class="frow" style="padding:0 0 10px"><label>业务类别</label><div class="chips" id="f-cat"></div></div>
+      <div class="hint" style="margin-bottom:10px">按我司业务口径划分：<b style="color:#a85c10">能源类</b>=火电/煤气发电/余热发电/热电联产/储能等能源清洁高效利用主线；<b style="color:#14713a">环保类</b>=废水、废气（脱硫脱硝除尘）、固废与土壤修复主线；<b style="color:#1053c9">综合类</b>=两条线都做、都可能正面撞上。</div>
+      <div class="cgrid" id="rivalGrid"></div>
+    </div>
+
+    <div id="rPartnerBox" style="display:none">
+      <div class="frow" style="padding:0 0 10px"><label>业务类别</label><div class="chips" id="f-pcat"></div></div>
+      <div class="hint" style="margin-bottom:10px">EPC 联合体投标是行业常态：设计院补资质、施工单位补资源和当地关系。以下伙伴均核实了 2025-2026 年在江浙沪皖的能源/环保类真实业绩（带原文链接），点名称可查其在本库的招标/中标记录。<b>东华、中机一院、合肥煤炭院与我司业务有重叠——既是对手也是潜在联合体对象</b>，所以在上面那张「竞争对手」表里也会见到它们。</div>
+      <div class="cgrid" id="partnerGrid"></div>
+    </div>
   </div>
 
   <!-- 3c 海外信号 -->
@@ -420,32 +465,63 @@ details.sub li{padding:2px 0}
     <div class="cgrid" id="ovGrid"></div>
   </div>
 
-  <!-- 4 重点客户 -->
+  <!-- 4 客户与业主（原「重点客户」+「业主图谱」合并，2026-10-21） -->
   <div class="panel" id="p-client">
-    <div class="sect">重点客户动态 <small>按「本库抓到的招标/中标记录」自动关联</small></div>
-    <div class="hint" style="margin-bottom:10px">显示该客户在本库中出现的全部项目记录（含招标、中标、中标单位与金额）。若显示「暂无记录」，说明本轮检索未覆盖到该客户的公开招标，不代表其没有项目。</div>
-    <div class="frow" style="padding:0 0 10px"><label>行业</label><div class="chips" id="f-cgrp"></div></div>
-    <div class="hint" style="margin:0 0 10px;background:#fff7e6;border:1px solid #ffe3ad;border-radius:9px;padding:8px 12px;color:#8a5b00">
-      客户卡片分两层：<b>海外/扩张动态</b>（新闻检索，重点跟踪有色企业出海——海外园区配套自备电厂、余热发电、海水淡化 = 我司海外 EPC 机会）+ <b>库内招标记录</b>（国内公开渠道）。
+    <div class="sect">客户与业主 <small>谁在买 · 买了什么 · 找谁做的</small></div>
+    <!-- 三段切页：国内客户 / 海外客户 / 业主图谱 -->
+    <div class="cswitch" id="cTop">
+      <span data-k="dom" class="on">国内重点客户 <b id="cDomN">—</b></span>
+      <span data-k="ab">海外中资出海 <b id="cAbN">—</b></span>
+      <span data-k="graph">业主画像图谱 <b id="cGrN">—</b></span>
     </div>
-    <div class="cgrid" id="cliGrid"></div>
+    <div class="cswitch" id="cSwitch" style="display:none">
+      <span data-k="dom" class="on">国内重点客户 <b id="cDomN">—</b></span>
+      <span data-k="ab">海外中资出海 <b id="cAbN">—</b></span>
+    </div>
+
+    <!-- 国内 -->
+    <div id="cDomBox">
+      <div class="hint" style="margin-bottom:10px">
+        <b>国内名单怎么来的</b>：不是拍脑袋列的，而是把本库业主库按「采购过我们能干的活」反推出来——
+        凡是在江浙沪皖公开招标里买过<b>热电联产 / 集中供热 / 脱硫脱硝 / 废水零排 / 土壤修复 / 光伏储能</b>的业主，
+        按<b>项目数 + 金额</b>排进重点客户。分三档：<b>S 战略</b>（金额≥3亿或≥5个项目）、<b>A 重点</b>（≥1亿或≥3个）、<b>B 观察</b>。
+      </div>
+      <div class="kpirow" id="cDomKpi"></div>
+      <div class="frow" style="padding:0 0 10px"><label>档位</label><div class="chips" id="f-dtier"></div>
+        <label style="margin-left:16px">地区</label><div class="chips" id="f-drg"></div></div>
+      <div class="cgrid" id="domGrid"></div>
+    </div>
+
+    <!-- 海外 -->
+    <div id="cAbBox" style="display:none">
+      <div class="hint" style="margin-bottom:10px">
+        跟踪中资企业<b>海外矿山 / 园区 / 建厂</b>动向。海外园区落地必然要配套<b>自备电厂、余热发电、海水淡化</b>——
+        这正是我司海外业务方向（有色企业用热用电 + 配套海水淡化）。客户出海即是我司出海机会。
+      </div>
+      <div class="frow" style="padding:0 0 10px"><label>行业</label><div class="chips" id="f-cgrp"></div></div>
+      <div class="cgrid" id="cliGrid"></div>
+    </div>
+    <!-- 第三段：业主画像图谱 -->
+    <div id="cGrBox" style="display:none">
+      <div class="hint" style="margin-bottom:10px">
+        <b>这一块回答</b>：这家业主<b>买什么</b>（细分赛道）、<b>最近找谁做的</b>（主要供应商 + 合作次数 + 金额）、<b>什么时候动</b>（最近动态）。
+        公告原文披露了<b>招标人联系人、电话、代理机构</b>的，直接列在档案下方。数据完全由本库公告反向聚合，未接第三方工商库。
+      </div>
+      <div class="hint" id="grMeta" style="margin-bottom:8px;font-size:12px"></div>
+      <div class="gkp" id="grTip"></div>
+      <div class="gseg" id="grSeg"><span data-m="owner" class="on">按业主看</span><span data-m="sup">按供应商看</span></div>
+      <div class="frow" style="padding:0 0 10px"><label>地区</label><div class="chips" id="f-grg"></div></div>
+      <div class="gwrap">
+        <div class="gside">
+          <input class="gsearch" id="grQ" placeholder="搜业主 / 供应商名称…">
+          <div class="gs-h" id="grListH">业主名单</div>
+          <div class="gli" id="grList"></div>
+        </div>
+        <div class="gmain" id="grMain"></div>
+      </div>
+    </div>
   </div>
 
-  <!-- 4.5 业主图谱 -->
-  <div class="panel" id="p-graph">
-    <div class="sect">业主画像 · 供应商关系图谱 <small id="grMeta"></small></div>
-    <div class="gkp" id="grTip"></div>
-    <div class="gseg" id="grSeg"><span data-m="owner" class="on">按业主看</span><span data-m="sup">按供应商看</span></div>
-    <div class="frow" style="padding:0 0 10px"><label>地区</label><div class="chips" id="f-grg"></div></div>
-    <div class="gwrap">
-      <div class="gside">
-        <input class="gsearch" id="grQ" placeholder="搜业主 / 供应商名称…">
-        <div class="gs-h" id="grListH">业主名单</div>
-        <div class="gli" id="grList"></div>
-      </div>
-      <div class="gmain" id="grMain"></div>
-    </div>
-  </div>
 
   <!-- 5 行业动态 -->
   <div class="panel" id="p-trend">
@@ -518,6 +594,13 @@ details.sub li{padding:2px 0}
       <ul>
         <li>同一项目的多次公告（立项 → 招标 → 候选 → 中标）已合并为一条记录，卡片底部的时间链可点击跳各阶段原文</li>
         <li>列表显示的阶段是该项目<b>最进展</b>的一环，避免同一项目重复占位</li>
+      </ul>
+      <h4>二·二、附件清单与原始发布平台（2026-10-21 新增）</h4>
+      <ul>
+        <li><b>附件清单</b>：卡片底部出现「📎 附件 N 个」时，点开可看到该公告挂的所有附件（招标文件、工程量清单、图纸、资格审查条件等），能直接下的给<b>直接下载链接</b>，没抓到直链的标注「需到原文页下」。<b>附件里往往是信息量最大的部分</b>——控制价、评标办法、业绩门槛都在里面，建议先看附件再判断要不要跟。</li>
+        <li><b>原始发布平台</b>：省级交易平台很多只是「转发」市级或行业平台的公告，附件也常挂在下级平台。卡片上的「原始发布 · XX平台」就是从公告详情页里读出来的<b>真正首发地</b>（例如「浙江能源集团智慧供应链一体化平台」「乐采云平台」「南京云平台」）。有直达链接的直接点，只有平台名的给一个按标题搜索的入口。</li>
+        <li><b>两种风险标记</b>：标「转载源」的说明这条来自聚合站（如招标网、中国采招网），不是交易平台原文，链接会失效；标「原文可能打不开」的是抓取时发现详情页是空壳（白页），可改用搜索入口找。</li>
+        <li><b>已知覆盖范围</b>：附件扫描是逐条打开详情页做的，浙江、江苏两站结构规整，覆盖率最高；部分市直平台公告正文里压根不挂附件（公告本身就是全部内容），这类不会有附件，属正常。</li>
       </ul>
       <h4>三·一、业主画像 / 供应商关系图谱怎么读（2026-10-21 新增）</h4>
       <ul>
@@ -612,21 +695,21 @@ details.sub li{padding:2px 0}
   </div>
 </div>
 
-<script src="data.js?v=202610211903"></script>
+<script src="data.js?v=202610211914"></script>
 <script>
 /* ==================== 状态 ==================== */
 var D = window.DATA;
-var TABS = [['p-items','商机库',0],['p-win','中标情报',0],['p-graph','业主图谱',0],
-            ['p-rival','竞争对手',0],
-            ['p-partner','合作生态',0],['p-overseas','海外信号',0],
-            ['p-client','重点客户',0],['p-trend','行业动态',0],['p-wechat','情报精选',0],['p-plat','招标平台',0],['p-help','口径说明',0]];
+var TABS = [['p-items','商机库',0],['p-win','中标情报',0],
+            ['p-rival','同业与伙伴',0],
+            ['p-overseas','海外信号',0],
+            ['p-client','客户与业主',0],['p-trend','行业动态',0],['p-wechat','情报精选',0],['p-plat','招标平台',0],['p-help','口径说明',0]];
 var F = {rg:new Set(),biz:new Set(),ind:new Set(),sub:new Set(),g:new Set(),mode:new Set(),p:new Set(),
          st:'',q:'',sort:'sc',page:1,tab:0};
 var PS = 24;
 
 /* ==================== 工具 ==================== */
 function el(id){return document.getElementById(id)}
-function esc(s){return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function money(a){return a==null?'—':(a>=1? a.toFixed(2)+'亿' : (a*10000).toFixed(0)+'万')}
 function num(x){return x==null?0:x}
 function uniq(arr){return Array.from(new Set(arr.filter(function(x){return x})))}
@@ -674,10 +757,12 @@ function kpiGo(a){
 
 /* ==================== Tab ==================== */
 TABS[0][2]=meta.total; TABS[1][2]=D.rivals.length;
-TABS[2][2]=((D.graph||{}).owners||[]).length;   // 业主图谱
-TABS[3][2]=D.competitors.length;
-TABS[4][2]=D.partners.length; TABS[5][2]=D.overseas.length; TABS[6][2]=D.clients.length;
-TABS[7][2]=D.trends.length; TABS[8][2]=(((D.digest||{}).items||[]).length+((D.wechat||{}).items||[]).length); TABS[9][2]=D.platforms.length;
+// 同业与伙伴：竞争对手 + 伙伴池
+TABS[2][2]=D.competitors.length+D.partners.length;
+TABS[3][2]=D.overseas.length;
+// 客户与业主：国内客户 + 海外客户 + 业主图谱，三个子页合计
+TABS[4][2]=((D.domStat&&D.domStat.total)||0)+D.clients.length+((D.graph||{}).owners||[]).length;
+TABS[5][2]=D.trends.length; TABS[6][2]=(((D.digest||{}).items||[]).length+((D.wechat||{}).items||[]).length); TABS[7][2]=D.platforms.length;
 el('tabs').innerHTML=TABS.map(function(t,i){
   return '<button class="tab'+(i===0?' on':'')+'" data-t="'+i+'">'+t[1]+'<i>'+t[2]+'</i></button>'}).join('');
 function goTab(i){
@@ -801,8 +886,11 @@ function cardHtml(x){
   var acts='';
   if(x.url||x.buyer){
     var bq=qcName(x.buyer), wq=qcName(x.win);
+    // 附件数显性提示：有附件说明「招标文件/清单/图纸能拿到」，是点进去的强理由
+    var nf=(x.files&&x.files.length)?x.files.length:0;
     acts='<div class="pj-act">'+
       (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener" title="打开公告原文，页内通常有招标人联系人、电话、代理机构">查看公告原文 ↗</a>':'')+
+      (nf?'<a href="javascript:void(0)" class="act-file" onclick="toggleFiles(\''+esc(x.id)+'\')" title="展开附件清单，自己挑要下的">📎 附件 '+nf+' 个</a>':'')+
       (bq?'<a href="https://www.qcc.com/web/search?key='+encodeURIComponent(bq)+'" target="_blank" rel="noopener nofollow" title="跳转企查查查该业主工商信息（外部站点，需自行登录）">查业主工商信息 ↗</a>':'')+
       (wq?'<a href="https://www.qcc.com/web/search?key='+encodeURIComponent(wq)+'" target="_blank" rel="noopener nofollow" title="跳转企查查查中标单位工商信息（外部站点，需自行登录）">查中标单位 ↗</a>':'')+
       '</div>';
@@ -815,7 +903,53 @@ function cardHtml(x){
           :'<span class="pj-t">'+esc(x.t)+'</span>')+
     '<div class="tags">'+tags+'</div>'+
     '<div class="pj-meta">'+meta+'</div>'+
-    (x.snip?'<div class="pj-snip">'+esc(x.snip)+'</div>':'')+chain+acts+'</div>';
+    (x.snip?'<div class="pj-snip">'+esc(x.snip)+'</div>':'')+chain+
+    originLine(x)+fileList(x)+acts+'</div>';
+}
+
+/* ---------- 原始发布平台：公告真正首发的地方 ---------- */
+/* 省级交易平台很多只是「转发」市级/行业平台的公告，附件也常挂在下级平台。
+   详情页里的「来源：XX平台」就是这条线索。有 URL 给链接，只有名字就给出名字+搜索入口。 */
+function originLine(x){
+  var o=x.org;
+  if(!o||(!o.n&&!o.u))return '';
+  var nm=o.n||'原始平台';
+  var isRep=x.rp;
+  var h='<div class="pj-org">';
+  if(o.u){
+    h+='<span class="ol"><i>原始发布</i><a href="'+esc(o.u)+'" target="_blank" rel="noopener" title="这是该公告真正首发的平台，页面更完整、附件更全">'+esc(nm)+' ↗</a></span>';
+  }else{
+    // 只有平台名：给一个站内搜索入口，让他自己去该平台捞
+    h+='<span class="ol"><i>原始发布</i><span class="onm">'+esc(nm)+'</span>'+
+       '<a class="os" href="https://www.baidu.com/s?wd='+encodeURIComponent(x.t+' '+nm)+'" target="_blank" rel="noopener nofollow" title="在该平台找不到直达链接，用标题搜一下">搜 ↗</a></span>';
+  }
+  if(isRep)h+='<span class="rp" title="这条来自转载站/聚合站，不是交易平台原文，链接可能失效">转载源</span>';
+  if(x.sh)h+='<span class="rp" title="原文页抓不到正文（空壳页），链接可能打不开">原文可能打不开</span>';
+  return h+'</div>';
+}
+
+/* ---------- 附件清单：能看到就行，让他自己选 ---------- */
+/* 附件里通常有招标文件、工程量清单、图纸、资格审查条件——比标题信息量大得多。
+   默认收起，点「附件 N 个」展开。没有链接的只显示文件名（说明存在，需去原文页下）。 */
+function fileList(x){
+  var f=x.files||[];
+  if(!f.length)return '';
+  var rows=f.map(function(it,i){
+    var nm=it.n||('附件'+(i+1));
+    var ext=(nm.match(/\.(\w{2,5})$/)||[])[1];
+    var cls='ft'+(ext?' ext-'+(ext.toLowerCase()==='pdf'?'pdf':(ext.toLowerCase().indexOf('doc')===0?'doc':(ext.toLowerCase().indexOf('xls')===0?'xls':'zip'))):'');
+    if(it.u){
+      return '<li><a class="'+cls+'" href="'+esc(it.u)+'" target="_blank" rel="noopener" title="直接下载/打开">'+esc(nm)+'</a></li>';
+    }
+    return '<li><span class="'+cls+'" title="该附件存在但没抓到直链，请到原文页下载">'+esc(nm)+'<em>需到原文页下</em></span></li>';
+  }).join('');
+  return '<div class="pj-files" id="fl-'+esc(x.id)+'" style="display:none">'+
+    '<div class="fh">附件清单 <small>'+f.length+' 个 · 招标文件/清单/图纸通常在这里</small></div>'+
+    '<ul>'+rows+'</ul></div>';
+}
+function toggleFiles(id){
+  var d=document.getElementById('fl-'+id);
+  if(d)d.style.display=(d.style.display==='none'?'block':'none');
 }
 
 var LAST=[];
@@ -853,9 +987,13 @@ function resetF(){
   f.classList.add('on'); el('q').value=''; render();
 }
 el('btnCsv').onclick=function(){
-  var head=['项目名称','地区','城市','阶段','优先级','业务大类','细分','业主','中标单位','金额(亿元)','金额原文','日期','截止','承包模式','来源平台','链接'];
+  var head=['项目名称','地区','城市','阶段','优先级','业务大类','细分','业主','中标单位','金额(亿元)','金额原文','日期','截止','承包模式','来源平台','原始发布平台','附件数','附件清单','链接'];
   var rows=LAST.map(function(x){return [x.t,x.rg,x.city,x.st,x.g,x.biz,x.sub,x.buyer,x.win,
-    (x.amt==null?'':x.amt),x.amtTxt,x.d,x.dl,x.mode,x.p,x.url].map(function(v){
+    (x.amt==null?'':x.amt),x.amtTxt,x.d,x.dl,x.mode,x.p,
+    (x.org&&x.org.n?x.org.n:''),
+    (x.files&&x.files.length?x.files.length:''),
+    (x.files||[]).map(function(f){return f.n+(f.u?' <'+f.u+'>':'')}).join(' | '),
+    x.url].map(function(v){
     return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}).join(',')});
   var csv='\ufeff'+[head.join(',')].concat(rows).join('\r\n');
   var a=document.createElement('a');
@@ -1232,6 +1370,93 @@ function renderMStrip(){
 
 /* ==================== 重点客户 ==================== */
 var cRg=new Set(), cEx=new Set();
+/* ---- 同业与伙伴：两段切页（竞争对手 / 伙伴池）---- */
+var rTab='rival';
+function rApply(){
+  el('rRivalBox').style.display=(rTab==='rival'?'block':'none');
+  el('rPartnerBox').style.display=(rTab==='partner'?'block':'none');
+  Array.prototype.forEach.call(el('rSwitch').querySelectorAll('span[data-k]'),
+    function(x){x.classList.toggle('on',x.dataset.k===rTab)});
+}
+el('rSwitch').onclick=function(e){
+  var sp=e.target.closest('span[data-k]'); if(!sp)return;
+  rTab=sp.dataset.k; rApply();
+};
+(function(){var a=el('rCn'),b=el('rPn');
+  if(a)a.textContent=(D.competitors||[]).length;
+  if(b)b.textContent=(D.partners||[]).length;})();
+
+/* ---- 客户与业主：三段切页（国内客户 / 海外客户 / 业主图谱）---- */
+var cTab='dom';
+function cApply(){
+  el('cDomBox').style.display=(cTab==='dom'?'block':'none');
+  el('cAbBox').style.display =(cTab==='ab' ?'block':'none');
+  var g=el('cGrBox'); if(g)g.style.display=(cTab==='graph'?'block':'none');
+  var bs=el('cTop').querySelectorAll('span[data-k]');
+  Array.prototype.forEach.call(bs,function(x){x.classList.toggle('on',x.dataset.k===cTab)});
+  // 首次进图谱页时才渲染，避免每次开页面都算一遍
+  if(cTab==='graph' && !cGrBox._drawn){ cGrBox._drawn=1; try{renderGraph()}catch(e){} }
+}
+el('cTop').onclick=function(e){
+  var sp=e.target.closest('span[data-k]'); if(!sp)return;
+  cTab=sp.dataset.k; cApply();
+};
+/* 兼容旧的 cSwitch（已隐藏，仅防其它代码引用报错） */
+el('cSwitch').onclick=function(){};
+/* 计数注入 */
+(function(){
+  var a=el('cDomN'), b=el('cAbN'), c=el('cGrN');
+  if(a)a.textContent=((D.domStat&&D.domStat.total)||0);
+  if(b)b.textContent=(D.clients||[]).length;
+  if(c)c.textContent=(((D.graph||{}).owners)||[]).length;
+})();
+/* ---- 国内重点客户 ---- */
+var dTier=new Set(), dRg=new Set();
+var TIER_TXT={S:'战略',A:'重点',B:'观察'};
+var TIER_BG={S:'#ffe9e6',A:'#fff3e0',B:'#eef2f7'};
+var TIER_FG={S:'#c0392b',A:'#a8620a',B:'#5a6270'};
+function renderDomestic(){
+  var L=(D.domestic||[]).filter(function(x){
+    return (!dTier.size||dTier.has(x.tier)) && (!dRg.size||dRg.has(x.rg))});
+  var st=D.domStat||{};
+  el('cDomKpi').innerHTML=
+    '<div class="kpi"><b>'+(st.total||0)+'</b><span>国内重点客户</span></div>'+
+    '<div class="kpi"><b>'+(st.S||0)+'</b><span>战略级（≥3亿 或 ≥5项目）</span></div>'+
+    '<div class="kpi"><b>'+(st.A||0)+'</b><span>重点级</span></div>'+
+    '<div class="kpi"><b>'+L.reduce(function(s,x){return s+x.amt},0).toFixed(1)+'亿</b><span>筛选结果涉及金额</span></div>';
+  el('domGrid').innerHTML=L.map(function(x){
+    var open=cEx.has('d:'+x.name);
+    var its=open?x.items:x.items.slice(0,3);
+    return '<div class="ccard"><div class="cc-h"><b>'+esc(x.name)+'</b>'+
+      '<span class="cc-tag" style="background:'+TIER_BG[x.tier]+';color:'+TIER_FG[x.tier]+';font-weight:700">'+x.tier+' '+TIER_TXT[x.tier]+'</span>'+
+      (x.rg?'<span class="cc-tag">'+esc(x.rg)+'</span>':'')+
+      (x.main?'<span class="cc-tag" style="background:#e8f4ff;color:#1053c9">'+esc(x.main)+'</span>':'')+
+      '</div>'+
+      '<div class="cc-m">本库 <b>'+x.n+'</b> 个项目'+(x.amt>0?' · 涉及金额 <b>'+money(x.amt)+'</b>':'')+
+        (x.latest?' · 最新 '+esc(x.latest):'')+'</div>'+
+      (x.items.length?'<div class="cc-i"><ul>'+its.map(function(it){
+        return '<li>'+(it.url?'<a href="'+esc(it.url)+'" target="_blank" rel="noopener">':'')+
+          esc(it.t)+(it.amt?' <b>'+money(it.amt)+'</b>':'')+
+          ' <span class="sub-i">'+esc(it.st||'')+' '+esc(it.d||'')+(it.win?' · 中:'+esc(it.win):'')+'</span>'+
+          (it.url?'</a>':'')+'</li>'}).join('')+'</ul>'+
+        (x.items.length>3?'<div class="cc-more" data-ck="d:'+esc(x.name)+'">'+
+          (open?'收起 ▴':'展开全部 '+x.items.length+' 条 ▾')+'</div>':'')+'</div>':'')+
+      '<div class="cc-i"><a href="javascript:searchFor(\''+esc(x.name.replace(/'/g,"\\'"))+'\')">在商机库中搜索该业主项目 ↗</a></div>'+
+      '</div>'}).join('')||'<div class="empty">当前筛选无结果</div>';
+}
+el('domGrid').onclick=function(e){
+  var m=e.target.closest('.cc-more'); if(!m)return;
+  var k=m.dataset.ck.slice(2);
+  if(cEx.has('d:'+k))cEx.delete('d:'+k);else cEx.add('d:'+k);
+  renderDomestic();
+};
+chipsBox('f-dtier',[{v:'S',t:'S 战略'},{v:'A',t:'A 重点'},{v:'B',t:'B 观察'}],null,'dt');
+el('f-dtier').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
+  toggle(dTier,c.dataset.v);c.classList.toggle('on');renderDomestic()};
+chipsBox('f-drg',[{v:'江苏'},{v:'浙江'},{v:'安徽'},{v:'上海'}],null,'dr');
+el('f-drg').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
+  toggle(dRg,c.dataset.v);c.classList.toggle('on');renderDomestic()};
+
 var GTAG={钢铁:'#f1f3f6',有色:'#efe9ff',化工化纤:'#e8f4ff',水泥建材:'#fff2e0','其他制造':'#f1f3f6'};
 var GCOL={钢铁:'#4a5568',有色:'#6a2fd0',化工化芬:'#1053c9',化工化纤:'#1053c9',水泥建材:'#a85c10','其他制造':'#5a6270'};
 var AB_SHOW=2, IT_SHOW=3;
@@ -1391,7 +1616,7 @@ function renderGraphSup(s){
 }
 function renderGraph(){
   var pool = gSt.m==='owner' ? (GR.owners||[]) : (GR.suppliers||[]);
-  el('grMeta').textContent = '业主 '+(GR.owners||[]).length+' 家 · 供应商 '+(GR.suppliers||[]).length+
+  if(el('grMeta')) el('grMeta').textContent = '业主 '+(GR.owners||[]).length+' 家 · 供应商 '+(GR.suppliers||[]).length+
     ' 家 · 可关联记录 '+(GR.nRel||0)+' 条';
   el('grTip').innerHTML='<b>怎么用：</b>点左侧名单任一家 → 右侧出档案。业主档案给的是「这家业主都买什么、'+
     '最近找谁做的、金额多大」，供应商档案给的是「这家中标单位在给谁干活、擅长哪个细分」。'+
@@ -1520,7 +1745,7 @@ el('f-wx').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
 function renderPlat(){
   var lv={};
   D.platforms.forEach(function(p){(lv[p.level]=lv[p.level]||[]).push(p)});
-  var order=['省级','市级','行业','全国','行业/地方'];
+  var order=['省级','市级','行业/能源集团','行业','全国','行业/地方'];
   el('platWrap').innerHTML=Object.keys(lv).sort(function(a,b){
     return order.indexOf(a)-order.indexOf(b)}).map(function(k){
     return '<div class="sect">'+esc(k)+'平台 <small>'+lv[k].length+' 个</small></div><div class="plgrid">'+
@@ -1528,6 +1753,7 @@ function renderPlat(){
         return '<div class="pl">'+(p.url?'<a class="pn" href="'+esc(p.url)+'" target="_blank" rel="noopener">'+esc(p.name)+' ↗</a>'
           :'<div class="pn">'+esc(p.name)+'</div>')+
           (p.cover?'<div class="pc">'+esc(p.cover)+'</div>':'')+
+          (p.note?'<div class="pnote">注：'+esc(p.note)+'</div>':'')+
           (p.cnt?'<div class="pv">本库收录 '+p.cnt+' 条</div>':'')+'</div>'}).join('')+'</div>'}).join('');
 }
 
@@ -1544,7 +1770,7 @@ function searchFor(kw){
 }
 
 /* ==================== 启动 ==================== */
-render();renderRivals();renderGraph();renderCompetitors();renderPartners();renderOverseas();renderClients();renderTrends();renderMetals();renderMStrip();renderPlat();renderWechat();renderDigest();bindDigest();(function(){var n=((D.wechat||{}).items||[]).length,f=el('wxFold'),s2=el('wxFoldN');if(s2)s2.textContent=n;if(f&&!n)f.style.display='none';})();
+render();renderRivals();renderGraph();renderCompetitors();renderPartners();renderOverseas();renderClients();renderDomestic();rApply();cApply();renderTrends();renderMetals();renderMStrip();renderPlat();renderWechat();renderDigest();bindDigest();(function(){var n=((D.wechat||{}).items||[]).length,f=el('wxFold'),s2=el('wxFoldN');if(s2)s2.textContent=n;if(f&&!n)f.style.display='none';})();
 /* 浏览器端实时行情已停用：各大行情源（新浪 hq.sinajs.cn、东方财富 push2、腾讯 qt.gtimg.cn）
    均拒绝跨站请求或不提供国内期货代码，页面只可能被 403。
    改为由服务端定时任务在每个工作日收盘 16:05 抓取并重新发布。
