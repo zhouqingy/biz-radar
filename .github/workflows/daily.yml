@@ -1,9 +1,5 @@
 name: 商机雷达每日更新
 
-# 每天北京时间 07:20 自动跑：采集 → 补字段 → 清洗 → 构建 → 提交
-# 提交后 Pages 自动重新部署，网址不变
-# cron 是 UTC 时间：07:20 北京 = 前一日 23:20 UTC
-
 on:
   schedule:
     - cron: '20 23 * * *'
@@ -19,7 +15,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 55
     steps:
       - name: 检出仓库
         uses: actions/checkout@v4
@@ -35,23 +31,24 @@ jobs:
         id: crawl
         working-directory: tools
         continue-on-error: true
+        timeout-minutes: 25
         run: |
-          python collect_v4.py --days 3 --perkw 150 \
+          python collect_v4.py --days 3 --perkw 80 \
             --sites 江苏,浙江,合肥,苏州,常州 --merge
 
       - name: 2) 详情页扫描
         working-directory: tools
         continue-on-error: true
-        timeout-minutes: 20
+        timeout-minutes: 15
         run: |
-          python scan_detail.py --all --days 7 --limit 200 --sleep 0.12
+          python scan_detail.py --all --days 7 --limit 120 --sleep 0.1 --workers 8
 
       - name: 3) 补缺失字段
         working-directory: tools
         continue-on-error: true
-        timeout-minutes: 15
+        timeout-minutes: 10
         run: |
-          python fill_missing.py --limit 100 --sleep 0.2
+          python fill_missing.py --limit 80 --sleep 0.1 --workers 8
 
       - name: 4) 重建数据（第一轮）
         working-directory: tools
@@ -69,7 +66,7 @@ jobs:
         run: |
           python build_owner_graph.py
 
-      - name: 4.6) 重建数据（第二轮，把图谱并进去）
+      - name: 4.6) 重建数据（第二轮）
         working-directory: tools
         env:
           BIZ_OUT: ${{ github.workspace }}
