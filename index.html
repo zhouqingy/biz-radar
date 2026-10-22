@@ -575,6 +575,15 @@ details.sub li{padding:2px 0}
 .ovhot .oht{font-size:13px;line-height:1.7;opacity:.95;margin-top:8px}
 .ovhot .ohm{font-size:11.5px;opacity:.8;margin-top:8px;display:flex;gap:10px;flex-wrap:wrap}
 .ovhot a{color:#ffe08a}
+/* 切口标签（2026-10-22）：回答「我们的哪一段活能进去」。
+   配色是刻意分的：水=蓝、电站=砖红、余热=土黄、供热=洋红、配电=墨绿、机会池=灰。
+   同一屏里靠颜色就能扫出「今天有几条是水、几条是电站」。 */
+.ovcut{display:inline-block;font-size:11px;font-weight:800;line-height:1.6;padding:2px 8px;border-radius:6px;margin-right:6px;vertical-align:middle}
+.ovhot .ovcut{
+  /* 深紫底上用「原配色浅底」会糊成一片，看不出是标签。
+     高亮卡里改成半透明白底 + 彩字加粗，靠色相区分，不用靠底色深浅。 */
+  background:rgba(255,255,255,.94)!important;font-size:12px;padding:3px 11px;
+  box-shadow:0 1px 3px rgba(0,0,0,.25)}
 .badge{display:inline-block;font-size:11px;padding:1px 8px;border-radius:8px;background:rgba(255,255,255,.2);font-weight:700}
 /* ---- 顶部金属行情条 ---- */
 .mstrip{display:flex;gap:6px;align-items:stretch;margin-top:11px;padding-top:10px;border-top:1px solid rgba(255,255,255,.18);overflow-x:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.35) transparent}
@@ -752,10 +761,11 @@ window.addEventListener('error',function(e){
   <!-- 3c 海外信号 -->
   <div class="panel" id="p-overseas">
     <div class="sect">海外用能信号 <small>客户出海 = 我司出海 · 按「与我司业务关联度」排序</small></div>
-    <div class="hint" style="margin-bottom:10px">跟踪 44 家重点客户的海外矿山 / 园区 / 建厂动向。海外园区落地必然要配套<b>自备电厂、余热发电、海水淡化</b>——这正是我司海外业务方向（有色企业用热用电 + 配套海水淡化）。关联度由标题与解读中的「发电/自备电厂/氧化铝/镍/园区/海水淡化」等业务关键词计算。</div>
+    <div class="hint" style="margin-bottom:10px">跟踪 <b id="ovClientN">—</b> 家中资出海客户（江浙沪皖优先）的海外矿山 / 园区 / 建厂动向。海外园区落地要配套<b>自备电站、余热发电、海水淡化</b>——这正是我司海外业务方向。<br><b>排序不再按「关联度」</b>：改成按<b>我司切口</b>（海水淡化 / 自备电站 / 余热 / 供热 / 配电）优先，同切口里按项目金额大小。原因很简单——旧算法数的是标题里命中几个关键词，结果「某公司签约某园区」这种泛泛标题得高分，而「巴淡强制新建数据中心自建海水淡化厂」只有一个关键词、排到看不见的地方。<b>越是我们能直接接的活，越应该排前面。</b></div>
     <div id="ovHot"></div>
     <div class="sect" style="margin-top:18px">全部海外动态 <small id="ovCnt"></small></div>
     <div class="frow" style="padding:0 0 10px"><label>行业</label><div class="chips" id="f-ogrp"></div></div>
+    <div class="frow" style="padding:0 0 10px"><label>我司切口</label><div class="chips" id="f-ocut"></div></div>
     <div class="hint" id="ovSectorTip" style="margin:0 0 10px;background:#f0f7ff;border:1px solid #cfe4ff;border-radius:9px;padding:8px 12px;color:#1053c9;font-size:12.5px;line-height:1.7"></div>
     <div class="cgrid" id="ovGrid"></div>
   </div>
@@ -1079,7 +1089,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610220116';
+var VER='?v=202610221458';
 /* ── 全局状态 ──────────────────────────────────────────────
    注意：这些必须在 boot_main() 外面声明。boot_main 里用 var 声明的东西
    全是函数作用域，脚本外面看不见——调试时会发现 D / items 都是 undefined，
@@ -2274,34 +2284,117 @@ el('f-pcat').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
   toggle(pCat,c.dataset.v);c.classList.toggle('on');renderPartners()};
 
 /* ==================== 海外信号 ==================== */
-var oGrp=new Set();
+/* 2026-10-22 改版：从「按关联度排」改成「按我司能切的那一段排」。
+   原来每张卡只有一个关联度分数，用户看完只知道「这事跟我沾边」，
+   不知道「我们的哪一段活能进去」。现在每条带一个切口标签：
+     自备电站·动力岛 / 供配电·孤网 / 余热回收 / 海水淡化 / 热电联产·供热 / 机会池
+   排序也在 build_web 里改成「切口优先级 → 合同额 → 关联度」，
+   不再是「标题里命中几个关键词」。 */
+var oGrp=new Set(), oCut=new Set();
+var CUT_META={
+  water:{t:'海水淡化',c:'#0b6fa4',bg:'#e3f4fb'},
+  power:{t:'自备电站·动力岛',c:'#a8451a',bg:'#fdece3'},
+  waste:{t:'余热回收',c:'#7a5b00',bg:'#fdf4dc'},
+  cogen:{t:'热电联产·供热',c:'#8a2f6b',bg:'#fbe8f4'},
+  grid:{t:'供配电·孤网',c:'#215c3a',bg:'#e4f4ea'},
+  opp:{t:'机会池',c:'#4a5568',bg:'#eef1f6'},
+  '':{t:'',c:'',bg:''}
+};
+function cutMeta(o){
+  var m=CUT_META[o.cut||''];
+  /* cutWhy 是人工写的「这条线索具体能切什么活」，比 6 个粗标签精确得多。
+     有就显示人工那句，没有就显示标签名。 */
+  /* cutWhy 是人工写的一句话，可能带括号补充（「海水淡化 EPC + O&M（建成后移交…）」），
+     直接截 26 字会变成半句「海水淡化 EPC + O&M（建成后移交，含运维培训」——括号没闭合，很难看。
+     先在第一个括号/破折号处断开，再限长；完整版放 title 悬浮提示里。 */
+  var w=(o.cutWhy||'').split(/[（(——]/)[0].trim();
+  return {t:(w||'').slice(0,20)||(m&&m.t)||'', c:(m&&m.c)||'', bg:(m&&m.bg)||''};
+}
 function ovCard(o,big){
-  var h='<div class="'+(big?'ovhot':'ccard')+'"><h3>'+(o.url?'<a href="'+esc(o.url)+'" target="_blank" rel="noopener"'+(big?' style="color:#ffe08a"':'')+'>'+esc(o.title)+(o.url?' ↗':'')+'</a>':esc(o.title))+'</h3>';
+  var cm=cutMeta(o);
+  var cutTag = cm.t ? '<span class="ovcut" style="background:'+cm.bg+';color:'+cm.c+'" title="'+esc(o.cutWhy||cm.t)+'">'+esc(cm.t)+'</span>' : '';
+  var h='<div class="'+(big?'ovhot':'ccard')+'">'+
+        (big&&cutTag?'<div style="margin-bottom:6px">'+cutTag+'</div>':'')+
+        '<h3>'+(o.url?'<a href="'+esc(o.url)+'" target="_blank" rel="noopener"'+(big?' style="color:#ffe08a"':'')+'>'+esc(o.title)+(o.url?' ↗':'')+'</a>':esc(o.title))+'</h3>';
   if(big){
     h+='<div class="oht">'+esc(o.desc||'')+'</div>';
     h+='<div class="ohm"><span class="badge">'+esc(o.name)+'</span><span class="badge">'+esc(o.grp)+'</span>'+
        (o.tag?'<span class="badge">'+esc(o.tag)+'</span>':'')+'<span>'+esc(o.date||'')+'</span></div>';
   }else{
     h+='<div class="cc-m">'+esc(o.desc||'')+'</div>';
-    h+='<div class="ns" style="font-size:11.5px;color:var(--tx3);margin-top:6px"><span class="ntag 行业">'+esc(o.tag||'动态')+'</span><span>'+esc(o.name)+'</span><span>'+esc(o.date||'')+'</span></div>';
+    h+='<div class="ns" style="font-size:11.5px;color:var(--tx3);margin-top:6px">'+cutTag+
+       '<span class="ntag 行业">'+esc(o.tag||'动态')+'</span><span>'+esc(o.name)+'</span><span>'+esc(o.date||'')+'</span></div>';
   }
   return h+'</div>';
 }
 function renderOverseas(){
   var list=D.overseas||[];
+  // 高关联区：取切口最明确的 4 条（data 已按切口优先级排好序，直接取头 4 条）
   var hot=list.slice(0,4);
   el('ovHot').innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-bottom:16px">'+
     hot.map(function(o){return ovCard(o,true)}).join('')+'</div>';
-  var rest=list.filter(function(o){return !oGrp.size||oGrp.has(o.grp)});
-  el('ovCnt').textContent='共 '+list.length+' 条 · 高关联 '+list.filter(function(o){return o.rel>=3}).length+' 条';
-  el('ovGrid').innerHTML=rest.map(function(o){return ovCard(o,false)}).join('')||'<div class="empty">暂无</div>';
+  var rest=list.filter(function(o){
+    if(oGrp.size && !oGrp.has(abGrp(o.grp))) return false;
+    if(oCut.size && !oCut.has(o.cut||'')) return false;
+    return true;
+  });
+  var nCut={}; list.forEach(function(o){var k=o.cut||''; nCut[k]=(nCut[k]||0)+1});
+  // 客户家数动态填，别再写死（原来硬编码「44 家」，实际已经 94 家了）
+  var cn=el('ovClientN');
+  if(cn) cn.textContent=((D.clients||[]).length||'—');
+  el('ovCnt').textContent='共 '+list.length+' 条 · 切口明确 '+list.filter(function(o){return o.cut&&o.cut!=='opp'}).length+
+    ' 条 · 海水淡化 '+(nCut.water||0)+' 条';
+  el('ovGrid').innerHTML=rest.map(function(o){return ovCard(o,false)}).join('')||'<div class="empty">没有匹配的动态，换个筛选条件试试</div>';
+  // 切口筛选条（动态生成，只显示有数据的切口）
+  var cb=el('f-ocut');
+  if(cb){
+    cb.innerHTML=['water','power','waste','cogen','grid','opp',''].filter(function(k){return nCut[k]})
+      .map(function(k){
+        var m=CUT_META[k]||{t:'看不出'};
+        return '<span class="chip'+(oCut.has(k)?' on':'')+'" data-k="ocut" data-v="'+k+'">'+
+               esc(k?m.t:'看不出')+'<em>'+nCut[k]+'</em></span>';
+      }).join('');
+  }
+  buildOvGrpChips();
 }
-chipsBox('f-ogrp',['有色','钢铁','化工化纤','水泥建材','数据中心','化肥','其他制造'],null,'ogrp');
+el('f-ocut') && (el('f-ocut').onclick=function(e){
+  var c=e.target.closest('.chip'); if(!c)return;
+  var v=c.dataset.v;
+  if(oCut.has(v))oCut.delete(v);else oCut.add(v);
+  c.classList.toggle('on'); renderOverseas();
+});
+/* 行业筛选：2026-10-22 修——原来这里写死「有色/钢铁/化工化纤/水泥建材/数据中心/化肥/其他制造」，
+   可数据里的行业名是「有色冶炼/水泥/化工化纤/…」，两套名字对不上，
+   点「水泥建材」出来 0 条、点「有色」出来 0 条，筛选器等于坏的。
+
+   ⚠ 还有个更隐蔽的坑：这段原来是**立即执行的 IIFE**，在脚本解析时就跑。
+   可 data.news.js 是按需加载的——那时 D.overseas 还不存在，
+   于是 renderOverseas 里这排 chips 永远是空的（容器在，里面没东西），
+   而切口那排因为是每次渲染现建的，反而正常。两排一个有一个没有，看着像「行业没数据」。
+   现在改成函数，由 renderOverseas 每次调用（幂等，重复调只是重画）。 */
+function buildOvGrpChips(){
+  var list=D.overseas||[], n={};
+  list.forEach(function(o){var g=abGrp(o.grp); n[g]=(n[g]||0)+1});
+  var order=['有色冶炼','水泥','数据中心','电力配套','钢铁','化工化纤','造纸','玻璃']
+    .filter(function(g){return n[g]});
+  Object.keys(n).forEach(function(g){if(order.indexOf(g)<0)order.push(g)});
+  var box=el('f-ogrp');
+  if(box) box.innerHTML=order.map(function(g){
+    return '<span class="chip'+(oGrp.has(g)?' on':'')+'" data-k="ogrp" data-v="'+g+'">'+esc(g)+'<em>'+n[g]+'</em></span>';
+  }).join('');
+}
+buildOvGrpChips();
+/* 旧的 chipsBox('f-ogrp', [...]) 已删除：它写死的行业名（有色/水泥建材/化肥）
+   和数据里的（有色冶炼/水泥/化工化纤）不是一套，点了出 0 条。
+   现在由上面那个 IIFE 从数据现取并归一后渲染。 */
 (function(){var box=el('ovSectorTip');if(!box)return;
-  box.innerHTML='<b>三行业出海 · 为什么与我司有关</b>：'+
-   '<b>水泥</b>——水泥窑余热发电是我司成熟市场，出海项目还需自备电厂、脱硝除尘；'+
-   '<b>数据中心</b>——高载能，供电方案多元：<b>天然气发电</b>（燃气轮机/分布式能源，东南亚、中东天然气产区尤常见）、'+'市电+柴油发电机备电、光伏+储能绿电；还有<b>冷热电三联供</b>（燃气发电余热用吸收式制冷给机房降温）——'+'正对「能源清洁高效利用+热电联产」的老本行；冷却系统带来水处理，海岛项目还需海水淡化；'+
-   '<b>化肥</b>——合成氨/磷化工高耗能，必配自备热电站、余热回收、脱硫脱硝与废水零排放。';})();
+  box.innerHTML='<b>切口怎么读</b>：<b>海水淡化</b>——海岛/缺水地区新建数据中心、园区，'+
+   '巴淡岛已把 SWRO 写成核准前置条件；<b>自备电站·动力岛</b>——项目明确写了电站/发电机组的，最直接的活；'+
+   '<b>余热回收</b>——窑尾 SP 炉、AQC 炉、液冷余热，我司标准产品；'+
+   '<b>热电联产·供热</b>——园区蒸汽/集中供热；<b>供配电·孤网</b>——变电站、升压站、孤网稳定；'+
+   '<b>机会池</b>——项目是真的，但没写明要配什么，先进候选池跟踪。'+
+   '<br><b>为什么很多条标「看不出」</b>：那是诚实标注。客户动态原文只说了建厂、扩产、签约，'+
+   '没写要配套什么能源设施——硬给它编一个切口，你按标签去追就扑空了。';})();
 el('f-ogrp').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
   toggle(oGrp,c.dataset.v);c.classList.toggle('on');renderOverseas()};
 
@@ -2591,10 +2684,15 @@ function ccMore(key,cnt,open){
    排序：pri → 行业（有色→水泥→数据中心→钢铁→化工→造纸→玻璃）→ 库内命中数。
    行业顺序是用户点名的重点业务顺序，别按字母排。 */
 var cRg=new Set(), cPri=new Set(), cEx=new Set();
-var AB_GRP_ORDER=['有色冶炼','水泥','数据中心','钢铁','化工化纤','造纸','玻璃'];
+/* 2026-10-22：加了「电力配套」——巴淡那批（PLN Batam / BP Batam）不是客户而是关口，
+   单列在数据中心之后。顺序 = 业务优先级，不是字母序。 */
+var AB_GRP_ORDER=['有色冶炼','水泥','数据中心','电力配套','钢铁','化工化纤','造纸','玻璃'];
 /* 行业别名归一：历史数据里同时存在「有色」和「有色冶炼」、「水泥」和「水泥建材」，
    不归一会导致同一个行业在筛选器里出现两次、各带一半数据。 */
-var AB_GRP_ALIAS={'有色':'有色冶炼','水泥建材':'水泥'};
+/* 行业别名归一。历史数据里有三套叫法混着（有色/有色冶炼、水泥建材/水泥、化肥/化工化纤），
+   和后端 build_web.py 的 GALIAS 必须保持一致——两边不一致，筛选器就会出现
+   「同一个行业两个入口、各带一半数据」。改一边记得改另一边。 */
+var AB_GRP_ALIAS={'有色':'有色冶炼','水泥建材':'水泥','化肥':'化工化纤','其他制造':'化工化纤'};
 function abGrp(g){ return AB_GRP_ALIAS[g] || g || '其他制造' }
 
 /* 图谱总家数（业主 + 供应商）。抽成公共函数的原因见下面 _gTotal 处的注释：
@@ -2691,8 +2789,15 @@ function renderClients(){
           ' <span class="sub-i">'+esc(it.st)+' '+esc(it.d)+(it.win?' · 中:'+esc(it.win):'')+'</span>'+
           (it.url?'</a>':'')+'</li>'}).join('')+'</ul>'+
       (x.items.length>IT_SHOW?ccMore('it:'+x.name,x.items.length-(open?x.items.length:IT_SHOW),open):'')+'</div>'
-      :'<div class="cc-m" style="color:#8a9099">本库（国内公开渠道）暂无该客户记录——不代表没机会，'+
-        '海外建厂信息通常先在集团官网/行业媒体发布，不在国内招标平台。</div>';
+      /* 2026-10-22：按主体类型分两种说法。
+         「电力配套」那一组（PLN Batam、BP Batam）是审批/并网关口，本来就不会在国内
+         招标平台发标，套用「暂无该客户记录」会让人误以为数据没抓到。
+         说清它是什么，比说「没记录」有用。 */
+      : (abGrp(x.grp)==='电力配套'
+         ? '<div class="cc-m" style="color:#8a9099">这是<b>关口型主体</b>（审批 / 并网 / 水务），'+
+           '不在国内招标平台发标，本库自然没有记录。它的价值在「能不能进场」而不是「发不发标」。</div>'
+         : '<div class="cc-m" style="color:#8a9099">本库（国内公开渠道）暂无该客户记录——不代表没机会，'+
+           '海外建厂信息通常先在集团官网/行业媒体发布，不在国内招标平台。</div>');
     return '<div class="ccard ab-card"><div class="cc-h"><b>'+esc(x.name)+'</b>'+
       '<span class="cc-tag" style="background:'+(GTAG[abGrp(x.grp)]||'#f1f3f6')+';color:'+(GCOL[abGrp(x.grp)]||'#5a6270')+'">'+esc(abGrp(x.grp))+'</span>'+
       priTag+
@@ -3825,8 +3930,8 @@ function boot_main(){
 
 /* 启动逻辑在 boot.js（defer，保证在数据脚本之后执行） */
 </script>
-<script defer src="data.core.js?v=202610220116"></script>
-<script defer src="data.items.js?v=202610220116"></script>
+<script defer src="data.core.js?v=202610221458"></script>
+<script defer src="data.items.js?v=202610221458"></script>
 <script defer src="boot.js?v=202610212029"></script>
 <!-- 竞对画像抽屉：点「画像」按钮从右侧滑出，不跳页 -->
 <!-- rival.js 已于 2026-10-22 停用：它调的腾讯云函数只有 3 家单位有数据（中国联合/江苏院/河北院），
