@@ -18,9 +18,7 @@ from collections import defaultdict, Counter
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(ROOT, 'raw')
-# 2026-10-22：路径改成可配置。原来写死 '../biz-radar/data.js'，那是沙盒的目录结构；
-# 搬到 GitHub Actions 后产物在仓库根目录，跟 tools/ 是同级。用 BIZ_OUT 指过去。
-DATA = os.path.join(os.environ.get('BIZ_OUT') or os.path.join(os.path.dirname(ROOT), 'biz-radar'), 'data.js')
+DATA = os.path.join(os.path.dirname(ROOT), 'biz-radar', 'data.js')
 OUT = os.path.join(RAW, 'owner_graph.json')
 
 # ---- 清洗规则 ----
