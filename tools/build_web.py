@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 """生成前端数据包 data.js"""
-import json, os, re, random, datetime
+import json, os, re, random, datetime, math
 from collections import Counter, defaultdict
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-# 2026-10-22：输出目录改成可配置。
-#   原来硬编码 '/workspace/biz-radar'，那是沙盒里的路径；搬到 GitHub Actions 后
-#   目录结构是 repo/tools/ 和 repo/ 的关系，写死了就往不存在的地方写。
-#   现在默认仍是沙盒路径（本地跑不受影响），Actions 里用 BIZ_OUT 覆盖。
-OUT = os.environ.get('BIZ_OUT') or '/workspace/biz-radar'
+OUT = '/workspace/biz-radar'
 os.makedirs(OUT, exist_ok=True)
 
 D = json.load(open(os.path.join(ROOT, 'merged.json'), encoding='utf-8'))
@@ -66,6 +62,50 @@ IND = json.load(open(os.path.join(ROOT, 'raw', 'industry.json'), encoding='utf-8
 AB = json.load(open(os.path.join(ROOT, 'raw', 'clients_abroad.json'), encoding='utf-8'))
 AB2_PATH = os.path.join(ROOT, 'raw', 'clients_abroad2.json')
 AB2 = json.load(open(AB2_PATH, encoding='utf-8')) if os.path.exists(AB2_PATH) else {'clients': []}
+# 人工补录的海外动态（三行业增量 + 巴淡岛这批）。这里先加载一份，
+# 一是给客户卡挂载用（按 name 匹配），二是后面并入海外动态列表。
+# 注意：读一次、用两处，别再各自 json.load 一遍——两处读的时点不同，
+# 一旦中间被别的逻辑改过，两处就会不一致（这个坑在 digest 上踩过）。
+_EXTRA_PATH = os.path.join(ROOT, 'raw', 'oversea_extra.json')
+try:
+    _EXTRA = json.load(open(_EXTRA_PATH, encoding='utf-8'))
+    _EXTRA = _EXTRA.get('items', _EXTRA) if isinstance(_EXTRA, dict) else _EXTRA
+except Exception:
+    _EXTRA = []
+# 按客户名建索引，客户循环里 O(1) 取，不用每次遍历
+_EXTRABY = {}
+for _x in _EXTRA:
+    _EXTRABY.setdefault((_x.get('name') or '').strip(), []).append(_x)
+# 再按「标题前 40 字」建一个反向索引，专门用来给扁平列表补 cutWhy。
+# 扁平列表里同一条目可能来自客户卡（abroad）而不带 cutWhy，
+# 靠标题回查人工补录那份，就能把人工写的那句话捞回来。
+# 2026-10-22 补：clients_abroad.json 的 items 里也带 cut/cutWhy（seed_cutwhy.py 写的），
+#   这份是海外动态的大头（57 条 vs extra 的 20 条），必须一起进索引，
+#   否则桐昆、海亮这两条永远补不到说明——它们只存在于 clients_abroad。
+def _feed_why(d):
+    cl = d.get('clients') if isinstance(d, dict) else None
+    arrs = [c.get('items') or [] for c in cl] if isinstance(cl, list) else \
+           [d.get('items', d) if isinstance(d, dict) else d]
+    for arr in arrs:
+        if not isinstance(arr, list):
+            continue
+        for x in arr:
+            if not isinstance(x, dict) or not x.get('cutWhy'):
+                continue
+            _t = (x.get('title') or '')[:40]
+            if _t:
+                _EXTRABY_WHY.setdefault(_t, x['cutWhy'])
+
+
+_EXTRABY_WHY = {}
+for _x in _EXTRA:
+    _t = (_x.get('title') or '')[:40]
+    if _t and _x.get('cutWhy'):
+        _EXTRABY_WHY[_t] = _x['cutWhy']
+try:
+    _feed_why(json.load(open(os.path.join(ROOT, 'raw', 'clients_abroad.json'), encoding='utf-8')))
+except Exception as _e:
+    print('[WARN] clients_abroad 的 cutWhy 未建索引：%s' % _e)
 PT_PATH = os.path.join(ROOT, 'raw', 'partners.json')
 PARTNERS = json.load(open(PT_PATH, encoding='utf-8')) if os.path.exists(PT_PATH) else []
 
@@ -626,7 +666,22 @@ for c in CLIENTS:
     hits = [r for r in D if kw and kw in (r['buyer'] + r['win'] + r['t'] + r['snip'])]
     hits.sort(key=lambda x: (x['amt'] or 0), reverse=True)
     grp = _ci.get('grp') or '其他制造'
+    # 海外动态挂载：先精确按前 4 字找，再退一步做「包含匹配」。
+    #   2026-10-22 加包含匹配的原因：新加的客户主体是外文名（DayOne / PT Equator Gate
+    #   System Batam / BW Digital），前 4 字索引（ABMAP['DayO']）永远命中不了，
+    #   结果这些客户卡上一条海外动态都不显示——数据明明入库了，卡上是空的。
+    #   包含匹配会慢一点（70 家 × 26 个来源字符串），但这点开销可以忽略。
     ab = ABMAP.get(kw[:4]) or ABMAP.get(c[:4]) or {}
+    if not ab:
+        _nm = (c or '').replace('（', '(').split('(')[0]
+        for _src in (AB.get('clients', []), AB2.get('clients', [])):
+            for _cc in _src:
+                _snm = (_cc.get('name') or '').replace('（', '(').split('(')[0]
+                if _snm and _nm and (_snm in _nm or _nm in _snm):
+                    ab = {'items': (ab.get('items') or []) + (_cc.get('items') or [])}
+                    break
+            if ab.get('items'):
+                break
     for c2 in AB2.get('clients', []):
         k2 = c2.get('name', '').replace('（', '(').split('(')[0][:4]
         if (k2 and k2 == kw[:4]) or k2 == c[:4]:
@@ -634,6 +689,11 @@ for c in CLIENTS:
             break
     abitems = [x for x in (ab.get('items') or [])
                if x.get('title') and (x.get('url') or x.get('desc'))]
+    # 2026-10-22：人工补录在 raw/oversea_extra.json 里的条目（比如巴淡岛这批），
+    # 原来是「只进海外动态扁平列表、不进客户卡」——于是客户卡上看到的是
+    # 「海外建厂 / 扩张动态 0 条」，得切到海外页才能看到，同一个事实两个地方不同步。
+    # 现在按 name 把它挂回对应客户卡前面（人工整理的通常信息最全，排最前）。
+    abitems = _EXTRABY.get(c, []) + abitems
     _seen_clear.add(kw[:4])
     overseas.append({
         'name': c, 'kw': kw, 'n': len(hits), 'grp': grp,
@@ -649,7 +709,17 @@ for c in CLIENTS:
         'items': [{'t': h['t'][:60], 'amt': h['amtY'], 'd': h['d'], 'st': h['st'], 'win': h['win'], 'url': h['url']}
                   for h in hits[:8]],
         'abroad': [{'title': x['title'][:70], 'date': x.get('date') or '', 'tag': x.get('tag') or '',
-                    'desc': (x.get('desc') or '')[:130], 'url': x.get('url') or ''} for x in abitems[:4]],
+                    # cut=我司切口。⚠ 必须在这里判、用**截断前**的 desc 判：
+                    #   下面 desc 被截到 130 字，而很多条目的关键信息（"含装机 360 兆瓦
+                    #   天然气发电站"）在 130 字之后。用截断后的文本判，
+                    #   这些条目就会变成「看不出」——踩过这个坑，永钢那条就是。
+                    'cut': x.get('cut') or OC.guess_cut(x['title'], x.get('desc') or ''),
+                    # cutWhy：人工写的「这条线索具体能切什么活」，比 6 个粗标签精确，
+                    # 前端优先显示它；没有就退回显示标签名。
+                    # 空字符串统一转成 ''（JSON 里 null 会让前端 `o.cutWhy||''` 之外的分支报错）。
+                    'cutWhy': x.get('cutWhy') or '',
+                    'desc': (x.get('desc') or '')[:130], 'url': x.get('url') or ''}
+                   for x in abitems[:6]],
     })
 # 只在 AB / AB2 里出现、但不在人工名单里的海外客户，补进来（标 pri=3 表示「挖掘到的，未确认」）
 for src in (AB.get('clients', []), AB2.get('clients', [])):
@@ -666,12 +736,28 @@ for src in (AB.get('clients', []), AB2.get('clients', [])):
             'why': '新闻/公告中发现的出海动向，尚未确认是否属于我们业务范围',
             'proj': '', 'rg': '', 'amt': 0, 'latest': '',
             'items': [],
+            # 2026-10-22：这一支也要算切口。原来漏了，导致「永钢中亚含装机 360 兆瓦
+            # 天然气发电站」这种最该被看见的条目，标签是空的、排序掉到最后。
             'abroad': [{'title': x['title'][:70], 'date': x.get('date') or '', 'tag': x.get('tag') or '',
+                        'cut': x.get('cut') or OC.guess_cut(x['title'], x.get('desc') or ''),
                         'desc': (x.get('desc') or '')[:130], 'url': x.get('url') or ''} for x in items[:4]],
         })
+# 补 cutN：两支都追加完之后统一补，别写在中间分支里（写在中间时后面的条目补不到）。
+for _c in overseas:
+    for _a in _c.get('abroad', []):
+        _a['cutN'] = OC.CUTS.get(_a.get('cut') or '', '')
 # 排序：江浙沪皖优先（用户口径），再按行业，最后按库内命中数。
 # 行业顺序按用户点名的重点：有色 → 水泥 → 数据中心 → 钢铁 → 化工 → 造纸 → 玻璃
-gorder = {'有色冶炼':0, '水泥':1, '数据中心':2, '钢铁':3, '化工化纤':4, '造纸':5, '玻璃':6}
+# 2026-10-22：行业顺序统一成「业务优先级」，并由 oversea_clients.GROUPS 派生，
+# 不再在这里硬编码第二份。原来的问题是：
+#   ① 这里写死不认识「电力配套」，巴淡的 PLN/BP Batam 全部落到默认 9，排到最后；
+#   ② 与 oversea_clients.py 的 GROUPS 顺序必须人工保持同步，迟早错位。
+gorder = {g: i for i, (g, _d) in enumerate(OC.GROUPS)}
+# 行业别名归一：历史数据里同时存在「有色 / 有色冶炼」「水泥建材 / 水泥」「化肥 / 化工化纤」。
+# 不归一会导致同一个行业在筛选器里出现两次、各带一半数据（前端 abGrp() 里也有一份同样的映射）。
+GALIAS = {'有色': '有色冶炼', '水泥建材': '水泥', '化肥': '化工化纤', '其他制造': '化工化纤'}
+for _c in overseas:
+    _c['grp'] = GALIAS.get(_c.get('grp') or '', _c.get('grp') or '其他制造')
 overseas.sort(key=lambda x: (x['pri'], gorder.get(x['grp'], 9), -x['n'], -x['amt']))
 clients = overseas   # 兼容旧代码引用
 
@@ -724,9 +810,22 @@ print('微信线索 %d 条（竞对 %d / 行业 %d）'
 overseas = []
 for cl in clients:
     for a in cl.get('abroad', []):
-        txt = a['title'] + ' ' + a.get('desc') or ''
+        txt = a['title'] + ' ' + (a.get('desc') or '')
         rel = sum(1 for k in REL_KW if k in txt)
-        overseas.append({'name': cl['name'], 'grp': cl['grp'], 'kw': cl['kw'], **a, 'rel': rel})
+        # 2026-10-22：透传客户卡阶段算好的 cut / cutN。
+        #   ⚠ 这一行必须显式写出 cut 和 cutN，不能只写 **a 就算完——
+        #   踩过：以为 **a 会带过来，结果 a 是客户卡 abroad 里的子对象，
+        #   它的 cut 在上一段算好了，但 cutN 是在循环之后补的，
+        #   两个循环顺序一乱，这里拿到的就是没有 cutN 的版本，
+        #   统计时全部落到「看不出」（59 条），而客户卡上显示正常。
+        #   所以宁可多写两个字段，把依赖关系写死在这里。
+        overseas.append({'name': cl['name'], 'grp': cl['grp'], 'kw': cl['kw'], **a,
+                         'cut': a.get('cut') or OC.guess_cut(a.get('title') or '', a.get('desc') or ''),
+                         'cutN': a.get('cutN') or OC.CUTS.get(a.get('cut') or '', ''),
+                         # cutWhy 也要显式写出。`**a` 里虽然有，但 a 是 abroad 的截断版，
+                         # 走 _EXTRABY 补进来的条目 a 里没有 cutWhy，得回原始条目取。
+                         'cutWhy': a.get('cutWhy') or _EXTRABY_WHY.get((a.get('title') or '')[:40], ''),
+                         'rel': rel})
 # ---- 三行业出海增量（数据中心/化肥/水泥，2026-10-19 上线）----
 # 历史 bug（务必牢记）：这批增量最初只写进了 data.js，没落盘到 raw/ 持久源，
 # 结果每次 update_weekly.py 全量重建就把它们冲掉（竞对 65→59、海外 76→71）。
@@ -743,6 +842,9 @@ try:
         txt = (x.get('title') or x.get('t') or '') + ' ' + (x.get('desc') or '')
         x = dict(x)
         x['rel'] = x.get('rel') or sum(1 for _k in REL_KW if _k in txt)
+        # 2026-10-22：切口标签。人工写的 cut 优先，没有就按全文关键词兜底。
+        x['cut'] = x.get('cut') or OC.guess_cut(x.get('title') or x.get('t') or '', x.get('desc') or '')
+        x['cutN'] = OC.CUTS.get(x['cut'], '')
         overseas.append(x)
         _seen.add(k)
         _n += 1
@@ -776,19 +878,125 @@ for _di in digest.get('items', []):
             None, (o.get('title') or ''), (_di.get('t') or '')).ratio() >= 0.5
            for o in overseas):
         continue
-    _g2 = ('水泥建材' if any(z in _txt for z in ('海螺', '华新', '红狮'))
+    _g2 = ('水泥' if any(z in _txt for z in ('海螺', '华新', '红狮'))
            else '数据中心' if '润泽' in _txt
-           else '化肥' if any(z in _txt for z in ('云天化', '新洋丰', '云图', '六国', '川金诺'))
-           else '有色' if ('华友' in _txt or '青山' in _txt) else '其他制造')
+           else '化工化纤' if any(z in _txt for z in ('云天化', '新洋丰', '云图', '六国', '川金诺'))
+           else '有色冶炼' if ('华友' in _txt or '青山' in _txt) else '其他制造')
+    # 2026-10-22：行业名统一。历史代码这里写的是「水泥建材 / 化肥 / 有色」，
+    # 和 oversea_clients.py 的「水泥 / 化工化纤 / 有色冶炼」不是一套名字，
+    # 结果同一个行业在筛选器里出现两次、各带一半数据。
+    _c2 = OC.guess_cut(_di.get('t') or '', _di.get('sum') or '')
     overseas.append({'name': _hit, 'grp': _g2, 'kw': _hit,
                      'title': _di.get('t', ''), 'desc': _di.get('sum', ''),
                      'date': _di.get('d', ''), 'tag': '海外投资',
+                     'cut': _c2, 'cutN': OC.CUTS.get(_c2, ''),
                      'url': _di.get('url', ''), 'rel': 6, 'src': _di.get('src', '')})
     _ovtitles.add((_di.get('t') or '')[:40])
     _n2 += 1
 if _n2:
     print('微信深度稿海外项目并入 %d 条' % _n2)
-overseas.sort(key=lambda x: (x['rel'], x.get('date') or ''), reverse=True)
+# 2026-10-22 去重：同一条海外动态会从两个来源各进一次——
+#   ① 客户卡（clients 里的 abroad）② raw/oversea_extra.json 手工补录，
+#   两边 name 可能写成「海螺集团」和「安徽海螺集团有限责任公司」，标题一字不差。
+#   之前只是按 (name, title) 判重，全称/简称不一致就漏了，页面上同一件事出现两次。
+#   现在按「标题前 40 字」判重（标题是事实主体，company 名写法差异不影响）。
+_ovseen = {}
+_dedup = []
+for _o in overseas:
+    _k = (_o.get('title') or _o.get('t') or '')[:40]
+    if not _k:
+        _dedup.append(_o)
+        continue
+    if _k in _ovseen:
+        # 已有：保留信息更全的那条（desc 长、有 cut、有 url 的优先）
+        _old = _ovseen[_k]
+        _score = lambda z: (len(z.get('desc') or '') > 0, bool(z.get('cut')), len(z.get('desc') or ''))
+        if _score(_o) > _score(_old):
+            _dedup[_dedup.index(_old)] = _o
+            _ovseen[_k] = _o
+        continue
+    _ovseen[_k] = _o
+    _dedup.append(_o)
+if len(_dedup) != len(overseas):
+    print('海外动态去重：%d → %d 条（同标题跨来源重复）' % (len(overseas), len(_dedup)))
+overseas = _dedup
+
+# 2026-10-22 补丁：去重之后补 cutWhy。
+#   上面「三行业增量」那段只补了 cut / cutN，没补 cutWhy，导致前端标签退化成
+#   6 个粗标签里的名字（「余热回收」），看不到人工写的那句「这条线索具体能切什么活」。
+#   放在去重之后是因为要保证被保留下来的那条也带上（去重可能整条替换）。
+for _o in overseas:
+    if not _o.get('cutWhy'):
+        _o['cutWhy'] = _EXTRABY_WHY.get((_o.get('title') or '')[:40], '')
+
+# ── 2026-10-22 重写排序：从「报道条数」改成「业务价值」 ──
+# 老规则 overseas.sort(key=rel) 的问题：rel 数的是「标题里命中几个业务关键词」，
+# 于是「某公司签约某园区」这种泛泛标题得 3-4 分，而「巴淡强制新建数据中心自建
+# 海水淡化厂」只有 1 个关键词（淡化）得 1 分、排到看不到的地方——
+# **越是我们能直接接的活，排得越靠后**，这个排序其实是反的。
+#
+# 新规则三级排序：
+#   ① 切口权重 cutW：海水淡化 / 自备电站 / 余热 这些「明确能接」的排前面，
+#      机会池（opp）和看不出（空）排后面；
+#   ② 合同额对数 amtLog：同一档里，金额大的先看（20 亿美元 > 1 亿美元，
+#      但不会像线性排序那样让一个超大项目压掉全部小项目）；
+#   ③ rel 和日期做兜底，保证同分时新的在前。
+# 切口权重。这几个数字是「业务判断」，不是技术参数，改之前先想清楚：
+#   water=0  放第一位。理由：巴淡岛把 SWRO 写成了核准前置条件，水是「不建就批不了」
+#            的刚需，而且我司海外定位里海水淡化是差异化那一块，不是配角。
+#             踩过：一开始 water 和 power 都设 0，于是同分之下按金额排，
+#            DayOne 那条「监管强制新建数据中心自建 SWRO」只值 1100 万美元，
+#            被 126 亿美元的电站项目压到十几名开外——**最该看见的那条看不见**。
+#   power=1  自备电站是我司最核心的活，量也最大。
+#   waste=1  余热回收是标准产品，同权重。
+#   cogen/grid 依次靠后；opp=机会池；'' = 看不出，一律沉底。
+CUT_W = {'water': 0, 'power': 1, 'waste': 1, 'cogen': 2, 'grid': 3, 'opp': 4, '': 5}
+_MONEY_RE = re.compile(r'(\d+(?:\.\d+)?)\s*(亿|千万|万)\s*(美元|印尼盾|新元|元|人民币|卢比)?')
+
+
+def _amt_log(txt):
+    """从文本里粗取金额量级，返回 log10(美元) 供排序。取不到返回 0。
+
+    只用于**排序**，不进展示。所以允许粗：宁可把「30 公顷」误当金额，
+    也不为了精确去写一个复杂的 NLP——排序错一位没人看得出来，
+    展示错一个数字就是事故。
+    """
+    best = 0.0
+    for m in _MONEY_RE.finditer(txt or ''):
+        try:
+            v = float(m.group(1))
+        except ValueError:
+            continue
+        unit, cur = m.group(2), (m.group(3) or '')
+        v *= {'亿': 1e8, '千万': 1e7, '万': 1e4}.get(unit, 1)
+        if '印尼盾' in cur or '卢比' in cur:
+            v /= 15000.0          # 约 1 美元 ≈ 15000 印尼盾
+        elif '新元' in cur:
+            v /= 1.35
+        elif '元' in cur or '人民币' in cur:
+            v /= 7.2
+        if v > best:
+            best = v
+    return math.log10(best) if best > 1 else 0.0
+
+
+def _amt_key(x):
+    """金额优先、其次关联度。写成元组是为了让上面第二次 sort 一句话说清排序依据。"""
+    return (x.get('amtLog') or 0, x.get('rel') or 0)
+
+
+for _o in overseas:
+    _o['cutW'] = CUT_W.get(_o.get('cut') or '', 4)
+    _o['amtLog'] = round(_amt_log((_o.get('title') or '') + ' ' + (_o.get('desc') or '')), 2)
+# 三级排序，写法要绕一下：
+#   Python 的 sort 是稳定的，所以从「最不重要的键」开始连续排三次，
+#   最终结果就是按「最重要 → 最次要」的优先级排好。
+#   日期是字符串没法取负，正好用稳定的多次排序解决，不用写奇怪的 key。
+overseas.sort(key=lambda x: x.get('date') or '', reverse=True)   # ③ 新的在前
+overseas.sort(key=lambda x: _amt_key(x), reverse=True)           # ② 金额大的在前
+overseas.sort(key=lambda x: x['cutW'])                           # ① 切口优先级（升序，0 最优先）
+_cutc = Counter(o.get('cutN') or '（看不出）' for o in overseas)
+print('海外动态 %d 条，切口分布：%s' % (len(overseas), ' · '.join('%s %d' % (k, v) for k, v in _cutc.most_common())))
 
 # 页面顶部“数据更新”日期
 # ------------------------------------------------------------------
