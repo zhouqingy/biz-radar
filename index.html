@@ -761,7 +761,7 @@ window.addEventListener('error',function(e){
   <!-- 3c 海外信号 -->
   <div class="panel" id="p-overseas">
     <div class="sect">海外用能信号 <small>客户出海 = 我司出海 · 按「与我司业务关联度」排序</small></div>
-    <div class="hint" style="margin-bottom:10px">跟踪 <b id="ovClientN">—</b> 家中资出海客户（江浙沪皖优先）的海外矿山 / 园区 / 建厂动向。海外园区落地要配套<b>自备电站、余热发电、海水淡化</b>——这正是我司海外业务方向。<br><b>排序不再按「关联度」</b>：改成按<b>我司切口</b>（海水淡化 / 自备电站 / 余热 / 供热 / 配电）优先，同切口里按项目金额大小。原因很简单——旧算法数的是标题里命中几个关键词，结果「某公司签约某园区」这种泛泛标题得高分，而「巴淡强制新建数据中心自建海水淡化厂」只有一个关键词、排到看不见的地方。<b>越是我们能直接接的活，越应该排前面。</b></div>
+    <div class="hint" style="margin-bottom:10px"><span id="ovHead">跟踪 <b id="ovClientN"></b> 家中资出海客户（江浙沪皖优先）</span>的海外矿山 / 园区 / 建厂动向。海外园区落地要配套<b>自备电站、余热发电、海水淡化</b>——这正是我司海外业务方向。<br><b>排序不再按「关联度」</b>：改成按<b>我司切口</b>（海水淡化 / 自备电站 / 余热 / 供热 / 配电）优先，同切口里按项目金额大小。原因很简单——旧算法数的是标题里命中几个关键词，结果「某公司签约某园区」这种泛泛标题得高分，而「巴淡强制新建数据中心自建海水淡化厂」只有一个关键词、排到看不见的地方。<b>越是我们能直接接的活，越应该排前面。</b></div>
     <div id="ovHot"></div>
     <div class="sect" style="margin-top:18px">全部海外动态 <small id="ovCnt"></small></div>
     <div class="frow" style="padding:0 0 10px"><label>行业</label><div class="chips" id="f-ogrp"></div></div>
@@ -2339,9 +2339,27 @@ function renderOverseas(){
     return true;
   });
   var nCut={}; list.forEach(function(o){var k=o.cut||''; nCut[k]=(nCut[k]||0)+1});
-  // 客户家数动态填，别再写死（原来硬编码「44 家」，实际已经 94 家了）
+  // 客户家数动态填，别再写死（原来硬编码「44 家」，实际已经 94 家了）。
+  // ⚠ 海外页进的是 news 模块，D.clients 在 org 模块里——用户如果先点「海外机会」
+  //   再点「客户与业主」，ozg 还没加载，这里就是 0，会显示成破折号。
+  //   所以拿不到时退回读 data.org.js 的全局（如果之前已经加载过），
+  //   两者都没有就不写，保持「—」而不是写一个错的 0。
   var cn=el('ovClientN');
-  if(cn) cn.textContent=((D.clients||[]).length||'—');
+  if(cn){
+    var _n=((D.clients||[]).length)||((window.DATA_ORG&&window.DATA_ORG.clients||[]).length);
+    if(_n) cn.textContent=_n;
+    /* 客户名单在 org 模块里，没加载就不写数（保持「—」，不写错的 0）。
+       这里顺手拉一次 org——反正海外页正文要按客户名挂情报，用户往下看
+       「这条是谁的项目」时也要用到客户名，提前拉不浪费。 */
+    /* 拿不到就整句隐藏掉家数，而不是显示「—」。
+       为什么不写成 need('org', ...) 去拉：data.org.js 有 356KB，
+       直接点进海外页的人本来不需要它，为了一个数字多下一整个模块不划算。
+       用户点过「客户与业主」后 D.clients 就在了，回来自然显示。 */
+    else{
+      var hd=el('ovHead');
+      if(hd) hd.textContent='跟踪中资出海客户（江浙沪皖优先）';
+    }
+  }
   el('ovCnt').textContent='共 '+list.length+' 条 · 切口明确 '+list.filter(function(o){return o.cut&&o.cut!=='opp'}).length+
     ' 条 · 海水淡化 '+(nCut.water||0)+' 条';
   el('ovGrid').innerHTML=rest.map(function(o){return ovCard(o,false)}).join('')||'<div class="empty">没有匹配的动态，换个筛选条件试试</div>';
