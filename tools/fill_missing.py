@@ -75,6 +75,8 @@ def main():
     ap.add_argument('--limit', type=int, default=100)
     ap.add_argument('--sleep', type=float, default=0.35)
     ap.add_argument('--dry', action='store_true')
+    # 2026-10-22：并发线程数，原因同 scan_detail（境外线路延迟高，串行撞总超时）
+    ap.add_argument('--workers', type=int, default=8)
     args = ap.parse_args()
 
     import detail_fields
@@ -112,53 +114,78 @@ def main():
             continue
 
         t0 = time.time()
-        for i, x in enumerate(todo, 1):
-            before = need_of(x)
-            html = curl(x['url'])
-            if not html or len(html) < 400:
-                grand['fail'] += 1
-                continue
-            f = detail_fields.parse(html, x.get('st') or '')
-            got = []
-            # 只补不改：已有值一律不动。
-            # ⚠ 空字符串也算「没值」——原始数据里 win='' 有一批（列表接口返回空串），
-            #   如果只判 `not x.get('win')` 其实是对的，但写回时要保证不写入空值，
-            #   否则会造出一批「看起来有字段、点开是空」的记录。
-            def _set(k, v):
-                if v is None or (isinstance(v, str) and not v.strip()):
-                    return False
-                if isinstance(v, list) and not v:
-                    return False
-                if x.get(k):
-                    return False
-                x[k] = v
-                return True
+        # ── 2026-10-22 改成并发 ──────────────────────────────────────
+        # 和 scan_detail 同一个原因：GitHub Actions 出境线路延迟高，
+        # 串行 + sleep 跑不完，会撞 40 分钟总超时。
+        # 这里把「抓页面 + 解析」放进线程池，写回仍然在主线程串行做
+        # （dict 原地改，多线程同时改同一条会打架）。
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+        lock = threading.Lock()
 
-            if _set('win', f.get('win')):
-                got.append('win'); grand['win'] += 1
-            if _set('winJoint', f.get('winJoint')):
-                pass
-            if _set('buyer', f.get('buyer')):
-                got.append('buyer'); grand['buyer'] += 1
-            if f.get('amt') and not x.get('amt'):
-                x['amt'] = f['amt']
-                x['amtY'] = round(f['amt'] / 1e8, 4)
-                if f.get('amtSrc'):
-                    x['amtSrc'] = f['amtSrc']
-                got.append('amt'); grand['amt'] += 1
-            if _set('phone', f.get('phone')):
-                got.append('phone'); grand['phone'] += 1
-            for k in ('agc', 'contact', 'openDate'):
-                _set(k, f.get(k))
-            grand['n'] += 1
-            if got:
-                x['fillAt'] = time.strftime('%Y-%m-%d')
-            if i % 20 == 0:
-                # 每 20 条落盘一次，进程被杀也不白干
-                json.dump(arr, open(fp, 'w', encoding='utf-8'), ensure_ascii=False)
-                print(f'   {i}/{len(todo)}  已补 win={grand["win"]} buyer={grand["buyer"]} '
-                      f'amt={grand["amt"]} phone={grand["phone"]}  {time.time()-t0:.0f}s')
+        def fetch(x):
+            try:
+                html = curl(x['url'])
+            except Exception:
+                return None
             time.sleep(args.sleep + random.random() * 0.2)
+            if not html or len(html) < 400:
+                return (x, None)
+            try:
+                return (x, detail_fields.parse(html, x.get('st') or ''))
+            except Exception:
+                return (x, None)
+
+        done = {'n': 0}
+        with ThreadPoolExecutor(max_workers=args.workers) as ex:
+            for item in ex.map(fetch, todo):
+                if item is None:
+                    grand['fail'] += 1
+                    continue
+                x, f = item
+                if f is None:
+                    grand['fail'] += 1
+                    continue
+                got = []
+                # 只补不改：已有值一律不动。
+                # ⚠ 空字符串也算「没值」——原始数据里 win='' 有一批（列表接口返回空串），
+                #   如果只判 `not x.get('win')` 其实是对的，但写回时要保证不写入空值，
+                #   否则会造出一批「看起来有字段、点开是空」的记录。
+                def _set(k, v):
+                    if v is None or (isinstance(v, str) and not v.strip()):
+                        return False
+                    if isinstance(v, list) and not v:
+                        return False
+                    if x.get(k):
+                        return False
+                    x[k] = v
+                    return True
+
+                if _set('win', f.get('win')):
+                    got.append('win'); grand['win'] += 1
+                if _set('winJoint', f.get('winJoint')):
+                    pass
+                if _set('buyer', f.get('buyer')):
+                    got.append('buyer'); grand['buyer'] += 1
+                if f.get('amt') and not x.get('amt'):
+                    x['amt'] = f['amt']
+                    x['amtY'] = round(f['amt'] / 1e8, 4)
+                    if f.get('amtSrc'):
+                        x['amtSrc'] = f['amtSrc']
+                    got.append('amt'); grand['amt'] += 1
+                if _set('phone', f.get('phone')):
+                    got.append('phone'); grand['phone'] += 1
+                for k in ('agc', 'contact', 'openDate'):
+                    _set(k, f.get(k))
+                grand['n'] += 1
+                if got:
+                    x['fillAt'] = time.strftime('%Y-%m-%d')
+                done['n'] += 1
+                if done['n'] % 20 == 0:
+                    # 每 20 条落盘一次，进程被杀也不白干
+                    json.dump(arr, open(fp, 'w', encoding='utf-8'), ensure_ascii=False)
+                    print(f'   {done["n"]}/{len(todo)}  已补 win={grand["win"]} buyer={grand["buyer"]} '
+                          f'amt={grand["amt"]} phone={grand["phone"]}  {time.time()-t0:.0f}s')
 
         json.dump(arr, open(fp, 'w', encoding='utf-8'), ensure_ascii=False)
         print(f'[{prov}] 完成 {len(todo)} 条  {time.time()-t0:.0f}s')
