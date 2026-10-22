@@ -1089,7 +1089,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610221458';
+var VER='?v=202610221506';
 /* ── 全局状态 ──────────────────────────────────────────────
    注意：这些必须在 boot_main() 外面声明。boot_main 里用 var 声明的东西
    全是函数作用域，脚本外面看不见——调试时会发现 D / items 都是 undefined，
@@ -3930,8 +3930,8 @@ function boot_main(){
 
 /* 启动逻辑在 boot.js（defer，保证在数据脚本之后执行） */
 </script>
-<script defer src="data.core.js?v=202610221458"></script>
-<script defer src="data.items.js?v=202610221458"></script>
+<script defer src="data.core.js?v=202610221506"></script>
+<script defer src="data.items.js?v=202610221506"></script>
 <script defer src="boot.js?v=202610212029"></script>
 <!-- 竞对画像抽屉：点「画像」按钮从右侧滑出，不跳页 -->
 <!-- rival.js 已于 2026-10-22 停用：它调的腾讯云函数只有 3 家单位有数据（中国联合/江苏院/河北院），
