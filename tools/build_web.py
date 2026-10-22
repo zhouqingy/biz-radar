@@ -4,7 +4,18 @@ import json, os, re, random, datetime, math
 from collections import Counter, defaultdict
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-OUT = '/workspace/biz-radar'
+# 输出去向。三种环境都要能跑：
+#   · 本地沙箱        → /workspace/biz-radar
+#   · GitHub Actions  → workflow 里设了 BIZ_OUT=${{ github.workspace }}
+#   · 别的机器        → 脚本上一级目录
+# ⚠ 这里原来是写死的 OUT = '/workspace/biz-radar'。
+#   Actions runner 上没有 /workspace 目录、也没权限建，于是
+#   os.makedirs 直接 PermissionError: [Errno 13] Permission denied: '/workspace'，
+#   整个「4) 重建数据」步骤挂掉——运行 #3 就是这么失败的。
+#   讽刺的是 workflow 里 BIZ_OUT 一直设着，只是脚本没读它。
+OUT = (os.environ.get('BIZ_OUT')
+       or ('/workspace/biz-radar' if os.path.isdir('/workspace/biz-radar')
+           else os.path.dirname(ROOT)))
 os.makedirs(OUT, exist_ok=True)
 
 D = json.load(open(os.path.join(ROOT, 'merged.json'), encoding='utf-8'))
