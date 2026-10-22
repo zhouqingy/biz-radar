@@ -276,6 +276,9 @@ def main():
     ap.add_argument('--days', type=int, default=0, help='只扫最近 N 天的')
     ap.add_argument('--rescan', action='store_true', help='连已扫过的重扫')
     ap.add_argument('--sleep', type=float, default=0.3)
+    # 2026-10-22：并发线程数。境外机房（GitHub Actions）延迟高，串行跑不完，
+    # 用 8 路并发把 200 条压到 2-3 分钟内。本地跑也可以设 1 保持原行为。
+    ap.add_argument('--workers', type=int, default=8)
     args = ap.parse_args()
 
     provs = ['江苏', '浙江', '安徽', '上海'] if args.all else [args.prov]
@@ -320,11 +323,28 @@ def main():
         print('[%s] 待扫 %d 条（共 %d 条）' % (prov, len(todo), len(arr)))
         t0 = time.time()
         st = {'files': 0, 'origin': 0, 'shell': 0, 'buyer': 0, 'win': 0, 'amt': 0, 'phone': 0}
-        for i, x in enumerate(todo, 1):
+
+        # ── 2026-10-22 改成并发 ────────────────────────────────────────
+        # 起因：GitHub Actions 上跑这一跑，200 条扫了 9 分钟还没完，直接撞 40 分钟
+        # 总超时被砍。原因是 Actions 机房在境外，访问国内政务站单次请求要 2-4 秒，
+        # 原来串行 + sleep，200 条光等待就 10 分钟以上。
+        # 现在用线程池并发（默认 8 路），总耗时降到 1/5 左右。
+        # 注意：--sleep 仍然保留，但变成"每个线程请求之间歇一下"，避免把对方打挂。
+        import threading
+        from concurrent.futures import ThreadPoolExecutor
+        lock = threading.Lock()
+        cnt = {'done': 0}
+
+        def work(x):
             try:
                 r = scan_one(x['url'])
-            except Exception as e:
-                continue
+            except Exception:
+                return None
+            time.sleep(args.sleep)
+            return (x, r)
+
+        def apply(item):
+            x, r = item
             x['scanAt'] = today
             x['shell'] = r['shell']
             if r['files']:
@@ -357,10 +377,19 @@ def main():
             # 信源分级
             host = re.sub(r'^https?://', '', x['url']).split('/')[0].lower()
             x['srcType'] = 'reprint' if any(h in host for h in REPRINT_HOST) else 'official'
-            if i % 25 == 0:
-                print('   %d/%d  附件%d 原始平台%d 空壳%d  (%.0fs)'
-                      % (i, len(todo), st['files'], st['origin'], st['shell'], time.time() - t0))
-            time.sleep(args.sleep)
+
+        with ThreadPoolExecutor(max_workers=args.workers) as ex:
+            for item in ex.map(work, todo):
+                if item is None:
+                    continue
+                with lock:
+                    apply(item)
+                    cnt['done'] += 1
+                    i = cnt['done']
+                    if i % 25 == 0:
+                        print('   %d/%d  附件%d 原始平台%d 空壳%d  (%.0fs)'
+                              % (i, len(todo), st['files'], st['origin'], st['shell'],
+                                 time.time() - t0))
 
         json.dump(arr, open(path, 'w', encoding='utf-8'), ensure_ascii=False)
         print('[%s] 完成 附件%d 条 / 原始平台%d 条 / 空壳%d 条  %.0fs'
