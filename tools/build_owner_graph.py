@@ -18,7 +18,25 @@ from collections import defaultdict, Counter
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(ROOT, 'raw')
-DATA = os.path.join(os.path.dirname(ROOT), 'biz-radar', 'data.js')
+# 产物所在的网站根目录。三种环境：
+#   · 本地沙箱        → /workspace/biz-radar（ROOT 的上级有个 biz-radar）
+#   · GitHub Actions  → BIZ_OUT=${{ github.workspace }}（ROOT 就是仓库根，没有嵌套的 biz-radar）
+#   · 别的机器        → ROOT 的上级
+# ⚠ 原来是 DATA = 上级/biz-radar/data.js，在 Actions 上拼成了
+#   /home/runner/work/biz-radar/biz-radar/biz-radar/data.js —— 多套了一层，
+#   FileNotFoundError，运行 #4 就挂在这。build_web.py 已经改成读 BIZ_OUT，
+#   这里必须一起改，否则两边对产物的位置理解不一致。
+def _site_dir():
+    env = os.environ.get('BIZ_OUT')
+    if env:
+        return env
+    up = os.path.dirname(ROOT)
+    nested = os.path.join(up, 'biz-radar')
+    return nested if os.path.isdir(nested) else up
+
+
+SITE = _site_dir()
+DATA = os.path.join(SITE, 'data.js')
 OUT = os.path.join(RAW, 'owner_graph.json')
 
 # ---- 清洗规则 ----
