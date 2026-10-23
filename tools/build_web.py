@@ -1251,6 +1251,8 @@ data = {
     'items': brief,
     'rivals': rivals,
     # 关注门槛说明 + 三栏计数，前端顶栏直接读这个
+    # 2026-10-23 补 tenderHm / winHm：前端默认「只看主场业务」，按钮上写 22 而列表只有 10 条，
+    # 用户会以为统计造假。这里在构建期算好「主场口径」的条数，前端显示成 22/10，两个数同屏。
     'watch': {
         'amt': WATCH_AMT,
         'tender': sum(1 for b in brief if b['bk'] == 'tender' and b['w']),
@@ -1258,6 +1260,8 @@ data = {
         'lead': sum(1 for b in brief if b['bk'] == 'lead'),
         'tenderAll': sum(1 for b in brief if b['bk'] == 'tender'),
         'winAll': sum(1 for b in brief if b['bk'] == 'win'),
+        'tenderHm': sum(1 for b in brief if b['bk'] == 'tender' and b['w'] and b.get('hm')),
+        'winHm': sum(1 for b in brief if b['bk'] == 'win' and b['w'] and b.get('hm')),
         'all': len(brief),
     },
     'buyers': buyers,
