@@ -665,7 +665,7 @@ window.addEventListener('error',function(e){
 
 
 </head>
-<body><div style="background:#fff8ee;border-bottom:1px solid #f7e2c4;padding:7px 16px;font:600 12.5px/1.6 -apple-system,'Microsoft YaHei',sans-serif;color:#a8620a">本地预览版 · 与线上功能一致，数据已全部内联，双击即可打开</div>
+<body>
 
 <div class="hd"><div class="wrap">
   <h1>江浙沪皖 商机雷达 <span class="ver">v2.0</span></h1>
@@ -1030,8 +1030,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610231556"></script>
-<script src="data.items.js?v=202610231556"></script>
+<script src="data.core.js?v=202610231627"></script>
+<script src="data.items.js?v=202610231627"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1096,7 +1096,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610231556';
+var VER='?v=202610231627';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3917,4 +3917,4 @@ function boot_main(){
 
 /* 启动逻辑在 boot.js（defer，保证在数据脚本之后执行） */
 </script>
-<script src="boot.js?v=202610231556"></script>
+<script src="boot.js?v=202610231627"></script>
