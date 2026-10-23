@@ -15,6 +15,26 @@
   --line2:#d6dbe4;
   --red:#c0392b;--amber:#a8620a;--green:#1a7f4b;--purple:#5b4bc4;
   --sh:0 1px 2px rgba(20,30,50,.04),0 2px 8px rgba(20,30,50,.04);
+
+  /* ---- Element 设计规范（本地化，不引 CDN）----
+     用户问「能不能用 element-UI 这种来布局」。Element 的组件层依赖 Vue 2 运行时，
+     这个页面是手写 DOM，套上去要整页重写；但它那套**视觉规范**是纯 CSS，可以直接吃：
+       主色 #409EFF / 成功 #67C23A / 警告 #E6A23C / 危险 #F56C6C / 信息 #909399
+       文字三级 #303133 / #606266 / #909399，四级占位 #C0C4CC
+       边框三级 #DCDFE6 / #E4E7ED / #EBEEF5，填充 #F5F7FA
+       圆角 4px（控件）/ 8px（卡片），卡片阴影 0 2px 12px 0 rgba(0,0,0,.1)
+     命名一律 --el- 前缀，跟原有的 --brand/--line 并存，互不干扰，
+     这样改卡片样式时不会把页头 KPI 那些老样式的颜色带崩。 */
+  --el-blue:#409EFF;--el-blue-d:#337ECC;--el-blue-l:#ECF5FF;
+  --el-success:#67C23A;--el-success-l:#F0F9EB;
+  --el-warning:#E6A23C;--el-warning-l:#FDF6EC;
+  --el-danger:#F56C6C;--el-danger-l:#FEF0F0;
+  --el-info:#909399;--el-info-l:#F4F4F5;
+  --el-tx1:#303133;--el-tx2:#606266;--el-tx3:#909399;--el-tx4:#C0C4CC;
+  --el-bd1:#DCDFE6;--el-bd2:#E4E7ED;--el-bd3:#EBEEF5;--el-fill:#F5F7FA;
+  --el-r:4px;--el-r-card:8px;
+  --el-sh:0 2px 12px 0 rgba(0,0,0,.1);
+  --el-sh-h:0 2px 4px rgba(0,0,0,.12),0 0 6px rgba(0,0,0,.04);
 }
 body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
   background:var(--bg);color:var(--tx);font-size:14.5px;line-height:1.65;
@@ -141,17 +161,46 @@ button{font-family:inherit}
 .rbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:0 2px 10px;font-size:13px;color:var(--tx2)}
 .rbar b{color:var(--brand);font-size:16px;font-weight:800}
 .rbar .rhint{margin-left:auto;display:flex;gap:8px;align-items:center}
+/* 载入中提示：一个转圈的点 + 一句话。
+   用它而不是 progress 条，是因为这是后台静默加载，
+   页面完全可用，没必要拿个进度条挡在最显眼的位置。 */
+.rload{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--el-tx3);
+  background:var(--el-blue-l);border:1px solid #d9ecff;border-radius:20px;padding:2px 12px}
+.rload b{color:var(--el-blue-d);font-size:12px;font-weight:700}
+.rload i{width:6px;height:6px;border-radius:50%;background:var(--el-blue);flex:none;
+  animation:rspin 1s linear infinite}
+.rload i::after{content:'';display:block;width:6px;height:6px;border-radius:50%;
+  box-shadow:0 -9px 0 -2px var(--el-blue)}
+@keyframes rspin{to{transform:rotate(360deg)}}
+.rside{font-size:12px;color:var(--el-blue-d);font-weight:600;text-decoration:underline;
+  text-underline-offset:3px;cursor:pointer}
+.rside:hover{color:var(--el-blue)}
 
 /* ---------- 项目卡片 ---------- */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:13px;align-items:start}
-.pj{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 16px 12px;position:relative;overflow:hidden;transition:transform .16s,box-shadow .16s,border-color .16s}
-.pj:hover{transform:translateY(-2px);border-color:#bcd4ff;box-shadow:0 10px 26px rgba(20,50,110,.11)}
+/* 卡片大小不一的根因有两处，都在这里治：
+     ① 原来是 align-items:start —— 同一排的卡片各按自己内容撑高，短的悬在半空，
+        一眼看过去参差不齐。去掉它回到 grid 默认的 stretch，同排卡片强制等高。
+     ② 列宽 minmax(380px→340px)：380 在 1440 宽的屏幕上只能排 3 列，卡片被迫拉得很宽；
+        340 能排 4 列，卡片更接近正方，扫读时视线移动更短。 */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+/* 卡片本体：改成 flex 纵向流。
+   这样里面的 .pj-act 才能用 margin-top:auto 沉到卡片底部——
+   不管中间 snip/chain/org 这几段有还是没有，操作行永远贴着底边对齐，
+   一排卡片看过去按钮在同一条水平线上，这是「整齐感」最主要的来源。
+   min-height 是给单列（手机/窄窗口）兜底的，栅格拉伸时不会用到。 */
+.pj{background:#fff;border:1px solid var(--el-bd2);border-radius:var(--el-r-card);
+    padding:14px 16px 13px;position:relative;overflow:hidden;
+    display:flex;flex-direction:column;min-height:238px;
+    transition:transform .2s,box-shadow .2s,border-color .2s}
+.pj:hover{transform:translateY(-2px);border-color:var(--el-blue);box-shadow:var(--el-sh)}
 .pj::before{content:'';position:absolute;left:0;top:0;right:0;height:3px;background:var(--bar,#d6dae1)}
 .pj.gA{--bar:linear-gradient(90deg,#e8453c,#ff8a3c)}
 .pj.gB{--bar:linear-gradient(90deg,#fa8c16,#ffc53c)}
 .pj.gC{--bar:linear-gradient(90deg,#2f84ff,#69b1ff)}
 .pj.gD{--bar:#dde1e8}
-.pj-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px}
+/* 卡头（分级徽章 + 分数 + 金额）固定 26px：
+   有 NEW 标记和没 NEW 标记的卡片，卡头高度原来会差 3px，累积到一排就很明显。 */
+.pj-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:9px;min-height:26px}
 .gbadge{font-size:10.5px;font-weight:800;color:#fff;padding:2.5px 9px;border-radius:8px;letter-spacing:.4px;white-space:nowrap;line-height:1.5}
 .gbadge.A{background:linear-gradient(135deg,#e8453c,#ff7a45)}
 .gbadge.B{background:linear-gradient(135deg,#fa8c16,#ffb02e)}
@@ -161,10 +210,19 @@ button{font-family:inherit}
 .newdot{font-size:10px;font-weight:800;color:#c0202a;background:#ffecec;border:1px solid #ffc9c9;padding:1px 7px;border-radius:8px;white-space:nowrap}
 .pj-money{margin-left:auto;text-align:right;font-size:19px;font-weight:800;color:var(--red);font-variant-numeric:tabular-nums;line-height:1.15}
 .pj-money small{display:block;font-size:10px;color:#98a0ac;font-weight:400;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pj-t{font-size:14.5px;font-weight:750;line-height:1.55;color:var(--tx);display:block}
+/* 标题锁 2 行：原来 1~3 行都有，一排卡片里标题区高度能差 40px。
+   clamp 到 2 行 + min-height 兜住「只有 1 行」的情况（短标题也占 2 行的高度），
+   这样标题区永远等高，标题本身还留了完整的 hover 变蓝。
+   字重 750→600：750 是 Windows 下的合成粗体，边缘发虚，Element 规范一律用 600。 */
+.pj-t{font-size:14.5px;font-weight:600;line-height:1.55;color:var(--el-tx1);
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+  min-height:44px}
 .pj-t:hover{color:var(--brand)}
 .pj-t .go{font-size:11px;color:var(--brand);font-weight:600;white-space:nowrap}
-.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+/* 标签行：原来 0~3 行不定（有的卡片连 sG 命中词和 early 都有，有的只有 2 个）。
+   固定最小 22px（一行）、最大 44px（两行），再多就截掉——
+   标签是给眼睛扫的，第 5 个标签的边际价值远不如「一排卡片一样高」。 */
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;min-height:22px;max-height:44px;overflow:hidden}
 .tg{font-size:10.5px;padding:1.5px 8px;border-radius:20px;font-weight:600;white-space:nowrap}
 .tg-biz{background:#e9f7ef;color:#14713a}
 .tg-rg{background:#f0f2f6;color:#5a6270}
@@ -173,12 +231,21 @@ button{font-family:inherit}
 .tg-new{background:#ffe0e0;color:#c0202a}
 .tg-early{background:linear-gradient(135deg,#0d9b6c,#12b981);color:#fff;font-weight:800;box-shadow:0 1px 4px rgba(13,155,108,.35)}
 .tgo{background:#fff;border:1px dashed #d3d9e3;color:#7a818c}
-.pj-meta{margin-top:8px;display:flex;flex-wrap:wrap;gap:3px 14px;font-size:12px;color:var(--tx2);border-top:1px dashed var(--line);padding-top:7px}
+/* 元信息行（业主/中标/来源/预计招标）：业主名长短差很大，换行数 1~3 行都有。
+   锁在 1~2 行之间（33~55px），超出的靠 overflow 吃掉，卡片高度不再被业主名绑架。 */
+.pj-meta{margin-top:9px;display:flex;flex-wrap:wrap;gap:3px 14px;font-size:12px;color:var(--el-tx2);
+  border-top:1px dashed var(--el-bd2);padding-top:8px;min-height:33px;max-height:55px;overflow:hidden}
 .pj-meta .mi{min-width:0}
 .pj-meta .mi i{font-style:normal;color:var(--tx3);margin-right:4px}
 .pj-meta .mi b{color:var(--tx);font-weight:600}
 .pj-meta .mi.win b{color:#14713a}
-.pj-snip{margin-top:7px;font-size:12px;color:#7c838d;line-height:1.65;background:#f8fafc;border-radius:8px;padding:6px 9px}
+/* 摘要锁 2 行：原来有的公告摘要一写就是五六行，单卡能撑到别人的两倍高。 */
+/* 卡片内的弹性占位：撑开上下两区之间的空白，自己不显示任何东西。
+   min-height 保证内容超满的卡片也不会把两区挤成零间距。 */
+.pj-sp{flex:1 1 auto;min-height:6px}
+.pj-snip{margin-top:8px;font-size:12px;color:var(--el-tx2);line-height:1.65;
+  background:var(--el-fill);border-radius:var(--el-r);padding:7px 10px;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .chain{margin-top:7px;display:flex;gap:5px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--tx3)}
 .chain a{padding:1px 7px;border-radius:5px;background:#f6f8fb;border:1px solid var(--line);color:var(--tx2)}
 .chain a:hover{border-color:var(--brand);color:var(--brand)}
@@ -317,7 +384,10 @@ details.sub li{padding:2px 0}
 /* ---------- 卡片底部动作条：跳原文 / 跳企查查核对工商信息 ---------- */
 .dp-tag{font-size:10.5px;padding:1px 7px;border-radius:6px;background:#fdf2f2;color:#b03a2e;border:1px solid #f2cfc9;font-weight:600}
 .dp-tag::before{content:'⛔ '}
-.pj-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line)}
+/* 操作行沉底：margin-top:auto 把上面所有剩余空间全吃进这一行之前，
+   于是无论卡片内容是 3 段还是 6 段，按钮组都贴着底边，同排按钮水平对齐。
+   没有操作按钮的卡片（比如纯立项线索）由 .pj-meta 的 margin-top:auto 顶住。 */
+.pj-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px dashed var(--el-bd2)}
 .pj-act a{font-size:11.5px;color:var(--brand-d);background:#f2f7ff;border:1px solid #dce8fb;border-radius:7px;padding:2px 9px;font-weight:600}
 .pj-act a:hover{background:#e4eefe;border-color:#b9d3f8}
 /* ---------- 单位百科卡（2026-10-23）----------
@@ -1268,7 +1338,12 @@ var TABS = [
 ];
 /* 2026-10-21：biz/sub 换成 sg（业务分层短码）；新增 side=是否显示兼营（三级分公司业务） */
 var F = {rg:new Set(),sg:new Set(),ind:new Set(),g:new Set(),mode:new Set(),p:new Set(),
-         st:'',q:'',sort:'sc',page:1,tab:0,bk:'tender',hideWin:false,side:false};
+         /* 2026-10-24 默认档 tender→all。
+     用户原话：「三个省能投和已投的项目只有18个拜托这都是2026年了」
+     原因：三档按钮上的 13/18 是「主场 + 关注档（≥3000万 或 A/B）」双重过滤后的数，
+     和全库的 96/140 差一个量级。默认档切到「全部」，进来先看到 1521 条这个量级，
+     想收窄再点前三档——让「宽口径」当默认值，「严口径」当用户主动的选择。 */
+         st:'',q:'',sort:'sc',page:1,tab:0,bk:'all',hideWin:false,side:false};
 
 /* 业务分层短码 → 显示名。顺序就是用户定的优先级，别按字母重排。
    一级主攻 4 个（有色冶炼供能合同额第一）→ 二级 3 个 → 三级 3 个（分公司业务）→ 降级 */
@@ -1385,7 +1460,21 @@ function loadChunk(name, cb) {
 /* 兼容旧调用：需要「全部」时把两块都拉下来 */
 function loadAllItems(cb) {
   if (!window.__itemsSplit) { if (cb) cb(); return; }
-  loadChunk('lead', function () { loadChunk('rest', cb); });
+  /* 2026-10-24 串行改并行。
+     原来是 loadChunk('lead', ()=>loadChunk('rest', cb))，两个 600KB 的 chunk
+     必须一个下完才开始下第二个，白白多付一个完整 RTT。
+     默认档改成「全部」之后，这条路成了每次进页面的必经之路，
+     串行那一个 RTT 就直接摊到每个用户的首屏上了。
+     预注入版（__CHUNKS__）例外：它是 shift() 逐个取的，并行会取错序，
+     那种情况本来也不发请求，串行没有代价。 */
+  if (window.__CHUNKS__ && window.__CHUNKS__.length) {
+    loadChunk('lead', function () { loadChunk('rest', cb); });
+    return;
+  }
+  var n = 0;
+  var fin = function () { if (++n >= 2 && cb) cb(); };
+  loadChunk('lead', fin);
+  loadChunk('rest', fin);
 }
 
 /* 把某个模块的数据合并进 D */
@@ -1531,7 +1620,10 @@ function refreshTabCounts(){
      那时 buildFilters 还没跑 → 直接读 WA 会 ReferenceError 把整个 boot 打断
      （2026-10-23 实测：首屏 tabs 全空、控制台红一片）。改成能取到就取、取不到直接读 D.watch。 */
   var _W=(typeof WA!=='undefined'&&WA)?WA:(D.watch||{});
-  _setTab('p-items',   (_W.tenderAll||0)+(_W.winAll||0)+(_W.lead||0));
+  /* 默认档是「全部」，页签上的数字就得是「全部」的条数，
+     否则用户点进去看到 1521 条、页签却写着 490，又要怀疑一次。
+     取不到 all 就退回三档相加（老口径），别显示 0。 */
+  _setTab('p-items',   (_W.all||0) || ((_W.tenderAll||0)+(_W.winAll||0)+(_W.lead||0)));
   _setTab('p-rival',   arr(D.competitors).length+arr(D.partners).length);
   _setTab('p-overseas',arr(D.overseas).length);          /* 海外机会 = 海外动态条数 */
   _setTab('p-client',  ((D.domStat&&D.domStat.total)||0)+arr(D.clients).length+((D.graph||{}).owners||[]).length);
@@ -1769,6 +1861,8 @@ function buildFilters(){
   ];
   var waBox = el('wares');
   if (waBox) {
+    /* 这个开关只在「全部」档下有意义（前三档本来就只留有能投的）。
+       默认档改成 all 了，所以它得默认就露出来，否则用户根本不知道有这功能。 */
     waBox.innerHTML = BOOK.map(function (b) {
       var n = b[0] === 'lead' ? WA.lead : (WA[b[0]] || 0);          // 关注档条数（全库口径）
       var allN = b[0] === 'lead' ? WA.lead : (b[0] === 'tender' ? WA.tenderAll : WA.winAll);
@@ -1785,12 +1879,14 @@ function buildFilters(){
         '按当前「' + (F.side ? '含兼营' : '只看主场业务') + '」过滤后的条数，点开就是。';
       /* 数字留空，由 syncWareNums() 在每次 render 后填当前列表的真实条数。
          这里先写任何预估值都会跟列表对不上（首屏只有 42 条切片，算不出真值）。 */
-      return '<div class="ware' + (b[0] === 'tender' ? ' on' : '') + '" data-bk="' + b[0] + '" title="' + esc(tip) + '">' +
+      return '<div class="ware" data-bk="' + b[0] + '" title="' + esc(tip) + '">' +
         b[1] + '<b style="display:none">0</b></div>';
     }).join('') +
-      '<div class="ware" data-bk="all" id="waAllW">全部 <b style="display:none">0</b></div>' +
+      /* 默认选中「全部」：跟着 F.bk 走，不然按钮高亮在「能投的标」上、列表却是全部，
+         用户又会对着两个口径起疑。见上方 4a 的口径说明。 */
+      '<div class="ware on" data-bk="all" id="waAllW">全部 <b style="display:none">0</b></div>' +
       '<span class="ware-tog" id="waHide" title="「全部」档里有一批已经开过标的，滤掉它们只剩还能投的">只看还能投的</span>' +
-      '<div class="wtip">数字 = <b>这一档点进去看到的条数</b>（随下方筛选条件实时变）。' +
+      '<div class="wtip" id="waTip">数字 = <b>这一档点进去看到的条数</b>（随下方筛选条件实时变）。' +
       '前三档只看关注档（金额 ' + (WA.amt * 10000) + ' 万以上 或 综合分 A/B），「全部」不卡这些条件' +
       '<a href="javascript:void(0)" id="waAll" style="margin-left:8px;color:var(--brand);font-weight:600">看全部含小项目</a></div>';
     waBox.onclick = function (e) {
@@ -1830,6 +1926,11 @@ function buildFilters(){
       var d = e.target.closest('.ware'); if (!d) return;
       pick(d.dataset.bk);
     };
+    /* 默认档是「全部」，所以这个开关进来就得是显形的。
+       原来它常驻 display:none，只有用户手点「全部」才出现——
+       默认档改了之后，不补这一句用户永远看不到它。 */
+    var _h0 = el('waHide');
+    if (_h0) _h0.style.display = 'inline-block';
   }
   /* 只给「多选筛选项」绑通用 toggle。
      ⚠ 别改回 querySelectorAll('.chip') 一把抓：
@@ -2014,7 +2115,12 @@ function cardHtml(x){
       (x.iv?'':'<span class="dp-tag" title="这条没过找商机严筛口径，只在「全部」里备查">非投：'+esc(x.dp||'不符合找商机口径')+'</span>')+'</div>'+
     '<div class="pj-meta">'+meta+'</div>'+
     (x.snip?'<div class="pj-snip">'+esc(x.snip)+'</div>':'')+chain+
-    originLine(x)+fileList(x)+acts+'</div>';
+    /* 弹性占位：把上面「卡头/标题/标签/元信息/摘要/阶段链」整块顶到卡片上端，
+       下面「原始发布/附件/操作按钮」整块吸到卡片下端。
+       没有它，卡片内容少的那些（比如纯立项线索没有附件也没有操作按钮）会整块悬在上半截，
+       底部空一大块，一排卡片看着就是「有的满有的空」。
+       有了它，不管中间几段内容，操作按钮永远在同一条水平线上。 */
+    '<i class="pj-sp"></i>'+originLine(x)+fileList(x)+acts+'</div>';
 }
 
 /* ---------- 原始发布平台：公告真正首发的地方 ---------- */
@@ -2196,6 +2302,15 @@ function widenBk(){
   loadAllItems(function(){ render(); refreshFilterCounts(); });
 }
 
+/* 兼营一键放开：render 每次都重建 rbar 的 innerHTML，监听不能绑在 rbar 上，
+   绑 document 上用 closest 找，委托一次管到页面销毁。 */
+document.addEventListener('click', function (e) {
+  var t = e.target.closest('[data-act="sideAll"]'); if (!t) return;
+  F.side = true; F.page = 1;
+  var c = el('f-side'); if (c) { var q = c.querySelector('.chip'); if (q) q.classList.add('on'); }
+  render();
+});
+
 function toggleFiles(id){
   var d=document.getElementById('fl-'+id);
   if(d)d.style.display=(d.style.display==='none'?'block':'none');
@@ -2255,10 +2370,29 @@ function render(){
      顶部那个 380 亿是哪 N 条的总和。数字对得上，逻辑就不再被怀疑。 */
   var nAmt=a.filter(function(x){return num(x.amt)>0}).length;
   var nNo=a.length-nAmt;
-  el('rbar').innerHTML='<span>命中 <b>'+a.length+'</b> 条 · 其中 <b>'+nAmt+'</b> 条有金额 · 这 '+nAmt+' 条合计 <b>'+sum.toFixed(1)+' 亿</b></span>'+
+  /* 分块还没拉完时，这里的 a.length 只是当前已到位的条数，不是全库。
+     不写明的话用户看到「命中 42 条」就当成了全库只有 42 条——
+     这是他上一轮质疑「三个省只有这么几个项目」的直接来源。
+     所以加载中就明说：现在 42 条，全库 1521 条，正在载入。 */
+  var _loading = window.__itemsSplit &&
+    !((_chunkState['lead'] === 'done' || _chunkState['lead'] === 'err') &&
+      (_chunkState['rest'] === 'done' || _chunkState['rest'] === 'err'));
+  /* 「全部」档下默认还叠着「只看主场业务」这道过滤（602 vs 1521），
+     不写明的话用户看到 602 就当成了全库——上一轮「三个省才这么几个项目」
+     的质疑就是这么来的。这里把差值、原因和出口一并给出。
+     ⚠ 别在字符串里拼 onclick=...el('f-side')...：这段本身就在 JS 单引号字符串里，
+       内联引号一转义就 SyntaxError（2026-10-24 踩过），统一走 data-act 委托。 */
+  var _sideTip = (F.bk === 'all' && !F.side && window.items && items.length > a.length)
+    ? '<a href="javascript:void(0)" class="rside" data-act="sideAll">' +
+      '另有 ' + (items.length - a.length) + ' 条兼营业务被隐藏，点这里一起看</a>'
+    : '';
+  var _loadTip = _loading
+    ? '<span class="rload"><i></i>全库共 <b>' + (meta.total || 0) + '</b> 条，正在载入…（当前已到位 ' + a.length + ' 条）</span>'
+    : '';
+  el('rbar').innerHTML='<span>命中 <b>'+a.length+'</b> 条 · 其中 <b>'+nAmt+'</b> 条有金额 · 这 '+nAmt+' 条合计 <b>'+sum.toFixed(1)+' 亿</b></span>'+_loadTip+
     '<span class="rhint"><span class="hint">'+
       (nNo?'另 '+nNo+' 条原文未披露金额（多为立项公示/招标计划，不写投资额） · ':'')+
-      '顶部「已公示金额 '+meta.amtSum.toFixed(0)+' 亿」是全库 '+meta.withAmt+' 条带金额项目的总和，与本页筛选无关'+
+      '顶部「已公示金额 '+meta.amtSum.toFixed(0)+' 亿」是全库 '+meta.withAmt+' 条带金额项目的总和，与本页筛选无关'+_sideTip+
     '</span></span>';
   var tot=Math.ceil(a.length/PS)||1;
   if(F.page>tot)F.page=tot;
@@ -5020,6 +5154,14 @@ function boot_main(){
   buildFilters();  // 筛选器 + 三档关注库
   buildRivalFilter();
   render();        // 商机库第一页
+  /* 默认档是「全部」，可首屏只有 42 条切片——名义 1521、实际 42，又是数字对不上。
+     这里在后台把 lead + rest 两块并行拉下来，拉完自动重渲，数字自然涨上去。
+     刻意**不阻塞首屏**：卡片先出来让用户有事干，也比盯着白屏等 10 秒强。
+     ⚠ 不要改成先 loadAllItems 再 render：那样首屏时间 = 两块 600KB 的下载时间，
+       而用户已经抱怨过「上传这么慢」了。 */
+  if ((F.bk || 'all') === 'all' && window.__itemsSplit) {
+    loadAllItems(function () { render(); refreshFilterCounts(); });
+  }
   renderPlat();    // 平台导航（纯静态，很轻）
   refreshTabCounts();
 }
