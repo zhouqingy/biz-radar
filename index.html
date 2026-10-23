@@ -318,6 +318,30 @@ details.sub li{padding:2px 0}
 .pj-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:7px;border-top:1px dashed var(--line)}
 .pj-act a{font-size:11.5px;color:var(--brand-d);background:#f2f7ff;border:1px solid #dce8fb;border-radius:7px;padding:2px 9px;font-weight:600}
 .pj-act a:hover{background:#e4eefe;border-color:#b9d3f8}
+/* ---------- 单位百科卡（2026-10-23）----------
+   三层信息：身份（从哪来）/ 能力（能干什么）/ 找人（该找谁）。
+   领导班子用 <details> 折叠——一屏 37 家，全展开没人看；
+   营销真要找人时再点开，比一开始就铺开更实用。 */
+.en-line{font-size:12px;color:var(--tx2);line-height:1.75;margin-bottom:6px}
+.en-line b{color:var(--tx3);font-weight:600;margin-right:3px}
+.en-tags{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 7px}
+.en-tags span{font-size:11px;padding:1px 7px;border-radius:6px;background:#f2f6fb;color:var(--tx2);border:1px solid var(--line)}
+.en-pj{font-size:12px;color:var(--tx2);line-height:1.7;padding:2px 0}
+.en-people{margin-top:8px;border:1px solid var(--line);border-radius:8px;background:#fafcff}
+.en-people summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--brand-d);padding:6px 10px;list-style:none}
+.en-people summary::-webkit-details-marker{display:none}
+.en-people summary::before{content:'▸ ';color:var(--tx3)}
+.en-people[open] summary::before{content:'▾ '}
+.en-pnote{font-weight:400;color:var(--tx3);font-size:11px;margin-left:4px}
+.en-people table{width:100%;border-collapse:collapse;font-size:11.5px}
+.en-people th{text-align:left;color:var(--tx3);font-weight:600;padding:4px 10px;width:34%;vertical-align:top;border-top:1px dashed var(--line)}
+.en-people td{padding:4px 10px;line-height:1.6;border-top:1px dashed var(--line)}
+.en-ev{display:flex;gap:8px;flex-wrap:wrap;align-items:baseline;padding:4px 0;border-bottom:1px dashed #f0e4c8;font-size:12px;line-height:1.6}
+.en-ev em{font-style:normal;color:var(--tx3);font-size:11px;font-variant-numeric:tabular-nums;flex:0 0 74px}
+.en-ev span{flex:1;min-width:140px;color:var(--tx)}
+.en-ev b{color:#a8620a;font-weight:600}
+.en-ev u{text-decoration:none;color:#a8620a;font-weight:700}
+.en-ev i{font-style:normal;flex:0 0 100%;color:var(--tx3);font-size:11px}
 /* ---------- 客户卡的业主画像条 ---------- */
 .cc-prof{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
 .cc-prof .oi{background:#f6f8fc;border:1px solid var(--line);border-radius:7px;padding:3px 8px;font-size:11px;line-height:1.5}
@@ -766,6 +790,7 @@ window.addEventListener('error',function(e){
       <span data-k="board" class="on">按战绩排序 <b id="rBn">—</b></span>
       <span data-k="rival">竞争对手档案 <b id="rCn">—</b></span>
       <span data-k="partner">联合体伙伴池 <b id="rPn">—</b></span>
+      <span data-k="ency">单位百科 <b id="rEn">—</b></span>
     </div>
     <!-- 战绩榜（原「中标情报」页签，2026-10-22 并入） -->
     <div id="rBoardBox">
@@ -798,6 +823,26 @@ window.addEventListener('error',function(e){
       <div class="frow" style="padding:0 0 10px"><label>业务类别</label><div class="chips" id="f-pcat"></div></div>
       <div class="hint" style="margin-bottom:10px">EPC 联合体投标是行业常态：设计院补资质、施工单位补资源和当地关系。以下伙伴均核实了 2025-2026 年在江浙沪皖的能源/环保类真实业绩（带原文链接），点名称可查其在本库的招标/中标记录。<b>东华、中机一院、合肥煤炭院与我司业务有重叠——既是对手也是潜在联合体对象</b>，所以在上面那张「竞争对手」表里也会见到它们。</div>
       <div class="cgrid" id="partnerGrid"></div>
+    </div>
+
+    <!-- 单位百科（2026-10-23 新增）
+         起因：用户说「海外除了找业主还要找合作伙伴，比如有色设计院中国恩菲、中国瑞林，
+         做铝的沈阳铝镁院；另外我刚开始搞营销，中冶系一冶二冶十三冶都是什么、怎么来的，
+         需要熟悉」。这一段的定位不是「竞对档案」——竞对档案看的是它在本库拿了多少单，
+         这一段看的是**这家单位到底是谁**：从哪来、归谁管、主营什么、海外做到哪、
+         现在谁当家（营销找对门用）。
+         人员信息全部来自各单位官网领导团队页 / 官方新闻 / 上市公告 / 行业协会公示，
+         不采集任何私人手机、邮箱、住址。 -->
+    <div id="rEncyBox" style="display:none">
+      <div class="hint" style="margin-bottom:10px">
+        <b>这一栏是「入门课 + 找人」。</b>① 海外有色/化工项目要联合，先得知道设计院是谁——他们拿矿冶主体，我们做动力岛/余热/供配电；
+        ② 中冶系带编号的「X冶」是原冶金部建设公司的军队式编号，一冶到二十三冶归属分散在十几个集团，<b>不是都姓中冶</b>，谈之前先看清归谁管；
+        ③ 每家列出公开披露的领导班子，营销知道该找哪个层级、哪个条线的人。<br>
+        <span style="color:var(--tx3)">人员信息边界：只收企业公开披露的姓名、职务、公开履历（官网领导团队页 / 年报 / 官方新闻 / 行业协会公示），不收私人手机号、私人邮箱、住址、社交账号。</span>
+      </div>
+      <div class="frow" style="padding:0 0 10px"><label>分组</label><div class="chips" id="f-eg"></div></div>
+      <div id="encyNote" style="display:none;background:#f0f7ff;border:1px solid #cfe4ff;border-radius:9px;padding:8px 12px;color:#1053c9;font-size:12.5px;line-height:1.7;margin-bottom:10px"></div>
+      <div id="encyGrid"></div>
     </div>
   </div>
 
@@ -1069,8 +1114,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610231832"></script>
-<script src="data.items.js?v=202610231832"></script>
+<script src="data.core.js?v=202610232132"></script>
+<script src="data.items.js?v=202610232132"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1135,7 +1180,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610231832';
+var VER='?v=202610232132';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -2759,7 +2804,7 @@ function renderMStrip(){
      看不过瘾再切到档案看「这家到底是谁」。 */
 var rTab='board';
 function rApply(){
-  var m={board:'rBoardBox', rival:'rRivalBox', partner:'rPartnerBox'};
+  var m={board:'rBoardBox', rival:'rRivalBox', partner:'rPartnerBox', ency:'rEncyBox'};
   Object.keys(m).forEach(function(k){
     var b=el(m[k]); if(b) b.style.display=(k===rTab?'block':'none');
   });
@@ -2770,6 +2815,7 @@ function rApply(){
     if(rTab==='board'){ buildRivalFilter(); renderRivals(); }
     else if(rTab==='rival'){ renderCompetitors(); }
     else if(rTab==='partner'){ renderPartners(); }
+    else if(rTab==='ency'){ renderEncy(); }
   }catch(e){ console.error('[rApply]',rTab,e); }
   refreshRivalCounts();
 }
@@ -2789,6 +2835,147 @@ function refreshRivalCounts(){
   if(a)a.textContent=arr(D.competitors).length;
   if(b)b.textContent=arr(D.partners).length;
   if(c)c.textContent=arr(D.rivals).length;
+  var e2=el('rEn'); if(e2&&D.ency){
+    var n=0; (D.ency.groups||[]).forEach(function(g){n+=(g.units||[]).length});
+    e2.textContent=n;
+  }
+}
+
+/* ---- 单位百科（2026-10-23）----
+   四组：有色设计院 / 化工设计院 / 中冶系 / 综合工程公司（直接对手）。
+   卡片里信息分三层：
+     ① 身份层  沿革、归属、总部、成立年 —— 回答「这家从哪来」
+     ② 能力层  主营、强项、代表业绩、海外范围 —— 回答「它能干什么、干到哪」
+     ③ 找人层  公开披露的领导班子 —— 回答「营销该找谁」
+   跟上面「竞争对手档案」不重复：那边看它在本库拿了多少单，这边看它是谁。 */
+var eGrp='';          // 当前分组，'' = 全部
+function renderEncy(){
+  var E=D.ency; if(!E||!E.groups){ el('encyGrid').innerHTML='<div class="empty">百科数据未加载</div>'; return; }
+  /* 分组筛选条 */
+  var chips=el('f-eg');
+  if(chips && !chips.dataset.done){
+    chips.dataset.done='1';
+    var gh='<span class="chip'+(eGrp===''?' on':'')+'" data-g="">全部</span>';
+    (E.groups||[]).forEach(function(g){
+      gh+='<span class="chip'+(eGrp===g.id?' on':'')+'" data-g="'+esc(g.id)+'">'+esc(g.name)+'</span>';
+    });
+    chips.innerHTML=gh;
+    chips.onclick=function(ev){
+      var c=ev.target.closest('.chip'); if(!c)return;
+      eGrp=c.dataset.g;
+      Array.prototype.forEach.call(chips.querySelectorAll('.chip'),
+        function(x){x.classList.toggle('on',x.dataset.g===eGrp)});
+      renderEncy();
+    };
+  }
+  /* 分组说明（中冶系那组有编号规则的坑，必须显示出来） */
+  var note=el('encyNote'), h='';
+  (E.groups||[]).forEach(function(g){
+    if(eGrp && g.id!==eGrp) return;
+    if(eGrp===g.id && g.rule){ note.style.display='block'; note.innerHTML='<b>'+esc(g.name)+'：</b>'+esc(g.rule); }
+    else if(!eGrp){ /* 全览时不显示 rule，避免一屏塞不下 */ }
+    var us=(g.units||[]).slice();
+    if(g.id==='mcc'){
+      /* 中冶系按「设计院 / 建设公司」分开排，营销看的是「能联合还是会对撞」 */
+      us.sort(function(a,b){
+        var ka=(a.type==='设计院'?0:1), kb=(b.type==='设计院'?0:1);
+        return ka-kb;
+      });
+    }
+    h+='<div class="grpt">'+esc(g.name)+' · '+us.length+' 家<span class="grpd">'+esc(g.why||'')+'</span></div>';
+    h+=us.map(encyCard).join('');
+  });
+  if(!eGrp && note) note.style.display='none';
+  el('encyGrid').innerHTML=h||'<div class="empty">没有符合筛选条件的单位</div>';
+}
+
+function _arrE(v){ return Array.isArray(v)?v:(v?[v]:[]); }
+function _kvE(o){
+  /* 领导班子可能是 {职务:姓名} 也可能是 {职务:[姓名]}，统一成 [职务, 姓名文本] */
+  var out=[], skip={src:1,note:1,note_people:1};
+  Object.keys(o||{}).forEach(function(k){
+    if(skip[k])return;
+    var v=o[k];
+    var txt=Array.isArray(v)?v.join('、'):String(v==null?'':v);
+    txt=txt.replace(/^（|）$/g,'').trim();
+    if(txt) out.push([k,txt]);
+  });
+  return out;
+}
+function encyCard(x){
+  var h='<div class="ccard">';
+  h+='<div class="cc-h"><b>'+esc(x.name)+'</b>';
+  if(x.short) h+='<span class="cc-tag none">'+esc(x.short)+'</span>';
+  if(x.city) h+='<span class="cc-tag none">'+esc(x.city)+'</span>';
+  if(x.type) h+='<span class="cc-tag" style="background:'+(x.type==='设计院'?'#e8f4ff;color:#1053c9':'#fff2e0;color:#a85c10')+'">'+esc(x.type)+'</span>';
+  var cf=x.confidence||'';
+  h+='<span class="cc-tag" style="background:'+(cf==='查证'?'#eaf7ee;color:#14713a':'#fff8e6;color:#a85c10')+'" title="'+esc(x.src||'')+'">'+(cf==='查证'?'已查证':'待核实')+'</span>';
+  if(x.overseas) h+='<span class="cc-tag" style="background:#e8f4ff;color:#1053c9">有海外</span>';
+  h+='</div>';
+
+  if(x.relation){
+    var isStar=(x.relation||'').indexOf('⭐')>=0;
+    h+='<div class="cc-track" style="'+(isStar?'background:#fffbf0;border-color:#f0dcae':'')+'"><i>关系</i>'+
+       '<span style="flex:1;min-width:0">'+esc(x.relation.replace(/⭐/g,'★'))+'</span></div>';
+  }
+
+  h+='<div class="cc-body">';
+  /* ① 身份 */
+  var idp=[];
+  if(x.former) idp.push('<b>前身</b> '+esc(x.former));
+  if(x.origin) idp.push('<b>沿革</b> '+esc(x.origin));
+  if(x.history) idp.push('<b>沿革</b> '+esc(x.history));
+  if(x.parent) idp.push('<b>归属</b> '+esc(x.parent));
+  if(x.founded) idp.push('<b>创建</b> '+esc(String(x.founded)));
+  if(x.listed) idp.push('<b>上市</b> '+esc(x.listed));
+  if(x.capital) idp.push('<b>规模</b> '+esc(x.capital));
+  if(idp.length) h+='<p class="en-line">'+idp.join(' ｜ ')+'</p>';
+  /* ② 能力 */
+  var bz=_arrE(x.biz).concat(_arrE(x.focus3));
+  if(bz.length) h+='<div class="en-tags">'+bz.slice(0,10).map(function(k){return '<span>'+esc(k)+'</span>'}).join('')+'</div>';
+  if(x.strength) h+='<p><b>强项</b> '+esc(x.strength)+'</p>';
+  if(x.wte) h+='<p style="color:#a85c10"><b>垃圾焚烧</b> '+esc(x.wte)+'</p>';
+  if(x.finance) h+='<p><b>财务</b> '+esc(x.finance)+'</p>';
+  if(x.strategy) h+='<p><b>战略</b> '+esc(x.strategy)+'</p>';
+  if(x.scale) h+='<p><b>体量</b> '+esc(x.scale)+'</p>';
+  if(x.signal) h+='<p style="color:#14713a"><b>动向</b> '+esc(x.signal)+'</p>';
+  var pj=_arrE(x.projects);
+  if(pj.length) h+='<div class="cc-hits" style="margin-top:6px"><i style="font-style:normal;color:var(--tx3);font-size:12px">代表业绩</i>'+
+    pj.slice(0,6).map(function(t){return '<div class="en-pj">· '+esc(t)+'</div>'}).join('')+'</div>';
+  var ov=_arrE(x.overseas_list);
+  if(ov.length) h+='<p><b>海外覆盖</b> '+ov.map(esc).join(' · ')+'</p>';
+  if(x.subsidiaries&&x.subsidiaries.length) h+='<p><b>成员单位</b> '+x.subsidiaries.map(esc).join(' · ')+'</p>';
+  if(x.note_split) h+='<p style="color:#a85c10"><b>注意</b> '+esc(x.note_split)+'</p>';
+  if(x.note_alias) h+='<p style="color:#a85c10"><b>注意</b> '+esc(x.note_alias)+'</p>';
+  if(x.watch) h+='<p style="color:#1053c9"><b>盯防要点</b> '+esc(x.watch)+'</p>';
+  /* ③ 找人 */
+  var pp=_kvE(x.people);
+  if(pp.length){
+    h+='<details class="en-people"><summary>公开披露的领导班子 · '+pp.length+' 项'+
+       '<span class="en-pnote">（官网/公告公开信息，无私人联系方式）</span></summary><table>';
+    pp.forEach(function(a){ h+='<tr><th>'+esc(a[0])+'</th><td>'+esc(a[1])+'</td></tr>'; });
+    if(x.people&&x.people.src) h+='<tr><th>来源</th><td style="color:var(--tx3)">'+esc(x.people.src)+'</td></tr>';
+    h+='</table></details>';
+  }
+  /* 本库实证（只有直接对手组有） */
+  var ev=_arrE(x.evidence_from_db);
+  if(ev.length){
+    h+='<div class="cc-hits" style="margin-top:8px"><i style="font-style:normal;color:#a85c10;font-size:12px">本库实证（我们自己抓到的）</i>';
+    ev.forEach(function(e){
+      h+='<div class="en-ev"><em>'+esc(e.d||'')+'</em><span>'+esc(e.t||'')+'</span>'+
+         '<b>'+esc(e.role||'')+'</b>'+(e.amt?'<u>'+esc(e.amt)+'</u>':'')+
+         (e.hit?'<i>'+esc(e.hit)+'</i>':'')+'</div>';
+    });
+    h+='</div>';
+  }
+  h+='</div>';
+  /* 动作条 */
+  h+='<div class="pj-act">'+
+     '<a href="https://jzsc.mohurd.gov.cn/data/company?complexname='+encodeURIComponent(x.name||'')+'" target="_blank" rel="noopener nofollow">查资质 ↗</a>'+
+     '<a href="javascript:searchFor(\''+esc((x.name||'').slice(0,6))+'\')">库内记录 ↗</a>'+
+     (x.confidence==='待核实'?'<span style="color:#a85c10;font-size:12px">资料待核实，用前请再确认</span>':'')+
+     '</div>';
+  return h+'</div>';
 }
 
 /* ---- 客户与业主：三段切页（国内客户 / 海外客户 / 业主图谱）---- */
