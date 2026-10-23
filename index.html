@@ -91,6 +91,13 @@ button{font-family:inherit}
 .chip:hover{border-color:var(--brand);color:var(--brand)}
 .chip.on{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:600}
 .chip em{font-style:normal;opacity:.65;font-size:11px;margin-left:3px}
+/* 三档按钮上「22 /10」的斜杠后半段：全库关注档之外，再告诉我按当前口径真有几条 */
+.wsub{font-style:normal;font-size:11.5px;font-weight:600;opacity:.55;margin-left:-3px}
+/* 承包模式分组标（①②③）：一眼看出「能不能拿总包」，比六个词平铺有用 */
+.mgrp{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;
+  border-radius:50%;background:#eef2f8;color:var(--brand);font-size:11px;font-weight:700;
+  flex:none;cursor:help}
+.mnote{font-size:11px;color:var(--tx3);padding:4px 2px 0;line-height:1.5}
 .srow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding-top:6px;border-top:1px dashed var(--line);margin-top:4px}
 .srch{flex:1;min-width:200px;padding:8px 13px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;outline:none}
 .srch:focus{border-color:var(--brand)}
@@ -1096,7 +1103,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610231627';
+var VER='?v=202610231638';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -1520,8 +1527,51 @@ function buildFilters(){
     var c=e.target.closest('.chip'); if(!c)return;
     F.side=!F.side; c.classList.toggle('on',F.side); F.page=1; render();
   };
-  chipsBox('f-mode',uniq(items.map(function(x){return x.mode}).filter(function(x){return x&&x.length<12}))
-    .sort(function(a,b){return countBy('mode')[b]-countBy('mode')[a]}).slice(0,10),countBy('mode'),'mode');
+  /* 承包模式（2026-10-23 重做）：
+     原来是把 mode 字段按出现次数取前 10 个直接铺成 chips，结果是
+     EPC / 施工总承包 / 设备采购 / 工程总承包 / 采购 / 施工 六个词混排，
+     用户看不出区别，还以为是同一件事的六种写法。
+     其实这些词的区别只有一个维度：**我方能不能拿到总包**。
+       ① 能拿总包 —— EPC / EPC+O / EP / 工程总承包 / PC（设计/采购+施工一起给）
+       ② 只能拿施工 —— 施工总承包 / 施工 / 建安标段（只给施工，设计采购在别人手里）
+       ③ 只能供货或做安装分包 —— 设备采购 / 采购 / 成套设备（业主自己买设备，或总包已定）
+     所以按这三组排，并在 group 前加分隔标，鼠标移上去解释差别。 */
+  var MODE_GROUP = [
+    ['① 能拿总包（设计+采购+施工一起）',
+      ['EPC', 'EPC+O', 'EPC（交钥匙）', 'EP', 'EP（设计）', 'EP/装置总包', '工程总承包',
+       'PC（采购+施工）', '设备+施工', '设备采购+施工', '合同能源管理(EMC)']],
+    ['② 只能拿施工（设计/设备在别人手里）',
+      ['施工总承包', '施工专业承包', '专业承包', '施工', '施工分包', '施工劳务',
+       '改造工程', '修复工程', '设计/修复工程']],
+    ['③ 只能供货或做安装分包（业主自购设备 / 总包已定）',
+      ['设备采购', '设备采购及安装', '设备采购+安装', '设备采购含安装', '设备采购及实施',
+       '设备采购（系统成套）', '设备供货及安装调试', '设备', '采购', '服务采购', '服务']]
+  ];
+  var _mc = countBy('mode');
+  var _mh = '';
+  MODE_GROUP.forEach(function (g, gi) {
+    var seeds = g[1].filter(function (v) { return _mc[v]; });
+    // 兜底：没被显式归组的 mode 值，按次数补进第 ① 组之后，避免有数据却筛不到
+    if (gi === 0) {
+      Object.keys(_mc).sort(function (a, b) { return _mc[b] - _mc[a]; }).forEach(function (v) {
+        var grouped = MODE_GROUP.some(function (gg) { return gg[1].indexOf(v) >= 0; });
+        if (!grouped && v && v.length < 12 && seeds.indexOf(v) < 0) seeds.push(v);
+      });
+    }
+    if (!seeds.length) return;
+    _mh += '<span class="mgrp" title="' + esc(g[0]) + '">' + esc(g[0].slice(0, 1)) + '</span>';
+    _mh += seeds.map(function (v) {
+      return '<span class="chip" data-k="mode" data-v="' + esc(v) + '">' + esc(v) + '<em>' + (_mc[v] || 0) + '</em></span>';
+    }).join('');
+  });
+  (function () {
+    var box = el('f-mode'); if (!box) return;
+    box.innerHTML = _mh;
+    box.insertAdjacentHTML('afterend',
+      '<div class="mnote">上面只列「标题里写明承包模式」的 ' +
+      items.filter(function (x) { return !!x.mode; }).length +
+      ' 条。其余多为立项公示 / 招标计划阶段，还没定招标方式，所以没有模式可标。</div>');
+  })();
   chipsBox('f-p',(meta.platTop||[]).slice(0,10).map(function(x){return x[0]}),countBy('p'),'p');
 
   /* 只给「多选筛选项」绑通用 toggle。
@@ -1545,21 +1595,39 @@ function buildFilters(){
      每个库里只放「关注档」：金额 ≥3000 万 或 综合分 A/B。
      其余小项目可以在「全部」里翻，但不占主列表。 */
   var WA = D.watch || {amt:0.3, tender:0, win:0, lead:0, all:0};
+  /* 三档按钮的标题必须写清口径（2026-10-23）：
+     用户看到「能投的标 22」但点进去只有 10 张卡，怀疑数据造假。
+     真实原因是两处过滤叠加：后端 w（金额≥3000万 或 A/B 级）+ 前端默认「只看主场业务」。
+     2026-10-23 二次修正：第一版把按钮数改成「实到条数」，结果首屏 items 只有 42 条切片，
+     算出来是 7 而不是 10，比原来更乱。所以按钮数回到 watch 的全库口径（稳定、可对账），
+     在旁边用灰色小字标出「当前实到 N」，两个数同时可见，谁都不猜。 */
   var BOOK = [
-    ['tender', '📋 能投的标', 'waT'],
-    ['win',    '🏁 已出结果', 'waW'],
-    ['lead',   '💡 立项线索', 'waL']
+    ['tender', '📋 能投的标', 'waT', '招标公告 / 招标计划 / 变更公告里，金额≥3000万 或 综合分 A/B 的项目'],
+    ['win',    '🏁 已出结果', 'waW', '中标结果公示 / 中标候选人公示里，金额≥3000万 或 综合分 A/B 的项目'],
+    ['lead',   '💡 立项线索', 'waL', '审批 / 备案 / 重点项目名单。还没招标，不卡金额，全量列出']
   ];
   var waBox = el('wares');
   if (waBox) {
     waBox.innerHTML = BOOK.map(function (b) {
-      var n = b[0] === 'lead' ? WA.lead : (WA[b[0]] || 0);
-      return '<div class="ware' + (b[0] === 'tender' ? ' on' : '') + '" data-bk="' + b[0] + '">' +
-        b[1] + '<b>' + n + '</b></div>';
+      var n = b[0] === 'lead' ? WA.lead : (WA[b[0]] || 0);          // 关注档条数（全库口径）
+      var allN = b[0] === 'lead' ? WA.lead : (b[0] === 'tender' ? WA.tenderAll : WA.winAll);
+      /* 实到条数：直接读构建期算好的 watch.tenderHm / winHm（主场口径），
+         不在前端重算——运行时 D 里根本没有 items（条目按 chunk 懒加载），
+         拿首屏 42 条切片去数会得到 7，比不显示还糟。字段缺失就不显示，宁缺毋滥。 */
+      var shown = null;
+      if (b[0] === 'tender') shown = (WA.tenderHm == null ? null : WA.tenderHm);
+      else if (b[0] === 'win') shown = (WA.winHm == null ? null : WA.winHm);
+      var tip = b[3] + '。\n关注档（全库）' + n + ' 条' + (allN && allN !== n ? '，这一档总共 ' + allN + ' 条' : '') +
+        (b[0] === 'lead' ? '；立项线索不卡金额，全量列出' :
+          '；再按「' + (F.side ? '含兼营' : '只看主场业务') + '」过滤' + (shown === null ? '' : '后实到 ' + shown + ' 条')) + '。';
+      return '<div class="ware' + (b[0] === 'tender' ? ' on' : '') + '" data-bk="' + b[0] + '" title="' + esc(tip) + '">' +
+        b[1] + '<b>' + n + '</b>' +
+        (shown !== null ? '<i class="wsub">/' + shown + '</i>' : '') + '</div>';
     }).join('') +
       '<div class="ware" data-bk="all" id="waAllW">全部 <b>' + (WA.all || 0) + '</b></div>' +
       '<span class="ware-tog" id="waHide" title="「全部」档里有一批已经开过标的，滤掉它们只剩还能投的">只看还能投的</span>' +
-      '<div class="wtip">只看 <b>' + (WA.amt * 10000) + ' 万以上</b> 或 综合分 A/B 的项目' +
+      '<div class="wtip">按钮上 <b>22 /10</b>：前一个是全库关注档（金额 ' + (WA.amt * 10000) + ' 万以上 或 综合分 A/B），' +
+      '后一个是按当前「' + (F.side ? '含兼营' : '只看主场业务') + '」过滤后列表里真有的条数' +
       '<a href="javascript:void(0)" id="waAll" style="margin-left:8px;color:var(--brand);font-weight:600">看全部含小项目</a></div>';
     waBox.onclick = function (e) {
       var pick = function (bk) {
@@ -1839,8 +1907,20 @@ var LAST=[];
 function render(){
   var a=filtered(); LAST=a;
   var sum=a.reduce(function(s,x){return s+num(x.amt)},0);
-  el('rbar').innerHTML='<span>命中 <b>'+a.length+'</b> 条 · 已公示金额合计 <b>'+sum.toFixed(1)+' 亿</b></span>'+
-    '<span class="rhint"><span class="hint">综合分 = 业务匹配 + 规模 + 阶段 + 是否总承包标的</span></span>';
+  /* 统计条（2026-10-23 用户质疑「数据对不上」后重写）：
+     原来只写「命中 7 条 · 已公示金额合计 6.8 亿」，三个问题：
+       ① 6.8 亿是这 7 条的合计，还是全库的合计？跟顶部 380 亿什么关系？
+       ② 7 条里其实只有 6 条带金额，剩下 1 条原文没披露，没说
+       ③ 380 亿的分母是 441 条，但没写在同一个视野里，所以看着「对不上」
+     现在一句话给全：命中 N 条 / 其中 M 条有金额 / 这 M 条合计 X 亿 /
+     顶部那个 380 亿是哪 N 条的总和。数字对得上，逻辑就不再被怀疑。 */
+  var nAmt=a.filter(function(x){return num(x.amt)>0}).length;
+  var nNo=a.length-nAmt;
+  el('rbar').innerHTML='<span>命中 <b>'+a.length+'</b> 条 · 其中 <b>'+nAmt+'</b> 条有金额 · 这 '+nAmt+' 条合计 <b>'+sum.toFixed(1)+' 亿</b></span>'+
+    '<span class="rhint"><span class="hint">'+
+      (nNo?'另 '+nNo+' 条原文未披露金额（多为立项公示/招标计划，不写投资额） · ':'')+
+      '顶部「已公示金额 '+meta.amtSum.toFixed(0)+' 亿」是全库 '+meta.withAmt+' 条带金额项目的总和，与本页筛选无关'+
+    '</span></span>';
   var tot=Math.ceil(a.length/PS)||1;
   if(F.page>tot)F.page=tot;
   var pg=a.slice((F.page-1)*PS,F.page*PS);
@@ -3887,10 +3967,14 @@ function boot_main(){
   var _isEarly=function(x){return !!x.early || x.st==='立项公示' || x.st==='招标计划'};
   var _earlyN=items.filter(_isEarly).length;
   // 第 4 项是点击动作：sw:xxx = 跳商机库并选中该泳道；g:A = 选中等级筛选
+  /* 「已公示金额 380 亿」的副标题要写清分母（2026-10-23）：
+     用户拿这个数和列表底下的「合计 6.8 亿」对比，以为统计出错。
+     其实一个是全库 441 条带金额项目的总和，一个是当前筛选结果的合计，
+     根本不是同一个东西，所以直接在卡片上把分母标出来。 */
   var kpi=[
    ['cursor',meta.total,'入库项目','sw:'],['hot2',canBid,'当前在招','sw:bid'],
    ['',meta.new,'本轮更新',''],['',meta.withWin,'已出中标结果',''],
-   ['',meta.amtSum.toFixed(0)+'亿','已公示金额',''],
+   ['',meta.amtSum.toFixed(0)+'亿','已公示金额·'+meta.withAmt+'条合计',''],
    ['',items.filter(function(x){return x.g==='A'}).length,'A 战略必争','g:A'],
    ['',_earlyN,'立项早期·拟招标','sw:early'],
    ['',items.filter(function(x){return x.hm}).length,'主场业务',''],
