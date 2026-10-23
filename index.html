@@ -163,6 +163,13 @@ details.sub li{padding:2px 0}
 .cc-m{font-size:12.5px;color:var(--tx2);margin-top:5px}
 .cc-m b{color:var(--red)}
 .cc-i{font-size:12px;color:var(--tx3);margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+/* ---- 切口标签（2026-10-23）----
+   回答「这条线索，我们的哪一段活能进去」。客户卡里是小字，一间公司的一堆动态
+   扫一眼就能看出「这家有海水淡化 / 这家只有余热」，比读十条标题快。
+   颜色按切口分：水蓝 / 电站橙 / 余热黄 / 供热紫 / 配电绿 / 机会灰。 */
+.ovcut{display:inline-block;font-size:10.5px;line-height:1.5;font-weight:700;
+  padding:1px 6px;border-radius:5px;margin-right:5px;vertical-align:1px;white-space:nowrap}
+.ovcut.tip{cursor:help}
 .cc-i li{padding:2px 0;list-style:none}
 .cc-i a:hover{color:var(--brand)}
 /* ---------- 卡片底部动作条：跳原文 / 跳企查查核对工商信息 ---------- */
@@ -408,9 +415,16 @@ details.sub li{padding:2px 0}
   <!-- 3c 海外信号 -->
   <div class="panel" id="p-overseas">
     <div class="sect">海外用能信号 <small>客户出海 = 我司出海 · 按「与我司业务关联度」排序</small></div>
-    <div class="hint" style="margin-bottom:10px">跟踪 44 家重点客户的海外矿山 / 园区 / 建厂动向。海外园区落地必然要配套<b>自备电厂、余热发电、海水淡化</b>——这正是我司海外业务方向（有色企业用热用电 + 配套海水淡化）。关联度由标题与解读中的「发电/自备电厂/氧化铝/镍/园区/海水淡化」等业务关键词计算。</div>
+    <div class="hint" style="margin-bottom:10px">跟踪中资出海客户（江浙沪皖优先）的海外矿山 / 园区 / 建厂动向。海外园区落地要配套<b>自备电站、余热发电、海水淡化</b>——这正是我司海外业务方向。<br>
+      <b>排序不再按「关联度」</b>：改成按<b>我司切口</b>（海水淡化 / 自备电站 / 余热 / 供热 / 配电）优先，同切口里按项目金额大小。原因很简单——旧算法数的是标题里命中几个关键词，结果「某公司签约某园区」这种泛泛标题得高分，而「巴淡强制新建数据中心自建海水淡化厂」只有一个关键词、排到看不见的地方。<b>越是我们能直接接的活，越应该排前面。</b></div>
     <div id="ovHot"></div>
     <div class="sect" style="margin-top:18px">全部海外动态 <small id="ovCnt"></small></div>
+    <div class="frow" style="padding:0 0 8px"><label>切口</label><div class="chips" id="f-ocut"></div></div>
+    <div class="hint" style="margin:0 0 8px;background:#f7f9fc;border:1px solid #e3e9f2;border-radius:8px;padding:7px 12px;color:#5a6270;font-size:12px;line-height:1.7">
+      <b>切口怎么读</b>：这条线索，我们的<b>哪一段活</b>能进去。标签优先显示人工写的那句具体活（如「海水淡化 EPC + O&M」），
+      没有就显示粗分类（海水淡化 / 自备电站·动力岛 / 余热回收 / 热电联产 / 供配电·孤网 / 机会池）。
+      <b>「看不出」占一半多是故意的</b>——大部分动态是年报营收、投产仪式这类没有能源配套信息的内容，硬贴标签只会让人不信。
+    </div>
     <div class="frow" style="padding:0 0 10px"><label>行业</label><div class="chips" id="f-ogrp"></div></div>
     <div class="hint" id="ovSectorTip" style="margin:0 0 10px;background:#f0f7ff;border:1px solid #cfe4ff;border-radius:9px;padding:8px 12px;color:#1053c9;font-size:12.5px;line-height:1.7"></div>
     <div class="cgrid" id="ovGrid"></div>
@@ -1152,29 +1166,75 @@ el('f-pcat').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
   toggle(pCat,c.dataset.v);c.classList.toggle('on');renderPartners()};
 
 /* ==================== 海外信号 ==================== */
-var oGrp=new Set();
+var oGrp=new Set(), oCut=new Set();
 function ovCard(o,big){
-  var h='<div class="'+(big?'ovhot':'ccard')+'"><h3>'+(o.url?'<a href="'+esc(o.url)+'" target="_blank" rel="noopener"'+(big?' style="color:#ffe08a"':'')+'>'+esc(o.title)+(o.url?' ↗':'')+'</a>':esc(o.title))+'</h3>';
+  var cm=cutMeta(o);
+  var h='<div class="'+(big?'ovhot':'ccard')+'">'+(big&&cm.t?'<div style="margin-bottom:6px">'+
+      '<span class="ovcut" style="background:rgba(255,255,255,.94);color:'+cm.c+';font-size:12px;padding:3px 11px;box-shadow:0 1px 3px rgba(0,0,0,.25)">'+
+      esc(cm.t)+'</span></div>':'')+'<h3>'+(o.url?'<a href="'+esc(o.url)+'" target="_blank" rel="noopener"'+(big?' style="color:#ffe08a"':'')+'>'+esc(o.title)+(o.url?' ↗':'')+'</a>':esc(o.title))+'</h3>';
   if(big){
     h+='<div class="oht">'+esc(o.desc||'')+'</div>';
     h+='<div class="ohm"><span class="badge">'+esc(o.name)+'</span><span class="badge">'+esc(o.grp)+'</span>'+
        (o.tag?'<span class="badge">'+esc(o.tag)+'</span>':'')+'<span>'+esc(o.date||'')+'</span></div>';
   }else{
     h+='<div class="cc-m">'+esc(o.desc||'')+'</div>';
-    h+='<div class="ns" style="font-size:11.5px;color:var(--tx3);margin-top:6px"><span class="ntag 行业">'+esc(o.tag||'动态')+'</span><span>'+esc(o.name)+'</span><span>'+esc(o.date||'')+'</span></div>';
+    h+='<div class="ns" style="font-size:11.5px;color:var(--tx3);margin-top:6px">'+cutTag(o)+'<span class="ntag 行业">'+esc(o.tag||'动态')+'</span><span>'+esc(o.name)+'</span><span>'+esc(o.date||'')+'</span></div>';
   }
   return h+'</div>';
 }
+/* 行业名归一（2026-10-23）：数据侧的行业名跟页面原来写死的那套对不上——
+   数据是「有色冶炼 / 水泥 / 化工化纤」，页面筛选条写的是「有色 / 水泥建材 / 化肥」，
+   于是点「水泥建材」出来 0 条、点「有色」也出来 0 条，筛选器等于坏的。
+   这里统一映射，再让筛选条按**数据里真实有哪些行业**动态生成。 */
+var OV_GRP_ALIAS={'有色':'有色冶炼','水泥建材':'水泥','化肥':'化工化纤','其他制造':'化工化纤'};
+function ovGrp(g){ g=g||''; return OV_GRP_ALIAS[g]||g; }
 function renderOverseas(){
   var list=D.overseas||[];
   var hot=list.slice(0,4);
   el('ovHot').innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-bottom:16px">'+
     hot.map(function(o){return ovCard(o,true)}).join('')+'</div>';
-  var rest=list.filter(function(o){return !oGrp.size||oGrp.has(o.grp)});
-  el('ovCnt').textContent='共 '+list.length+' 条 · 高关联 '+list.filter(function(o){return o.rel>=3}).length+' 条';
-  el('ovGrid').innerHTML=rest.map(function(o){return ovCard(o,false)}).join('')||'<div class="empty">暂无</div>';
+  var rest=list.filter(function(o){
+    if(oGrp.size && !oGrp.has(ovGrp(o.grp))) return false;
+    /* 切口筛选：空串代表「看不出」，也必须能单独筛——
+       用户最常问的两个问题就是「哪些能接」和「哪些根本没信息」。 */
+    if(oCut.size && !oCut.has(o.cut||'')) return false;
+    return true;
+  });
+  var nCut={}; list.forEach(function(o){var k=o.cut||''; nCut[k]=(nCut[k]||0)+1});
+  var nClear=list.filter(function(o){return o.cut&&o.cut!=='opp'}).length;
+  el('ovCnt').textContent='共 '+list.length+' 条 · 切口明确 '+nClear+' 条 · 海水淡化 '+(nCut.water||0)+' 条';
+  el('ovGrid').innerHTML=rest.map(function(o){return ovCard(o,false)}).join('')||'<div class="empty">没有匹配的动态，换个筛选条件试试</div>';
+  /* 切口筛选条：只显示有数据的切口，避免一排 0 条的空按钮。
+     ⚠ 必须每次渲染现建，不能写成脚本加载时执行一次——
+       data.news.js 是按需加载的，脚本解析那会儿 D.overseas 还不存在，会建成空条。 */
+  var cb=el('f-ocut');
+  if(cb){
+    cb.innerHTML=['water','power','waste','cogen','grid','opp',''].filter(function(k){return nCut[k]})
+      .map(function(k){
+        var m=CUT_META[k]||{t:'看不出'};
+        return '<span class="chip'+(oCut.has(k)?' on':'')+'" data-v="'+k+'">'+esc(k?m.t:'看不出')+
+          '<em>'+nCut[k]+'</em></span>';
+      }).join('');
+  }
+  /* 行业筛选条同理，动态生成（下面那条写死的 chipsBox 已删） */
+  var gb=el('f-ogrp');
+  if(gb){
+    var nGrp={}; list.forEach(function(o){var g=ovGrp(o.grp); nGrp[g]=(nGrp[g]||0)+1});
+    var order=['有色冶炼','水泥','数据中心','电力配套','钢铁','化工化纤','造纸','玻璃']
+      .filter(function(g){return nGrp[g]});
+    Object.keys(nGrp).forEach(function(g){if(order.indexOf(g)<0)order.push(g)});
+    gb.innerHTML=order.map(function(g){
+      return '<span class="chip'+(oGrp.has(g)?' on':'')+'" data-v="'+esc(g)+'">'+esc(g)+'<em>'+nGrp[g]+'</em></span>';
+    }).join('');
+  }
 }
-chipsBox('f-ogrp',['有色','钢铁','化工化纤','水泥建材','数据中心','化肥','其他制造'],null,'ogrp');
+el('f-ocut').onclick=function(e){
+  var c=e.target.closest('.chip'); if(!c)return;
+  var v=c.dataset.v;
+  if(oCut.has(v))oCut.delete(v);else oCut.add(v);
+  renderOverseas();
+};
+/* f-ogrp 的选项改由 renderOverseas() 按数据动态生成，这里不再写死 */
 (function(){var box=el('ovSectorTip');if(!box)return;
   box.innerHTML='<b>三行业出海 · 为什么与我司有关</b>：'+
    '<b>水泥</b>——水泥窑余热发电是我司成熟市场，出海项目还需自备电厂、脱硝除尘；'+
@@ -1224,6 +1284,32 @@ function renderMStrip(){
     '<span class="dt">'+tail+'</span>';
 }
 
+/* ---------------- 切口标签 ----------------
+   数据侧（build_web.py）给每条海外动态打了 cut（key）和 cutWhy（人话，20 字内）。
+   cut 负责筛选和上色，cutWhy 负责说清「这条具体能切什么活」——
+   只给 6 个粗标签没用，用户要的是「这家能让我做什么」。
+   cutWhy 写不出就退回显示标签名，不硬凑。 */
+var CUT_META={
+  water:{t:'海水淡化',c:'#0b6fa4',bg:'#e3f4fb'},
+  power:{t:'自备电站·动力岛',c:'#a8451a',bg:'#fdece3'},
+  waste:{t:'余热回收',c:'#7a5b00',bg:'#fdf4dc'},
+  cogen:{t:'热电联产·供热',c:'#8a2f6b',bg:'#fbe8f4'},
+  grid:{t:'供配电·孤网',c:'#215c3a',bg:'#e4f4ea'},
+  opp:{t:'机会池',c:'#4a5568',bg:'#eef1f6'},
+  '':{t:'',c:'',bg:''}
+};
+function cutMeta(o){
+  var m=CUT_META[o&&o.cut||'']||CUT_META[''];
+  /* cutWhy 可能带括号补充（"海水淡化 EPC + O&M（建成后移交…"），
+     先在第一个括号/破折号处断开，再限长，否则标签被截成半句。 */
+  var w=((o&&o.cutWhy)||'').split(/[（(——]/)[0].trim();
+  return {t:(w||'').slice(0,20)||m.t, c:m.c, bg:m.bg, tip:(o&&o.cutWhy)||m.t};
+}
+function cutTag(o){
+  var m=cutMeta(o); if(!m.t) return '';
+  return '<span class="ovcut tip" style="background:'+m.bg+';color:'+m.c+'" title="'+esc(m.tip)+'">'+esc(m.t)+'</span>';
+}
+
 /* ==================== 重点客户 ==================== */
 var cRg=new Set(), cEx=new Set();
 var GTAG={钢铁:'#f1f3f6',有色:'#efe9ff',化工化纤:'#e8f4ff',水泥建材:'#fff2e0','其他制造':'#f1f3f6'};
@@ -1255,7 +1341,7 @@ function renderClients(){
         abShow.map(function(a){
           return '<li'+(a.desc?' title="'+esc(a.desc)+'"':'')+'>'+(a.url?'<a href="'+esc(a.url)+'" target="_blank" rel="noopener">':'')+
             '<span class="cc-tag" style="background:#fff2e0;color:#a85c10">'+esc(a.tag||'动态')+'</span> '+
-            esc(a.title)+(a.url?'</a>':'')+
+            cutTag(a)+esc(a.title)+(a.url?'</a>':'')+
             ' <span class="sub-i">'+esc(a.date)+'</span>'+
             (a.desc&&open?'<br><span class="sub-i clamp3" style="color:#8a6100">'+esc(a.desc)+'</span>':'')+
             '</li>'}).join('')+'</ul>'+
@@ -1274,7 +1360,14 @@ function renderClients(){
       '<span class="cc-tag" style="background:'+(GTAG[x.grp]||'#f1f3f6')+';color:'+(GCOL[x.grp]||'#5a6270')+'">'+esc(x.grp)+'</span>'+
       (hit?'<span class="cc-tag" style="background:#fff2e0;color:#a85c10">'+x.n+' 条库内记录</span>'
          :'<span class="cc-tag none">库内暂无</span>')+
-      (nw.length?'<span class="cc-tag" style="background:#e8f1ff;color:#1053c9">'+nw.length+' 条相关情报</span>':'')+'</div>'+
+      (nw.length?'<span class="cc-tag" style="background:#e8f1ff;color:#1053c9">'+nw.length+' 条相关情报</span>':'')+
+      /* 切口汇总：这家公司的海外动态里出现过几种可接的活（去重、按优先级排）。
+         比逐条看标题快——「这家有电站+水」和「这家只卖铜材」完全是两回事。 */
+      (function(){var seen={},ks=[];ab.forEach(function(a){if(a.cut&&!seen[a.cut]){seen[a.cut]=1;ks.push(a.cut)}});
+        ks.sort(function(p,q){var w={water:0,power:1,waste:2,cogen:3,grid:4,opp:5};
+          return (w[p]==null?9:w[p])-(w[q]==null?9:w[q])});
+        return ks.map(function(k){var m=CUT_META[k];return m?'<span class="ovcut" style="background:'+m.bg+';color:'+m.c+'">'+esc(m.t)+'</span>':''}).join('')})()+
+      '</div>'+
       nwHtml+abHtml+hitHtml+
       '<div class="cc-i"><a href="javascript:searchFor(\''+esc(x.kw)+'\')">在商机库中搜索相关记录 ↗</a></div>'+
       '</div>'}).join('')||'<div class="empty">暂无</div>';
