@@ -328,7 +328,12 @@ details.sub li{padding:2px 0}
 .en-line b{color:var(--tx3);font-weight:600;margin-right:3px}
 .en-tags{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 7px}
 .en-tags span{font-size:11px;padding:1px 7px;border-radius:6px;background:#f2f6fb;color:var(--tx2);border:1px solid var(--line)}
-.en-pj{font-size:12px;color:var(--tx2);line-height:1.7;padding:2px 0}
+.en-pj{display:flex;gap:8px;align-items:baseline;font-size:12px;color:var(--tx2);
+  line-height:1.6;padding:3px 0;border-bottom:1px dashed var(--line)}
+.en-pj>span{flex:1;min-width:0}
+.en-pj a{flex:0 0 auto;font-size:11px;padding:1px 7px;border-radius:5px;text-decoration:none;
+  border:1px solid #cfd9e6;background:#fbfdff;color:#1053c9;white-space:nowrap}
+.en-pj a:hover{background:#1053c9;color:#fff;border-color:#1053c9}
 .en-people{margin-top:8px;border:1px solid var(--line);border-radius:8px;background:#fafcff}
 .en-people summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--brand-d);padding:6px 10px;list-style:none}
 .en-people summary::-webkit-details-marker{display:none}
@@ -713,6 +718,48 @@ details.sub li{padding:2px 0}
 .pj-t.dead .go{color:#b06a10;opacity:1}
 .pj-t:hover .go{opacity:1}
 
+
+/* ---------- 单位百科 v2：精简卡片 + 企业画像弹层（2026-10-23）----------
+   卡片只留「名字 / 城市 / 类型 / 当家人 / 能力标签 / 一句话强项 + 三个动作」，
+   细节全收进全屏画像，避免一屏 38 张卡撑到几万像素高。 */
+.ccard.ec .cc-h{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ec-name{cursor:pointer;color:var(--brand-d)}
+.ec-name:hover{text-decoration:underline}
+.ec-brief{font-size:12.5px;color:var(--tx2);line-height:1.7;margin:6px 0 2px}
+.ec-people{font-size:12px;color:var(--tx2);line-height:1.7;margin:4px 0 0}
+.ec-people b{color:var(--tx3);font-weight:600;margin-right:3px}
+
+/* 全屏画像弹层 */
+#encyProfBox{display:none;position:fixed;inset:0;z-index:9000;background:rgba(15,23,42,.55);
+  align-items:flex-start;justify-content:center;padding:28px 16px;overflow:auto;
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.ep-wrap{width:100%;max-width:820px;background:var(--card);border-radius:14px;
+  box-shadow:0 18px 50px rgba(15,23,42,.28);padding:18px 20px 22px;margin:auto 0}
+.ep-head{display:flex;gap:12px;align-items:flex-start;border-bottom:2px solid var(--brand);
+  padding-bottom:10px;margin-bottom:4px}
+.ep-head>div:first-child{flex:1;min-width:0}
+.ep-title{font-size:19px;font-weight:700;color:var(--tx);line-height:1.35;display:flex;
+  flex-wrap:wrap;gap:8px;align-items:baseline}
+.ep-idline{font-size:12.5px;color:var(--tx2);line-height:1.7;margin-top:4px}
+.ep-x{flex:0 0 auto;font-size:12px;padding:5px 12px;border-radius:7px;cursor:pointer;
+  border:1px solid #cfd9e6;background:#fff;color:var(--tx2)}
+.ep-x:hover{background:#eef2f7;color:var(--tx)}
+.ep-sec{margin-top:16px;padding-top:12px;border-top:1px dashed var(--line)}
+.ep-sec>b{display:block;font-size:13.5px;color:var(--tx);margin-bottom:8px}
+.ep-sec p{font-size:12.5px;color:var(--tx2);line-height:1.8;margin:3px 0}
+.ep-sec p b{color:var(--tx3);font-weight:600;margin-right:4px}
+.ep-sec table{width:100%;border-collapse:collapse;font-size:12.5px}
+.ep-sec th{text-align:left;color:var(--tx3);font-weight:600;padding:5px 10px;width:30%;
+  vertical-align:top;border-top:1px dashed var(--line)}
+.ep-sec td{padding:5px 10px;line-height:1.7;border-top:1px dashed var(--line);color:var(--tx)}
+.ep-src{margin-top:14px;font-size:11.5px;color:var(--tx3);line-height:1.7;
+  background:#f7f9fc;border-radius:8px;padding:8px 11px}
+@media(max-width:640px){
+  #encyProfBox{padding:10px 6px}
+  .ep-wrap{padding:14px 13px 18px;border-radius:11px}
+  .ep-title{font-size:16.5px}
+  .en-pj{flex-wrap:wrap}
+}
 </style>
 <script>
 /* 顶层报错兜底：写到 <html data-err> 便于定位 */
@@ -1116,8 +1163,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610232215"></script>
-<script src="data.items.js?v=202610232215"></script>
+<script src="data.core.js?v=202610232259"></script>
+<script src="data.items.js?v=202610232259"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1182,7 +1229,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610232215';
+var VER='?v=202610232259';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -1474,7 +1521,15 @@ function _tabIdx(id){
 function _setTab(id,v){ var i=_tabIdx(id); if(i>=0) TABS[i][2]=v; }
 function refreshTabCounts(){
   /* 全部按面板 id 定位，顺序怎么变都不会串 */
-  _setTab('p-items',   meta.total);
+  /* 2026-10-23：找商机页签挂「严筛后有用条数」（能投+已出+立项线索），
+     不再挂入库全量 1521——用户原话「有多少条有用的显示多少条」，
+     页签写 1521 点进去只有 13，看着像数据造假。
+     入库全量 1521 仍在副标题和「全部」档里可见。 */
+  /* ⚠ WA 是 buildFilters() 里的局部变量（记录三档口径），这里在顶层就会被调用，
+     那时 buildFilters 还没跑 → 直接读 WA 会 ReferenceError 把整个 boot 打断
+     （2026-10-23 实测：首屏 tabs 全空、控制台红一片）。改成能取到就取、取不到直接读 D.watch。 */
+  var _W=(typeof WA!=='undefined'&&WA)?WA:(D.watch||{});
+  _setTab('p-items',   (_W.tenderAll||0)+(_W.winAll||0)+(_W.lead||0));
   _setTab('p-rival',   arr(D.competitors).length+arr(D.partners).length);
   _setTab('p-overseas',arr(D.overseas).length);          /* 海外机会 = 海外动态条数 */
   _setTab('p-client',  ((D.domStat&&D.domStat.total)||0)+arr(D.clients).length+((D.graph||{}).owners||[]).length);
@@ -2849,23 +2904,20 @@ function refreshRivalCounts(){
   }
 }
 
-/* ---- 单位百科（2026-10-23）----
-   四组：有色设计院 / 化工设计院 / 中冶系 / 综合工程公司（直接对手）。
-   卡片里信息分三层：
-     ① 身份层  沿革、归属、总部、成立年 —— 回答「这家从哪来」
-     ② 能力层  主营、强项、代表业绩、海外范围 —— 回答「它能干什么、干到哪」
-     ③ 找人层  公开披露的领导班子 —— 回答「营销该找谁」
-   跟上面「竞争对手档案」不重复：那边看它在本库拿了多少单，这边看它是谁。 */
-var eGrp='';          // 当前分组，'' = 全部
+/* ---- 单位百科（2026-10-23，二版按用户反馈重构）----
+   用户反馈：① 别一直下拉 → 分组当标签栏，一次只看一组；② 每家企业做个画像
+   → 点「企业画像」弹全屏档案；③ 业绩要能跳转 → 每条业绩挂「库内搜 + 全网搜」；
+   ④ 内容少 → 持续补（v2 已补贵阳铝镁院，电解铝设计第一梯队）。 */
+var eGrp='youse';         // 当前分组，默认有色设计院（不再搞「全部」一屏 37 张）
 function renderEncy(){
   var E=D.ency; if(!E||!E.groups){ el('encyGrid').innerHTML='<div class="empty">百科数据未加载</div>'; return; }
-  /* 分组筛选条 */
   var chips=el('f-eg');
   if(chips && !chips.dataset.done){
     chips.dataset.done='1';
-    var gh='<span class="chip'+(eGrp===''?' on':'')+'" data-g="">全部</span>';
+    var gh='';
     (E.groups||[]).forEach(function(g){
-      gh+='<span class="chip'+(eGrp===g.id?' on':'')+'" data-g="'+esc(g.id)+'">'+esc(g.name)+'</span>';
+      gh+='<span class="chip'+(eGrp===g.id?' on':'')+'" data-g="'+esc(g.id)+'">'+esc(g.name)+' <b>'+
+          (g.units||[]).length+'</b></span>';
     });
     chips.innerHTML=gh;
     chips.onclick=function(ev){
@@ -2876,30 +2928,26 @@ function renderEncy(){
       renderEncy();
     };
   }
-  /* 分组说明（中冶系那组有编号规则的坑，必须显示出来） */
-  var note=el('encyNote'), h='';
-  (E.groups||[]).forEach(function(g){
-    if(eGrp && g.id!==eGrp) return;
-    if(eGrp===g.id && g.rule){ note.style.display='block'; note.innerHTML='<b>'+esc(g.name)+'：</b>'+esc(g.rule); }
-    else if(!eGrp){ /* 全览时不显示 rule，避免一屏塞不下 */ }
-    var us=(g.units||[]).slice();
-    if(g.id==='mcc'){
-      /* 中冶系按「设计院 / 建设公司」分开排，营销看的是「能联合还是会对撞」 */
-      us.sort(function(a,b){
-        var ka=(a.type==='设计院'?0:1), kb=(b.type==='设计院'?0:1);
-        return ka-kb;
-      });
-    }
-    h+='<div class="grpt">'+esc(g.name)+' · '+us.length+' 家<span class="grpd">'+esc(g.why||'')+'</span></div>';
-    h+=us.map(encyCard).join('');
-  });
-  if(!eGrp && note) note.style.display='none';
+  var note=el('encyNote'), h='', g=null;
+  (E.groups||[]).forEach(function(x){ if(x.id===eGrp) g=x; });
+  if(!g){ el('encyGrid').innerHTML='<div class="empty">没有这个分组</div>'; return; }
+  if(g.rule){ note.style.display='block'; note.innerHTML='<b>'+esc(g.name)+'：</b>'+esc(g.rule); }
+  else note.style.display='none';
+  if(E.coverage_note && eGrp!=='mcc'){
+    note.style.display='block';
+    note.innerHTML=(g.rule?'<b>'+esc(g.name)+'：</b>'+esc(g.rule)+'<br>':'')+
+      '<span style="color:var(--tx3)">收录范围：'+esc(E.coverage_note)+'</span>';
+  }
+  var us=(g.units||[]).slice();
+  if(g.id==='mcc'){
+    us.sort(function(a,b){ var ka=(a.type==='设计院'?0:1), kb=(b.type==='设计院'?0:1); return ka-kb; });
+  }
+  h+=us.map(encyCard).join('');
   el('encyGrid').innerHTML=h||'<div class="empty">没有符合筛选条件的单位</div>';
 }
 
 function _arrE(v){ return Array.isArray(v)?v:(v?[v]:[]); }
 function _kvE(o){
-  /* 领导班子可能是 {职务:姓名} 也可能是 {职务:[姓名]}，统一成 [职务, 姓名文本] */
   var out=[], skip={src:1,note:1,note_people:1};
   Object.keys(o||{}).forEach(function(k){
     if(skip[k])return;
@@ -2910,65 +2958,104 @@ function _kvE(o){
   });
   return out;
 }
+
+/* 业绩跳转：每条业绩给两个入口——
+   🔍 库内搜（searchFor 取标题前 8 字，能撞上我们库里的公告）
+   🌐 全网搜（百度，一定可达，用来核原文） */
+function _pjRow(t){
+  var kw=(t||'').replace(/[（(].*$/,'').slice(0,18);
+  return '<div class="en-pj"><span>'+esc(t)+'</span>'+
+    '<a href="javascript:searchFor(\''+esc(kw.slice(0,8))+'\')" title="在本库搜这条业绩相关的招标/中标记录">库内 🔍</a>'+
+    '<a href="https://www.baidu.com/s?wd='+encodeURIComponent((t||'').slice(0,40))+'" target="_blank" rel="noopener nofollow" title="去全网核这条业绩的原文">全网 ↗</a></div>';
+}
+
 function encyCard(x){
-  var h='<div class="ccard">';
-  h+='<div class="cc-h"><b>'+esc(x.name)+'</b>';
-  if(x.short) h+='<span class="cc-tag none">'+esc(x.short)+'</span>';
+  var h='<div class="ccard ec">';
+  h+='<div class="cc-h"><b onclick="encyProf(\''+esc(x.name)+'\')" class="ec-name" title="点开企业画像（全屏档案）">'+esc(x.name)+'</b>';
   if(x.city) h+='<span class="cc-tag none">'+esc(x.city)+'</span>';
   if(x.type) h+='<span class="cc-tag" style="background:'+(x.type==='设计院'?'#e8f4ff;color:#1053c9':'#fff2e0;color:#a85c10')+'">'+esc(x.type)+'</span>';
   var cf=x.confidence||'';
   h+='<span class="cc-tag" style="background:'+(cf==='查证'?'#eaf7ee;color:#14713a':'#fff8e6;color:#a85c10')+'" title="'+esc(x.src||'')+'">'+(cf==='查证'?'已查证':'待核实')+'</span>';
   if(x.overseas) h+='<span class="cc-tag" style="background:#e8f4ff;color:#1053c9">有海外</span>';
-  h+='</div>';
-
+  h+='<button class="rival-dw" onclick="encyProf(\''+esc(x.name)+'\')">企业画像</button></div>';
   if(x.relation){
     var isStar=(x.relation||'').indexOf('⭐')>=0;
     h+='<div class="cc-track" style="'+(isStar?'background:#fffbf0;border-color:#f0dcae':'')+'"><i>关系</i>'+
        '<span style="flex:1;min-width:0">'+esc(x.relation.replace(/⭐/g,'★'))+'</span></div>';
   }
-
-  h+='<div class="cc-body">';
-  /* ① 身份 */
-  var idp=[];
-  if(x.former) idp.push('<b>前身</b> '+esc(x.former));
-  if(x.origin) idp.push('<b>沿革</b> '+esc(x.origin));
-  if(x.history) idp.push('<b>沿革</b> '+esc(x.history));
-  if(x.parent) idp.push('<b>归属</b> '+esc(x.parent));
-  if(x.founded) idp.push('<b>创建</b> '+esc(String(x.founded)));
-  if(x.listed) idp.push('<b>上市</b> '+esc(x.listed));
-  if(x.capital) idp.push('<b>规模</b> '+esc(x.capital));
-  if(idp.length) h+='<p class="en-line">'+idp.join(' ｜ ')+'</p>';
-  /* ② 能力 */
   var bz=_arrE(x.biz).concat(_arrE(x.focus3));
-  if(bz.length) h+='<div class="en-tags">'+bz.slice(0,10).map(function(k){return '<span>'+esc(k)+'</span>'}).join('')+'</div>';
-  if(x.strength) h+='<p><b>强项</b> '+esc(x.strength)+'</p>';
-  if(x.wte) h+='<p style="color:#a85c10"><b>垃圾焚烧</b> '+esc(x.wte)+'</p>';
-  if(x.finance) h+='<p><b>财务</b> '+esc(x.finance)+'</p>';
-  if(x.strategy) h+='<p><b>战略</b> '+esc(x.strategy)+'</p>';
-  if(x.scale) h+='<p><b>体量</b> '+esc(x.scale)+'</p>';
-  if(x.signal) h+='<p style="color:#14713a"><b>动向</b> '+esc(x.signal)+'</p>';
-  var pj=_arrE(x.projects);
-  if(pj.length) h+='<div class="cc-hits" style="margin-top:6px"><i style="font-style:normal;color:var(--tx3);font-size:12px">代表业绩</i>'+
-    pj.slice(0,6).map(function(t){return '<div class="en-pj">· '+esc(t)+'</div>'}).join('')+'</div>';
-  var ov=_arrE(x.overseas_list);
-  if(ov.length) h+='<p><b>海外覆盖</b> '+ov.map(esc).join(' · ')+'</p>';
-  if(x.subsidiaries&&x.subsidiaries.length) h+='<p><b>成员单位</b> '+x.subsidiaries.map(esc).join(' · ')+'</p>';
-  if(x.note_split) h+='<p style="color:#a85c10"><b>注意</b> '+esc(x.note_split)+'</p>';
-  if(x.note_alias) h+='<p style="color:#a85c10"><b>注意</b> '+esc(x.note_alias)+'</p>';
-  if(x.watch) h+='<p style="color:#1053c9"><b>盯防要点</b> '+esc(x.watch)+'</p>';
-  /* ③ 找人 */
+  if(bz.length) h+='<div class="en-tags">'+bz.slice(0,8).map(function(k){return '<span>'+esc(k)+'</span>'}).join('')+'</div>';
+  if(x.strength) h+='<p class="ec-brief">'+esc(x.strength.length>96?x.strength.slice(0,96)+'…':x.strength)+'</p>';
   var pp=_kvE(x.people);
-  if(pp.length){
-    h+='<details class="en-people"><summary>公开披露的领导班子 · '+pp.length+' 项'+
-       '<span class="en-pnote">（官网/公告公开信息，无私人联系方式）</span></summary><table>';
-    pp.forEach(function(a){ h+='<tr><th>'+esc(a[0])+'</th><td>'+esc(a[1])+'</td></tr>'; });
-    if(x.people&&x.people.src) h+='<tr><th>来源</th><td style="color:var(--tx3)">'+esc(x.people.src)+'</td></tr>';
-    h+='</table></details>';
+  if(pp.length) h+='<p class="ec-people"><b>当家人</b> '+esc(pp.slice(0,2).map(function(a){return a[1].split('（')[0]}).join(' · '))+
+    '<span style="color:var(--tx3)">（共 '+pp.length+' 项，进画像看全）</span></p>';
+  h+='<div class="pj-act">'+
+     '<button class="rival-dw" onclick="encyProf(\''+esc(x.name)+'\')">企业画像</button>'+
+     '<a href="https://jzsc.mohurd.gov.cn/data/company?complexname='+encodeURIComponent(x.name||'')+'" target="_blank" rel="noopener nofollow">查资质 ↗</a>'+
+     '<a href="javascript:searchFor(\''+esc((x.name||'').slice(0,6))+'\')">库内记录 ↗</a>'+
+     '</div>';
+  return h+'</div>';
+}
+
+/* ---- 企业画像（全屏档案）----
+   点卡头或「企业画像」弹全屏，五段式：
+   身份沿革 / 能力资质 / 代表业绩（可跳转）/ 领导班子（找人）/ 库内实证+盯防 */
+function encyProf(name){
+  var u=(_encyAll())[name], E=D.ency||{};
+  if(!u) return;
+  var g=null;
+  (E.groups||[]).forEach(function(gg){ (gg.units||[]).forEach(function(x){ if(x.name===name) g=gg; }); });
+  var h='<div class="ep-head"><div>';
+  h+='<div class="ep-title">'+esc(u.name)+(u.short?'<span class="cc-tag none">'+esc(u.short)+'</span>':'')+'</div>';
+  var idp=[];
+  if(u.former)idp.push('前身 '+u.former);
+  if(u.origin||u.history)idp.push((u.origin||u.history));
+  if(u.parent)idp.push('归属 '+u.parent);
+  if(u.founded)idp.push('创建 '+u.founded);
+  if(u.city)idp.push('总部 '+u.city);
+  if(u.listed)idp.push('上市 '+u.listed);
+  if(u.capital)idp.push(u.capital);
+  h+='<div class="ep-idline">'+idp.map(esc).join(' ｜ ')+'</div></div>'+
+     '<button class="ep-x" onclick="encyProfClose()">关闭 ✕</button></div>';
+  if(u.relation) h+='<div class="cc-track" style="margin:10px 0"><i>关系</i><span style="flex:1;min-width:0">'+esc(u.relation.replace(/⭐/g,'★'))+'</span></div>';
+
+  /* 一、能力 */
+  h+='<div class="ep-sec"><b>① 能力与资质</b>';
+  var bz=_arrE(u.biz).concat(_arrE(u.focus3));
+  if(bz.length) h+='<div class="en-tags">'+bz.map(function(k){return '<span>'+esc(k)+'</span>'}).join('')+'</div>';
+  ['strength','wte','finance','strategy','scale','signal','note_split','note_alias'].forEach(function(k){
+    if(u[k]) h+='<p><b>'+({strength:'强项',wte:'垃圾焚烧',finance:'财务',strategy:'战略',scale:'体量',signal:'动向',note_split:'注意',note_alias:'注意'})[k]+'</b> '+esc(u[k])+'</p>';
+  });
+  var ql=_arrE(u.qual);
+  if(ql.length) h+='<p><b>资质</b> '+ql.map(esc).join(' · ')+'</p>';
+  var tc=_arrE(u.tech);
+  if(tc.length) h+='<p><b>专有技术</b> '+tc.map(esc).join(' · ')+'</p>';
+  if(u.subsidiaries&&u.subsidiaries.length) h+='<p><b>成员单位</b> '+u.subsidiaries.map(esc).join(' · ')+'</p>';
+  h+='</div>';
+
+  /* 二、代表业绩（可跳转） */
+  var pj=_arrE(u.projects);
+  if(pj.length){
+    h+='<div class="ep-sec"><b>② 代表业绩 <span style="color:var(--tx3);font-weight:400">'+pj.length+' 条，每条可查原文</span></b>';
+    h+=pj.map(_pjRow).join('');
+    var ov=_arrE(u.overseas_list);
+    if(ov.length) h+='<p style="margin-top:6px"><b>海外覆盖</b> '+ov.map(esc).join(' · ')+'</p>';
+    h+='</div>';
   }
-  /* 本库实证（只有直接对手组有） */
-  var ev=_arrE(x.evidence_from_db);
+
+  /* 三、领导班子（找人） */
+  var pp=_kvE(u.people);
+  if(pp.length){
+    h+='<div class="ep-sec"><b>③ 领导班子 · 营销找人 <span style="color:var(--tx3);font-weight:400">（公开披露信息，无私人联系方式）</span></b><table>';
+    pp.forEach(function(a){ h+='<tr><th>'+esc(a[0])+'</th><td>'+esc(a[1])+'</td></tr>'; });
+    if(u.people&&u.people.src) h+='<tr><th>来源</th><td style="color:var(--tx3)">'+esc(u.people.src)+'</td></tr>';
+    h+='</table></div>';
+  }
+
+  /* 四、库内实证 */
+  var ev=_arrE(u.evidence_from_db);
   if(ev.length){
-    h+='<div class="cc-hits" style="margin-top:8px"><i style="font-style:normal;color:#a85c10;font-size:12px">本库实证（我们自己抓到的）</i>';
+    h+='<div class="ep-sec"><b>④ 本库实证</b>';
     ev.forEach(function(e){
       h+='<div class="en-ev"><em>'+esc(e.d||'')+'</em><span>'+esc(e.t||'')+'</span>'+
          '<b>'+esc(e.role||'')+'</b>'+(e.amt?'<u>'+esc(e.amt)+'</u>':'')+
@@ -2976,14 +3063,265 @@ function encyCard(x){
     });
     h+='</div>';
   }
-  h+='</div>';
-  /* 动作条 */
-  h+='<div class="pj-act">'+
-     '<a href="https://jzsc.mohurd.gov.cn/data/company?complexname='+encodeURIComponent(x.name||'')+'" target="_blank" rel="noopener nofollow">查资质 ↗</a>'+
-     '<a href="javascript:searchFor(\''+esc((x.name||'').slice(0,6))+'\')">库内记录 ↗</a>'+
-     (x.confidence==='待核实'?'<span style="color:#a85c10;font-size:12px">资料待核实，用前请再确认</span>':'')+
-     '</div>';
+
+  /* 五、盯防要点 + 来源 */
+  if(u.watch) h+='<div class="ep-sec"><b>⑤ 盯防要点</b><p style="color:#1053c9">'+esc(u.watch)+'</p></div>';
+  if(u.src) h+='<div class="ep-src">资料来源：'+esc(u.src)+'　·　置信度：'+esc(u.confidence||'')+'</div>';
+
+  var box=document.getElementById('encyProfBox');
+  box.innerHTML='<div class="ep-wrap">'+h+'</div>';
+  box.style.display='flex';
+  document.body.style.overflow='hidden';
+}
+function encyProfClose(){
+  var box=document.getElementById('encyProfBox');
+  box.style.display='none'; box.innerHTML='';
+  document.body.style.overflow='';
+}
+/* 全局索引：卡上只存名字，画像时再查 */
+function _encyAll(){
+  var m={},E=D.ency||{};
+  (E.groups||[]).forEach(function(g){(g.units||[]).forEach(function(u){m[u.name]=u})});
+  return m;
+}
+
+/* ==================== 实时行情（浏览器直连，每 5 分钟自动刷新） ==================== */
+var LIVE_CODES=['CU','AL','ZN','PB','NI','SN','AO','SS','LC','RB','HC','I','JM'];
+function fetchLiveMetals(){
+  if(document.hidden)return;
+  var s=document.createElement('script'); s.async=true;
+  s.src='https://hq.sinajs.cn/list='+LIVE_CODES.map(function(c){return 'nf_'+c+'0'}).join(',');
+  s.onload=function(){try{applyLive()}catch(e){setLiveFail()}; try{s.remove()}catch(e){}};
+  s.onerror=function(){setLiveFail()};
+  document.head.appendChild(s);
+}
+function applyLive(){
+  var its=(D.metals&&D.metals.items)||[], got=0, d='';
+  LIVE_CODES.forEach(function(c){
+    var v=window['hq_str_nf_'+c+'0'];
+    if(!v||typeof v!=='string')return;
+    var f=v.split(','); if(f.length<18)return;
+    var price=parseFloat(f[8]), prev=parseFloat(f[10]);
+    if(!(price>0&&prev>0))return;
+    for(var i=0;i<its.length;i++){
+      if(its[i].code===c){
+        its[i].price=price;
+        its[i].chg=Math.round((price/prev-1)*10000)/100;
+        if(f[17]&&/^\d{4}-\d{2}-\d{2}/.test(f[17])){its[i].date=f[17].slice(0,10); d=d||f[17].slice(0,10);}
+        got++;
+      }
+    }
+  });
+  if(got){
+    if(d)D.metals.updated=d;
+    var n=new Date();
+    D.metals.live=('0'+n.getHours()).slice(-2)+':'+('0'+n.getMinutes()).slice(-2);
+    renderMStrip(); renderMetals();
+  }else setLiveFail();
+}
+function setLiveFail(){ if(D.metals)D.metals.live=''; renderMStrip(); renderMetals(); }
+
+chipsBox('f-cat',CAT_ORDER,null,'cat');
+el('f-cat').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
+  toggle(cCat,c.dataset.v);c.classList.toggle('on');renderCompetitors()};
+chipsBox('f-pcat',CAT_ORDER,null,'pcat');
+el('f-pcat').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
+  toggle(pCat,c.dataset.v);c.classList.toggle('on');renderPartners()};
+
+/* ---------------- 切口标签 ----------------
+   数据侧（build_web.py）给每条海外动态打了 cut（key）和 cutWhy（人话，20 字内）。
+   cut 负责筛选和上色，cutWhy 负责说清「这条具体能切什么活」——
+   只给 6 个粗标签没用，用户要的是「这家能让我做什么」。
+   cutWhy 写不出就退回显示标签名，不硬凑。 */
+var CUT_META={
+  water:{t:'海水淡化',c:'#0b6fa4',bg:'#e3f4fb'},
+  power:{t:'自备电站·动力岛',c:'#a8451a',bg:'#fdece3'},
+  waste:{t:'余热回收',c:'#7a5b00',bg:'#fdf4dc'},
+  cogen:{t:'热电联产·供热',c:'#8a2f6b',bg:'#fbe8f4'},
+  grid:{t:'供配电·孤网',c:'#215c3a',bg:'#e4f4ea'},
+  opp:{t:'机会池',c:'#4a5568',bg:'#eef1f6'},
+  '':{t:'',c:'',bg:''}
+};
+function cutMeta(o){
+  var m=CUT_META[(o&&o.cut)||'']||CUT_META[''];
+  /* cutWhy 可能带括号补充，先在第一个括号/破折号处断开，再限长，否则标签被截成半句 */
+  var w=((o&&o.cutWhy)||'').split(/[（(——]/)[0].trim();
+  return {t:(w||'').slice(0,20)||m.t, c:m.c, bg:m.bg, tip:(o&&o.cutWhy)||m.t};
+}
+function cutTag(o){
+  var m=cutMeta(o); if(!m.t) return '';
+  return '<span class="ovcut tip" style="background:'+m.bg+';color:'+m.c+'" title="'+esc(m.tip)+'">'+esc(m.t)+'</span>';
+}
+
+/* ==================== 海外信号 ==================== */
+var oGrp=new Set(), oCut=new Set();
+function ovCard(o,big){
+  var h='<div class="'+(big?'ovhot':'ccard')+'"><h3>'+(o.url?'<a href="'+esc(o.url)+'" target="_blank" rel="noopener"'+(big?' style="color:#ffe08a"':'')+'>'+esc(o.title)+(o.url?' ↗':'')+'</a>':esc(o.title))+'</h3>';
+  if(big){
+    h+='<div class="oht">'+esc(o.desc||'')+'</div>';
+    h+='<div class="ohm">'+(function(){var m=cutMeta(o);
+         return m.t?'<span class="badge" style="background:'+m.bg+';color:'+m.c+';border-color:transparent" title="'+esc(m.tip)+'">'+esc(m.t)+'</span>':'';
+       })()+'<span class="badge">'+esc(o.name)+'</span><span class="badge">'+esc(o.grp)+'</span>'+
+       (o.tag?'<span class="badge">'+esc(o.tag)+'</span>':'')+'<span>'+esc(o.date||'')+'</span></div>';
+  }else{
+    h+='<div class="cc-m">'+esc(o.desc||'')+'</div>';
+    h+='<div class="ns" style="font-size:11.5px;color:var(--tx3);margin-top:6px">'+cutTag(o)+'<span class="ntag 行业">'+esc(o.tag||'动态')+'</span><span>'+esc(o.name)+'</span><span>'+esc(o.date||'')+'</span></div>';
+  }
   return h+'</div>';
+}
+/* 行业名归一（2026-10-23）：数据侧的行业名跟页面写死的那套对不上——
+   数据是「有色冶炼 / 水泥 / 化工化纤」，筛选条写的是「有色 / 水泥建材 / 化肥」，
+   点下去出来 0 条，筛选器等于坏的。统一映射，再按数据里真实有哪些行业动态生成。 */
+var OV_GRP_ALIAS={'有色':'有色冶炼','水泥建材':'水泥','化肥':'化工化纤','其他制造':'化工化纤'};
+function ovGrp(g){ g=g||''; return OV_GRP_ALIAS[g]||g; }
+function renderOverseas(){
+  var list=D.overseas||[];
+  /* 海外数据在 news 模块里：D.overseas 只有在 mergeMod('news') 之后才有值。
+     原来这里直接读 D.overseas，tab3 首次进来时模块还没合并，于是显示 0 条、
+     切口筛选条只剩「看不出」一个格子。这里先兜底合并一次。 */
+  if(!(D.overseas&&D.overseas.length) && window.DATA_NEWS){ try{ mergeMod('news'); }catch(e){} }
+  var list0=D.overseas||[];
+  var list=list0;
+  var hot=list.slice(0,4);
+  el('ovHot').innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-bottom:16px">'+
+    hot.map(function(o){return ovCard(o,true)}).join('')+'</div>';
+  var rest=list.filter(function(o){
+    if(oGrp.size && !oGrp.has(ovGrp(o.grp))) return false;
+    /* 切口筛选：空串代表「看不出」，也必须能单独筛——
+       用户最常问的两个问题就是「哪些能接」和「哪些根本没信息」。 */
+    if(oCut.size && !oCut.has(o.cut||'')) return false;
+    return true;
+  });
+  var nCut={}; list.forEach(function(o){var k=o.cut||''; nCut[k]=(nCut[k]||0)+1});
+  var nClear=list.filter(function(o){return o.cut&&o.cut!=='opp'}).length;
+  el('ovCnt').textContent='共 '+list.length+' 条 · 切口明确 '+nClear+' 条 · 海水淡化 '+(nCut.water||0)+' 条';
+  el('ovGrid').innerHTML=rest.map(function(o){return ovCard(o,false)}).join('')||'<div class="empty">没有匹配的动态，换个筛选条件试试</div>';
+  /* 切口筛选条：只显示有数据的切口 */
+  var cb=el('f-ocut');
+  if(cb){
+    cb.innerHTML=['water','power','waste','cogen','grid','opp',''].filter(function(k){return nCut[k]})
+      .map(function(k){
+        var m=CUT_META[k]||{t:'看不出'};
+        return '<span class="chip'+(oCut.has(k)?' on':'')+'" data-v="'+k+'">'+esc(k?m.t:'看不出')+
+          '<em>'+nCut[k]+'</em></span>';
+      }).join('');
+  }
+  /* 行业筛选条同理，动态生成 */
+  var gb=el('f-ogrp');
+  if(gb){
+    var nGrp={}; list.forEach(function(o){var g=ovGrp(o.grp); nGrp[g]=(nGrp[g]||0)+1});
+    var order=['有色冶炼','水泥','数据中心','电力配套','钢铁','化工化纤','造纸','玻璃']
+      .filter(function(g){return nGrp[g]});
+    Object.keys(nGrp).forEach(function(g){if(order.indexOf(g)<0)order.push(g)});
+    gb.innerHTML=order.map(function(g){
+      return '<span class="chip'+(oGrp.has(g)?' on':'')+'" data-v="'+esc(g)+'">'+esc(g)+'<em>'+nGrp[g]+'</em></span>';
+    }).join('');
+  }
+}
+el('f-ocut').onclick=function(e){
+  var c=e.target.closest('.chip'); if(!c)return;
+  var v=c.dataset.v;
+  if(oCut.has(v))oCut.delete(v);else oCut.add(v);
+  renderOverseas();
+};
+
+/* f-ogrp 的选项改由 renderOverseas() 按数据动态生成，这里不再写死 */
+(function(){var box=el('ovSectorTip');if(!box)return;
+  box.innerHTML='<b>三行业出海 · 为什么与我司有关</b>：'+
+   '<b>水泥</b>——水泥窑余热发电是我司成熟市场，出海项目还需自备电厂、脱硝除尘；'+
+   '<b>数据中心</b>——高载能，供电方案多元：<b>天然气发电</b>（燃气轮机/分布式能源，东南亚、中东天然气产区尤常见）、'+'市电+柴油发电机备电、光伏+储能绿电；还有<b>冷热电三联供</b>（燃气发电余热用吸收式制冷给机房降温）——'+'正对「能源清洁高效利用+热电联产」的老本行；冷却系统带来水处理，海岛项目还需海水淡化；'+
+   '<b>化肥</b>——合成氨/磷化工高耗能，必配自备热电站、余热回收、脱硫脱硝与废水零排放。';})();
+el('f-ogrp').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
+  toggle(oGrp,c.dataset.v);c.classList.toggle('on');renderOverseas()};
+
+/* ==================== 金属仪表盘 ==================== */
+var MBLACK={RB:1,HC:1,'I':1,JM:1};
+function renderMetals(){
+  var M=D.metals||{}; var its=M.items||[];
+    el('mtDate').textContent=(M.at?('抓取时间 '+(M.updated||'')+' '+M.at+' · ') : (M.updated?('价格日期 '+M.updated+' · '):''))
+      +'每个工作日收盘 16:05 自动刷新，数据来自上期所公开行情';
+  el('mtGrid').innerHTML=its.map(function(m){
+    var cls=m.chg>0?'up':(m.chg<0?'down':'');
+    var arrow=m.chg>0?'▲':(m.chg<0?'▼':'—');
+    return '<div class="mt '+cls+'"><div class="mn">'+esc(m.name)+
+      '<span class="mcat">'+(MBLACK[m.code]?'黑色系':'有色')+'</span></div>'+
+      '<div class="mp">'+formatNum(m.price)+'<span class="mu">'+esc(m.unit)+'</span>'+
+      '<span class="mc">'+arrow+' '+sign_abs(m)+'</span></div>'+
+      '<div class="mh">'+esc(m.hint)+'</div></div>'}).join('');
+}
+function sign_abs(m){return (m.chg>0?'+':'')+Math.abs(m.chg)+'%'}
+function formatNum(n){return n>=10000?Math.round(n).toLocaleString('en-US'):n}
+function renderMStrip(){
+  var its=(D.metals&&D.metals.items)||[];
+  if(!its.length){el('mstrip').style.display='none';return}
+  var BLACK={RB:1,HC:1,'I':1,JM:1};
+  function card(m){
+    var c=m.chg>0?'up':(m.chg<0?'dn':'');
+    return '<span class="ms"><span class="r1"><span class="n">'+esc(m.name)+'</span>'+
+      '<span class="v">'+formatNum(m.price)+'</span></span>'+
+      '<span class="r2"><span class="u">'+esc(m.unit)+'</span>'+
+      '<span class="c '+c+'">'+(m.chg>0?'▲ +':(m.chg<0?'▼ ':'— '))+Math.abs(m.chg)+'%</span></span></span>';
+  }
+  var nf=its.filter(function(m){return !BLACK[m.code]}), bk=its.filter(function(m){return BLACK[m.code]});
+  var lab='当日行情'+(D.metals.updated?' · '+esc(D.metals.updated).slice(5):'');
+  var tail;
+  if(D.metals.at){ tail='<b style="color:#8ef0b4">'+esc(D.metals.updated||'')+' '+esc(D.metals.at)+'</b> 抓取'; }
+  else if(D.metals.updated){ tail=esc(D.metals.updated)+' 行情'; }
+  else tail='';
+  tail+=' · 每个工作日收盘 16:05 自动刷新';
+  el('mstrip').innerHTML='<span class="mslab">'+lab+'</span>'+
+    nf.map(card).join('')+
+    (bk.length?'<span class="sep"></span><span class="mslab">黑色系</span>'+bk.map(card).join(''):'')+
+    '<span class="dt">'+tail+'</span>';
+}
+
+/* ==================== 重点客户 ==================== */
+/* cRg / cPri / cEx 在下面的「海外中资出海客户」段落里统一定义（2026-10-21 合并，
+   原来这里声明过一份 cRg，重复声明会让海外页的筛选状态被前一份覆盖，坑过一次）。*/
+/* ---- 同业与伙伴：三段切页（战绩榜 / 竞争对手档案 / 伙伴池）----
+   2026-10-22：用户说「中标情况与同行伙伴是不是重复了」——确实是重复。
+   原来「中标情报」页单独挂一整套赛道筛选 + 对手表格，数据和「同业与伙伴」同源
+   （都是 D.rivals / D.competitors 那批单位），只是换个角度展示。
+   合并方式：同一页签内三段切页，第一段「按战绩排序」就是原来的中标榜。
+   ⚠ 默认段改成了 board（战绩榜）：进来先看「谁在拿单」，这是用户最关心的那一层；
+     看不过瘾再切到档案看「这家到底是谁」。 */
+var rTab='board';
+function rApply(){
+  var m={board:'rBoardBox', rival:'rRivalBox', partner:'rPartnerBox', ency:'rEncyBox'};
+  Object.keys(m).forEach(function(k){
+    var b=el(m[k]); if(b) b.style.display=(k===rTab?'block':'none');
+  });
+  Array.prototype.forEach.call(el('rSwitch').querySelectorAll('span[data-k]'),
+    function(x){x.classList.toggle('on',x.dataset.k===rTab)});
+  /* 各段的数据是按需渲染的：切到哪段才画哪段，避免一进页面就把 59 张卡片全画出来 */
+  try{
+    if(rTab==='board'){ buildRivalFilter(); renderRivals(); }
+    else if(rTab==='rival'){ renderCompetitors(); }
+    else if(rTab==='partner'){ renderPartners(); }
+    else if(rTab==='ency'){ renderEncy(); }
+  }catch(e){ console.error('[rApply]',rTab,e); }
+  refreshRivalCounts();
+}
+el('rSwitch').onclick=function(e){
+  var sp=e.target.closest('span[data-k]'); if(!sp)return;
+  rTab=sp.dataset.k;
+  /* 换段就把档案收起来：档案是「某一家单位」的，跟着段切走会
+     让人以为这张档案同时属于竞争对手和伙伴两栏。 */
+  var _pb=document.getElementById('rProfBox');
+  if(_pb){ _pb.style.display='none'; _pb.innerHTML=''; }
+  rApply();
+};
+/* 计数依赖 data.org.js（按需加载），不能在脚本顶层算——那时 D.competitors 还是 undefined。
+   改成函数，由 rApply() 在数据到位后调用。 */
+function refreshRivalCounts(){
+  var a=el('rCn'),b=el('rPn'),c=el('rBn');
+  if(a)a.textContent=arr(D.competitors).length;
+  if(b)b.textContent=arr(D.partners).length;
+  if(c)c.textContent=arr(D.rivals).length;
+  var e2=el('rEn'); if(e2&&D.ency){
+    var n=0; (D.ency.groups||[]).forEach(function(g){n+=(g.units||[]).length});
+    e2.textContent=n;
+  }
 }
 
 /* ---- 客户与业主：三段切页（国内客户 / 海外客户 / 业主图谱）---- */
@@ -4572,4 +4910,5 @@ function boot_main(){
 
 /* 启动逻辑在 boot.js（defer，保证在数据脚本之后执行） */
 </script>
+<div id="encyProfBox" onclick="if(event.target===this)encyProfClose()"></div>
 <script src="boot.js?v=202610231627"></script>
