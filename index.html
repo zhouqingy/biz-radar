@@ -1163,8 +1163,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610232259"></script>
-<script src="data.items.js?v=202610232259"></script>
+<script src="data.core.js?v=202610232322"></script>
+<script src="data.items.js?v=202610232322"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1229,7 +1229,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610232259';
+var VER='?v=202610232322';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -2858,13 +2858,11 @@ function renderMStrip(){
 /* ==================== 重点客户 ==================== */
 /* cRg / cPri / cEx 在下面的「海外中资出海客户」段落里统一定义（2026-10-21 合并，
    原来这里声明过一份 cRg，重复声明会让海外页的筛选状态被前一份覆盖，坑过一次）。*/
-/* ---- 同业与伙伴：三段切页（战绩榜 / 竞争对手档案 / 伙伴池）----
-   2026-10-22：用户说「中标情况与同行伙伴是不是重复了」——确实是重复。
-   原来「中标情报」页单独挂一整套赛道筛选 + 对手表格，数据和「同业与伙伴」同源
-   （都是 D.rivals / D.competitors 那批单位），只是换个角度展示。
-   合并方式：同一页签内三段切页，第一段「按战绩排序」就是原来的中标榜。
-   ⚠ 默认段改成了 board（战绩榜）：进来先看「谁在拿单」，这是用户最关心的那一层；
-     看不过瘾再切到档案看「这家到底是谁」。 */
+/* ---- 同业与伙伴：四段切页（战绩榜 / 竞争对手档案 / 联合体伙伴池 / 单位百科）----
+   2026-10-22：用户说「中标情况与同行伙伴是不是重复了」——确实重复，合并成同一页签切页。
+   默认段 board（战绩榜）：进来先看「谁在拿单」，想深挖再切档案/伙伴/百科。
+   ⚠ 2026-10-23 踩过的坑：这段注释和 rApply 曾在文件里存了两份，
+     后一份把前一份整体覆盖掉，改了前一份页面却没反应——删重复时要连注释一起删。 */
 var rTab='board';
 function rApply(){
   var m={board:'rBoardBox', rival:'rRivalBox', partner:'rPartnerBox', ency:'rEncyBox'};
@@ -2873,7 +2871,17 @@ function rApply(){
   });
   Array.prototype.forEach.call(el('rSwitch').querySelectorAll('span[data-k]'),
     function(x){x.classList.toggle('on',x.dataset.k===rTab)});
-  /* 各段的数据是按需渲染的：切到哪段才画哪段，避免一进页面就把 59 张卡片全画出来 */
+  /* 各段的数据是按需渲染的：切到哪段才画哪段，避免一进页面就把 59 张卡片全画出来。
+     ⚠ 2026-10-23 线上实测：org 模块 440KB 从 GitHub Pages 拉，用户点进来时
+       偶发还没到位，renderCompetitors 直接 .filter 一个 undefined 抛异常，
+       页面上四段全空。这里先探数据，没到就显示「正在载入」——
+       need() 的回调到达后会再调一次 rApply，数据那时才画。 */
+  var _need={board:'rivals',rival:'competitors',partner:'partners',ency:'ency'}[rTab];
+  if(_need && !(rTab==='ency' ? (D.ency&&D.ency.groups) : arr(D[_need]).length)){
+    var b2=el({board:'rBoardBox',rival:'rRivalBox',partner:'rPartnerBox',ency:'rEncyBox'}[rTab]);
+    if(b2) b2.innerHTML='<div class="empty">正在载入'+({board:'战绩榜',rival:'竞争对手档案',partner:'伙伴池',ency:'单位百科'})[rTab]+'数据…</div>';
+    return;
+  }
   try{
     if(rTab==='board'){ buildRivalFilter(); renderRivals(); }
     else if(rTab==='rival'){ renderCompetitors(); }
@@ -3278,52 +3286,6 @@ function renderMStrip(){
 /* ==================== 重点客户 ==================== */
 /* cRg / cPri / cEx 在下面的「海外中资出海客户」段落里统一定义（2026-10-21 合并，
    原来这里声明过一份 cRg，重复声明会让海外页的筛选状态被前一份覆盖，坑过一次）。*/
-/* ---- 同业与伙伴：三段切页（战绩榜 / 竞争对手档案 / 伙伴池）----
-   2026-10-22：用户说「中标情况与同行伙伴是不是重复了」——确实是重复。
-   原来「中标情报」页单独挂一整套赛道筛选 + 对手表格，数据和「同业与伙伴」同源
-   （都是 D.rivals / D.competitors 那批单位），只是换个角度展示。
-   合并方式：同一页签内三段切页，第一段「按战绩排序」就是原来的中标榜。
-   ⚠ 默认段改成了 board（战绩榜）：进来先看「谁在拿单」，这是用户最关心的那一层；
-     看不过瘾再切到档案看「这家到底是谁」。 */
-var rTab='board';
-function rApply(){
-  var m={board:'rBoardBox', rival:'rRivalBox', partner:'rPartnerBox', ency:'rEncyBox'};
-  Object.keys(m).forEach(function(k){
-    var b=el(m[k]); if(b) b.style.display=(k===rTab?'block':'none');
-  });
-  Array.prototype.forEach.call(el('rSwitch').querySelectorAll('span[data-k]'),
-    function(x){x.classList.toggle('on',x.dataset.k===rTab)});
-  /* 各段的数据是按需渲染的：切到哪段才画哪段，避免一进页面就把 59 张卡片全画出来 */
-  try{
-    if(rTab==='board'){ buildRivalFilter(); renderRivals(); }
-    else if(rTab==='rival'){ renderCompetitors(); }
-    else if(rTab==='partner'){ renderPartners(); }
-    else if(rTab==='ency'){ renderEncy(); }
-  }catch(e){ console.error('[rApply]',rTab,e); }
-  refreshRivalCounts();
-}
-el('rSwitch').onclick=function(e){
-  var sp=e.target.closest('span[data-k]'); if(!sp)return;
-  rTab=sp.dataset.k;
-  /* 换段就把档案收起来：档案是「某一家单位」的，跟着段切走会
-     让人以为这张档案同时属于竞争对手和伙伴两栏。 */
-  var _pb=document.getElementById('rProfBox');
-  if(_pb){ _pb.style.display='none'; _pb.innerHTML=''; }
-  rApply();
-};
-/* 计数依赖 data.org.js（按需加载），不能在脚本顶层算——那时 D.competitors 还是 undefined。
-   改成函数，由 rApply() 在数据到位后调用。 */
-function refreshRivalCounts(){
-  var a=el('rCn'),b=el('rPn'),c=el('rBn');
-  if(a)a.textContent=arr(D.competitors).length;
-  if(b)b.textContent=arr(D.partners).length;
-  if(c)c.textContent=arr(D.rivals).length;
-  var e2=el('rEn'); if(e2&&D.ency){
-    var n=0; (D.ency.groups||[]).forEach(function(g){n+=(g.units||[]).length});
-    e2.textContent=n;
-  }
-}
-
 /* ---- 客户与业主：三段切页（国内客户 / 海外客户 / 业主图谱）---- */
 var cTab='dom';
 var _gDrawn=0;   // 图谱段是否已画过（原来挂在 DOM 节点的自定义属性上，某些浏览器内联后取不到，改全局变量）
