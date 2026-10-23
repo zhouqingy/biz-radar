@@ -113,8 +113,6 @@ button{font-family:inherit}
 /* 计数为 0 的选项：保留可见（否则首屏切片期整行 chips 会消失），只调淡 */
 .chip.zero{opacity:.42}
 .chip.zero:hover{opacity:1}
-/* 三档按钮上「22 /10」的斜杠后半段：全库关注档之外，再告诉我按当前口径真有几条 */
-.wsub{font-style:normal;font-size:11.5px;font-weight:600;opacity:.55;margin-left:-3px}
 /* 承包模式分组标（①②③）：一眼看出「能不能拿总包」，比六个词平铺有用 */
 .mgrp{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;
   border-radius:50%;background:#eef2f8;color:var(--brand);font-size:11px;font-weight:700;
@@ -1137,7 +1135,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610231701';
+var VER='?v=202610231745';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -1648,10 +1646,19 @@ function buildFilters(){
   /* 三档按钮的标题必须写清口径（2026-10-23）：
      用户看到「能投的标 22」但点进去只有 10 张卡，怀疑数据造假。
      真实原因是两处过滤叠加：后端 w（金额≥3000万 或 A/B 级）+ 前端默认「只看主场业务」。
-     2026-10-23 二次修正：第一版把按钮数改成「实到条数」，结果首屏 items 只有 42 条切片，
-     算出来是 7 而不是 10，比原来更乱。所以按钮数回到 watch 的全库口径（稳定、可对账），
-     在旁边用灰色小字标出「当前实到 N」，两个数同时可见，谁都不猜。 */
-  var BOOK = [
+  /* 2026-10-23 三次修正（用户：小数字都对不上，改不了就别加）：
+     前两版都错在同一个地方——想在按钮上并列显示两个不同口径的数。
+       第一版：按钮 22（全库关注档），列表 10（再套主场过滤）→ 看着像造假
+       第二版：按钮 22/10，但「全部」那格没法写斜杠（它没有第二个口径）→ 三个有、一个没有，更乱
+     说到底，三档的口径本来就不一样，硬凑成一个格式必然对不齐：
+       能投的标 22 = 662 条里有金额≥3000万 或 A/B 的
+       已出结果 29 = 644 条里同上
+       立项线索 604 = 604 条，不卡金额不卡分级，全量
+       全部   1910 = 三档相加，本身就是另一个含义
+     所以按钮上**只放一个数**：这个档位"点进去能看到的条数"（就是列表实际渲染的条数，
+     点开多少条就是多少条，一眼可验真）。分层口径、关注档阈值、主场过滤这些，
+     全部写进 tooltip，需要的人把鼠标停一下就有，不需要的人不被数字干扰。 */
+  BOOK = [
     ['tender', '📋 能投的标', 'waT', '招标公告 / 招标计划 / 变更公告里，金额≥3000万 或 综合分 A/B 的项目'],
     ['win',    '🏁 已出结果', 'waW', '中标结果公示 / 中标候选人公示里，金额≥3000万 或 综合分 A/B 的项目'],
     ['lead',   '💡 立项线索', 'waL', '审批 / 备案 / 重点项目名单。还没招标，不卡金额，全量列出']
@@ -1661,23 +1668,26 @@ function buildFilters(){
     waBox.innerHTML = BOOK.map(function (b) {
       var n = b[0] === 'lead' ? WA.lead : (WA[b[0]] || 0);          // 关注档条数（全库口径）
       var allN = b[0] === 'lead' ? WA.lead : (b[0] === 'tender' ? WA.tenderAll : WA.winAll);
-      /* 实到条数：直接读构建期算好的 watch.tenderHm / winHm（主场口径），
-         不在前端重算——运行时 D 里根本没有 items（条目按 chunk 懒加载），
-         拿首屏 42 条切片去数会得到 7，比不显示还糟。字段缺失就不显示，宁缺毋滥。 */
-      var shown = null;
-      if (b[0] === 'tender') shown = (WA.tenderHm == null ? null : WA.tenderHm);
-      else if (b[0] === 'win') shown = (WA.winHm == null ? null : WA.winHm);
-      var tip = b[3] + '。\n关注档（全库）' + n + ' 条' + (allN && allN !== n ? '，这一档总共 ' + allN + ' 条' : '') +
-        (b[0] === 'lead' ? '；立项线索不卡金额，全量列出' :
-          '；再按「' + (F.side ? '含兼营' : '只看主场业务') + '」过滤' + (shown === null ? '' : '后实到 ' + shown + ' 条')) + '。';
+      /* 按钮上显示的数 = 点进去列表里真有的条数。
+         ⚠ 不能拿首屏 items 去数：运行时 D 里没有 items，条目按 chunk 懒加载，
+           首屏只有 42 条切片，数出来是 7 而不是真值 10（第二版就栽在这）。
+           所以用构建期算好的 watch.tenderHm / winHm（主场口径）。
+           立项线索不卡 hm，直接就是全量 604。字段缺失时退回关注档条数。 */
+      var shown = b[0] === 'lead' ? (WA.lead || 0)
+                : (b[0] === 'tender' ? (WA.tenderHm != null ? WA.tenderHm : n)
+                                     : (WA.winHm != null ? WA.winHm : n));
+      var tip = b[3] + '\n' +
+        '这一档全库共 ' + (allN || 0) + ' 条，其中关注档 ' + n + ' 条，' +
+        '按当前「' + (F.side ? '含兼营' : '只看主场业务') + '」过滤后的条数，点开就是。';
+      /* 数字留空，由 syncWareNums() 在每次 render 后填当前列表的真实条数。
+         这里先写任何预估值都会跟列表对不上（首屏只有 42 条切片，算不出真值）。 */
       return '<div class="ware' + (b[0] === 'tender' ? ' on' : '') + '" data-bk="' + b[0] + '" title="' + esc(tip) + '">' +
-        b[1] + '<b>' + n + '</b>' +
-        (shown !== null ? '<i class="wsub">/' + shown + '</i>' : '') + '</div>';
+        b[1] + '<b style="display:none">0</b></div>';
     }).join('') +
-      '<div class="ware" data-bk="all" id="waAllW">全部 <b>' + (WA.all || 0) + '</b></div>' +
+      '<div class="ware" data-bk="all" id="waAllW">全部 <b style="display:none">0</b></div>' +
       '<span class="ware-tog" id="waHide" title="「全部」档里有一批已经开过标的，滤掉它们只剩还能投的">只看还能投的</span>' +
-      '<div class="wtip">按钮上 <b>22 /10</b>：前一个是全库关注档（金额 ' + (WA.amt * 10000) + ' 万以上 或 综合分 A/B），' +
-      '后一个是按当前「' + (F.side ? '含兼营' : '只看主场业务') + '」过滤后列表里真有的条数' +
+      '<div class="wtip">数字 = <b>这一档点进去看到的条数</b>（随下方筛选条件实时变）。' +
+      '前三档只看关注档（金额 ' + (WA.amt * 10000) + ' 万以上 或 综合分 A/B），「全部」不卡这些条件' +
       '<a href="javascript:void(0)" id="waAll" style="margin-left:8px;color:var(--brand);font-weight:600">看全部含小项目</a></div>';
     waBox.onclick = function (e) {
       var pick = function (bk) {
@@ -2082,8 +2092,49 @@ function toggleFiles(id){
 }
 
 var LAST=[];
+/* 三档关注库的档位定义。挂成模块级变量（不是 buildFilters 里的 var），
+   因为 syncWareNums() 每次渲染都要用它把数字同步到按钮上。 */
+var BOOK = [];
+
+/* 把三档按钮上的数字，同步成「按当前条件点进去真能看到几条」。
+   ── 为什么必须做成这样（2026-10-23 用户第三次反馈「小数字都对不上」）：
+      用户要的不是三个不同口径的数并排，而是「这个按钮点下去有几条」，
+      跟列表对得上才算对。所以数字只有一个含义，且随筛选条件实时变化。
+   ── 为什么不能全量算：
+      运行时条目是按 chunk 懒加载的（首屏只有 42 条切片），
+      没加载的那部分前端根本数不到。所以只有「这批条目已经在内存里」的档位
+      才覆盖数字，其余保持构建期算好的值不动 —— 宁可保守，不再给错数。 */
+function syncWareNums(){
+  if(!window.items || !items.length) return;
+  if(!BOOK || !BOOK.length) return;      // buildFilters 还没跑，按钮都还没渲染
+  var box=el('wares'); if(!box) return;
+  /* 核心思路（2026-10-23 第四次，前三次都错在「预先算一个数」）：
+     首屏是 42 条切片，前端根本没法预知全库每一档有多少条 ——
+     任何预先算出来的数，都会和用户点进去看到的条数不一致。
+     所以换个方向：**只给当前选中的那一档显示数字**，数字来源就是刚刚渲染出来的
+     列表长度（LAST.length），点开多少条就是多少条，物理上不可能对不上。
+     未选中的档不显示数字，只显示名字——不猜，就不会错。 */
+  var cur=F.bk||'tender';
+  ['tender','win','lead','all'].forEach(function(k){
+    var el2=box.querySelector('.ware[data-bk="'+k+'"]'); if(!el2) return;
+    var numEl=el2.querySelector('b'); if(!numEl) return;
+    if(k===cur){
+      numEl.textContent=(window.LAST&&LAST.length)||0;
+      numEl.style.display='';
+    }else{
+      /* 没选中的档：数字清空且隐藏。只 display:none 是不够的 ——
+         textContent 还是上一轮的旧值，无障碍朗读和一些抓取工具会读到那个过期数字。 */
+      numEl.textContent='';
+      numEl.style.display='none';
+    }
+  });
+}
+
 function render(){
   var a=filtered(); LAST=a;
+  /* ⚠ 必须在 LAST 赋值之后同步按钮数字：数字来源就是 LAST.length，
+     放在前面会拿到上一轮的长度，差一条都算「对不上」。 */
+  try{ syncWareNums(); }catch(e){}
   var sum=a.reduce(function(s,x){return s+num(x.amt)},0);
   /* 统计条（2026-10-23 用户质疑「数据对不上」后重写）：
      原来只写「命中 7 条 · 已公示金额合计 6.8 亿」，三个问题：
