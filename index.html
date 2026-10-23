@@ -79,6 +79,25 @@ button{font-family:inherit}
 .sect small{font-weight:400;color:var(--tx3);font-size:12px}
 .hint{font-size:12.5px;color:var(--tx3);line-height:1.7}
 .empty{padding:40px 0;text-align:center;color:var(--tx3);font-size:14px}
+/* 空结果诊断框：不再只写「试试放宽筛选」，而是告诉用户是哪一条卡住了 */
+.dg{padding:26px 22px;text-align:left;background:#fff;border:1px dashed #d8dee8;
+  border-radius:12px;max-width:760px;margin:8px auto}
+.dg-h{font-size:15px;font-weight:800;color:var(--tx);margin-bottom:8px}
+.dg-s{font-size:12px;color:var(--tx3);line-height:2;margin-bottom:12px}
+.dg-c{display:inline-block;background:#f2f5fa;border-radius:6px;padding:2px 8px;
+  margin:0 6px 6px 0;font-size:11.5px;color:var(--tx2)}
+.dg-c b{color:var(--brand-d)}
+.dg-t{font-size:13px;color:var(--tx2);margin-bottom:9px;font-weight:600}
+.dg-r{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:7px 11px;background:#f7faf6;border-left:3px solid #52a352;border-radius:0 7px 7px 0;
+  margin-bottom:6px;font-size:12.5px;color:var(--tx2)}
+.dg-r b{color:#1a7f4b;font-size:14px}
+.dg-r a{flex:none;color:var(--brand);font-weight:700;font-size:12px;text-decoration:none;white-space:nowrap}
+.dg-r a:hover{text-decoration:underline}
+.dg-f{margin-top:13px;display:flex;gap:9px;flex-wrap:wrap}
+.dg-f a{font-size:12.5px;color:var(--brand-d);background:#f2f7ff;border:1px solid #dce8fb;
+  border-radius:8px;padding:6px 13px;font-weight:700;text-decoration:none}
+.dg-f a:hover{background:#e4eefe}
 
 /* ---------- 筛选器 ---------- */
 .fbar{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px 14px;margin-bottom:12px}
@@ -91,6 +110,9 @@ button{font-family:inherit}
 .chip:hover{border-color:var(--brand);color:var(--brand)}
 .chip.on{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:600}
 .chip em{font-style:normal;opacity:.65;font-size:11px;margin-left:3px}
+/* 计数为 0 的选项：保留可见（否则首屏切片期整行 chips 会消失），只调淡 */
+.chip.zero{opacity:.42}
+.chip.zero:hover{opacity:1}
 /* 三档按钮上「22 /10」的斜杠后半段：全库关注档之外，再告诉我按当前口径真有几条 */
 .wsub{font-style:normal;font-size:11.5px;font-weight:600;opacity:.55;margin-left:-3px}
 /* 承包模式分组标（①②③）：一眼看出「能不能拿总包」，比六个词平铺有用 */
@@ -484,7 +506,19 @@ details.sub li{padding:2px 0}
 .prof-act{display:flex;gap:7px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--line)}
 .prof-act a{font-size:11.5px;color:var(--brand-d);background:#f2f7ff;border:1px solid #dce8fb;
   border-radius:7px;padding:4px 10px;font-weight:600}
-.prof-act a:hover{background:#e4eefe;border-color:#b9d3f8}
+.prof-act:hover{background:#e4eefe;border-color:#b9d3f8}
+/* 企业档案区块（2026-10-23）：本库零业绩的单位也能看出「是谁、多大、擅长什么」 */
+.about-tx{font-size:12.5px;color:var(--tx2);line-height:1.95;text-align:justify;
+  background:#fafbfd;border:1px solid var(--line);border-left:3px solid var(--brand);
+  border-radius:0 8px 8px 0;padding:11px 14px}
+.about-rec{margin-top:10px}
+.ar-hd{font-size:11.5px;font-weight:700;color:var(--tx2);margin-bottom:6px}
+.ar-hd small{font-weight:500;color:var(--tx3);margin-left:5px}
+.ar-i{display:flex;gap:9px;align-items:baseline;padding:5px 0;border-bottom:1px dashed #eef0f4;font-size:12.5px}
+.ar-i:last-child{border-bottom:0}
+.ar-d{color:var(--tx3);font-size:11.5px;flex:none;width:78px}
+.ar-t{color:var(--tx);flex:1;line-height:1.6}
+.ar-m{color:#d4380d;font-weight:700;font-size:11.5px;flex:none}
 .prof-back{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;
   background:#f7faff;border:1px solid #dce8fb;border-radius:9px;padding:8px 12px;font-size:11.5px;color:var(--tx3)}
 .prof-back a{color:var(--brand);font-weight:700}
@@ -1103,7 +1137,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610231638';
+var VER='?v=202610231701';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -1495,7 +1529,12 @@ function chipsBox(id,vals,cntMap,key){
     return {v:String(v==null?'':v),t:String(v==null?'':v)};
   };
   var all=vals.map(norm);
-  var vs=cntMap?all.filter(function(o){return (cntMap[o.v]||0)>0}):all;
+  /* ⚠ 2026-10-23：这里原来把计数为 0 的选项直接删掉
+     （vs=cntMap?all.filter(o=>cntMap[o.v]>0):all）。后果是首屏 42 条切片期，
+     大部分筛选项根本不生成 DOM，等分块合并后 refreshFilterCounts 也没法把它们
+     「变回来」——因为它们压根不在页面上。于是筛选条看起来缺了一大半，
+     用户只能靠刷新。现在全部保留，计数为 0 的靠 .chip.zero 调淡。 */
+  var vs=all;
   box.innerHTML=vs.map(function(o){
     var c=cntMap?cntMap[o.v]||0:'';
     return '<span class="chip" data-k="'+esc(key)+'" data-v="'+esc(o.v)+'">'+esc(o.t)+
@@ -1516,7 +1555,18 @@ function buildFilters(){
      跟用户确认的 5 层业务分层对不上。现在合并成一个「业务分层」筛选，
      顺序按用户定的优先级：一级主攻 → 二级 → 三级 → 降级。 */
   /* 中文名直接显示（chipsBox 支持 {v,t}），不用让人记 youse/cogen 这种短码 */
-  chipsBox('f-sg', SEG_ORDER.map(function(k){return {v:k,t:SEG_NAME[k]||k}}), countBy('sg'), 'sg');
+  /* 2026-10-23 补 other：全库 1910 条里有 1042 条（55%）的 sg 是 other，
+     也就是自动分层没匹配上任何赛道词。这些条目原来在筛选条上**根本没有入口**——
+     用户点遍所有赛道都筛不到它们，只会觉得「数据乱了」。
+     现在单列一个「未分类」chip，点它就能把这批捞出来逐条看，方便人工纠偏。 */
+  var _sgVals=SEG_ORDER.map(function(k){return {v:k,t:SEG_NAME[k]||k}});
+  /* 叫「未分类」而不是 SEG_NAME 里的「其他」：f-ind 那一行已经有个「其他」，
+     两个同名会让人以为联动。这里说的是「分层词没匹配上」，语义不同。
+     ⚠ 不能只在 countBy('sg')['other'] 有数时才加：首屏只加载 42 条切片，
+       里面恰好没有 other 的话这个 chip 就不出现，等分块合并完用户也见不到它。
+       全库 1042 条是 other，这是**结构性**的一档，不是偶发选项，必须常驻。 */
+  _sgVals.push({v:'other',t:'未分类'});
+  chipsBox('f-sg', _sgVals, countBy('sg'), 'sg');
   chipsBox('f-ind',['钢铁','有色','化工','电力','水泥建材','市政','其他'],countBy('ind'),'ind');
   chipsBox('f-g',['A','B','C','D'],countBy('g'),'g');
   /* 范围：默认「只看主场」，勾「含兼营」把三级分公司业务（污水/土壤/零排放）也放出来。
@@ -1688,7 +1738,15 @@ function refreshFilterCounts(){
       var em=c.querySelector('em');
       var n=m[c.dataset.v]||0;
       if(em) em.textContent=n;
-      c.style.display=n?'':'none';   // 没命中的选项藏起来，少点干扰
+      /* 2026-10-23：原来一律 n?'':'none'，把计数为 0 的选项藏掉。
+         两个副作用都得治：
+           ① 首屏只有 42 条切片，其他选项计数全是 0 → 整行 chips 被藏得只剩一两个，
+              用户以为筛选器坏了；
+           ② 「未分类」是全库 1042 条的结构性一档，切片里为 0 就永远不出现，
+              那 55% 的数据彻底没有筛入口。
+         改成：未选中就保持可见，只是计数 0 时把字调淡，让用户知道「这档现在没有」，
+         而不是让它凭空消失。 */
+      c.classList.toggle('zero',!n);
     });
   });
 }
@@ -1898,6 +1956,126 @@ function fileList(x){
 }
 /* 点卡片标题 → 新标签打开原文（openItem 已在上面的「原文跳转」段定义） */
 
+/* ==================== 空结果诊断（2026-10-23 新增）====================
+   用户的原话：「你这里的筛选逻辑做的问题很大」。
+   实测确实如此——筛出 0 条时，页面只写一句「试试放宽筛选条件」，
+   但筛选条上很可能亮着 6 个条件，用户根本不知道该放哪一个；
+   更糟的是有些条件（比如业务分层 55% 是未分类）本身筛不出东西，
+   用户会以为整个库是空的、系统坏了。
+
+   做法：逐个条件做「去掉它还剩多少条」的回溯。
+   剩下 >0 的，就是卡住结果的那一个/几个，直接列出来并给一键去掉。
+   这是标准的「最小冲突集」思路，用在这里比任何文案都管用。 */
+function emptyDiag(){
+  var LABEL={rg:'地区',sg:'业务分层',ind:'下游行业',g:'优先级',mode:'承包模式',p:'来源平台',
+             bk:'关注档',st:'阶段筛选',q:'搜索词',side:'含兼营'};
+  var BKN={tender:'能投的标',win:'已出结果',lead:'立项线索',all:'全部'};
+  var lbl=function(k,v){
+    if(k==='sg') return (SEG_NAME[v]||v);
+    if(k==='g') return v+' 级';
+    if(k==='bk') return BKN[v]||v;
+    if(k==='st') return ({bid:'当前在招',early:'立项早期'})[v]||v;
+    return v;
+  };
+  var tests=[];
+  ['rg','sg','ind','g','mode','p'].forEach(function(k){
+    if(F[k] && F[k].size) tests.push({k:k,vals:Array.from(F[k])});
+  });
+  if(F.side) tests.push({k:'side',vals:['含兼营'],one:true});
+  if(F.st) tests.push({k:'st',vals:[F.st]});
+  if(F.q) tests.push({k:'q',vals:[F.q]});
+  if((F.bk||'tender')!=='all') tests.push({k:'bk',vals:[F.bk]});
+
+  /* 基线：不限档位、不加其他条件，只保留「当前档位」看总量，
+     这样能告诉用户「你选的档位里本来有多少条」 */
+  var baseN=0;
+  try{ baseN=items.filter(function(x){return match(x)}).length }catch(e){ baseN=0 }
+
+  var hits=[];
+  tests.forEach(function(t){
+    var keep={};
+    if(t.one){ keep[t.k]=F[t.k]; }
+    else if(t.k==='q'||t.k==='st'||t.k==='bk'){ keep[t.k]=F[t.k]; }
+    else { keep[t.k]=new Set(t.vals); }
+    /* 临时把这一项清空，看命中多少 */
+    var old=F[t.k];
+    if(t.k==='q'||t.k==='st') F[t.k]='';
+    else if(t.k==='bk') F[t.k]='all';
+    else if(t.one) F[t.k]=false;
+    else F[t.k]=new Set();
+    var n=0;
+    try{ n=items.filter(function(x){return match(x)}).length }catch(e){ n=0 }
+    F[t.k]=old;
+    if(n>0) hits.push({k:t.k,vals:t.vals,n:n});
+  });
+  hits.sort(function(a,b){return b.n-a.n});
+
+  var chips=tests.map(function(t){
+    var on=t.vals.map(function(v){return esc(lbl(t.k,v))}).join(' / ');
+    return '<span class="dg-c" data-k="'+esc(t.k)+'">'+esc(LABEL[t.k]||t.k)+'：<b>'+on+'</b></span>';
+  }).join('');
+
+  var body;
+  if(!tests.length){
+    body='<div class="dg-t">这个档位本身就没有项目。换一个档位试试。</div>';
+  }else if(hits.length){
+    body='<div class="dg-t">卡住结果的是下面这 '+(hits.length===1?'1 个':'几个')+'条件 —— 去掉任何一个就会有结果：</div>'+
+      hits.slice(0,4).map(function(h){
+        return '<div class="dg-r"><span>去掉「'+esc(LABEL[h.k]||h.k)+'：'+
+          esc(h.vals.map(function(v){return lbl(h.k,v)}).join(' / '))+'」后还剩 <b>'+h.n+'</b> 条</span>'+
+          '<a href="javascript:void(0)" onclick="dropCond(\''+esc(h.k)+'\')">只去掉这一条 →</a></div>';
+      }).join('');
+  }else{
+    body='<div class="dg-t">这些条件两两都冲突：任意去掉一条都还是 0 条。建议用下面的「清空筛选」重来。</div>';
+  }
+
+  return '<div class="empty dg">'+
+    '<div class="dg-h">没有符合条件的项目</div>'+
+    '<div class="dg-s">当前筛选：'+(chips||'<span class="dg-c">未设任何条件</span>')+'</div>'+
+    body+
+    '<div class="dg-f"><a href="javascript:void(0)" onclick="clearFilters()">清空全部筛选</a>'+
+    /* 一键放宽：档位切到「全部」，其余条件保留。绝大多数「筛不到」都是档位太窄 */
+    ((F.bk||'tender')!=='all'?'<a href="javascript:void(0)" onclick="widenBk()">改到「全部 1910 条」里搜</a>':'')+
+    '</div></div>';
+}
+
+/* 只去掉某一个条件（诊断框里的一键修复） */
+function dropCond(k){
+  if(k==='q'||k==='st'){ F[k]=''; }
+  else if(k==='side'){ F.side=false; }
+  else if(k==='bk'){ F.bk='all'; }
+  else if(F[k] && F[k].clear){ F[k].clear(); }
+  F.page=1;
+  if(el('f-side')){
+    var c=el('f-side').querySelector('.chip'); if(c) c.classList.toggle('on',F.side);
+  }
+  /* chip 的视觉状态要跟着走：清空 Set 后把所有 .on 摘掉 */
+  [].forEach.call(document.querySelectorAll('#f-'+k+' .chip'),function(c){c.classList.remove('on')});
+  render(); refreshFilterCounts();
+}
+
+/* 清空全部筛选：保留档位（用户刚点的档位是他的意图，不该一起清掉） */
+function clearFilters(){
+  ['rg','sg','ind','g','mode','p'].forEach(function(k){ if(F[k]&&F[k].clear) F[k].clear(); });
+  F.st=''; F.q=''; F.side=false; F.page=1; F.hideWin=false;
+  if(el('q')) el('q').value='';
+  [].forEach.call(document.querySelectorAll('.chip.on'),function(c){c.classList.remove('on')});
+  if(el('f-side')){ var c=el('f-side').querySelector('.chip'); if(c) c.classList.remove('on'); }
+  render(); refreshFilterCounts();
+}
+
+/* 放宽档位：切到「全部」并把数据拉全 */
+function widenBk(){
+  F.bk='all'; F.page=1;
+  [].forEach.call(document.querySelectorAll('.ware'),function(x){
+    x.classList.toggle('on',x.dataset.bk==='all');
+  });
+  var hb=el('waHide'); if(hb) hb.style.display='inline-block';
+  var box=el('grid');
+  if(window.__itemsSplit && box) box.innerHTML='<div class="empty">正在载入全部 1910 条…</div>';
+  loadAllItems(function(){ render(); refreshFilterCounts(); });
+}
+
 function toggleFiles(id){
   var d=document.getElementById('fl-'+id);
   if(d)d.style.display=(d.style.display==='none'?'block':'none');
@@ -1924,7 +2102,7 @@ function render(){
   var tot=Math.ceil(a.length/PS)||1;
   if(F.page>tot)F.page=tot;
   var pg=a.slice((F.page-1)*PS,F.page*PS);
-  el('grid').innerHTML=pg.length?pg.map(cardHtml).join(''):'<div class="empty">没有符合条件的项目，试试放宽筛选条件</div>';
+  el('grid').innerHTML=pg.length?pg.map(cardHtml).join(''):emptyDiag();
   // 分页
   var h='';
   function pi(t,p,dis,on){h+='<span class="pg'+(on?' on':'')+(dis?' dis':'')+'" data-p="'+p+'">'+t+'</span>'}
@@ -3048,7 +3226,13 @@ function profAgg(items, rgFallback){
 function profInsight(kind, o){
   var A=profAgg(o.items||[], o.rgAll || (o.rg&&typeof o.rg==='object'?o.rg:null)), out=[];
   var kn=PROF_KIND[kind]||PROF_KIND.owner;
-  if(!A.n) return ['<b>本库暂无记录。</b>这不代表它没业务，只说明它'+(kind==='owner'?'发包':'投标')+'的平台不在我们已监测的 49 个渠道里。要判断它，只能另找数据源。'];
+  if(!A.n) return [
+    '<b>本库暂无它的'+(kind==='owner'?'发包':'中标')+'记录。</b>这有三种可能，从高到低排：'+
+    '① 它常以<b>联合体成员或下属工程公司</b>身份出现，公告上公示的牵头方不是它；'+
+    '② 它主做的是<b>设计/咨询</b>，本库以施工和总包类公告为主，这类本来就收得少；'+
+    '③ 它'+(kind==='owner'?'发包':'投标')+'的平台不在我们已监测的渠道里。'+
+    '所以「0 条」只能说明本库没抓到，<b>不能推出它没业务</b>——这一页的结论要用上面的企业档案和工商链接去补。'
+  ];
 
   // 1) 集中度：大单是不是基本盘
   if(A.withAmt>0){
@@ -3204,7 +3388,15 @@ function skuNote(name, members){
 function profPage(kind, o){
   if(!o) return '<div class="gempty">暂无数据</div>';
   var K=PROF_KIND[kind]||PROF_KIND.owner;
-  var A=profAgg(o.items||[], o.rgAll || (o.rg&&typeof o.rg==='object'?o.rg:null));
+  /* 2026-10-23：先剔掉「动态」类条目，再做任何聚合。
+     原来 profAgg 直接吃 o.items，把竞对官网/公众号的新闻也当成中标记录，
+     于是 KPI 写「5 次中标」、赛道分布里冒出「未分类动态」，全是假数。
+     放在这里统一处理，下面的 KPI / 业绩表 / 分布图就都干净了。 */
+  var _rawItems=(o.items||[]).map(function(x){
+    return Object.assign({}, x, {isNews: x.isNews || x.st === '动态'});
+  });
+  var _realAll=_rawItems.filter(function(x){return !x.isNews});
+  var A=profAgg(_realAll, o.rgAll || (o.rg&&typeof o.rg==='object'?o.rg:null));
   var ins=profInsight(kind,o);
   var nm=esc(o.name);
 
@@ -3224,10 +3416,23 @@ function profPage(kind, o){
     kpi.push(['', A.rg.length, '覆盖地区', '']);
     kpi.push(['', esc(o.last||'—'), '最近中标', 'txt']);
   }else{
-    kpi.push(['n', o.n, '本库中标次数', '']);
-    kpi.push(['a', profMoney(o.amt), '中标金额合计', 'acc']);
+    /* 2026-10-23：「中标次数 / 金额合计 / 覆盖地区」必须只数真业绩。
+       o.n 是 gPick 从 rivals 带过来的原始条数，那里把状态为「动态」的新闻
+       也算进去了，于是江苏院显示「5 次中标」，实际只有 1 条真公告。
+       金额与地区同理：新闻里的金额不是中标额，新闻里的来源名也不是地区。 */
+    /* ⚠ 这里必须用 _realAll，不能用 items：items 是下面 ③ 业绩表那一段才赋值的，
+       KPI 在它前面执行，引用 items 会直接 undefined.forEach 崩掉整页。 */
+    var _amtReal=0, _rgSet={};
+    _realAll.forEach(function(x){
+      var _a=parseAmtAny(x.amt);
+      if(_a>0) _amtReal+=_a;
+      var _r=cleanRg(x.rg);
+      if(_r) _rgSet[_r]=1;
+    });
+    kpi.push(['n', _realAll.length, '本库中标次数', '']);
+    kpi.push(['a', profMoney(_amtReal||o.amt), '中标金额合计', 'acc']);
     kpi.push(['', o.hm!=null?o.hm:0, '主场中标（一级/二级业务）', '']);
-    kpi.push(['', A.rg.length, '覆盖地区', '']);
+    kpi.push(['', Object.keys(_rgSet).length||A.rg.length, '覆盖地区', '']);
     kpi.push(['', esc(o.last||o.latest||'—'), '最近中标', 'txt']);
   }
   var kpiHtml='<div class="prof-kpi">'+kpi.map(function(x){
@@ -3257,6 +3462,89 @@ function profPage(kind, o){
     '</dl>'+
     '<div class="prof-note">'+skuText+'</div></div>';
 
+  /* ②.5 企业档案（2026-10-23 新增）
+     用户的质问很直接：「这几家单位深度档案里面居然是空的，这都是每年项目比较多的
+     大企业啊」。查下来是两个问题叠加：
+       ① 数据其实有 —— competitors 里每家都有人工整理的 strength（200~280 字，
+          写清了资质等级、装机业绩、专长领域），但 rivalAsProfile 把它丢了；
+       ② 三家省级电力设计院在本库**确实一条中标记录都没有**（公告里中标单位
+          公示的是下属工程公司或联合体牵头方），所以业绩表、赛道分布、地域分布
+          全是空的 —— 页面上看起来就只剩一个名字。
+     所以这里补一块「企业档案」：有 strength 就完整展示，并把 recent 里的
+     近期动态（无论是字符串还是数组）统一列出来。哪怕本库零业绩，
+     这一页也能让人看出「这家是谁、多大、擅长什么、最近在干什么」。 */
+  var aboutHtml='';
+  (function(){
+    var _s=(o.strength||o.about||'').trim();
+    /* 动态有两个来源，两处都要收：
+       ① o.recent —— 人工整理档案里的近期动态（数组或一整段字符串）
+       ② o.items 里 st=动态 的条目 —— gPick 把 recent 映射进 items 时产生的副本 */
+    var _rec=o.recent;
+    var _fromItems=_rawItems.filter(function(x){return x.isNews});
+    /* recent 两种形态都有：competitors 早期是数组 [{title,amount,date,region,url}]，
+       后来手工补的批次是**一整段字符串**「项目A（金额），日期；项目B…」。
+       字符串就按 ；; 切成条目，别原样糊一大坨。 */
+    var _list=[];
+    if(Array.isArray(_rec)){
+      _list=_rec.filter(function(x){return x&&(x.title||x.t)}).map(function(x){
+        return {t:x.title||x.t, d:x.date||x.d||'', amt:parseAmtAny(x.amount!=null?x.amount:x.amt),
+                url:x.url||''}});
+    }else if(typeof _rec==='string' && _rec.trim()){
+      /* 手工补的批次是「项目A（金额），日期；项目B（金额），日期」的整段字符串。
+         先按 ；; 切，切完如果某一段里还带多个日期，说明它本身是好几条粘在一起的
+         （采集时摘要里就带；），再按「日期」这个锚点做二次切分，否则会得到
+         一条含 500 字、没有日期的巨型条目。 */
+      var _push=function(t,d,amt){ if(!t) return; _list.push({t:t, d:d||'', amt:parseAmtAny(amt), url:''}) };
+      var _seg=function(seg){
+        seg=seg.trim(); if(!seg) return;
+        var dates=seg.match(/20\d\d-\d\d-\d\d/g)||[];
+        if(dates.length>1){
+          /* 按日期切：每段 = 上一个日期之后 到 本日期 */
+          var idxs=[], re=/20\d\d-\d\d-\d\d/g, m2;
+          while((m2=re.exec(seg))) idxs.push({d:m2[0], i:m2.index});
+          var prev=0;
+          idxs.forEach(function(o2,k){
+            var piece=seg.slice(prev,o2.i).replace(/[；;，,]\s*$/,'').trim();
+            prev=o2.i+o2.d.length;
+            if(piece) _push(piece, o2.d);
+          });
+          return;
+        }
+        var m=seg.match(/^(.+?)[（(]\s*(?:约)?([0-9.,]+\s*[亿万]?元?|未检索到[^）)]*)\s*[）)]\s*[，,]?\s*(20\d\d-\d\d-\d\d)?/);
+        if(m) _push(m[1].trim(), (m[3]||'').trim(), m[2]);
+        else _push(seg.replace(/20\d\d-\d\d-\d\d/g,'').replace(/[，,；;]\s*$/,'').trim(),
+                   (seg.match(/20\d\d-\d\d-\d\d/)||[''])[0]);
+      };
+      _rec.split(/[；;]\s*/).forEach(_seg);
+    }
+    /* 合并 items 里的动态副本：以 URL+标题前缀去重，避免 same 条目出现两次 */
+    if(_fromItems.length){
+      var _seen={};
+      _list.forEach(function(x){ _seen[(x.t||'').slice(0,24)]=1 });
+      _fromItems.forEach(function(x){
+        var k=(x.t||'').slice(0,24);
+        if(_seen[k]) return;
+        _seen[k]=1;
+        _list.push({t:x.t, d:x.d||'', amt:parseAmtAny(x.amt), url:x.url||''});
+      });
+    }
+    /* 日期新→旧，没日期的沉底 */
+    _list.sort(function(a,b){ return String(b.d||'').localeCompare(String(a.d||'')) });
+    if(!_s && !_list.length) return;
+    aboutHtml='<div class="prof-sec"><h4><i></i>企业档案'+
+      (o.type?' <small>'+esc(o.type)+(o.cat?' · '+esc(o.cat):'')+'</small>':'')+'</h4>'+
+      (_s?'<div class="about-tx">'+esc(_s)+'</div>':'')+
+      (_list.length?'<div class="about-rec"><div class="ar-hd">近期动态 <small>来源：竞对官网 / 微信公众号公开报道，'+
+        '不在本库公告内，仅供了解动向</small></div>'+
+        _list.map(function(x){
+          return '<div class="ar-i"><span class="ar-d">'+esc(x.d||'—')+'</span>'+
+            '<span class="ar-t">'+esc(x.t)+'</span>'+
+            (x.amt?'<span class="ar-m">'+x.amt.toFixed(2)+' 亿</span>':'')+
+            (x.url?'<a class="lk" href="'+esc(x.url)+'" target="_blank" rel="noopener">↗</a>':'')+
+            '</div>';}).join('')+'</div>':'')+
+      '</div>';
+  })();
+
   /* ③ 业绩明细表 */
   /* 供应商：地域用后端预聚合的 rgs=[{k,n}]，转成 {地域:条数} 给分布图用 */
   (function(){
@@ -3264,7 +3552,7 @@ function profPage(kind, o){
       var m={}; o.rgs.forEach(function(r){ m[r.k]=(m[r.k]||0)+r.n }); o.rgAll=m;
     }
   })();
-  var items=(o.items||[]).map(function(x){
+  var items=_realAll.map(function(x){
     return {t:x.t, amt:parseAmtAny(x.amt), d:x.d, rg:cleanRg(x.rg), url:x.url,
             st:x.st, sub:x.sub||x.sg, win:x.win, owner:x.owner||x.buyer||x.o, buyer:x.buyer};
   }).sort(function(a,b){return (b.amt||0)-(a.amt||0)});
@@ -3284,18 +3572,32 @@ function profPage(kind, o){
           : '<td class="o">'+esc(x.owner||x.buyer||x.o||'—')+'</td>')+
         '<td class="m">'+profMoney(x.amt)+'</td>'+
         '<td>'+(x.url?'<a class="lk" href="'+esc(x.url)+'" target="_blank" rel="noopener" title="打开公告原文">↗</a>':'—')+'</td></tr>';
-    }).join(''):'<tr><td colspan="5" class="pm-empty">本库暂无记录</td></tr>')+
+    }).join(''):'<tr><td colspan="5" class="pm-empty">'+
+      /* 2026-10-23：空表不能只写「本库暂无记录」。用户看到大企业的档案是空表，
+         第一反应是「这系统没数据/坏了」。要说清为什么空、去哪能看到，
+         这才叫把话说完整。 */
+      (kind==='rival'
+        ? '本库 '+meta.total+' 条公告里，还没有一条把这家写成中标单位。<br>'+
+          '常见原因有两个：<b>①</b> 它常以下属工程公司或联合体成员身份中标，公告上公示的是牵头方；'+
+          '<b>②</b> 它主做设计/咨询，我们库里这类公告本身收录得少。'
+        : '本库暂无记录')+
+      '</td></tr>')+
     '</tbody></table></div>'+
     (A.amtCov<100?'<div class="plegend">金额覆盖率 '+A.amtCov+'%（'+A.withAmt+' / '+A.n+
       ' 条有金额）—— 上游公告本身不写金额，不是我们漏抓。</div>':'')+'</div>';
 
   /* ④ 分布 */
-  var distHtml='<div class="prof-two">'+
-    '<div class="prof-sec"><h4><i></i>'+(kind==='owner'?'采购方向':'擅长方向')+'</h4>'+profBars(A.seg)+'</div>'+
-    '<div class="prof-sec"><h4><i></i>地域分布</h4>'+profBars(A.rg)+'</div></div>'+
-    '<div class="prof-two">'+
-    '<div class="prof-sec"><h4><i></i>年份分布</h4>'+profBars(A.yr)+'</div>'+
-    '<div class="prof-sec"><h4><i></i>阶段分布</h4>'+profBars(A.st)+'</div></div>';
+  /* 2026-10-23：本库零业绩时，四个分布图全是「暂无」，占了半屏还显得像坏了。
+     这种情况下直接不渲染，把位置让给上面的「企业档案」。 */
+  var distHtml='';
+  if(A.n>0){
+    distHtml='<div class="prof-two">'+
+      '<div class="prof-sec"><h4><i></i>'+(kind==='owner'?'采购方向':'擅长方向')+'</h4>'+profBars(A.seg)+'</div>'+
+      '<div class="prof-sec"><h4><i></i>地域分布</h4>'+profBars(A.rg)+'</div></div>'+
+      '<div class="prof-two">'+
+      '<div class="prof-sec"><h4><i></i>年份分布</h4>'+profBars(A.yr)+'</div>'+
+      '<div class="prof-sec"><h4><i></i>阶段分布</h4>'+profBars(A.st)+'</div></div>';
+  }
 
   /* 关系网：业主→供应商 A/B；供应商→服务过的业主 */
   var relHtml='';
@@ -3353,10 +3655,12 @@ function profPage(kind, o){
   return '<div class="prof">'+
     '<div class="prof-hd"><div><h3>'+nm+'</h3>'+
       '<div class="prof-sub"><span class="kbadge '+K.cls+'">'+K.label+'</span>'+
-      (kind==='owner'?'<span class="pm-i">共 '+A.n+' 条发包记录</span>':'<span class="pm-i">共 '+A.n+' 条中标记录</span>')+
+      (kind==='owner'?'<span class="pm-i">共 '+A.n+' 条发包记录</span>'
+        :(A.n?'<span class="pm-i">共 '+A.n+' 条中标记录</span>'
+              :'<span class="pm-i">本库暂无它的中标公告，下面的企业档案来自公开资料</span>'))+
       (o.latest?'<span class="pm-i">最近动态 '+esc(o.latest)+'</span>':'')+
       '</div></div></div>'+
-    kpiHtml+idHtml+ctcHtml+tb+distHtml+relHtml+insHtml+act+'</div>';
+    kpiHtml+idHtml+aboutHtml+ctcHtml+tb+distHtml+relHtml+insHtml+act+'</div>';
 }
 
 /* 对手：从 rivals 数据转成通用档案结构
@@ -3399,9 +3703,14 @@ function rivalAsProfile(r){
   /* 单赛道单位：所有记录都归到这个赛道；多赛道且 items 无细分时留空不猜 */
   var onlyOne = segNames.length===1 ? segNames[0] : '';
   var items=(r.items||[]).map(function(x){
+    /* st=动态 的条目来自企业档案的「近期动态」（竞对官网 / 微信公众号），
+       不是本库公告。它不该出现在「中标业绩」表里，否则会跟上一块重复，
+       还会把一段几百字的新闻摘要当成项目名塞进表格。
+       这里统一打 isNews 标记，交给渲染层分表处理。 */
+    var isNews = (x.st === '动态') || x.news === 1;
     return {t:x.t, amt:parseAmtAny(x.amt!=null?x.amt:x.amount), d:x.d||x.date,
             rg:cleanRg(x.rg||x.region), url:x.url, st:x.st||'中标',
-            sub:x.sub||x.sg||onlyOne||'', owner:x.buyer||x.owner||''};
+            sub:x.sub||x.sg||onlyOne||'', owner:x.buyer||x.owner||'', isNews:isNews};
   });
   var amtSum=0, withAmt=0;
   items.forEach(function(x){ if(x.amt>0){amtSum+=x.amt;withAmt++;} });
@@ -3413,7 +3722,17 @@ function rivalAsProfile(r){
           amt: amtSum>0 ? Math.round(amtSum*1000)/1000 : (r.amt||0),
           hm:r.hm, latest:r.latest||(items[0]&&items[0].d)||'',
           items:items, subs:subs, main:r.main||r.cat, rg:r.rg||r.city,
-          nOwners:r.nOwners};
+          nOwners:r.nOwners,
+          /* 2026-10-23 修：这里原来把 strength / type 丢了。
+             gPick('rival') 虽在调用前把 strength 挂到了 rv 上，但这里是从参数 r 重建
+             新对象返回，没带上这两个字段，于是档案页里那 200 多字的企业简介
+             （资质等级、装机业绩、专长）全都渲染不出来 —— 三家省级电力设计院
+             「深度档案为空」就是这个原因之一。原样透传，不许再丢。 */
+          strength:r.strength||'', type:r.type||'',
+          /* recent 必须一起带出来。纯字符串形态的档案（手工补的批次）整份内容
+             就存在 recent 里，丢了它等于整个「近期动态」消失——浙江院/安徽院
+             就是这样变成一片空白的。 */
+          recent:r.recent, cat:r.cat};
 }
 
 /* 「收起档案」：把同业页自己的档案区清掉，回到名单。
@@ -3544,6 +3863,12 @@ function gPick(mode,name){
       if(src.city && !rv.rg) rv.rg=src.city;
       rv.strength=src.strength||'';
       rv.type=src.type||'';
+      /* 2026-10-23 补：recent 必须一起带过来。
+         浙江院/安徽院这类手工补的档案，整份「近期动态」就存在 recent 这个
+         字符串里（「项目A（金额），日期；项目B…」）。上面只搬了 strength/type，
+         recent 没搬，于是档案页里那一块永远不出现 —— 三家设计院「深度档案为空」
+         的第二层原因就在这里（第一层是 strength 在 rivalAsProfile 里被丢）。 */
+      if(src.recent!=null) rv.recent=src.recent;
     }
     /* 业绩为空时，才退而用近期动态充数（并且明确标成「动态」，不当业绩） */
     if(src && !(rv.items||[]).length && Array.isArray(src.recent)){
