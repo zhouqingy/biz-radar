@@ -2865,6 +2865,7 @@ function renderMStrip(){
      后一份把前一份整体覆盖掉，改了前一份页面却没反应——删重复时要连注释一起删。 */
 var rTab='board';
 function rApply(){
+  var _ldg=el('segLoading'); if(_ldg) _ldg.remove();
   var m={board:'rBoardBox', rival:'rRivalBox', partner:'rPartnerBox', ency:'rEncyBox'};
   Object.keys(m).forEach(function(k){
     var b=el(m[k]); if(b) b.style.display=(k===rTab?'block':'none');
@@ -2878,8 +2879,13 @@ function rApply(){
        need() 的回调到达后会再调一次 rApply，数据那时才画。 */
   var _need={board:'rivals',rival:'competitors',partner:'partners',ency:'ency'}[rTab];
   if(_need && !(rTab==='ency' ? (D.ency&&D.ency.groups) : arr(D[_need]).length)){
+    /* ⚠ 别用 innerHTML 往段容器里写提示——rEncyBox 里面装着 #f-eg / #encyNote / #encyGrid，
+       一冲就没了，等数据到了 renderEncy 再去取 #encyNote 直接拿到 null，整段崩掉。
+       改成插一个带 id 的提示节点，下次进来先摘掉它。 */
     var b2=el({board:'rBoardBox',rival:'rRivalBox',partner:'rPartnerBox',ency:'rEncyBox'}[rTab]);
-    if(b2) b2.innerHTML='<div class="empty">正在载入'+({board:'战绩榜',rival:'竞争对手档案',partner:'伙伴池',ency:'单位百科'})[rTab]+'数据…</div>';
+    if(b2 && !el('segLoading'))
+      b2.insertAdjacentHTML('afterbegin','<div class="empty" id="segLoading">正在载入'+
+        ({board:'战绩榜',rival:'竞争对手档案',partner:'伙伴池',ency:'单位百科'})[rTab]+'数据…</div>');
     return;
   }
   try{
@@ -2936,15 +2942,18 @@ function renderEncy(){
       renderEncy();
     };
   }
-  var note=el('encyNote'), h='', g=null;
+  var note=el('encyNote'), h='', g=null, grid=el('encyGrid');
+  if(!grid){ return; }
   (E.groups||[]).forEach(function(x){ if(x.id===eGrp) g=x; });
-  if(!g){ el('encyGrid').innerHTML='<div class="empty">没有这个分组</div>'; return; }
-  if(g.rule){ note.style.display='block'; note.innerHTML='<b>'+esc(g.name)+'：</b>'+esc(g.rule); }
-  else note.style.display='none';
-  if(E.coverage_note && eGrp!=='mcc'){
-    note.style.display='block';
-    note.innerHTML=(g.rule?'<b>'+esc(g.name)+'：</b>'+esc(g.rule)+'<br>':'')+
-      '<span style="color:var(--tx3)">收录范围：'+esc(E.coverage_note)+'</span>';
+  if(!g){ grid.innerHTML='<div class="empty">没有这个分组</div>'; return; }
+  if(note){
+    if(g.rule){ note.style.display='block'; note.innerHTML='<b>'+esc(g.name)+'：</b>'+esc(g.rule); }
+    else note.style.display='none';
+    if(E.coverage_note && eGrp!=='mcc'){
+      note.style.display='block';
+      note.innerHTML=(g.rule?'<b>'+esc(g.name)+'：</b>'+esc(g.rule)+'<br>':'')+
+        '<span style="color:var(--tx3)">收录范围：'+esc(E.coverage_note)+'</span>';
+    }
   }
   var us=(g.units||[]).slice();
   if(g.id==='mcc'){
