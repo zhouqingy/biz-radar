@@ -1165,8 +1165,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610232346"></script>
-<script src="data.items.js?v=202610232346"></script>
+<script src="data.core.js?v=202610232351"></script>
+<script src="data.items.js?v=202610232351"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1231,7 +1231,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610232346';
+var VER='?v=202610232351';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -2996,6 +2996,8 @@ function encyCard(x){
   var cf=x.confidence||'';
   h+='<span class="cc-tag" style="background:'+(cf==='查证'?'#eaf7ee;color:#14713a':'#fff8e6;color:#a85c10')+'" title="'+esc(x.src||'')+'">'+(cf==='查证'?'已查证':'待核实')+'</span>';
   if(x.overseas) h+='<span class="cc-tag" style="background:#e8f4ff;color:#1053c9">有海外</span>';
+  var _dw=_arrE(x.db_wins);
+  if(_dw.length) h+='<span class="cc-tag" style="background:#fff2e0;color:#a85c10" title="本库抓到它在江浙沪皖中标 '+_dw.length+' 单，合计 '+(x.db_amt||0)+' 亿">本库 '+_dw.length+' 单</span>';
   h+='<button class="rival-dw" onclick="encyProf(\''+esc(x.name)+'\')">企业画像</button></div>';
   if(x.relation){
     var isStar=(x.relation||'').indexOf('⭐')>=0;
@@ -3083,8 +3085,28 @@ function encyProf(name){
     h+='</div>';
   }
 
-  /* 五、盯防要点 + 来源 */
-  if(u.watch) h+='<div class="ep-sec"><b>⑤ 盯防要点</b><p style="color:#1053c9">'+esc(u.watch)+'</p></div>';
+  /* 五、本库中标记录（我们自己在公告里抓到的，不是抄来的） */
+  var dw=_arrE(u.db_wins);
+  if(dw.length){
+    h+='<div class="ep-sec"><b>⑤ 本库中标记录 '+dw.length+' 条 '+
+       '<span style="color:var(--tx3);font-weight:400">（我们从各地公告里抓到的，合计 '+(u.db_amt||0)+' 亿）</span></b>';
+    dw.forEach(function(w){
+      h+='<div class="en-pj"><span>'+esc(w.t||'')+
+         '<br><span style="color:var(--tx3);font-size:11px">'+
+         esc([w.d,(w.amt>0?(Math.round(w.amt/1e8*100)/100)+'亿':''),w.buyer].filter(Boolean).join(' · '))+
+         '</span></span>'+
+         (w.url?'<a href="'+esc(w.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+
+         '<a href="javascript:void(0)" data-sf="'+esc(String(w.t||'').slice(0,8))+'">库内 🔍</a></div>';
+    });
+    h+='</div>';
+  }else{
+    h+='<div class="ep-sec"><b>⑤ 本库中标记录</b><p style="color:var(--tx3)">本库暂未抓到该单位在江浙沪皖的中标记录'+
+       '——要么它在四地确实不活跃（项目多在西北/西南/海外），要么是我们的抓取还没覆盖到它的公告。'+
+       '这条本身就是情报：跟这家在江浙沪皖正面撞上的概率，目前看不高。</p></div>';
+  }
+
+  /* 六、盯防要点 + 来源 */
+  if(u.watch) h+='<div class="ep-sec"><b>⑥ 盯防要点</b><p style="color:#1053c9">'+esc(u.watch)+'</p></div>';
   if(u.src) h+='<div class="ep-src">资料来源：'+esc(u.src)+'　·　置信度：'+esc(u.confidence||'')+'</div>';
 
   var box=document.getElementById('encyProfBox');
