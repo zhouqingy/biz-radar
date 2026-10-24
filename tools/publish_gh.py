@@ -27,7 +27,7 @@ GitHub Pages 发布器 · publish_gh.py
   GH_REPO        默认 biz-radar
   BIZ_SITE       默认 /workspace/biz-radar
 """
-import argparse, base64, json, os, sys, time, urllib.request
+import argparse, base64, hashlib, json, os, sys, time, urllib.request
 
 OWNER = os.environ.get('GH_OWNER', 'zhouqingy')
 REPO = os.environ.get('GH_REPO', 'biz-radar')
@@ -50,6 +50,7 @@ FILES = ('index.html',
          # 的跳转链接，所以一直没人发现——但它确实一直在报错。
          'data.siku.js',
          'data.news.js',
+         'data.rivalperf.js',  # 2026-10-24 对手/业主全网业绩库（画像弹层用）
          'data.js',            # 整包兜底：任一模块加载失败时前端会回退到它
          'rival.js',
          'rival-cuc.html',
@@ -94,6 +95,39 @@ def get_sha(name, token, retry=3):
     raise RuntimeError('获取 %s 的 sha 失败（已重试 %d 次）：%s' % (name, retry, err))
 
 
+def verify_remote(name, raw, token, retry=4):
+    """推完回读校验（2026-10-23 事故后新增）。
+
+    ══════════ 为什么必须有这一道 ══════════
+    2026-10-23 16:04，publish_gh.py 打印了一整屏「✅ index.html 0.25 MB 2 秒」，
+    最后还来一句「✅ 已推送，Pages 约 1-2 分钟生效」。结果远端仓库里
+    index.html 仍是 108,768 字节的旧版，sha 一点没变。
+
+    原因：Contents API 偶尔在网关层就返回了 200/201，但对象没有真正落盘
+    （那次的伴随症状是另一个文件报 HTTP 403 "The rule did not run because
+    of a timeout"）。HTTP 200 只代表「请求被受理」，不代表「字节已写入」。
+
+    这道校验做的事：GET 回来，比对比 git blob sha（== 本地算出来的一致）和
+    size。不一致就等一等再查，超过 retry 次才算真失败。
+    宁可多花几秒，也不要再让用户对着一句「已推送」白等六分钟。
+    """
+    want_sha = hashlib.sha1(b'blob %d\x00' % len(raw) + raw).hexdigest()
+    last = ''
+    for i in range(retry):
+        d, err = api('/contents/' + name, token)
+        if err:
+            last = str(err)
+        else:
+            got_sha = (d.get('sha') or '') if isinstance(d, dict) else ''
+            got_sz = d.get('size') if isinstance(d, dict) else None
+            if got_sha == want_sha and got_sz == len(raw):
+                return True, ''
+            last = 'sha %s→%s / size %s→%s' % (
+                want_sha[:8], got_sha[:8] or '空', len(raw), got_sz)
+        time.sleep(2 + i * 2)
+    return False, last
+
+
 def put_file(name, token, dry=False):
     path = os.path.join(SITE, name)
     if not os.path.isfile(path):
@@ -120,15 +154,30 @@ def put_file(name, token, dry=False):
     t0 = time.time()
     d, err = api('/contents/' + name, token, 'PUT', payload)
     if err and 'sha' in str(err).lower():
-        # 远端这次没给 sha（或我们传的过期了）：重新取一次再试
-        sha2 = get_sha(name, token, retry=5)
+        # 远端这次没给 sha（或我们传的过期了）：重新取一次再试。
+        # 2026-10-23 事故：这里第二次 get_sha 自己也可能 IncompleteRead，
+        # 异常一路冒泡到 main() 把整个发布进程干掉——后面 6 个文件全没推。
+        # 取 sha 是「可以重来的事」，不该终止整轮发布：包成 try，失败就交补推。
+        try:
+            sha2 = get_sha(name, token, retry=5)
+        except Exception as e2:
+            print('  ⏳ %s  复取 sha 失败，稍后补推（%s）' % (name, str(e2)[:60]))
+            return False
         if sha2:
             payload['sha'] = sha2
         d, err = api('/contents/' + name, token, 'PUT', payload)
     if err:
         print('  ❌ %s -> %s' % (name, str(err)[:120]))
         return False
-    print('  ✅ %s  %.2f MB  %d 秒' % (name, len(raw) / 1048576.0, time.time() - t0))
+
+    # 回读校验：HTTP 200 不等于字节落盘，必须 GET 回来比对 sha + size。
+    ok, why = verify_remote(name, raw, token)
+    if not ok:
+        print('  ❌ %s  写入未生效（远端不符：%s）' % (name, why[:100]))
+        return False
+
+    print('  ✅ %s  %.2f MB  %d 秒  已回读校验'
+          % (name, len(raw) / 1048576.0, time.time() - t0))
     return True
 
 
@@ -168,6 +217,40 @@ def guard_rollback(force=False):
               % (-drop * 100, n_bak, n_cur))
     else:
         print('[闸门] ✅ 条目数 %d → %d（%+.1f%%），正常' % (n_bak, n_cur, -drop * 100))
+    return True
+
+
+def guard_index_html(force=False):
+    """index.html 体积闸门（2026-10-23 事故后新增）。
+
+    ══════════ 为什么必须有这一道 ══════════
+    2026-10-22 16:08，我推了一次 index.html，体积从 264,790 → 108,768 字节，
+    把用户在线上迭代了好几天的版本（新增「中标情报 / 业主图谱 / 合作生态」三个面板）
+    整个冲掉，退回到 10-21 的旧备份。用户第二天看到页面"样式又改回去了"。
+
+    根因：本地 /workspace/biz-radar/index.html 只是旧备份的拷贝，不是源码；
+    真实源码在用户手上、在仓库里。我在陈旧文件上改完直接推 = 悄悄回滚。
+
+    这道闸门只防「体积大幅缩水」这一种最容易发生的误覆盖：
+    HTML 是加法演进的，正常更新体积只会缓慢上涨；
+    一次掉 20% 以上，几乎只能是拿旧文件盖了新文件。
+    """
+    cur = os.path.join(SITE, 'index.html')
+    bak = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index.html.bak')
+    if not (os.path.isfile(cur) and os.path.isfile(bak)):
+        print('[闸门] index.html 无可比基线，跳过（首次推送正常）')
+        return True
+    a, b = os.path.getsize(bak), os.path.getsize(cur)
+    if not b:
+        print('[闸门] ❌ 本版 index.html 是空文件，已阻止推送')
+        return force
+    chg = (b - a) / float(a)
+    if chg < -0.20:
+        print('[闸门] ❌ index.html 体积骤降 %.0f%%（%d → %d 字节），疑似用旧文件覆盖了新页面'
+              % (chg * 100, a, b))
+        print('       确认是有意精简可加 --force；否则先在线上取回最新版再改')
+        return force
+    print('[闸门] ✅ index.html %d → %d 字节（%+.0f%%）' % (a, b, chg * 100))
     return True
 
 
@@ -217,6 +300,8 @@ def main():
 
     if not guard_rollback(a.force):
         return 5
+    if not guard_index_html(a.force):
+        return 6
 
     # 网络不稳（到 GitHub API 偶发 IncompleteRead / 空 sha）时，失败的文件
     # 自动再补推两轮，中间歇 3 秒。实测一轮 12 个文件里常有一两个需要重来。
@@ -224,11 +309,13 @@ def main():
     for f in FILES:
         if not put_file(f, token, a.dry_run):
             failed.append(f)
-    for attempt in range(2):
+    # 2026-10-23：网络 IncompleteRead 频发，2 轮补推不够（实测一轮 16 个文件里
+    # 有 4~5 个要重来）。加到 4 轮，每轮之间多歇一会儿让链路缓过来。
+    for attempt in range(4):
         if not failed:
             break
         print('[publish_gh] 补推第 %d 轮：%s' % (attempt + 1, ', '.join(failed)))
-        time.sleep(3)
+        time.sleep(5 + attempt * 5)
         still = []
         for f in failed:
             if not put_file(f, token, a.dry_run):
