@@ -1251,8 +1251,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610240943"></script>
-<script src="data.items.js?v=202610240943"></script>
+<script src="data.core.js?v=202610241004"></script>
+<script src="data.items.js?v=202610241004"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1317,7 +1317,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610240943';
+var VER='?v=202610241004';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3722,6 +3722,33 @@ document.addEventListener('click', function(ev){
   });
 });
 
+/* 评标出场记录：南通（后续各市）候选人公示抽出来的情报——
+   它参加过哪些开标、第几名、报多少、控制价多少。没中的更有信息量。 */
+function rperfEvalSec(name){
+  var rec=rperfRecs(name);
+  if(!rec || !(rec.eval||[]).length) return '';
+  var evs=rec.eval.slice().sort(function(a,b){return String(b.d||'').localeCompare(String(a.d||''))});
+  var won=evs.filter(function(x){return x.won}).length;
+  var h='<div class="prof-sec"><h4><i></i>评标出场记录 <small>市交易平台候选人公示采集 · 近 1 年 '+
+    evs.length+' 场 · 中标 '+won+' 场</small></h4>';
+  evs.slice(0,12).forEach(function(x){
+    var tag = x.won ? '<i class="rp-t rp-epc">中标</i>'
+            : (x.rank ? '<i class="rp-t rp-sj">第'+x.rank+'候选</i>'
+                      : '<i class="rp-t">参与</i>');
+    var money=[];
+    if(x.quote) money.push('报价 '+money(x.quote));
+    if(x.win_amt) money.push('中标价 '+money(x.win_amt));
+    if(x.control) money.push('控制价 '+money(x.control));
+    if(x.nCands) money.push(x.nCands+' 家竞标');
+    h+='<div class="en-pj"><span>'+tag+esc(x.t||'')+
+       (money.length?'<br><span style="color:var(--tx3);font-size:11px">'+esc(x.d||'')+' · '+esc(money.join(' · '))+'</span>':'')+'</span>'+
+       (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+'</div>';
+  });
+  if(evs.length>12) h+='<p style="color:var(--tx3)">仅列最近 12 场，共 '+evs.length+' 场</p>';
+  h+='<div class="prof-note">从评标/定标公示的候选人名单抽取：它报价跟控制价的差距、'+
+     '常和谁同场竞技、中标率如何 —— 判断它下一步会抢什么项目的最直接依据。</div></div>';
+  return h;
+}
 function domOwnerProf(name){
   var x=null;
   arr(D.domestic).forEach(function(o){ if(o.name===name) x=o; });
@@ -3758,7 +3785,8 @@ function domOwnerProf(name){
     h+='<div class="ep-sec"><b>③ 本库项目 '+x.items.length+' 条 <span style="color:var(--tx3);font-weight:400">（每条可跳原文）</span></b>';
     x.items.slice(0,20).forEach(function(it){
       var meta=[it.st,it.d,(it.win?'中：'+it.win:'')].filter(Boolean).join(' · ');
-      h+='<div class="en-pj"><span>'+esc(it.t||'')+(it.amt?' <b>'+money(it.amt)+'</b>':'')+
+      var _tp=rperfType(it.t||'');
+      h+='<div class="en-pj"><span><i class="rp-t rp-'+_tp[1]+'">'+_tp[0]+'</i>'+esc(it.t||'')+(it.amt?' <b>'+money(it.amt)+'</b>':'')+
          (meta?'<br><span style="color:var(--tx3);font-size:11px">'+esc(meta)+'</span>':'')+'</span>'+
          (it.url?'<a href="'+esc(it.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+
          '<a href="javascript:void(0)" data-sf="'+esc(String(it.t||'').slice(0,8))+'">库内 🔍</a></div>';
@@ -3776,6 +3804,7 @@ function domOwnerProf(name){
   }
   /* ⑤ 全网业绩（省交易平台全量采集，判断风向用） */
   h+=rperfSec(name);
+  h+=rperfEvalSec(name);
   var sub='国内重点客户'+(x.rg?' · '+x.rg:'')+(x.main?' · '+x.main:'');
   openUniProf(x.name, sub, h);
 }
@@ -4494,8 +4523,9 @@ function profPage(kind, o){
     (kind==='owner'?'<th style="width:150px">中标单位</th>':'<th style="width:140px">业主</th>')+
     '<th style="width:80px;text-align:right">金额</th><th style="width:60px">原文</th></tr></thead><tbody>'+
     (items.length?items.map(function(x){
+      var _tp=rperfType(x.t||'');
       return '<tr><td class="d">'+esc(x.d||'—')+'</td>'+
-        '<td class="p"><b>'+esc(x.t||'')+'</b>'+
+        '<td class="p"><i class="rp-t rp-'+_tp[1]+'">'+_tp[0]+'</i><b>'+esc(x.t||'')+'</b>'+
           '<span class="tg2 '+(SEG_TONE[x.sub||x.sg]||'t3')+'">'+esc(x.sub||x.sg||'未分类')+'</span>'+
           (x.st?'<span class="tg3">'+esc(x.st)+'</span>':'')+'</td>'+
         (kind==='owner'
@@ -4585,7 +4615,7 @@ function profPage(kind, o){
 
   /* 2026-10-24 全网业绩：对手/业主在省交易平台的**全量**公告，
      含不我们做的业务，用于判断风向 —— 与上面「本库中标记录」口径互补 */
-  var rperfHtml=rperfSec(o.name);
+  var rperfHtml=rperfSec(o.name)+rperfEvalSec(o.name);
 
   return '<div class="prof">'+
     '<div class="prof-hd"><div><h3>'+nm+'</h3>'+
