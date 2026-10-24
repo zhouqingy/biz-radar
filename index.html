@@ -1235,8 +1235,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610240836"></script>
-<script src="data.items.js?v=202610240836"></script>
+<script src="data.core.js?v=202610240905"></script>
+<script src="data.items.js?v=202610240905"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1301,7 +1301,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610240836';
+var VER='?v=202610240905';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3612,6 +3612,48 @@ var TIER_FG={S:'#c0392b',A:'#a8620a',B:'#5a6270'};
    现在加一个「单位画像」，弹出来的版式和单位百科那套 .ep-* 一模一样：
    概览 → 采购习惯 → 本库项目（可跳原文）→ 常中标单位。
    最后一段是营销最想要的：谁在跟我们抢这个业主，一眼就看到。 */
+/* ── 全网业绩库（2026-10-24 新增）──────────────────────────────
+   数据源 raw/rival_perf.json → data.rivalperf.js（window.DATA_RIVALPERF），
+   由 crawl_rival_perf.py 单独采集（单位名当关键词搜省公共资源交易平台），
+   物理隔离、绝不混入找商机库 —— 用户明确要求「搜到的数据不能放在
+   找商机那个里面，单独放着，不然会污染找商机库的数据」。
+   用途：判断对手/业主的风向，所以是**全量业绩**（不分赛道不分业务），
+   和找商机库的「只留我们能做的」是两套完全不同的口径。 */
+function rperfRecs(name){
+  var rp=(window.DATA_RIVALPERF||{}).db||{};
+  if(rp[name]) return rp[name];
+  /* 全角/半角括号差异兜底：「华光环保能源(西安)」vs「（西安）」 */
+  var norm=String(name||'').replace(/[（）()]/g,'');
+  for(var k in rp){
+    if(k.replace(/[（）()]/g,'')===norm) return rp[k];
+  }
+  /* 长名包含兜底：库里存的是「中煤第三建设（集团）有限责任公司（牵头单位）…」
+     这种联合体长名，画像名可能是简称（或反过来） */
+  if(norm.length>=6){
+    for(var k2 in rp){
+      var kn=k2.replace(/[（）()]/g,'');
+      if(kn.length>=6 && (kn.indexOf(norm)>=0 || norm.indexOf(kn)>=0)) return rp[k2];
+    }
+  }
+  return null;
+}
+function rperfSec(name){
+  var rec=rperfRecs(name);
+  if(!rec || !(rec.items||[]).length) return '';
+  var its=rec.items.slice().sort(function(a,b){return String(b.d||'').localeCompare(String(a.d||''))});
+  var h='<div class="prof-sec"><h4><i></i>全网业绩 <small>省公共资源交易平台采集 · 与本库口径不同，用于判断风向 · 共 '+
+    its.length+' 条'+(rec.kw?' · 检索词「'+esc(rec.kw)+'」':'')+'</small></h4>';
+  its.slice(0,15).forEach(function(x){
+    var meta=[x.d||'', x.rg?x.rg+'交易平台':''].filter(Boolean).join(' · ');
+    h+='<div class="en-pj"><span>'+esc(x.t||'')+
+       (meta?'<br><span style="color:var(--tx3);font-size:11px">'+esc(meta)+'</span>':'')+'</span>'+
+       (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+'</div>';
+  });
+  if(its.length>15) h+='<p style="color:var(--tx3)">仅列最近 15 条，共 '+its.length+' 条（按日期倒序）</p>';
+  h+='<div class="prof-note">这一栏是它<b>所有</b>的公开业绩（含市政/房建等我们不做的业务），'+
+     '和上面「本库中标记录」（只含我们能做的）口径不同 —— 对比两栏就能看出它的主战场和风向。</div></div>';
+  return h;
+}
 function domOwnerProf(name){
   var x=null;
   arr(D.domestic).forEach(function(o){ if(o.name===name) x=o; });
@@ -3664,6 +3706,8 @@ function domOwnerProf(name){
            esc(w.n)+(w.c>1?' ×'+w.c:'')+'</span>';
        }).join('')+'</div></div>';
   }
+  /* ⑤ 全网业绩（省交易平台全量采集，判断风向用） */
+  h+=rperfSec(name);
   var sub='国内重点客户'+(x.rg?' · '+x.rg:'')+(x.main?' · '+x.main:'');
   openUniProf(x.name, sub, h);
 }
@@ -4471,6 +4515,10 @@ function profPage(kind, o){
 
     '</div>';
 
+  /* 2026-10-24 全网业绩：对手/业主在省交易平台的**全量**公告，
+     含不我们做的业务，用于判断风向 —— 与上面「本库中标记录」口径互补 */
+  var rperfHtml=rperfSec(o.name);
+
   return '<div class="prof">'+
     '<div class="prof-hd"><div><h3>'+nm+'</h3>'+
       '<div class="prof-sub"><span class="kbadge '+K.cls+'">'+K.label+'</span>'+
@@ -4479,7 +4527,7 @@ function profPage(kind, o){
               :'<span class="pm-i">本库暂无它的中标公告，下面的企业档案来自公开资料</span>'))+
       (o.latest?'<span class="pm-i">最近动态 '+esc(o.latest)+'</span>':'')+
       '</div></div></div>'+
-    kpiHtml+idHtml+aboutHtml+ctcHtml+tb+distHtml+relHtml+insHtml+act+'</div>';
+    kpiHtml+idHtml+aboutHtml+ctcHtml+tb+rperfHtml+distHtml+relHtml+insHtml+act+'</div>';
 }
 
 /* 对手：从 rivals 数据转成通用档案结构
@@ -5164,6 +5212,9 @@ function boot_main(){
   }
   renderPlat();    // 平台导航（纯静态，很轻）
   refreshTabCounts();
+  /* 全网业绩库后台预载（~KB 级，不阻塞）：首次打开对手/业主画像就有数据，
+     不用在画像函数里搞「加载后重渲」的复杂度 */
+  setTimeout(function(){ need('rivalperf', function(){}); }, 2500);
 }
 /* 地址栏带 #t2 这类深链时再补渲对应面板 */
 (function(){
