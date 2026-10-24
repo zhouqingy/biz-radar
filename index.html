@@ -422,6 +422,8 @@ details.sub li{padding:2px 0}
   border:1px solid var(--bd2);color:var(--tx3);user-select:none}
 .rp-f:hover{color:#1053c9;border-color:#9fc0f0}
 .rp-f.on{background:#1053c9;border-color:#1053c9;color:#fff}
+.rp-gbtn{background:#f0f6ff !important;color:#1053c9 !important;border-color:#bcd4f5 !important}
+.rp-more{display:inline-block;font-size:12px;color:#1053c9;margin:6px 0;cursor:pointer}
 .en-people{margin-top:8px;border:1px solid var(--line);border-radius:8px;background:#fafcff}
 .en-people summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--brand-d);padding:6px 10px;list-style:none}
 .en-people summary::-webkit-details-marker{display:none}
@@ -1251,8 +1253,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610241017"></script>
-<script src="data.items.js?v=202610241017"></script>
+<script src="data.core.js?v=202610241024"></script>
+<script src="data.items.js?v=202610241024"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1317,7 +1319,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610241017';
+var VER='?v=202610241024';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3666,48 +3668,75 @@ function rperfType(t){
   if(/服务|咨询|评估|审计|评审|环评/.test(t))return ['服务·咨询','fw'];
   return ['其他','qt'];
 }
+/* 项目归并键：把「招标公告/更正公告/中标通知书/见证书/合同公告」这些
+   流程性尾巴剥掉，同一条招标的全流程公告归到同一组 ——
+   用户反馈：招完的项目留最新一条就够，想看过程再展开 */
+function rperfBase(t){
+  t=String(t||'').replace(/^\[(招标文件|资格后审|重新招标|重发)[^\]]*\]/,'')
+    .replace(/[[［][A-Za-z0-9\-_\u4e00-\u9fa5]{4,}\]］]\s*$/,'')
+    .replace(/(关于)?[^ ]{0,12}?(招标公告|中标|成交|结果|更正|变更|重新|重发|见证书|中标通知书|合同|资格后审|资格预审|澄清|答疑|公示|公告|通知)[^ ]*$/g,'');
+  return t.replace(/[　\s]/g,'').slice(0,16);
+}
 function rperfSec(name){
   var rec=rperfRecs(name);
   if(!rec || !(rec.items||[]).length) return '';
   var its=rec.items.slice().sort(function(a,b){return String(b.d||'').localeCompare(String(a.d||''))});
-  /* 同项目聚合：「…煤气高效利用改造项目-100MW…监理[A330…001]」这类同一条招标
-     的多个标段/多份文件会把列表刷屏，按标题主干归并，一条为主行 + 「+N 条同项目」 */
-  function baseOf(t){
-    t=String(t||'').replace(/^\[(招标文件|资格后审|重新招标|重发)[^\]]*\]/,'')
-                   .replace(/[[［][A-Za-z0-9\-_\u4e00-\u9fa5]*\]］]?\s*$/,'')  /* 尾部编号 */
-                   .replace(/[-—]\s*(一|二|三|四|五|六|1|2|3)标段.*$/,'')
-                   .replace(/(资格后审|资格预审|监理|施工|设计|勘察)\s*(招标|公告|公示)?.*$/,'');
-    return t.slice(0,18);
-  }
+  /* 归组：同项目一组。组内按日期倒序（最新在上），已招完的默认只露最新一条 */
   var groups=[],gmap={};
   its.forEach(function(x){
-    var b=baseOf(x.t), g=gmap[b];
-    if(!g){ g=gmap[b]={t:x.t,d:x.d,rg:x.rg,url:x.url,tp:rperfType(x.t),same:0}; groups.push(g); }
-    else { g.same++; if(String(x.d||'')>String(g.d||'')){g.d=x.d;} }
+    var b=rperfBase(x.t);
+    if(!b) b=String(x.t||'').slice(0,12);
+    var g=gmap[b];
+    if(!g){ g=gmap[b]={main:x, rows:[x], d:x.d||'', done:0}; groups.push(g); }
+    g.rows.push(x);
+    if(String(x.d||'')>String(g.d)) g.d=x.d;
   });
-  /* 类型统计（按条数，含被聚合的同项目条目） */
-  var tcnt={};
-  its.forEach(function(x){ var k=rperfType(x.t)[1]; tcnt[k]=(tcnt[k]||0)+1; });
-  var TNAME={epc:'EPC·总承包',jl:'监理',kc:'勘察·检测',sj:'设计',sg:'施工',zc:'资产·运营',hw:'货物·设备',fw:'服务·咨询',qt:'其他'};
-  var chips='<span class="rp-f on" data-act="rperfF" data-v="">全部 '+its.length+'</span>'+
+  groups.forEach(function(g){
+    g.rows.sort(function(a,b){return String(b.d||'').localeCompare(String(a.d||''))});
+    g.main=g.rows[0];
+    var allT=g.rows.map(function(x){return x.t||''}).join(' ');
+    g.done=/中标|成交|结果|合同|通知书/.test(g.main.t||'')?1:0;
+  });
+  /* 类型统计（按组） */
+  var tcnt={}, TNAME={epc:'EPC·总承包',jl:'监理',kc:'勘察·检测',sj:'设计',sg:'施工',zc:'资产·运营',hw:'货物·设备',fw:'服务·咨询',qt:'其他'};
+  groups.forEach(function(g){ var k=rperfType(g.main.t)[1]; g.tp=k; tcnt[k]=(tcnt[k]||0)+1; });
+  var chips='<span class="rp-f on" data-act="rperfF" data-v="">全部 '+groups.length+'组</span>'+
     Object.keys(TNAME).filter(function(k){return tcnt[k]}).map(function(k){
       return '<span class="rp-f" data-act="rperfF" data-v="'+k+'">'+TNAME[k]+' '+tcnt[k]+'</span>';
     }).join('');
-  var h='<div class="prof-sec"><h4><i></i>全网业绩 <small>省公共资源交易平台采集 · 与本库口径不同，用于判断风向 · 共 '+
-    its.length+' 条（聚合后 '+groups.length+' 组）</small></h4>'+
+  var SHOW=12, hidden=Math.max(0,groups.length-SHOW);
+  var h='<div class="prof-sec"><h4><i></i>全网业绩 <small>同一项目全流程归为一组，已招完的默认只显示最新中标公告 · 共 '+
+    its.length+' 条公告 / '+groups.length+' 个项目</small></h4>'+
     '<div class="rp-fs">'+chips+'</div>';
-  groups.slice(0,40).forEach(function(g){
-    var meta=[g.d||'', g.rg?g.rg+'交易平台':''].filter(Boolean).join(' · ');
-    h+='<div class="en-pj rp-row" data-rt="'+g.tp[1]+'">'+
-       '<span><i class="rp-t rp-'+g.tp[1]+'">'+g.tp[0]+'</i>'+esc(g.t||'')+
-       (g.same?' <b style="color:var(--tx3)">+'+g.same+' 条同项目</b>':'')+
+  var gi=0;
+  groups.forEach(function(g){
+    gi++;
+    var hid=gi>SHOW;
+    var m=g.main;
+    var tag=g.done?'<i class="rp-t rp-epc">已招完</i>':'<i class="rp-t rp-sg">'+rperfType(m.t)[0]+'</i>';
+    var meta=[m.d||'', m.rg?m.rg+'交易平台':''].filter(Boolean).join(' · ');
+    h+='<div class="rp-grp" data-rt="'+g.tp+'"'+(hid?' style="display:none"':'')+'>'+
+       '<div class="en-pj"><span>'+tag+esc(m.t||'')+
        (meta?'<br><span style="color:var(--tx3);font-size:11px">'+esc(meta)+'</span>':'')+'</span>'+
-       (g.url?'<a href="'+esc(g.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+'</div>';
+       (m.url?'<a href="'+esc(m.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+
+       (g.rows.length>1?'<a href="javascript:void(0)" data-act="rperfG" class="rp-gbtn">全过程 '+g.rows.length+' 条 ▸</a>':'')+
+       '</div>';
+    /* 全过程：默认收起 */
+    if(g.rows.length>1){
+      h+='<div class="rp-sub" style="display:none">';
+      g.rows.forEach(function(x){
+        var mm=[x.d||'', x.rg?x.rg+'平台':''].filter(Boolean).join(' · ');
+        h+='<div class="en-pj" style="padding-left:18px"><span><i class="rp-t">'+rperfType(x.t)[0]+'</i>'+esc(x.t||'')+
+           (mm?'<br><span style="color:var(--tx3);font-size:11px">'+esc(mm)+'</span>':'')+'</span>'+
+           (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+'</div>';
+      });
+      h+='</div>';
+    }
+    h+='</div>';
   });
-  if(groups.length>40) h+='<p style="color:var(--tx3)">仅列最近 40 组，点上面的类型筛选看某一类</p>';
-  h+='<div class="prof-note">这一栏是它<b>所有</b>的公开业绩（含监理/货物/资产等我们不做的业务，'+
-     '用类型标签区分），和上面「本库中标记录」（只含我们能做的）口径不同 —— '+
-     '看「EPC·总承包」「设计」两类就能判断它的主战场和风向。</div></div>';
+  if(hidden>0) h+='<a href="javascript:void(0)" data-act="rperfMore" class="rp-more">展开更早的 '+hidden+' 个项目 ▾</a>';
+  h+='<div class="prof-note">已招完的项目默认只显示最新中标公告；点「全过程 N 条」看它的招标公告→更正→中标全流程（判断它从挂牌到定标要多久）。'+
+     '灰色徽章（监理/货物/资产等）不是我们的业务，看「EPC·总承包」「设计」「施工」就行。</div></div>';
   return h;
 }
 /* 全网业绩段：类型筛选 chips（事件委托，同 sideAll 一套打法） */
@@ -3717,9 +3746,30 @@ document.addEventListener('click', function(ev){
   var sec=f.closest('.prof-sec'); if(!sec) return;
   [].forEach.call(sec.querySelectorAll('.rp-f'),function(x){x.classList.toggle('on',x===f)});
   var v=f.getAttribute('data-v');
-  [].forEach.call(sec.querySelectorAll('.rp-row'),function(r){
+  [].forEach.call(sec.querySelectorAll('.rp-grp'),function(r){
     r.style.display = (!v || r.getAttribute('data-rt')===v) ? '' : 'none';
   });
+});
+/* 「全过程 N 条」展开/收起 */
+document.addEventListener('click', function(ev){
+  var g=ev.target.closest ? ev.target.closest('[data-act="rperfG"]') : null;
+  if(!g) return;
+  ev.preventDefault();
+  var sub=g.closest('.en-pj').nextElementSibling;
+  if(sub && sub.classList.contains('rp-sub')){
+    var open=sub.style.display==='none';
+    sub.style.display=open?'':'none';
+    g.textContent=open?'收起 ▴':'全过程 '+sub.querySelectorAll('.en-pj').length+' 条 ▸';
+  }
+});
+/* 「展开更早的 N 个项目」：把隐藏组全部显示 */
+document.addEventListener('click', function(ev){
+  var m=ev.target.closest ? ev.target.closest('[data-act="rperfMore"]') : null;
+  if(!m) return;
+  ev.preventDefault();
+  var sec=m.closest('.prof-sec');
+  [].forEach.call(sec.querySelectorAll('.rp-grp'),function(r){ r.style.display=''; });
+  m.style.display='none';
 });
 
 /* 评标出场记录：南通（后续各市）候选人公示抽出来的情报——
