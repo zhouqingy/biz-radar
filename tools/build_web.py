@@ -1464,10 +1464,16 @@ try:
     # ③ 安徽列表标题含单位名（如「G344…淮北矿业…」）→ 业主方业绩
     _nperf = _neval = 0
     for _fn in ('nt_lifecycle.json', 'ah_lifecycle.json', 'js_lifecycle.json'):
-        _ntf = os.path.join(ROOT, 'raw', _fn)
-        if not os.path.exists(_ntf):
+        _nt = None
+        for _ntf in (os.path.join(ROOT, 'raw', _fn), os.path.join(ROOT, 'raw', _fn + '.gz')):
+            if os.path.exists(_ntf):
+                import gzip as _gz
+                _op = _gz.open if _ntf.endswith('.gz') else open
+                _nt = _op(_ntf, 'rt' if _ntf.endswith('.gz') else 'r', encoding='utf-8' if _ntf.endswith('.gz') else 'utf-8')
+                _nt = json.load(_nt).get('items') or []
+                break
+        if _nt is None:
             continue
-        _nt = json.load(open(_ntf, encoding='utf-8')).get('items') or []
         _plat = ('南通市公共资源交易平台' if _fn.startswith('nt_')
                  else '安徽省公共资源交易监管平台' if _fn.startswith('ah_')
                  else '江苏省公共资源交易平台')
