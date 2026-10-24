@@ -406,6 +406,22 @@ details.sub li{padding:2px 0}
 .en-pj a{flex:0 0 auto;font-size:11px;padding:1px 7px;border-radius:5px;text-decoration:none;
   border:1px solid #cfd9e6;background:#fbfdff;color:#1053c9;white-space:nowrap}
 .en-pj a:hover{background:#1053c9;color:#fff;border-color:#1053c9}
+/* 全网业绩：类型徽章 + 筛选 chips（Element 风格） */
+.rp-t{display:inline-block;font-style:normal;font-size:10px;line-height:1;padding:3px 6px;
+  border-radius:4px;margin-right:6px;vertical-align:1px;background:#eef4ff;color:#3d6fd4}
+.rp-jl{background:#f4f4f5;color:#909399}   /* 监理：灰（非主业） */
+.rp-kc{background:#f4f4f5;color:#909399}   /* 勘察检测：灰 */
+.rp-sj{background:#fdf6ec;color:#b88230}   /* 设计：橙 */
+.rp-sg{background:#f0f9eb;color:#529b2e}   /* 施工：绿 */
+.rp-zc{background:#f4f4f5;color:#909399}   /* 资产运营：灰（无效信息） */
+.rp-hw{background:#f4f4f5;color:#909399}   /* 货物设备：灰 */
+.rp-fw{background:#f4f4f5;color:#909399}   /* 服务咨询：灰 */
+.rp-epc{background:#ecf5ff;color:#1053c9;font-weight:600}  /* EPC：蓝主色 */
+.rp-fs{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 2px}
+.rp-f{font-size:11px;padding:3px 10px;border-radius:12px;cursor:pointer;
+  border:1px solid var(--bd2);color:var(--tx3);user-select:none}
+.rp-f:hover{color:#1053c9;border-color:#9fc0f0}
+.rp-f.on{background:#1053c9;border-color:#1053c9;color:#fff}
 .en-people{margin-top:8px;border:1px solid var(--line);border-radius:8px;background:#fafcff}
 .en-people summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--brand-d);padding:6px 10px;list-style:none}
 .en-people summary::-webkit-details-marker{display:none}
@@ -1235,8 +1251,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610240934"></script>
-<script src="data.items.js?v=202610240934"></script>
+<script src="data.core.js?v=202610240943"></script>
+<script src="data.items.js?v=202610240943"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1301,7 +1317,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610240934';
+var VER='?v=202610240943';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3637,23 +3653,75 @@ function rperfRecs(name){
   }
   return null;
 }
+/* 招标类型划分：营销经理一眼看出这条公告跟不跟我们有关 */
+function rperfType(t){
+  t=t||'';
+  if(/EPC|工程总承包|总承包/.test(t))        return ['EPC·总承包','epc'];
+  if(/监理/.test(t))                         return ['监理','jl'];
+  if(/勘察|检测|试验|测评/.test(t))          return ['勘察·检测','kc'];
+  if(/设计/.test(t))                         return ['设计','sj'];
+  if(/施工|建造|改造工程|安装工程/.test(t))  return ['施工','sg'];
+  if(/资产|租赁|外包|物业|产权|处置/.test(t))return ['资产·运营','zc'];
+  if(/采购|设备|货物|供货|材料|物资/.test(t))return ['货物·设备','hw'];
+  if(/服务|咨询|评估|审计|评审|环评/.test(t))return ['服务·咨询','fw'];
+  return ['其他','qt'];
+}
 function rperfSec(name){
   var rec=rperfRecs(name);
   if(!rec || !(rec.items||[]).length) return '';
   var its=rec.items.slice().sort(function(a,b){return String(b.d||'').localeCompare(String(a.d||''))});
-  var h='<div class="prof-sec"><h4><i></i>全网业绩 <small>省公共资源交易平台采集 · 与本库口径不同，用于判断风向 · 共 '+
-    its.length+' 条'+(rec.kw?' · 检索词「'+esc(rec.kw)+'」':'')+'</small></h4>';
-  its.slice(0,15).forEach(function(x){
-    var meta=[x.d||'', x.rg?x.rg+'交易平台':''].filter(Boolean).join(' · ');
-    h+='<div class="en-pj"><span>'+esc(x.t||'')+
-       (meta?'<br><span style="color:var(--tx3);font-size:11px">'+esc(meta)+'</span>':'')+'</span>'+
-       (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+'</div>';
+  /* 同项目聚合：「…煤气高效利用改造项目-100MW…监理[A330…001]」这类同一条招标
+     的多个标段/多份文件会把列表刷屏，按标题主干归并，一条为主行 + 「+N 条同项目」 */
+  function baseOf(t){
+    t=String(t||'').replace(/^\[(招标文件|资格后审|重新招标|重发)[^\]]*\]/,'')
+                   .replace(/[[［][A-Za-z0-9\-_\u4e00-\u9fa5]*\]］]?\s*$/,'')  /* 尾部编号 */
+                   .replace(/[-—]\s*(一|二|三|四|五|六|1|2|3)标段.*$/,'')
+                   .replace(/(资格后审|资格预审|监理|施工|设计|勘察)\s*(招标|公告|公示)?.*$/,'');
+    return t.slice(0,18);
+  }
+  var groups=[],gmap={};
+  its.forEach(function(x){
+    var b=baseOf(x.t), g=gmap[b];
+    if(!g){ g=gmap[b]={t:x.t,d:x.d,rg:x.rg,url:x.url,tp:rperfType(x.t),same:0}; groups.push(g); }
+    else { g.same++; if(String(x.d||'')>String(g.d||'')){g.d=x.d;} }
   });
-  if(its.length>15) h+='<p style="color:var(--tx3)">仅列最近 15 条，共 '+its.length+' 条（按日期倒序）</p>';
-  h+='<div class="prof-note">这一栏是它<b>所有</b>的公开业绩（含市政/房建等我们不做的业务），'+
-     '和上面「本库中标记录」（只含我们能做的）口径不同 —— 对比两栏就能看出它的主战场和风向。</div></div>';
+  /* 类型统计（按条数，含被聚合的同项目条目） */
+  var tcnt={};
+  its.forEach(function(x){ var k=rperfType(x.t)[1]; tcnt[k]=(tcnt[k]||0)+1; });
+  var TNAME={epc:'EPC·总承包',jl:'监理',kc:'勘察·检测',sj:'设计',sg:'施工',zc:'资产·运营',hw:'货物·设备',fw:'服务·咨询',qt:'其他'};
+  var chips='<span class="rp-f on" data-act="rperfF" data-v="">全部 '+its.length+'</span>'+
+    Object.keys(TNAME).filter(function(k){return tcnt[k]}).map(function(k){
+      return '<span class="rp-f" data-act="rperfF" data-v="'+k+'">'+TNAME[k]+' '+tcnt[k]+'</span>';
+    }).join('');
+  var h='<div class="prof-sec"><h4><i></i>全网业绩 <small>省公共资源交易平台采集 · 与本库口径不同，用于判断风向 · 共 '+
+    its.length+' 条（聚合后 '+groups.length+' 组）</small></h4>'+
+    '<div class="rp-fs">'+chips+'</div>';
+  groups.slice(0,40).forEach(function(g){
+    var meta=[g.d||'', g.rg?g.rg+'交易平台':''].filter(Boolean).join(' · ');
+    h+='<div class="en-pj rp-row" data-rt="'+g.tp[1]+'">'+
+       '<span><i class="rp-t rp-'+g.tp[1]+'">'+g.tp[0]+'</i>'+esc(g.t||'')+
+       (g.same?' <b style="color:var(--tx3)">+'+g.same+' 条同项目</b>':'')+
+       (meta?'<br><span style="color:var(--tx3);font-size:11px">'+esc(meta)+'</span>':'')+'</span>'+
+       (g.url?'<a href="'+esc(g.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+'</div>';
+  });
+  if(groups.length>40) h+='<p style="color:var(--tx3)">仅列最近 40 组，点上面的类型筛选看某一类</p>';
+  h+='<div class="prof-note">这一栏是它<b>所有</b>的公开业绩（含监理/货物/资产等我们不做的业务，'+
+     '用类型标签区分），和上面「本库中标记录」（只含我们能做的）口径不同 —— '+
+     '看「EPC·总承包」「设计」两类就能判断它的主战场和风向。</div></div>';
   return h;
 }
+/* 全网业绩段：类型筛选 chips（事件委托，同 sideAll 一套打法） */
+document.addEventListener('click', function(ev){
+  var f=ev.target.closest ? ev.target.closest('[data-act="rperfF"]') : null;
+  if(!f) return;
+  var sec=f.closest('.prof-sec'); if(!sec) return;
+  [].forEach.call(sec.querySelectorAll('.rp-f'),function(x){x.classList.toggle('on',x===f)});
+  var v=f.getAttribute('data-v');
+  [].forEach.call(sec.querySelectorAll('.rp-row'),function(r){
+    r.style.display = (!v || r.getAttribute('data-rt')===v) ? '' : 'none';
+  });
+});
+
 function domOwnerProf(name){
   var x=null;
   arr(D.domestic).forEach(function(o){ if(o.name===name) x=o; });
