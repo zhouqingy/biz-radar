@@ -839,6 +839,10 @@ details.sub li{padding:2px 0}
 .ep-sec p{font-size:12.5px;color:var(--tx2);line-height:1.8;margin:3px 0}
 .ep-sec p b{color:var(--tx3);font-weight:600;margin-right:4px}
 .ep-sec table{width:100%;border-collapse:collapse;font-size:12.5px}
+/* 找商机详情层：摘要全文可滚动（2026-10-24） */
+.pj-fullsnip{max-height:46vh;overflow-y:auto;background:var(--el-fill);border-radius:8px;
+  padding:11px 13px;font-size:13px;line-height:1.85;color:var(--tx2);white-space:pre-wrap;
+  word-break:break-all}
 .ep-sec th{text-align:left;color:var(--tx3);font-weight:600;padding:5px 10px;width:30%;
   vertical-align:top;border-top:1px dashed var(--line)}
 .ep-sec td{padding:5px 10px;line-height:1.7;border-top:1px dashed var(--line);color:var(--tx)}
@@ -2113,7 +2117,9 @@ function cardHtml(x){
 
       '</div>';
   }
-  return '<div class="pj '+GCLASS[x.g]+'">'+
+  /* 2026-10-24：卡片可点 → 弹详情层（openPjDetail）。整卡 cursor:pointer，
+     点到 a/button（原文、工商信息、附件等）时不触发弹层——那些有自己的去处。 */
+  return '<div class="pj '+GCLASS[x.g]+'" data-pjid="'+esc(x.id||'')+'" style="cursor:pointer">'+
     '<div class="pj-top"><span class="gbadge '+x.g+'">'+GTXT[x.g]+'</span>'+
       '<span class="gscore">'+x.sc+'分</span>'+
       (x.nw?'<span class="newdot">NEW</span>':'')+mv+'</div>'+
@@ -2415,6 +2421,9 @@ function render(){
   var tot=Math.ceil(a.length/PS)||1;
   if(F.page>tot)F.page=tot;
   var pg=a.slice((F.page-1)*PS,F.page*PS);
+  /* 2026-10-24：登记 本页卡片id→条目 映射，点卡片弹详情层用（openPjDetail） */
+  window._pjMap=window._pjMap||{};
+  pg.forEach(function(x){ if(x.id) window._pjMap[x.id]=x; });
   el('grid').innerHTML=pg.length?pg.map(cardHtml).join(''):emptyDiag();
   // 分页
   var h='';
@@ -3308,6 +3317,56 @@ document.addEventListener('click',function(e){
   closeUniProf();
   searchFor(kw);
 });
+/* ── 找商机卡片详情层（2026-10-24）──────────
+   用户反馈：卡片为了「一排等高」把标题/摘要全锁 2 行截断，「不能滑动根本看不清楚」。
+   改法：卡片保持整齐不变，点卡片任意处弹全屏详情层——完整标题、全摘要可滚动、
+   业主/中标/金额/阶段链/原文链接齐活。复用通用画像弹层 openUniProf。 */
+function openPjDetail(x){
+  if(!x) return;
+  var GT={A:'A·战略必争',B:'B·重点跟踪',C:'C·一般机会',D:'D·其他'};
+  var sub=(GT[x.g]||x.g||'')+' · '+x.sc+'分 · '+(x.st||'');
+  var h='';
+  // 金额
+  if(x.amt!=null) h+='<div style="font-size:26px;font-weight:800;color:var(--red);margin:10px 0 2px">'+
+    money(x.amt)+(x.amtTxt?'<span style="font-size:12px;font-weight:400;color:var(--tx3);margin-left:10px">'+esc(x.amtTxt)+'</span>':'')+'</div>';
+  // 元信息块
+  h+='<div class="ep-sec">';
+  if(x.buyer) h+='<p><b>业主</b>'+esc(x.buyer)+'</p>';
+  if(x.win) h+='<p><b>中标</b><span style="color:#14713a;font-weight:600">'+esc(x.win)+'</span></p>';
+  h+='<p><b>来源</b>'+esc(x.p||'—')+' · '+esc(x.d||'')+(x.dl?' · 截止 '+esc(x.dl):'')+'</p>';
+  if(x.expect) h+='<p style="color:#0d9b6c"><b>预计招标</b>'+esc(x.expect)+'</p>';
+  if(x.ind&&x.ind!=='其他') h+='<p><b>行业</b>'+esc(x.ind)+'</p>';
+  if(x.sG) h+='<p><b>命中词</b>'+esc(x.sG)+'</p>';
+  h+='</div>';
+  // 摘要全文（可滚动）
+  if(x.snip) h+='<div class="ep-sec"><b>公告摘要（全文）</b><div class="pj-fullsnip">'+esc(x.snip)+'</div></div>';
+  // 阶段链（全过程，展开显示，一眼看全不漏项）
+  var ah=(x.hist||[]).slice().sort(function(a,b){return (a.d||'').localeCompare(b.d||'')});
+  if(ah.length) h+='<div class="ep-sec"><b>全过程 '+ah.length+' 条</b>'+ah.map(function(hh){
+      return '<p>'+(hh.url?'<a href="'+esc(fullUrl(hh.url))+'" target="_blank" rel="noopener">'+esc(hh.st)+' '+esc(hh.d||'')+' ↗</a>':esc(hh.st)+' '+esc(hh.d||''))+'</p>';
+    }).join('')+'</div>';
+  // 附件
+  if(x.files&&x.files.length) h+='<div class="ep-sec"><b>附件 '+x.files.length+' 个</b>'+x.files.map(function(f){
+      return '<p>'+(f.u?'<a href="'+esc(f.u)+'" target="_blank" rel="noopener">'+esc(f.n||'附件')+' ↗</a>':esc(f.n||'附件'))+'</p>';
+    }).join('')+'</div>';
+  // 操作行：原文 / 业主工商 / 官方搜索兜底
+  var qcn=String(x.buyer||'').replace(/（[^）]*）/g,'').replace(/\((?:[^)]*(?:项目单位|代建|业主|招标人|采购代理|联合体)[^)]*)\)/gi,'').replace(/\s+/g,'').trim();
+  h+='<div class="ep-sec pj-act" style="padding-top:12px">'+
+    (x.url?'<a href="'+esc(fullUrl(x.url))+'" target="_blank" rel="noopener">公告原文 ↗</a>':'')+
+    (qcn.length>=4?'<a href="https://www.qcc.com/web/search?key='+encodeURIComponent(qcn)+'" target="_blank" rel="noopener nofollow">查业主工商信息 ↗</a>':'')+
+    (x.linkbad?'<a href="https://www.baidu.com/s?wd='+encodeURIComponent(x.t.replace(/[\[\]]/g,''))+'" target="_blank" rel="noopener nofollow">搜官方源 ↗</a>':'')+
+    '</div>';
+  openUniProf(x.t||'', sub, h);
+}
+/* 事件委托：点到卡片本体（非 a/button）就弹详情 */
+document.addEventListener('click',function(e){
+  var c=(e.target&&e.target.closest)?e.target.closest('#grid .pj'):null;
+  if(!c) return;
+  if(e.target.closest('a,button,details,summary,[data-act]')) return;
+  var x=window._pjMap&&window._pjMap[c.getAttribute('data-pjid')];
+  if(x) openPjDetail(x);
+});
+
 /* Esc 关弹层：百科弹层和通用弹层都收，谁开着关谁 */
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'||e.keyCode===27){
