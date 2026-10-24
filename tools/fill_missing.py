@@ -83,10 +83,24 @@ def main():
     provs = [args.prov] if args.prov else list(PROV_FILE)
     grand = {'n': 0, 'win': 0, 'buyer': 0, 'amt': 0, 'phone': 0, 'fail': 0}
 
+    # 2026-10-24：把 raw/weekly/ 也纳入补全范围。
+    # 那天新加的 pull_full_daily.py 全量翻页通道，产出都落在 weekly/ 下
+    # （一次 1200+ 条，是现在增量的主力），但当时 fill_missing 只认四个老文件，
+    # 于是这批新数据一条都没被补过字段——下游 judge 看不到金额，
+    # 「关注档」判定自然常年卡在 15 条上不去。
+    # 现在按「省文件 + weekly 全部文件」两份一起扫，写回各自原文件。
+    files = []
     for prov in provs:
         fp = os.path.join(RAW, PROV_FILE[prov])
-        if not os.path.exists(fp):
-            continue
+        if os.path.exists(fp):
+            files.append((prov, fp))
+    _wd = os.path.join(RAW, 'weekly')
+    if os.path.isdir(_wd):
+        for fn in sorted(os.listdir(_wd)):
+            if fn.endswith('.json'):
+                files.append(('weekly:' + fn, os.path.join(_wd, fn)))
+
+    for prov, fp in files:
         arr = json.load(open(fp, encoding='utf-8'))
         # 候选：缺关键字段 + 有 url + 是官方站 + 不是空壳
         cand = []
