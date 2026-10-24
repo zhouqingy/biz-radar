@@ -28,6 +28,7 @@ D = json.load(open(os.path.join(ROOT, 'merged.json'), encoding='utf-8'))
 #   ≥1亿 → 进；0.3~1亿 必须「核心工艺词+总承包」双命中；<0.3亿 → 不进。
 import seg_biz as SB
 import seg_match as SM
+import biz_rules as BR   # 2026-10-23：全链路唯一规则源，找商机严筛口径从这来
 
 # ---- 死链标记（2026-10-21） ----
 # 用户反馈「宝山那个项目还是跳转不了」。根因不是链接写错，是采集源本身是空壳站：
@@ -289,7 +290,37 @@ def bucket(st):
     return 'tender'
 
 
+# ── 中标单位取名白名单清洗（2026-10-24）────────────────────────────
+# 对手榜 TOP1 常年挂着「合同价款」，19 次——那是从公告正文里正则抽出来的
+# 非单位名。它占了「谁在拿单」第一名，营销经理会以为真有这么个单位。
+# 判定很直接：单位名必定以法定后缀结尾（公司/集团/院/中心/股份/总厂等），
+# 抽出来的东东没有后缀，也不含 ()（）里的角色注释，就当这条没抽到，留空。
+_UNIT_SUFFIX = ('有限公司', '股份', '集团', '设计院', '研究院', '总院', '工程局',
+                '总公司', '公司', '总厂', '分公司', '中心', '事务所', '联合体',
+                '有限责任', '工程队', '研究院所', '大學', '大学')
+
+# 明确不是单位名的脏值——这些词在公告里高频出现且容易被正则当成单位抓走
+_BAD_UNIT = ('合同价款', '详见', '招标人', '采购人', '中标人', '第一中标', '中标价',
+             '无 ', '暂定', '合计', '人民币', '万元', '亿元', '未知', '待定', '-', '/')
+
+
+def _clean_unit(w):
+    w = (w or '').strip()
+    if not w:
+        return ''
+    # 长度异常：要么是脏词，要么是被截断的半个名
+    if len(w) < 4 or len(w) > 60:
+        return ''
+    if any(b in w for b in _BAD_UNIT):
+        return ''
+    # 必须含法定单位后缀——「合同价款」「三通一平」这类自然落下来就是空
+    if not any(u in w for u in _UNIT_SUFFIX):
+        return ''
+    return w
+
+
 brief = []
+_nDrop = [0]      # 被 judge 判纯噪声、连库都不进 的条数
 for r in D:
     # ── items 瘦身（2026-10-21 用户反馈「加载时间太长」）────────────────
     # items 原来 1.17MB，逐字段量过后发现三处纯浪费：
@@ -303,6 +334,16 @@ for r in D:
             _u = '#' + _code + _u[len(_pre):]
             break
     # 业务分层：sg=层级短码（省体积），sG=命中词，sR=层级序号，hm=是否主场
+    # ── 业务规则判定（2026-10-23）───────────────────────────────
+    # judge() 是采集/构建共用的唯一规则源：
+    #   keep=False  → 纯噪声（无业务归属、无业主、无中标单位），连库都不进
+    #   bucket      → 三档：lead（前端信号）/ tender / win
+    #   investable  → 能不能进「找商机」严筛（iv=1）；同业/客户页签全留不受影响
+    _j = BR.judge(r['t'], r.get('snip') or '', r.get('amtY'),
+                  r.get('st') or '', r.get('buyer') or '', r.get('win') or '')
+    if not _j['keep']:
+        _nDrop[0] += 1
+        continue
     _si = seg_of(r)
     b = {
         'id': r['id'], 't': r['t'], 'rg': r['rg'], 'city': r['city'], 'st': r['st'],
@@ -310,7 +351,7 @@ for r in D:
         'hm': 1 if SM.is_home(_si['seg']) else 0,
         # biz/sub 保留：前端 CSV、旧筛选还有零散引用，且和上游数据对得上时便于回溯
         'biz': r.get('biz') or '', 'sub': r.get('sub') or '',
-        'buyer': r['buyer'], 'win': r['win'],
+        'buyer': r['buyer'], 'win': _clean_unit(r['win']),
         'amt': r['amtY'], 'amtTxt': r['amtTxt'][:40], 'd': r['d'], 'dl': r['dl'], 'p': r['p'],
         'url': _u, 'mode': r['mode'], 'snip': (r['snip'] or '')[:180],
         'sc': round(r['score']), 'nw': 1 if r.get('_new') else 0,
@@ -320,7 +361,11 @@ for r in D:
         'hist': [{'st': h['st'], 'd': h['d'], 'url': h['url']} for h in (r.get('hist') or [])][:2],
         # 分区 + 关注标记：前端据此分成「能投的标 / 已出的结果 / 立项线索」三栏，
         # 小项目收进「不关注」统计，不占主列表位置。
-        'bk': bucket(r['st']),
+        'bk': _j['bucket'],
+        'iv': 1 if _j['investable'] else 0,
+        # dp=被严筛剔除的原因（只在 iv=0 时有值）。「全部」档里给人一个说法，
+        # 不然用户看到「杭州地铁防滑垫」躺在库里会以为过滤没做。
+        'dp': ('' if _j['investable'] else (_j['drop'] or '不符合找商机口径'))[:46],
         'w': 1 if is_watch(r) else 0,
         # linkbad=1 表示原文链接打不开（空壳站/登录墙），前端不给主按钮，改给搜索入口
         # 注意别用 dl：那个字段已经是「投标截止日」了
@@ -1236,7 +1281,9 @@ data = {
         'at': time.strftime('%H:%M'),
         # 溯源用：源文件（weekly/early）里的最新日期，可能早于构建日
         'dataAsOf': _latest_weekly,
-        'total': len(D),
+        'total': len(brief),          # 入库项目（过完业务规则，纯噪声不进）
+        'rawTotal': len(D),           # 原始抓取公告数（过滤前）
+        'dropped': _nDrop[0],         # 判为纯噪声剔除的条数
         'new': sum(1 for r in D if r.get('_new')),
         'withAmt': sum(1 for r in D if r['amt']),
         'withWin': sum(1 for r in D if r['win']),
@@ -1255,13 +1302,15 @@ data = {
     # 用户会以为统计造假。这里在构建期算好「主场口径」的条数，前端显示成 22/10，两个数同屏。
     'watch': {
         'amt': WATCH_AMT,
-        'tender': sum(1 for b in brief if b['bk'] == 'tender' and b['w']),
-        'win': sum(1 for b in brief if b['bk'] == 'win' and b['w']),
-        'lead': sum(1 for b in brief if b['bk'] == 'lead'),
-        'tenderAll': sum(1 for b in brief if b['bk'] == 'tender'),
-        'winAll': sum(1 for b in brief if b['bk'] == 'win'),
-        'tenderHm': sum(1 for b in brief if b['bk'] == 'tender' and b['w'] and b.get('hm')),
-        'winHm': sum(1 for b in brief if b['bk'] == 'win' and b['w'] and b.get('hm')),
+        # 2026-10-23 起 tender/win/lead 全部叠加 iv（找商机严筛）：
+        # judge 判不可投的（纯货物/分包施工/管网/后期服务/兼营/不在12层级）不进这三档
+        'tender': sum(1 for b in brief if b['bk'] == 'tender' and b['w'] and b.get('iv')),
+        'win': sum(1 for b in brief if b['bk'] == 'win' and b['w'] and b.get('iv')),
+        'lead': sum(1 for b in brief if b['bk'] == 'lead' and b.get('iv')),
+        'tenderAll': sum(1 for b in brief if b['bk'] == 'tender' and b.get('iv')),
+        'winAll': sum(1 for b in brief if b['bk'] == 'win' and b.get('iv')),
+        'tenderHm': sum(1 for b in brief if b['bk'] == 'tender' and b['w'] and b.get('hm') and b.get('iv')),
+        'winHm': sum(1 for b in brief if b['bk'] == 'win' and b['w'] and b.get('hm') and b.get('iv')),
         'all': len(brief),
     },
     'buyers': buyers,
@@ -1315,7 +1364,7 @@ def dump(name, obj):
 # 白名单是列式打包的唯一入口，加了 brief 字段必须同步加这里。
 ITEM_COLS = ['id', 't', 'st', 'g', 'sg', 'sG', 'sR', 'hm', 'ind', 'rg', 'city', 'buyer', 'win',
              'amt', 'amtTxt', 'd', 'dl', 'p', 'url', 'mode', 'snip', 'sc', 'nw',
-             'early', 'expect', 'bk', 'w', 'linkbad']
+             'early', 'expect', 'bk', 'w', 'linkbad', 'iv', 'dp']
 _its = data['items']
 _cols = {k: [] for k in ITEM_COLS}
 _ext = {}
@@ -1395,6 +1444,86 @@ def dump_items_split():
     return len(s.encode('utf-8'))
 
 
+# 2026-10-23 事故修复：dump_items_split() 定义了却从没被调用，
+# data.items.js（首屏 42 条切片）停留在 10-21 的旧文件——首屏用户看到的
+# 「能投的标 / 已出结果」一直是两天前的数据，只有点「立项线索 / 全部」
+# 触发 chunk 懒加载才是新的。现在构建期显式调用一次。
+dump_items_split()
+
+# 2026-10-24 对手/业主「全网业绩库」：crawl_rival_perf.py 单独采集，
+# 物理隔离进 data.rivalperf.js（window.DATA_RIVALPERF），绝不混入找商机库
+def _rname_norm(s):
+    return re.sub(r'[（）()；;\s，,]', '', s or '')
+
+try:
+    _rp = json.load(open(os.path.join(ROOT, 'raw', 'rival_perf.json'), encoding='utf-8'))
+    _db = _rp.get('db') or {}
+    # ── 城市全生命周期并网（南通 + 安徽，多城市模板）──────────
+    # ① 中标/合同/业主归档 → 各单位「全网业绩」追加条目
+    # ② 候选人公示 → 「评标出场记录」（南通有详情才有 cands）
+    # ③ 安徽列表标题含单位名（如「G344…淮北矿业…」）→ 业主方业绩
+    _nperf = _neval = 0
+    for _fn in ('nt_lifecycle.json', 'ah_lifecycle.json', 'js_lifecycle.json'):
+        _ntf = os.path.join(ROOT, 'raw', _fn)
+        if not os.path.exists(_ntf):
+            continue
+        _nt = json.load(open(_ntf, encoding='utf-8')).get('items') or []
+        _plat = ('南通市公共资源交易平台' if _fn.startswith('nt_')
+                 else '安徽省公共资源交易监管平台' if _fn.startswith('ah_')
+                 else '江苏省公共资源交易平台')
+        _rgv = ('南通' if _fn.startswith('nt_')
+                else '安徽' if _fn.startswith('ah_') else '江苏')
+        _norms = {k: _rname_norm(k) for k in _db}
+        for _x in _nt:
+            _det = _x.get('detail') or {}
+            _date = _x.get('d') or ''
+            _title = _x.get('t') or ''
+            _row = {'t': _title, 'd': _date, 'rg': _rgv,
+                    'p': _plat, 'url': _x.get('url')}
+            _cands = _det.get('cands') or []
+            _winner = _rname_norm(_det.get('win') or (_cands[0]['n'] if _cands else ''))
+            for _nm, _rec in _db.items():
+                _kn = _norms[_nm]
+                if not _kn or len(_kn) < 5:
+                    continue
+                _hit = ''
+                if _winner and (_kn in _winner or _winner in _kn):
+                    _hit = 'win'
+                elif _kn in _rname_norm(_det.get('buyer') or ''):
+                    _hit = 'buyer'
+                # 安徽：没有详情，靠标题匹配（业主名通常在公告标题里）
+                if not _hit and not _fn.startswith('nt_') and _kn in _rname_norm(_title):
+                    _hit = 'title'
+                if _hit:
+                    _ex = dict(_row)
+                    _seen = {i['t'] for i in _rec.get('items') or []}
+                    if _title and _title not in _seen:
+                        _rec.setdefault('items', []).append(_ex)
+                        _rec['n'] = len(_rec['items'])
+                        _nperf += 1
+                # ② 评标出场（含没中的）：cat=cand 才有 cands
+                if _x.get('cat') == 'cand' and _cands:
+                    for _ci, _c in enumerate(_cands):
+                        _cn = _rname_norm(_c.get('n') or '')
+                        _parts = [_cn] + [_rname_norm(p) for p in re.split(r'[;；]', _c.get('n') or '')]
+                        if any(_kn in p or p in _kn for p in _parts if len(p) >= 5):
+                            _rec.setdefault('eval', []).append({
+                                't': _title, 'd': _date, 'url': _x.get('url'),
+                                'rank': _det.get('win') and (_ci + 1) or 0,
+                                'won': 1 if (_winner and (_kn in _winner or _winner in _kn)) else 0,
+                                'quote': _c.get('quote') or 0,
+                                'win_amt': _det.get('win_amt') or 0,
+                                'control': _det.get('control') or 0,
+                                'nCands': len(_cands),
+                            })
+                            _neval += 1
+                            break
+        print('并网[%s]: 累计业绩 +%d, 评标出场 +%d' % (_fn, _nperf, _neval))
+    _n = dump('rivalperf', {'updated': _rp.get('updated'), 'db': _db})
+    print('rivalperf: %d 家, %.0fKB' % (len(_db), _n / 1024))
+except Exception as e:
+    print('rival_perf 读取失败(不致命):', e)
+
 _core = {k: data[k] for k in ('meta', 'metals', 'platforms', 'watch', 'domStat') if k in data}
 # org 模块再拆一层（2026-10-21 四轮提速）：
 # graph（业主图谱 665KB）只有「客户与业主 → 业主图谱」这个子页才用，
@@ -1402,6 +1531,18 @@ _core = {k: data[k] for k in ('meta', 'metals', 'platforms', 'watch', 'domStat')
 # 单独拆成 data.graph.js，进图谱子页时才拉。
 _org = {k: data[k] for k in ('rivals', 'buyers', 'latent', 'domestic', 'competitors',
                              'clients', 'partners') if k in data}
+# 单位百科（2026-10-23）：有色设计院 / 化工院 / 中冶系 / 直接对手，共 37 家。
+# 用户点名要的——「海外除了找业主还要找合作伙伴」「刚搞营销需要熟悉中冶系」。
+# 50KB 跟 org 一起下发，不单独开模块（单独开反而多一次请求）。
+_ency_path = os.path.join(ROOT, 'raw', 'units_encyclopedia.json')
+if os.path.exists(_ency_path):
+    try:
+        _org['ency'] = json.load(open(_ency_path, encoding='utf-8'))
+        print('单位百科：%d 组 %d 家'
+              % (len(_org['ency'].get('groups', [])),
+                 sum(len(g.get('units', [])) for g in _org['ency'].get('groups', []))))
+    except Exception as _e:
+        print('⚠ raw/units_encyclopedia.json 读失败，跳过：', _e)
 _graph_mod = {'graph': data['graph']} if 'graph' in data else {}
 _news = {k: data[k] for k in ('trends', 'digest', 'wechat', 'overseas') if k in data}
 _chunk_total, _chunk_meta = dump_item_chunks()
