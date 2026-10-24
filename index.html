@@ -1253,8 +1253,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610241024"></script>
-<script src="data.items.js?v=202610241024"></script>
+<script src="data.core.js?v=202610241050"></script>
+<script src="data.items.js?v=202610241050"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1319,7 +1319,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610241024';
+var VER='?v=202610241050';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3839,17 +3839,16 @@ function domOwnerProf(name){
       h+='<div class="en-pj"><span><i class="rp-t rp-'+_tp[1]+'">'+_tp[0]+'</i>'+esc(it.t||'')+(it.amt?' <b>'+money(it.amt)+'</b>':'')+
          (meta?'<br><span style="color:var(--tx3);font-size:11px">'+esc(meta)+'</span>':'')+'</span>'+
          (it.url?'<a href="'+esc(it.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+
-         '<a href="javascript:void(0)" data-sf="'+esc(String(it.t||'').slice(0,8))+'">库内 🔍</a></div>';
+         '</div>';
     });
     if(x.items.length>20) h+='<p style="color:var(--tx3)">仅列前 20 条，共 '+x.items.length+' 条</p>';
     h+='</div>';
   }
   /* ④ 常中标单位：营销最想看的一段 */
   if((x.wins||[]).length){
-    h+='<div class="ep-sec"><b>④ 常中标单位 <span style="color:var(--tx3);font-weight:400">（点一家直接在库里查它）</span></b><div class="en-tags">'+
+    h+='<div class="ep-sec"><b>④ 常中标单位</b><div class="en-tags">'+
        x.wins.map(function(w){
-         return '<span class="clk" data-sf="'+esc(String(w.n||''))+'">'+
-           esc(w.n)+(w.c>1?' ×'+w.c:'')+'</span>';
+         return '<span>'+esc(w.n)+(w.c>1?' ×'+w.c:'')+'</span>';
        }).join('')+'</div></div>';
   }
   /* ⑤ 全网业绩（省交易平台全量采集，判断风向用） */
