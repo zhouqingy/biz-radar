@@ -330,9 +330,22 @@ CITY_FILES = [
     # 省站一份接口覆盖江苏 13 市（每条自带 city，经 area 字段落入 _cityval）
     ('js_lifecycle.json', '江苏', '江苏', '江苏省公共资源交易平台'),
 ]
+def _jload_any(*paths):
+    """依次尝试路径，支持 .json / .json.gz（CI 仓库只存 gz 省体积）"""
+    import gzip
+    for _p in paths:
+        if os.path.exists(_p):
+            try:
+                if _p.endswith('.gz'):
+                    return json.load(gzip.open(_p, 'rt', encoding='utf-8'))
+                return json.load(open(_p, encoding='utf-8'))
+            except Exception:
+                continue
+    return None
+
 for _fn, _city, _rg, _plat in CITY_FILES:
-    _fp = os.path.join(RAW, _fn)
-    if not os.path.exists(_fp):
+    _fp = _jload_any(os.path.join(RAW, _fn), os.path.join(RAW, _fn + '.gz'))
+    if _fp is None:
         continue
     _nn = 0
     _ncon = 0
@@ -341,7 +354,7 @@ for _fn, _city, _rg, _plat in CITY_FILES:
     _CON_ONLY = re.compile(
         r'施工|[管网道绿化附属亮化路基路面厂区装修]工程?施工|土建施工|零星维修|修缮工程')
     _TURNKEY = re.compile(r'EPC|总承包|设计|监理|勘察|咨询|运营|检测')
-    for _x in json.load(open(_fp, encoding='utf-8')).get('items') or []:
+    for _x in (_fp.get('items') or []):
         _det = _x.get('detail') or {}
         _cityval = _city
         if _x.get('city'):
