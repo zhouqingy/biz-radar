@@ -51,6 +51,12 @@ SITES = {
         'host': 'https://ggzy.zj.gov.cn',
         'plat': '浙江省公共资源交易服务平台',
         'level': '省级',
+        # 2026-10-23 实测：浙江站单页条数硬上限 20。rn=21 起直接返回
+        # {"msg":"请求条数 rn 超过最大允许值: 21","status":"error"}。
+        # 老代码写死 rn=50，意味着**浙江站的每一个关键词、每一次请求全部被拒**，
+        # 45 个关键词跑完 169 秒、取回 0 条，日志上只写"关键词命中 0/45"。
+        # 这就是"采集跑满半小时没有新增"的第一号原因。
+        'rnMax': 20,
     },
     '合肥': {
         'api': 'https://ggzy.hefei.gov.cn/inteligentsearch/rest/esinteligentsearch/getFullTextDataNew',
@@ -67,6 +73,9 @@ SITES = {
         'plat': '苏州市公共资源交易中心',
         'level': '市级', 'rg': '江苏',
         'sort': '{"infodate":"0"}',    # 苏州只认 infodate
+        # 2026-10-23：苏州站整站 502（不是我们请求的问题，连续三次探测都返回
+        # 502 Bad Gateway 页面）。先停用，免得每次跑都在这里耗 45×3 秒。
+        'off': '苏州站整站 502（2026-10-23 探测），待其恢复后把 off 去掉',
     },
     '常州': {
         'api': 'https://ggzy.changzhou.gov.cn/inteligentsearch/rest/esinteligentsearch/getFullTextDataNew',
@@ -74,6 +83,8 @@ SITES = {
         'plat': '常州市公共资源交易中心',
         'level': '市级', 'rg': '江苏',
         'sort': '{"webdate":"0"}',
+        # 常州是区县级市，电力/环保标的本身很少，45 个关键词只命中 5 个、
+        # 且多为 1~3 条。不是坏点，只是盘子小，留着当补充。
     },
     # 市级站要归到省：合肥归安徽
 }
@@ -119,26 +130,100 @@ def is_noise(title):
     return False
 
 
-def post(api, payload, timeout=45, retry=2):
+class SiteError(Exception):
+    """站点级失败（连不上 / 业务报错 / 返回非 JSON）。fetch_site 捕获后立刻放弃该站，
+    而不是把 45 个关键词挨个撞一遍——那才是"跑满 30 分钟没数据"的真正原因。"""
+
+
+_CURL_RC = {
+    6: '域名解析失败（DNS）',
+    7: '连接被拒绝/无法建立连接（端口不通或被出口策略拦）',
+    28: '超时',
+    35: 'TLS 握手失败',
+    52: '服务器返回空响应',
+    56: '接收数据失败（连接被重置）',
+}
+
+
+def _curl_hint(rc, stderr):
+    """curl 用 -s 时 rc≠0 常常 stderr 也是空的，只报一个数字没法排查。
+    这里把常见的退出码翻成人话，剩下的才贴原始 stderr。"""
+    msg = (stderr or '').strip()
+    hint = _CURL_RC.get(rc, '')
+    if msg:
+        return hint + ' | ' + re.sub(r'\s+', ' ', msg)[:160]
+    return hint or '（curl 无输出，通常是对端直接断开）'
+
+
+def post(api, payload, timeout=45, retry=2, insecure=False, follow=False):
+    """insecure: 江苏 jsggzy.jszwfw.gov.cn 证书链不完整，curl 默认 rc=60 拒握，
+    2026-10-24 实测必须 -k。follow: 上海站 getFullTextDataNew 会先 302，需 -L。"""
+    """单次检索请求。
+
+    2026-10-23 重写。旧版本有三个致命问题，叠在一起让整条采集链路静默失效：
+      ① `except Exception: pass` → 异常被完全吞掉，日志里只会看到"取回 0 条"，
+         根本看不出是连不上、被拒、还是返回了 HTML；
+      ② 只判断"能不能解析出 result"，不判断业务错误。浙江站 rn>20 会返回
+         `{"msg":"请求条数 rn 超过最大允许值: 50","status":"error"}`，
+         这个响应是合法 JSON，于是被当成"0 条命中"，一声不响地吃掉整站；
+      ③ 不检查 curl 的 returncode。江苏站 80 端口拒绝连接时 rc=7、stdout 为空，
+         表现和"真的没数据"完全一样。
+    """
     body = json.dumps(payload, ensure_ascii=False)
+    last = ''
     for k in range(retry + 1):
+        cmd = ['curl', '-s', '-m', str(timeout)]
+        if insecure: cmd.append('-k')
+        if follow: cmd.append('-L')
+        cmd += ['-X', 'POST', api,
+                '-H', 'Content-Type: application/json;charset=utf-8',
+                '-H', 'User-Agent: ' + UA, '-d', body]
         p = subprocess.run(
-            ['curl', '-s', '-m', str(timeout), '-X', 'POST', api,
-             '-H', 'Content-Type: application/json;charset=utf-8',
-             '-H', 'User-Agent: ' + UA, '-d', body],
+            cmd,
             capture_output=True, text=True)
-        try:
-            o = json.loads(p.stdout)
-            # 苏州/常州/合肥等市级站是双层嵌套：{"code":200,"content":"{\"result\":{...}}"}
-            # content 是**转义后的 JSON 字符串**，必须二次解析，否则永远取不到 result。
-            inner = o.get('content') if isinstance(o, dict) else None
-            if isinstance(inner, str):
-                o = json.loads(inner)
-            return o['result']
-        except Exception:
+        raw = (p.stdout or '').strip()
+        # ① 传输层：curl 自己就失败了
+        if p.returncode != 0:
+            last = 'curl rc=%s %s' % (p.returncode, _curl_hint(p.returncode, p.stderr))
             if k < retry:
                 time.sleep(1.5)
-    return None
+                continue
+            raise SiteError(last)
+        if not raw:
+            last = '空响应（rc=0 但 stdout 为空，通常是网关拦了请求）'
+            if k < retry:
+                time.sleep(1.5)
+                continue
+            raise SiteError(last)
+        # ② 解析层：苏州站 502 时会返回一整页 HTML
+        try:
+            o = json.loads(raw)
+        except Exception:
+            head = re.sub(r'\s+', ' ', raw[:80])
+            last = '返回非 JSON：' + head
+            if k < retry:
+                time.sleep(1.5)
+                continue
+            raise SiteError(last)
+        # 苏州/常州/合肥等市级站是双层嵌套：{"code":200,"content":"{\"result\":{...}}"}
+        # content 是**转义后的 JSON 字符串**，必须二次解析，否则永远取不到 result。
+        inner = o.get('content') if isinstance(o, dict) else None
+        if isinstance(inner, str):
+            try:
+                o = json.loads(inner)
+            except Exception:
+                last = 'content 二次解析失败'
+                if k < retry:
+                    time.sleep(1.5)
+                    continue
+                raise SiteError(last)
+        # ③ 业务层：合法 JSON，但没有 result，就是站点明确拒绝了这个请求
+        if not isinstance(o, dict) or 'result' not in o:
+            last = '业务报错：' + re.sub(r'\s+', ' ', raw[:120])
+            # 参数类错误重试没意义，直接抛
+            raise SiteError(last)
+        return o['result']
+    raise SiteError(last or '未知失败')
 
 
 def mk(**kw):
@@ -204,15 +289,22 @@ def fetch_site(name, cfg, sdt, edt, per_kw=200, pause=0.35):
     而是直接返回 {"result":{"error":null}}——没有 totalcount、没有 records。
     看起来像"0 条命中"，实际是查询作废。所以 fields 必须按站配置，
     且 post() 要能识别双层嵌套 {code, content:"..."}。
+
+    2026-10-23 重写失败处理。旧版本遇到 post() 返回 None 就 `break`，
+    只跳出当前关键词，接着撞下一个关键词——江苏站连不上时，
+    45 个关键词 × (1+2) 次重试 × 45 秒超时 = 理论上 100 分钟，实测卡了 156 秒后
+    悄悄返回 0 条，日志上只写"关键词命中 0/45"。表面上像"这几天没新公告"。
+    现在改成：任何一次 SiteError 都直接冒泡，由 main() 判为整站失败并明确打日志。
     """
     seen = {}
     stat = []
+    # 单页条数按站取。浙江站硬上限 20（见 SITES 里的注释），别的站 50 没问题。
+    rn = int(cfg.get('rnMax', 50))
     # 字段按站配置：市级站（合肥/常州）没有 infodate 的索引，带上就整条查询作废。
     # 默认给最小集 title，返回体里 webdate / infoid / categorynum 都自带，够用了。
     fields = cfg.get('fields', 'title')
     for kw in KW_ALL:
         got = 0
-        rn = 50
         page = 0
         while got < per_kw:
             r = post(cfg['api'], mk(sdt=sdt, edt=edt, wd=kw, pn=page * rn,
@@ -265,9 +357,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--days', type=int, default=7, help='抓最近多少天')
     ap.add_argument('--perkw', type=int, default=200, help='每个关键词最多取多少条')
-    ap.add_argument('--sites', default='江苏,浙江,合肥')
+    ap.add_argument('--sites', default='浙江,合肥,常州',
+                    help='逗号分隔。江苏/苏州默认不在列——见 SITES 里的 off 说明')
     ap.add_argument('--out', default='')
     ap.add_argument('--merge', action='store_true', help='并入 raw/industry.json')
+    ap.add_argument('--allow-degraded', action='store_true',
+                    help='站点失败也退出 0（默认只要有站失败就退出 1，让 CI 报警）')
     args = ap.parse_args()
 
     today = datetime.date.today()
@@ -277,13 +372,27 @@ def main():
 
     allitems = []
     report = {}
+    failed = []
     for name in [x.strip() for x in args.sites.split(',') if x.strip()]:
         cfg = SITES.get(name)
         if not cfg:
             print('  跳过未知站点', name)
+            failed.append((name, '未知站点'))
+            continue
+        if cfg.get('off'):
+            print('  %-4s 已停用：%s' % (name, cfg['off']))
+            report[name] = {'n': 0, 'kw': {}, 'skipped': cfg['off']}
             continue
         t0 = time.time()
-        items, stat = fetch_site(name, cfg, sdt, edt, args.perkw)
+        try:
+            items, stat = fetch_site(name, cfg, sdt, edt, args.perkw)
+        except SiteError as e:
+            # 整站失败。以前这里是静默 break，日志上只留"取回 0 条"，
+            # 看起来和"这几天真的没有新公告"一模一样，白白错过好几周。
+            print('  %-4s ✗ 整站失败（耗时 %.0fs）：%s' % (name, time.time() - t0, e))
+            failed.append((name, str(e)))
+            report[name] = {'n': 0, 'kw': {}, 'error': str(e)}
+            continue
         hit = [(k, v) for k, v in stat if v]
         print('  %-4s 取回 %-4d 条（关键词命中 %d/%d）耗时 %.0fs'
               % (name, len(items), len(hit), len(stat), time.time() - t0))
@@ -306,10 +415,11 @@ def main():
         'total': len(items),
         'byGrade': {g: sum(1 for x in items if x['g'] == g) for g in 'ABC'},
         'bySite': report,
+        'failed': [{'site': n, 'err': e} for n, e in failed],
         'items': items,
     }
     path = args.out or os.path.join(RAW, 'collect_%s.json' % today.isoformat())
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
     json.dump(out, open(path, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print('\n合计去重 %d 条 · A级 %d / B级 %d / C级 %d → %s'
           % (len(items), out['byGrade']['A'], out['byGrade']['B'], out['byGrade']['C'], path))
@@ -323,6 +433,14 @@ def main():
 
     if args.merge:
         merge(path)
+
+    # 失败的站必须让上游知道。以前静默返回 0，CI 一片绿，数据停更一周都没人发现。
+    if failed:
+        print('\n⚠ %d 个站点失败：' % len(failed))
+        for n, e in failed:
+            print('   %s → %s' % (n, e))
+        if not args.allow_degraded:
+            sys.exit(1)
 
 
 def merge(path):
