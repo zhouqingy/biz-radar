@@ -1251,8 +1251,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610241004"></script>
-<script src="data.items.js?v=202610241004"></script>
+<script src="data.core.js?v=202610241017"></script>
+<script src="data.items.js?v=202610241017"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1317,7 +1317,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610241004';
+var VER='?v=202610241017';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3735,13 +3735,13 @@ function rperfEvalSec(name){
     var tag = x.won ? '<i class="rp-t rp-epc">中标</i>'
             : (x.rank ? '<i class="rp-t rp-sj">第'+x.rank+'候选</i>'
                       : '<i class="rp-t">参与</i>');
-    var money=[];
-    if(x.quote) money.push('报价 '+money(x.quote));
-    if(x.win_amt) money.push('中标价 '+money(x.win_amt));
-    if(x.control) money.push('控制价 '+money(x.control));
-    if(x.nCands) money.push(x.nCands+' 家竞标');
+    var ml=[];
+    if(x.quote) ml.push('报价 '+money(x.quote));
+    if(x.win_amt) ml.push('中标价 '+money(x.win_amt));
+    if(x.control) ml.push('控制价 '+money(x.control));
+    if(x.nCands) ml.push(x.nCands+' 家竞标');
     h+='<div class="en-pj"><span>'+tag+esc(x.t||'')+
-       (money.length?'<br><span style="color:var(--tx3);font-size:11px">'+esc(x.d||'')+' · '+esc(money.join(' · '))+'</span>':'')+'</span>'+
+       (ml.length?'<br><span style="color:var(--tx3);font-size:11px">'+esc(x.d||'')+' · '+esc(ml.join(' · '))+'</span>':'')+'</span>'+
        (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+'</div>';
   });
   if(evs.length>12) h+='<p style="color:var(--tx3)">仅列最近 12 场，共 '+evs.length+' 场</p>';
