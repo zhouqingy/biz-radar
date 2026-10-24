@@ -312,6 +312,77 @@ for prov, fn in [('江苏', 'jiangsu.json'), ('浙江', 'zhejiang.json'), ('安�
         if not r['t']: continue
         new.append(r)
 
+# ---- 城市全生命周期采集（多城市模板：南通 EWB-FRONT / 安徽 ggzy.ah.gov.cn）----
+# 出口A：与业务相关的照常走 classify/grade 严筛（judge 在下游统一做）；
+#        计划/提前公示 → 招标计划档，公告 → 招标公告，结果/合同 → 中标结果，
+#        立项批复 → 立项公示（审批平台源头）
+STAGE_MAP = {'plan': '招标计划', 'prep': '招标计划', 'notice': '招标公告',
+             'cand': '中标候选人公示', 'result': '中标结果公示', 'contract': '中标结果公示',
+             'approval': '立项公示',
+             # 江苏省站扩展体系（水利/交通/政采，2026-10-24）
+             'sl-plan': '招标计划', 'sl-notice': '招标公告', 'sl-cand': '中标候选人公示',
+             'sl-result': '中标结果公示', 'jt-plan': '招标计划', 'jt-notice': '招标公告',
+             'jt-cand': '中标候选人公示', 'jt-result': '中标结果公示',
+             'cg-notice': '招标公告', 'cg-result': '中标结果公示'}
+CITY_FILES = [
+    ('nt_lifecycle.json', '南通', '江苏', '南通市公共资源交易平台'),
+    ('ah_lifecycle.json', '安徽', '安徽', '安徽省公共资源交易监管平台'),
+    # 省站一份接口覆盖江苏 13 市（每条自带 city，经 area 字段落入 _cityval）
+    ('js_lifecycle.json', '江苏', '江苏', '江苏省公共资源交易平台'),
+]
+for _fn, _city, _rg, _plat in CITY_FILES:
+    _fp = os.path.join(RAW, _fn)
+    if not os.path.exists(_fp):
+        continue
+    _nn = 0
+    _ncon = 0
+    # 纯施工标段：标题含「施工」且不带总承包/EPC/设计等关键词 → 剔除
+    #（盖住 施工公告 / 施工中标结果公告 / 施工资格后审 / 扩建施工 等各种尾巴）
+    _CON_ONLY = re.compile(
+        r'施工|[管网道绿化附属亮化路基路面厂区装修]工程?施工|土建施工|零星维修|修缮工程')
+    _TURNKEY = re.compile(r'EPC|总承包|设计|监理|勘察|咨询|运营|检测')
+    for _x in json.load(open(_fp, encoding='utf-8')).get('items') or []:
+        _det = _x.get('detail') or {}
+        _cityval = _city
+        if _x.get('city'):
+            # 省站条目自带干净城市名（南通市/盐城市…）
+            _cityval = _x['city']
+        elif _x.get('area'):
+            _cityval = _x['area'].split('-')[0].strip() or _city
+        # 省站(js)无 detail，从列表摘要里抽招标人/中标人
+        _snip = _x.get('snip') or ''
+        _snb = _snw = ''
+        if _snip:
+            _m = re.search(r'招标人[为是]([\u4e00-\u9fa5A-Za-z0-9（）()]{4,30})', _snip)
+            _snb = _m.group(1) if _m else ''
+            _m = re.search(r'(?:中标人|中标单位|第一中标候选人)[名为是]([\u4e00-\u9fa5A-Za-z0-9（）()]{4,40})', _snip)
+            _snw = _m.group(1) if _m else ''
+        _r = make_rec({
+            't': _x.get('t'), 'rg': _rg, 'city': _cityval,
+            'st': STAGE_MAP.get(_x.get('cat'), ''),
+            'buyer': (_det.get('buyer') or _snb).strip(),
+            'win': (_det.get('win') or _snw).strip(),
+            # detail.win_amt 单位是亿，merged 体系 amt 单位是元
+            'amt': (_det.get('win_amt') or 0) * 1e8 or None,
+            'd': _x.get('d'), 'p': _plat,
+            'url': _x.get('url'),
+            # 立项批复把批复部门带进摘要，页面上能看出是哪个发改委批的；
+            # 省站条目把列表摘要截 120 字带出（招标人/候选人信息）
+            'snip': ('批复部门：' + _x['dept']) if _x.get('dept') else ('摘要：' + _snip[:120] if _snip else ''),
+        }, _rg)
+        if not _r['t']:
+            continue
+        # 纯施工标段剔除（2026-10-24 用户反馈）：「扩建施工」「管网施工」这类
+        # 土建/安装标段只进业主/对手画像（出口B直接读原始文件，不受影响），
+        # 不进找商机库占版面。带 EPC/总承包/设计/监理/勘察 的仍保留。
+        _tt = _r['t']
+        if _CON_ONLY.search(_tt) and not _TURNKEY.search(_tt):
+            _ncon += 1
+            continue
+        new.append(_r)
+        _nn += 1
+    print(f'[城市生命周期:{_city}] 注入 {_nn} 条（纯施工标段剔除 {_ncon} 条）')
+
 # ---- 每周增量：raw/weekly/*.json（定时任务每轮写入，字段与省级采集文件一致）----
 WEEKLY = os.path.join(RAW, 'weekly')
 if os.path.isdir(WEEKLY):
@@ -512,6 +583,12 @@ for i, (k, r) in enumerate(merged.items()):
     sc = parse_scale(text)
     r['mw'], r['tph'] = sc['mw'], sc['boiler_tph']
     g, sco = grade(biz, sub, r['st'], r['amt'], sc, text, r['t'], r.get('snip') or '')
+    # 城市全生命周期（出口A 口径）：只留跟我们业务相关的（A/B/C 级）。
+    # 用户明确要求：找商机库是"只做我们能做的"，无关的 D 级
+    # （房建/装饰/货物）不能进来 —— 那些走出口B 进对手情报库。
+    if r.get('p') in ('南通市公共资源交易平台', '安徽省公共资源交易监管平台',
+                      '江苏省公共资源交易平台') and g == 'D':
+        continue
     r['g'], r['score'] = g, sco
     if not r['city']: r['city'] = guess_city(r['rg'], text)
     # 阶段取链路中最进展的一环，并保留主要阶段列表
