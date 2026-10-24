@@ -16,7 +16,7 @@ POST JSON /inteligentsearch/rest/esinteligentsearch/getFullTextDataNew
 schema 与 nt_lifecycle/ah_lifecycle 一致，build_data/build_web 直接复用。
 合法合规：法定公开公告，0.35s/请求，不碰登录，仅内部决策用。
 """
-import json, os, re, sys, time, argparse, subprocess, datetime
+import json, os, re, sys, time, argparse, subprocess, datetime, gzip
 
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
 RAW = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'raw')
@@ -136,12 +136,15 @@ def main():
     cats = {k: v for k, v in CATS.items() if k in args.cats.split(',')}
     cities = [c for c in CITIES if not args.cities or c in args.cities.split(',')]
 
+    # gz 兼容：CI 里仓库只存 .gz（省体积），读到哪个用哪个
     old = []
-    if os.path.exists(OUT):
-        try:
-            old = json.load(open(OUT)).get('items', [])
-        except Exception:
-            old = []
+    for _p in (OUT, OUT + '.gz'):
+        if os.path.exists(_p):
+            try:
+                old = json.load(gzip.open(_p, 'rt', encoding='utf-8') if _p.endswith('.gz') else open(_p)).get('items', [])
+                break
+            except Exception:
+                old = []
     known = {x['id'] for x in old}
     allitems = list(old)
 
