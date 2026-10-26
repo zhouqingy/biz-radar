@@ -1269,8 +1269,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610261644"></script>
-<script src="data.items.js?v=202610261644"></script>
+<script src="data.core.js?v=202610261706"></script>
+<script src="data.items.js?v=202610261706"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1335,7 +1335,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610261644';
+var VER='?v=202610261706';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3969,6 +3969,10 @@ function rperfTable(name, extraNews){
       var nc=Math.max.apply(null, g.evals.map(function(e){return e.nCands||0}));
       if(nc>1) pos.push(nc+' 家竞标');
     }
+    /* 业主（招标人）：2026-10-26 起，中标结果公告扫描能直接读到「建设单位名称」，
+       比从标题里猜准得多。营销最想知道「这活是谁发的」，所以放显眼位置。 */
+    var own='';
+    for(var _i=0;_i<g.rows.length;_i++){ if(g.rows[_i].owner){ own=g.rows[_i].owner; break; } }
     var meta=[m.rg?m.rg+'平台':'', g.rows.length>1?'全过程 '+g.rows.length+' 条':''].filter(Boolean).join(' · ');
     /* 主体标记：同集团合并时，非本体法人要标出来，否则会误以为是本体中的标 */
     var byTag='';
@@ -3980,6 +3984,7 @@ function rperfTable(name, extraNews){
         (g.evals.length&&g.evals[0].ctrlYi>0?'<br><span style="font-size:10.5px;color:var(--tx3)" title="招标控制价">控 '+money(g.evals[0].ctrlYi)+'</span>':'')+'</td>'+
       '<td class="p">'+stTag+'<b>'+esc(m.t||'')+'</b>'+
         (byTag?' '+byTag:'')+
+        (own?'<span class="tg3" style="background:#eef4ff;color:#3d6fd4" title="招标人（建设单位）">业主 '+esc(own)+'</span>':'')+
         (meta?'<span style="color:var(--tx3);font-size:11px;display:block;margin-top:2px">'+esc(meta)+'</span>':'')+
         (g.rows.length>1?'<a href="javascript:void(0)" data-act="rperfG" class="rp-gbtn">全过程 ▸</a>':'')+
       '</td>'+
