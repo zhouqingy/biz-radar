@@ -424,6 +424,18 @@ details.sub li{padding:2px 0}
 .rp-f.on{background:#1053c9;border-color:#1053c9;color:#fff}
 .rp-gbtn{background:#f0f6ff !important;color:#1053c9 !important;border-color:#bcd4f5 !important}
 .rp-more{display:inline-block;font-size:12px;color:#1053c9;margin:6px 0;cursor:pointer}
+/* 业绩表（2026-10-24 合并版）：公告原文 / 评标出场 / 官网动态 一张表 */
+.rp-tb td.p b{font-size:12.5px}
+.rp-tb .rp-gbtn{margin-left:6px;font-size:11px;padding:1px 7px;border-radius:10px;
+  border:1px solid #bcd4f5;text-decoration:none}
+.rp-subrow{display:flex;gap:8px;align-items:baseline;padding:3px 0;font-size:12px;
+  border-bottom:1px dashed #f0f2f6}
+.rp-subrow:last-child{border-bottom:0}
+.rp-subrow .sd{color:var(--tx3);font-size:11px;flex:none;width:76px;font-variant-numeric:tabular-nums}
+.rp-subrow .st{flex:1;line-height:1.55;color:var(--tx2)}
+.rp-news{margin-top:14px;padding-top:10px;border-top:1px solid var(--line)}
+.rp-news .ar-hd{font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:4px;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.rp-news .ar-hd small{font-weight:400;color:var(--tx3);font-size:11px}
 .en-people{margin-top:8px;border:1px solid var(--line);border-radius:8px;background:#fafcff}
 .en-people summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--brand-d);padding:6px 10px;list-style:none}
 .en-people summary::-webkit-details-marker{display:none}
@@ -1257,8 +1269,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610241728"></script>
-<script src="data.items.js?v=202610241728"></script>
+<script src="data.core.js?v=202610261644"></script>
+<script src="data.items.js?v=202610261644"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1323,7 +1335,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610241728';
+var VER='?v=202610261644';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3696,6 +3708,53 @@ var TIER_FG={S:'#c0392b',A:'#a8620a',B:'#5a6270'};
    找商机那个里面，单独放着，不然会污染找商机库的数据」。
    用途：判断对手/业主的风向，所以是**全量业绩**（不分赛道不分业务），
    和找商机库的「只留我们能做的」是两套完全不同的口径。 */
+/* 2026-10-24 用户提出：「你这无锡华光还没有华光环保全」。
+   查下来是**同集团分家**：采集时「无锡华光环保能源集团股份有限公司」和
+   「华光环保能源（西安）设计研究院有限公司」各占一个键，业绩散在 3 个键下
+   （西安院还因为全角/半角括号各存了一份），于是本体反而看起来最少。
+   营销要的是「这家集团在江浙沪皖干了什么」，而不是按法人拆分。
+   所以加第 4 层匹配：取公共词根 ≥4 字（如「华光环保能源」）的同系单位合并返回。
+   ⚠ 只在**渲染时聚合**，绝不改动源数据 —— 各法人主体的原始记录必须留得住，
+     否则将来要按主体核金额就核不出来了。 */
+function rpRoot(n){
+  /* 剥掉括号注释，再去主体后缀。
+     ⚠ 后缀必须**从末尾逐个剥**，不能用一条 `(股份)?有限公司|集团|公司…` 大正则一次清：
+        那样「无锡华光环保能源集团股份有限公司」里的「集团股份」会被当成后缀吃掉，
+        剩下「无锡华光环保能源」，再吃掉「公司」剩下「无锡华光环保能源」—— 看着对，
+        但「华光环保能源（西安）设计研究院有限公司」剥完是「华光环保能源」，
+        两头词根变成「无锡…」和「…」对不齐（实测就是这么失效的）。
+     改成循环剥末尾后缀，谁剥到剥不动为止。 */
+  var s=String(n||'').replace(/[（(][^）)]*[）)]/g,'').replace(/[\s　]/g,'');
+  var tail=/(股份有限公司|有限责任公司|有限公司|股份公司|集团公司|集团|公司|研究院|设计院|工程局|工程公司|总局|总公司|分公司|厂|院)$/;
+  for(var i=0;i<6;i++){
+    var t=s.replace(tail,'');
+    if(t===s) break;
+    s=t;
+  }
+  return s;
+}
+/* 两个词根的**公共前缀**（连续相同字），用于判断是否同系 */
+function rpCommon(a,b){
+  var n=Math.min(a.length,b.length), i=0;
+  while(i<n && a.charAt(i)===b.charAt(i)) i++;
+  return a.slice(0,i);
+}
+/* 去掉开头的地名/行政区前缀：「无锡华光环保能源」↔「华光环保能源」应算同系。
+   地名按「最长匹配」剥一次即可，剥完长度不足 4 字就不剥（防止把公司名本身剥没了）。 */
+var RP_PLACE=/^(?:中国|江苏|浙江|上海|安徽|无锡|南京|苏州|常州|南通|扬州|泰州|镇江|盐城|淮安|连云港|宿迁|徐州|杭州|宁波|温州|绍兴|嘉兴|湖州|金华|台州|合肥|芜湖|马鞍山|蚌埠|安庆|铜陵|池州|宣城|滁州|宿州|六安|亳州|淮南|淮北|黄山|阜阳)(?:市|省|自治区)?/;
+function rpStem(s){
+  var t=String(s||'').replace(RP_PLACE,'');
+  return t.length>=4 ? t : s;
+}
+function rpSameGroup(a,b){
+  var sa=rpStem(a), sb=rpStem(b);
+  if(sa===sb && sa.length>=4) return true;
+  /* 一个是另一个的前缀，且短的那个 ≥4 字：「华光环保能源」⊂「华光环保能源设计」 */
+  if(sa.length>=4 && sb.length>=4 && (sa.indexOf(sb)===0 || sb.indexOf(sa)===0)) return true;
+  /* 其余按公共前缀 ≥4 字且占比 ≥60% 判 */
+  var c=rpCommon(a,b);
+  return c.length>=4 && c.length>=Math.min(a.length,b.length)*0.6;
+}
 function rperfRecs(name){
   var rp=(window.DATA_RIVALPERF||{}).db||{};
   if(rp[name]) return rp[name];
@@ -3713,6 +3772,57 @@ function rperfRecs(name){
     }
   }
   return null;
+}
+/* 金额统一成「亿元」数字。
+   ⚠ 两套来源单位不同，混用就会出「32560000.00亿」这种笑话：
+     · rival_perf 的 items.amt —— 单位是**元**（32560000 = 3256 万）
+     · rival_perf 的 eval.win_amt/quote/control —— 已经是**亿**（1.348 亿）
+   全部先过这把尺子再进表。 */
+/* 同集团（同一词根）全部主体的记录合并。
+   返回 {items:[…], eval:[…], names:[同系单位名…]}；
+   找不到同系单位时 items/eval 为空数组（调用方按「无」处理）。 */
+function rpAmtYi(v){
+  if(v==null || v==='') return 0;
+  var n=Number(v);
+  if(!(n>0)) return 0;
+  return n>=1e5 ? n/1e8 : n;   /* 10 万以上按「元」理解，否则按「亿」 */
+}
+function rperfGroup(name){
+  var rp=(window.DATA_RIVALPERF||{}).db||{};
+  var root=rpRoot(name);
+  /* 词根太短（<4 字）不做合并：「中冶」「华光」这种 2 字词根会误伤一大片 */
+  if(root.length<4) return {items:[],eval:[],names:[]};
+  var items=[], evalA=[], names=[], seen={};
+  function take(k,v){
+    if(!v) return;
+    if(names.indexOf(k)<0) names.push(k);
+    (v.items||[]).forEach(function(x){
+      var kk=(x.d||'')+'|'+String(x.t||'').slice(0,40);
+      if(seen[kk]) return; seen[kk]=1;
+      var o={}; for(var f in x) o[f]=x[f];
+      o.by=k;                      /* 记下这条属于哪个法人主体，表里要标 */
+      items.push(o);
+    });
+    (v.eval||[]).forEach(function(x){
+      var kk='E'+(x.d||'')+'|'+String(x.t||'').slice(0,40);
+      if(seen[kk]) return; seen[kk]=1;
+      var o={}; for(var f in x) o[f]=x[f];
+      o.by=k;
+      evalA.push(o);
+    });
+  }
+  var base=rperfRecs(name);
+  if(base) take(name, base);
+  Object.keys(rp).forEach(function(k){
+    if(rp[k]===base) return;
+    var r=rpRoot(k);
+    if(r.length<4) return;
+    /* 判同系（规则见 rpSameGroup）：
+       「无锡华光环保能源」vs「华光环保能源设计」→ 剥地名后一个是另一个的前缀，合并
+       「中冶南方都市环保」vs「中冶南方连铸」→ 剥完仍只公共「中冶南方」，占比不足，不合并 */
+    if(rpSameGroup(root,r)) take(k,rp[k]);
+  });
+  return {items:items, eval:evalA, names:names};
 }
 /* 招标类型划分：营销经理一眼看出这条公告跟不跟我们有关 */
 function rperfType(t){
@@ -3736,69 +3846,191 @@ function rperfBase(t){
     .replace(/(关于)?[^ ]{0,12}?(招标公告|中标|成交|结果|更正|变更|重新|重发|见证书|中标通知书|合同|资格后审|资格预审|澄清|答疑|公示|公告|通知)[^ ]*$/g,'');
   return t.replace(/[　\s]/g,'').slice(0,16);
 }
-function rperfSec(name){
+/* 2026-10-24 用户：「中标业绩搞一个表就行了，近期动态和中标业绩啥的这类业绩放在一个表里面不就行了」。
+   ── 原来这里拆成两段：⑤全网业绩（项目分组列表）+ 评标出场记录（另一段列表），
+      再加上企业档案里的「近期动态」，同一批项目在三处各出现一次，
+      用户得来回对照才拼得出「这家在江浙沪皖干了什么」。
+   ── 现在合成**一张表**：一行一件事，来源用徽章标（本库公告 / 全网公告 / 评标 / 动态），
+      按日期倒序，同项目归组可展开全过程。筛选 chips 改成按「来源 + 招标类型」双重筛选。
+   ⚠ 表里绝不能把「动态」（竞对官网/公众号新闻）和「中标业绩」（公告原文）混为一谈 ——
+     前者没有原文可核。所以动态一律带 `NEWS` 徽章、金额列显示「—」、原文列显示「官网 ↗」，
+     让人一眼分清哪一行能拿去做投标依据。 */
+function rperfTable(name, extraNews){
   var rec=rperfRecs(name);
-  if(!rec || !(rec.items||[]).length) return '';
-  var its=rec.items.slice().sort(function(a,b){return String(b.d||'').localeCompare(String(a.d||''))});
-  /* 归组：同项目一组。组内按日期倒序（最新在上），已招完的默认只露最新一条 */
-  var groups=[],gmap={};
+  var grp=rperfGroup(name);
+  var items=[], evs=[], news=[];
+
+  /* ① 本库/全网公告（rival_perf），含同集团其他法人主体 */
+  (grp.items||[]).forEach(function(x){ items.push(x) });
+
+  /* ② 评标出场记录（候选人公示抽取：排名/报价/控制价/几家竞标） */
+  (grp.eval||[]).forEach(function(x){ evs.push(x) });
+
+  /* ③ 近期动态（竞对官网 / 公众号，没有公告原文） */
+  (extraNews||[]).forEach(function(x){ news.push(x) });
+
+  if(!items.length && !evs.length && !news.length) return '';
+
+  /* 评标记录挂到同项目组上：按归并键 + 日期接近，避免一件事出现两行 */
+  var evalByBase={};
+  evs.forEach(function(x){
+    var b=rperfBase(x.t)||String(x.t||'').slice(0,12);
+    (evalByBase[b]=evalByBase[b]||[]).push(x);
+  });
+
+  /* 归组 */
+  var its=items.slice().sort(function(a,b){return String(b.d||'').localeCompare(String(a.d||''))});
+  var groups=[], gmap={};
   its.forEach(function(x){
-    var b=rperfBase(x.t);
-    if(!b) b=String(x.t||'').slice(0,12);
+    var b=rperfBase(x.t)||String(x.t||'').slice(0,12);
     var g=gmap[b];
-    if(!g){ g=gmap[b]={main:x, rows:[x], d:x.d||'', done:0}; groups.push(g); }
+    if(!g){ g=gmap[b]={main:x, rows:[x], d:x.d||'', evals:[], base:b}; groups.push(g); }
     g.rows.push(x);
     if(String(x.d||'')>String(g.d)) g.d=x.d;
   });
   groups.forEach(function(g){
     g.rows.sort(function(a,b){return String(b.d||'').localeCompare(String(a.d||''))});
     g.main=g.rows[0];
-    var allT=g.rows.map(function(x){return x.t||''}).join(' ');
-    g.done=/中标|成交|结果|合同|通知书/.test(g.main.t||'')?1:0;
+    g.evals=(evalByBase[g.base]||[]);
+    g.evals.forEach(function(e){ e._used=1 });
+    g.done=/中标|成交|结果|合同|通知书/.test(g.rows.map(function(x){return x.t||''}).join(' '))?1:0;
   });
-  /* 类型统计（按组） */
-  var tcnt={}, TNAME={epc:'EPC·总承包',jl:'监理',kc:'勘察·检测',sj:'设计',sg:'施工',zc:'资产·运营',hw:'货物·设备',fw:'服务·咨询',qt:'其他'};
-  groups.forEach(function(g){ var k=rperfType(g.main.t)[1]; g.tp=k; tcnt[k]=(tcnt[k]||0)+1; });
-  var chips='<span class="rp-f on" data-act="rperfF" data-v="">全部 '+groups.length+'组</span>'+
+  /* 没挂上项目的评标记录，单独成组（它本身就是一件事） */
+  evs.forEach(function(x){
+    if(x._used) return;
+    var b=rperfBase(x.t)||String(x.t||'').slice(0,12);
+    var g=gmap[b];
+    if(g){ g.evals.push(x); return; }
+    g=gmap[b]={main:{t:x.t, d:x.d, rg:x.rg, url:x.url, by:x.by}, rows:[], evals:[x], d:x.d||'', base:b, done:x.won?1:0};
+    groups.push(g);
+  });
+  groups.sort(function(a,b){ return String(b.d||'').localeCompare(String(a.d||'')) });
+
+  /* 类型 / 来源统计，做筛选 chips */
+  var TNAME={epc:'EPC·总承包',jl:'监理',kc:'勘察·检测',sj:'设计',sg:'施工',zc:'资产·运营',hw:'货物·设备',fw:'服务·咨询',qt:'其他'};
+  var tcnt={};
+  groups.forEach(function(g){
+    var k=rperfType((g.main&&g.main.t)||'')[1];
+    g.tp=k; tcnt[k]=(tcnt[k]||0)+1;
+  });
+  var nWon=evs.filter(function(x){return x.won}).length;
+  var amtSum=0;
+  its.forEach(function(x){ x.amtYi=rpAmtYi(x.amt); if(x.amtYi>0) amtSum+=x.amtYi });
+  evs.forEach(function(x){ x.winYi=rpAmtYi(x.win_amt); x.quoteYi=rpAmtYi(x.quote); x.ctrlYi=rpAmtYi(x.control);
+                           if(x.winYi>0) amtSum+=x.winYi });
+
+  var chips='<span class="rp-f on" data-act="rperfF" data-v="">全部 '+groups.length+'</span>'+
     Object.keys(TNAME).filter(function(k){return tcnt[k]}).map(function(k){
       return '<span class="rp-f" data-act="rperfF" data-v="'+k+'">'+TNAME[k]+' '+tcnt[k]+'</span>';
-    }).join('');
-  var SHOW=12, hidden=Math.max(0,groups.length-SHOW);
-  var h='<div class="prof-sec"><h4><i></i>全网业绩 <small>同一项目全流程归为一组，已招完的默认只显示最新中标公告 · 共 '+
-    its.length+' 条公告 / '+groups.length+' 个项目</small></h4>'+
+    }).join('')+
+    (evs.length?'<span class="rp-f" data-act="rperfF" data-v="__eval">评标出场 '+evs.length+'</span>':'')+
+    (news.length?'<span class="rp-f" data-act="rperfF" data-v="__news">近期动态 '+news.length+'</span>':'');
+
+  var h='<div class="prof-sec"><h4><i></i>'+(name.indexOf('华光')>=0?'业绩与动态':'中标业绩 · 近期动态')+
+    ' <small>公告原文 + 评标出场 + 官网动态合成一张表 · 共 '+groups.length+' 个项目'+
+    (grp.names.length>1?' · 含同集团 '+grp.names.length+' 家主体':'')+'</small></h4>'+
     '<div class="rp-fs">'+chips+'</div>';
+
+  var SHOW=14, hidden=Math.max(0,groups.length-SHOW);
+  var tb='<div class="prof-tbwrap"><table class="prof-tb rp-tb"><thead><tr>'+
+    '<th style="width:84px">日期</th>'+
+    '<th>项目 / 标的</th>'+
+    '<th style="width:104px">我方的位置</th>'+
+    '<th style="width:96px;text-align:right">金额</th>'+
+    '<th style="width:52px">原文</th>'+
+    '</tr></thead><tbody>';
   var gi=0;
   groups.forEach(function(g){
     gi++;
+    var m=g.main||{};
     var hid=gi>SHOW;
-    var m=g.main;
-    var tag=g.done?'<i class="rp-t rp-epc">已招完</i>':'<i class="rp-t rp-sg">'+rperfType(m.t)[0]+'</i>';
-    var meta=[m.d||'', m.rg?m.rg+'交易平台':''].filter(Boolean).join(' · ');
-    h+='<div class="rp-grp" data-rt="'+g.tp+'"'+(hid?' style="display:none"':'')+'>'+
-       '<div class="en-pj"><span>'+tag+esc(m.t||'')+
-       (meta?'<br><span style="color:var(--tx3);font-size:11px">'+esc(meta)+'</span>':'')+'</span>'+
-       (m.url?'<a href="'+esc(m.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+
-       (g.rows.length>1?'<a href="javascript:void(0)" data-act="rperfG" class="rp-gbtn">全过程 '+g.rows.length+' 条 ▸</a>':'')+
-       '</div>';
-    /* 全过程：默认收起 */
-    if(g.rows.length>1){
-      h+='<div class="rp-sub" style="display:none">';
-      g.rows.forEach(function(x){
-        var mm=[x.d||'', x.rg?x.rg+'平台':''].filter(Boolean).join(' · ');
-        h+='<div class="en-pj" style="padding-left:18px"><span><i class="rp-t">'+rperfType(x.t)[0]+'</i>'+esc(x.t||'')+
-           (mm?'<br><span style="color:var(--tx3);font-size:11px">'+esc(mm)+'</span>':'')+'</span>'+
-           (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+'</div>';
-      });
-      h+='</div>';
+    /* 一行 = 一个项目的最新状态。状态徽章优先反映「我们能从中学到什么」：
+       已招完（有中标结果）> 评标名次 > 招标类型 */
+    var stTag;
+    if(g.done) stTag='<i class="rp-t rp-epc">已招完</i>';
+    else if(g.evals.length){
+      var e0=g.evals[0];
+      stTag = e0.won?'<i class="rp-t rp-epc">中标</i>'
+            : (e0.rank?'<i class="rp-t rp-sj">第'+e0.rank+'候选</i>':'<i class="rp-t">参与评标</i>');
     }
-    h+='</div>';
+    else stTag='<i class="rp-t rp-'+g.tp+'">'+rperfType(m.t||'')[0]+'</i>';
+    /* 金额：优先取中标价/中标额，没有就空着 —— 不猜 */
+    var amt=0, amtNote='';
+    g.evals.forEach(function(e){ if(e.winYi>amt){ amt=e.winYi; amtNote='中标'; } });
+    if(!amt){ m.amtYi=rpAmtYi(m.amt); if(m.amtYi>0){ amt=m.amtYi; amtNote=''; } }
+    /* 「我方的位置」：排名 / 未参与 / 竞标家数 / 平台 */
+    var pos=[];
+    if(g.evals.length){
+      var w=g.evals.filter(function(e){return e.won}).length;
+      var best=g.evals.filter(function(e){return e.rank>0}).sort(function(a,b){return a.rank-b.rank})[0];
+      if(w) pos.push('中标');
+      else if(best) pos.push('第 '+best.rank+' 候选');
+      else pos.push('参与');
+      var nc=Math.max.apply(null, g.evals.map(function(e){return e.nCands||0}));
+      if(nc>1) pos.push(nc+' 家竞标');
+    }
+    var meta=[m.rg?m.rg+'平台':'', g.rows.length>1?'全过程 '+g.rows.length+' 条':''].filter(Boolean).join(' · ');
+    /* 主体标记：同集团合并时，非本体法人要标出来，否则会误以为是本体中的标 */
+    var byTag='';
+    if(grp.names.length>1 && m.by){
+      byTag='<span class="tg3" title="这条记在该法人主体名下">'+esc(rpRoot(m.by).slice(0,8)||m.by.slice(0,8))+'</span>';
+    }
+    tb+='<tr class="rp-grp" data-rt="'+g.tp+'"'+(g.evals.length?' data-ev="1"':'')+(hid?' style="display:none"':'')+'>'+
+      '<td class="d">'+esc(g.d||'—')+
+        (g.evals.length&&g.evals[0].ctrlYi>0?'<br><span style="font-size:10.5px;color:var(--tx3)" title="招标控制价">控 '+money(g.evals[0].ctrlYi)+'</span>':'')+'</td>'+
+      '<td class="p">'+stTag+'<b>'+esc(m.t||'')+'</b>'+
+        (byTag?' '+byTag:'')+
+        (meta?'<span style="color:var(--tx3);font-size:11px;display:block;margin-top:2px">'+esc(meta)+'</span>':'')+
+        (g.rows.length>1?'<a href="javascript:void(0)" data-act="rperfG" class="rp-gbtn">全过程 ▸</a>':'')+
+      '</td>'+
+      '<td class="o">'+(pos.length?esc(pos.join(' · ')):'<span class="pm-na">—</span>')+'</td>'+
+      '<td class="m">'+(amt>0?money(amt):'<span class="pm-na">—</span>')+'</td>'+
+      '<td>'+(m.url?'<a class="lk" href="'+esc(m.url)+'" target="_blank" rel="noopener nofollow" title="打开公告原文">↗</a>':'—')+'</td>'+
+      '</tr>';
+    /* 全过程（默认收起）：招标公告 → 更正 → 候选人 → 中标结果，逐条带日期 */
+    if(g.rows.length>1){
+      tb+='<tr class="rp-sub" data-rt="'+g.tp+'" style="display:none"><td></td><td colspan="4" style="padding:2px 9px 8px">';
+      g.rows.forEach(function(x){
+        tb+='<div class="rp-subrow">'+
+          '<span class="sd">'+esc(x.d||'')+'</span>'+
+          '<i class="rp-t">'+rperfType(x.t||'')[0]+'</i>'+
+          '<span class="st">'+esc(x.t||'')+'</span>'+
+          (x.url?'<a class="lk" href="'+esc(x.url)+'" target="_blank" rel="noopener nofollow">↗</a>':'')+
+          '</div>';
+      });
+      tb+='</td></tr>';
+    }
   });
-  if(hidden>0) h+='<a href="javascript:void(0)" data-act="rperfMore" class="rp-more">展开更早的 '+hidden+' 个项目 ▾</a>';
-  h+='<div class="prof-note">已招完的项目默认只显示最新中标公告；点「全过程 N 条」看它的招标公告→更正→中标全流程（判断它从挂牌到定标要多久）。'+
+  tb+='</tbody></table></div>';
+  if(hidden>0) tb+='<a href="javascript:void(0)" data-act="rperfMore" class="rp-more">展开更早的 '+hidden+' 个项目 ▾</a>';
+
+  /* 近期动态（无公告原文，单独排在表末并明确标注来源，不与业绩混排） */
+  var newsH='';
+  if(news.length){
+    newsH='<div class="rp-news"><div class="ar-hd">近期动态 <small>来源：竞对官网 / 微信公众号公开报道，'+
+      '不在本库公告内，仅供了解动向，不能当投标依据</small></div>'+
+      news.map(function(x){
+        return '<div class="ar-i"><span class="ar-d">'+esc(x.d||'—')+'</span>'+
+          '<span class="ar-t">'+esc(x.t)+'</span>'+
+          (x.amt>0?'<span class="ar-m">'+x.amt.toFixed(2)+' 亿</span>':'')+
+          (x.url?'<a class="lk" href="'+esc(x.url)+'" target="_blank" rel="noopener nofollow">↗</a>':'')+
+          '</div>';
+      }).join('')+'</div>';
+  }
+
+  h+=tb+newsH;
+  h+='<div class="prof-note">一张表看完：<b>公告原文</b>（可点进原文核对）→ <b>评标出场</b>（排名/报价/几家竞标）→ '+
+     '<b>官网动态</b>（无原文，仅参考）。点「全过程」看它从挂牌到定标要多久；'+
      '灰色徽章（监理/货物/资产等）不是我们的业务，看「EPC·总承包」「设计」「施工」就行。</div></div>';
   return h;
 }
-/* 全网业绩段：类型筛选 chips（事件委托，同 sideAll 一套打法） */
+/* 兼容旧调用名：外部还有地方按老名字调，保留一层壳慢慢替换 */
+function rperfSec(name){ return rperfTable(name, window._profNews && window._profNews[name]); }
+function rperfEvalSec(){ return ''; }
+/* 业绩表筛选 chips（事件委托，同 sideAll 一套打法）
+   ⚠ 2026-10-24 改成表格后有两个坑：
+     ① .rp-grp 现在是 <tr>，它的「全过程」子行是同级的**下一个 <tr>**，不是 nextElementSibling 的 div；
+     ② 隐藏一行时必须连它的全过程子行一起藏，否则会出现「主行没了、子行还挂在表里」的孤儿行。 */
 document.addEventListener('click', function(ev){
   var f=ev.target.closest ? ev.target.closest('[data-act="rperfF"]') : null;
   if(!f) return;
@@ -3806,19 +4038,33 @@ document.addEventListener('click', function(ev){
   [].forEach.call(sec.querySelectorAll('.rp-f'),function(x){x.classList.toggle('on',x===f)});
   var v=f.getAttribute('data-v');
   [].forEach.call(sec.querySelectorAll('.rp-grp'),function(r){
-    r.style.display = (!v || r.getAttribute('data-rt')===v) ? '' : 'none';
+    var rv=r.getAttribute('data-rt');
+    var hit = !v || rv===v || (v==='__eval' && r.getAttribute('data-ev')==='1')
+                       || (v==='__news' && r.getAttribute('data-nw')==='1');
+    r.style.display = hit ? '' : 'none';
+    var nx=r.nextElementSibling;
+    if(nx && nx.classList.contains('rp-sub')){
+      if(!hit) nx.style.display='none';
+      else if(r.getAttribute('data-open')==='1') nx.style.display='';
+    }
   });
+  /* 「近期动态」块跟着 __news 一起显隐 */
+  var nb=sec.querySelector('.rp-news');
+  if(nb) nb.style.display = (v==='__news') ? '' : (v ? 'none' : '');
 });
-/* 「全过程 N 条」展开/收起 */
+/* 「全过程 N 条」展开/收起：主行 <tr> 的下一个 <tr> 就是子行 */
 document.addEventListener('click', function(ev){
   var g=ev.target.closest ? ev.target.closest('[data-act="rperfG"]') : null;
   if(!g) return;
   ev.preventDefault();
-  var sub=g.closest('.en-pj').nextElementSibling;
+  var row=g.closest('.rp-grp');
+  if(!row) return;
+  var sub=row.nextElementSibling;
   if(sub && sub.classList.contains('rp-sub')){
     var open=sub.style.display==='none';
     sub.style.display=open?'':'none';
-    g.textContent=open?'收起 ▴':'全过程 '+sub.querySelectorAll('.en-pj').length+' 条 ▸';
+    row.setAttribute('data-open', open?'1':'0');
+    g.textContent=open?'收起 ▴':'全过程 ▸';
   }
 });
 /* 「展开更早的 N 个项目」：把隐藏组全部显示 */
@@ -3827,37 +4073,17 @@ document.addEventListener('click', function(ev){
   if(!m) return;
   ev.preventDefault();
   var sec=m.closest('.prof-sec');
-  [].forEach.call(sec.querySelectorAll('.rp-grp'),function(r){ r.style.display=''; });
+  [].forEach.call(sec.querySelectorAll('.rp-grp'),function(r){
+    r.style.display='';
+    var nx=r.nextElementSibling;
+    if(nx && nx.classList.contains('rp-sub')) nx.style.display = r.getAttribute('data-open')==='1' ? '' : 'none';
+  });
   m.style.display='none';
 });
 
-/* 评标出场记录：南通（后续各市）候选人公示抽出来的情报——
-   它参加过哪些开标、第几名、报多少、控制价多少。没中的更有信息量。 */
-function rperfEvalSec(name){
-  var rec=rperfRecs(name);
-  if(!rec || !(rec.eval||[]).length) return '';
-  var evs=rec.eval.slice().sort(function(a,b){return String(b.d||'').localeCompare(String(a.d||''))});
-  var won=evs.filter(function(x){return x.won}).length;
-  var h='<div class="prof-sec"><h4><i></i>评标出场记录 <small>市交易平台候选人公示采集 · 近 1 年 '+
-    evs.length+' 场 · 中标 '+won+' 场</small></h4>';
-  evs.slice(0,12).forEach(function(x){
-    var tag = x.won ? '<i class="rp-t rp-epc">中标</i>'
-            : (x.rank ? '<i class="rp-t rp-sj">第'+x.rank+'候选</i>'
-                      : '<i class="rp-t">参与</i>');
-    var ml=[];
-    if(x.quote) ml.push('报价 '+money(x.quote));
-    if(x.win_amt) ml.push('中标价 '+money(x.win_amt));
-    if(x.control) ml.push('控制价 '+money(x.control));
-    if(x.nCands) ml.push(x.nCands+' 家竞标');
-    h+='<div class="en-pj"><span>'+tag+esc(x.t||'')+
-       (ml.length?'<br><span style="color:var(--tx3);font-size:11px">'+esc(x.d||'')+' · '+esc(ml.join(' · '))+'</span>':'')+'</span>'+
-       (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+'</div>';
-  });
-  if(evs.length>12) h+='<p style="color:var(--tx3)">仅列最近 12 场，共 '+evs.length+' 场</p>';
-  h+='<div class="prof-note">从评标/定标公示的候选人名单抽取：它报价跟控制价的差距、'+
-     '常和谁同场竞技、中标率如何 —— 判断它下一步会抢什么项目的最直接依据。</div></div>';
-  return h;
-}
+/* 评标出场记录已在 rperfTable 里并进主表（2026-10-24），这里不再单独成段。
+   保留空壳是因为外部还有调用点，删了会报 undefined。 */
+function rperfEvalSec(){ return ''; }
 function domOwnerProf(name){
   var x=null;
   arr(D.domestic).forEach(function(o){ if(o.name===name) x=o; });
@@ -3910,9 +4136,9 @@ function domOwnerProf(name){
          return '<span>'+esc(w.n)+(w.c>1?' ×'+w.c:'')+'</span>';
        }).join('')+'</div></div>';
   }
-  /* ⑤ 全网业绩（省交易平台全量采集，判断风向用） */
-  h+=rperfSec(name);
-  h+=rperfEvalSec(name);
+  /* ⑤ 业绩与动态（2026-10-24 合并成一张表：
+       省交易平台全量公告 + 评标出场 + 同集团其他主体，全部按日期倒序排在一张表里） */
+  h+=rperfTable(name);
   var sub='国内重点客户'+(x.rg?' · '+x.rg:'')+(x.main?' · '+x.main:'');
   openUniProf(x.name, sub, h);
 }
@@ -4464,6 +4690,12 @@ function profPage(kind, o){
     return Object.assign({}, x, {isNews: x.isNews || x.st === '动态'});
   });
   var _realAll=_rawItems.filter(function(x){return !x.isNews});
+  /* 2026-10-24：动态不再单独占一段（原来在「企业档案」里另起一坨），
+     合并进 rperfTable 的「近期动态」块，统一在业绩表末尾标注来源。
+     这里先算好传下去，避免表格里再去翻 o.recent 的各种历史格式。 */
+  var _rperfNewsFromItems=_rawItems.filter(function(x){return x.isNews}).map(function(x){
+    return {t:x.t, d:x.d||'', amt:parseAmtAny(x.amt), url:x.url||''};
+  });
   var A=profAgg(_realAll, o.rgAll || (o.rg&&typeof o.rg==='object'?o.rg:null));
   var ins=profInsight(kind,o);
   var nm=esc(o.name);
@@ -4602,14 +4834,12 @@ function profPage(kind, o){
     aboutHtml='<div class="prof-sec"><h4><i></i>企业档案'+
       (o.type?' <small>'+esc(o.type)+(o.cat?' · '+esc(o.cat):'')+'</small>':'')+'</h4>'+
       (_s?'<div class="about-tx">'+esc(_s)+'</div>':'')+
-      (_list.length?'<div class="about-rec"><div class="ar-hd">近期动态 <small>来源：竞对官网 / 微信公众号公开报道，'+
-        '不在本库公告内，仅供了解动向</small></div>'+
-        _list.map(function(x){
-          return '<div class="ar-i"><span class="ar-d">'+esc(x.d||'—')+'</span>'+
-            '<span class="ar-t">'+esc(x.t)+'</span>'+
-            (x.amt?'<span class="ar-m">'+x.amt.toFixed(2)+' 亿</span>':'')+
-            (x.url?'<a class="lk" href="'+esc(x.url)+'" target="_blank" rel="noopener">↗</a>':'')+
-            '</div>';}).join('')+'</div>':'')+
+      /* 2026-10-24：近期动态不再在这里单列 —— 用户要求「近期动态和中标业绩
+         放在一个表里面」。动态条目已经由 _rperfNewsFromItems 传进 rperfTable，
+         在那里统一排在业绩表末尾并标注「无原文、仅参考」。
+         这里再列一遍就是同一批事出现两次，翻起来更乱。 */
+      (_list.length?'<div class="prof-note">另有 '+_list.length+' 条官网/公众号动态，'+
+        '已并入下方「业绩与动态」表末尾，统一按日期排。</div>':'')+
       '</div>';
   })();
 
@@ -4723,7 +4953,7 @@ function profPage(kind, o){
 
   /* 2026-10-24 全网业绩：对手/业主在省交易平台的**全量**公告，
      含不我们做的业务，用于判断风向 —— 与上面「本库中标记录」口径互补 */
-  var rperfHtml=rperfSec(o.name)+rperfEvalSec(o.name);
+  var rperfHtml=rperfTable(o.name, _rperfNewsFromItems);
 
   return '<div class="prof">'+
     '<div class="prof-hd"><div><h3>'+nm+'</h3>'+
