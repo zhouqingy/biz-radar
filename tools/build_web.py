@@ -1456,7 +1456,20 @@ def _rname_norm(s):
     return re.sub(r'[（）()；;\s，,]', '', s or '')
 
 try:
-    _rp = json.load(open(os.path.join(ROOT, 'raw', 'rival_perf.json'), encoding='utf-8'))
+    # ⚠ 2026-10-26 踩的坑：merge_awards.py 写的是 rival_perf.json.gz，而这里只读
+    #    riveval_perf.json（未压缩），结果「扫了 9000 条公告、合并进去 294 条业绩」
+    #    全落在 .gz 里，页面一条都没变（本地 452 家 vs 线上 450 家）。两个格式都认。
+    _rp = None
+    for _rpf in (os.path.join(ROOT, 'raw', 'rival_perf.json.gz'),
+                 os.path.join(ROOT, 'raw', 'rival_perf.json')):
+        if os.path.exists(_rpf):
+            if _rpf.endswith('.gz'):
+                import gzip as _gz
+                _rp = json.load(_gz.open(_rpf, 'rt', encoding='utf-8'))
+            else:
+                _rp = json.load(open(_rpf, encoding='utf-8'))
+            break
+    _rp = _rp or {}
     _db = _rp.get('db') or {}
     # ── 城市全生命周期并网（南通 + 安徽，多城市模板）──────────
     # ① 中标/合同/业主归档 → 各单位「全网业绩」追加条目
