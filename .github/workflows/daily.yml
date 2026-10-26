@@ -55,6 +55,31 @@ jobs:
         timeout-minutes: 12
         run: |
           python fill_missing.py --limit 80 --sleep 0.1 --workers 8
+      - name: 3.1) 南通市站全生命周期（多城市模板）
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 20
+        run: python crawl_city_lifecycle.py --days 3 --detail 1
+
+      - name: 3.2) 安徽省站全生命周期（列表翻页 + 立项批复）
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 30
+        run: python crawl_ah.py --backfill-days 3 --approvals 1
+
+      - name: 3.3) 江苏省站全生命周期（13 市，建工+水利+交通+政采）
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 30
+        run: python crawl_js_prov.py --backfill-days 3
+
+      - name: 3.4) 名单命中详情补抓（评标情报）
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 15
+        run: |
+          python fetch_js_detail.py --limit 120 --sleep 0.3
+          python fetch_ah_detail.py --limit 40
 
       - name: 4) 重建数据（第一轮）
         working-directory: tools
