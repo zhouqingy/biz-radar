@@ -81,6 +81,18 @@ jobs:
           python fetch_js_detail.py --limit 120 --sleep 0.3
           python fetch_ah_detail.py --limit 40
 
+      - name: 3.5) 中标结果公告全文扫描（按中标单位建反向索引）
+        # 2026-10-26 新增，起因：用户指出「洪泽主城片区热电联产异地项目」的中标
+        # （华光环保能源（西安）设计研究院，6.22 亿 EPC）在库里查不到。
+        # 根因是 crawl_rival_perf.py 按**标题**搜公司名，而真实公告标题里根本不写
+        # 中标单位名字 —— 名字在正文表格里。所以改成反过来：把中标结果/候选人公示
+        # 一条条拉下来读出「中标单位名称」字段，建成反向索引，谁也漏不掉。
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 25
+        run: |
+          python scan_awards.py --to $(date -u +%Y-%m) --cats result,cand --max 900
+
       - name: 4) 重建数据（第一轮）
         working-directory: tools
         env:
