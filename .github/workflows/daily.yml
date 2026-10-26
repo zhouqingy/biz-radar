@@ -91,7 +91,15 @@ jobs:
         continue-on-error: true
         timeout-minutes: 25
         run: |
-          python scan_awards.py --to $(date -u +%Y-%m) --cats result,cand --max 900
+          python scan_awards.py --to $(date -u +%Y-%m) --cats result,cand --max 900 --zj
+
+      - name: 3.6) 把中标索引并进业绩库
+        # 2026-10-26 新增：3.5 只是把公告读成索引（award_index.json），不并进
+        # rival_perf.json 的话，企业画像里一条都看不到 —— 等于白扫。
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 10
+        run: python merge_awards.py
 
       - name: 4) 重建数据（第一轮）
         working-directory: tools
