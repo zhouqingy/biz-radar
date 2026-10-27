@@ -15,7 +15,9 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    # 2026-10-27 90 → 120：3.5 扩了上海(--sh 6页)和安徽(--ah 120条)两站，
+    # 这步本身上限提到 38 分钟，整条串行流水线留够余量。
+    timeout-minutes: 120
     steps:
       - name: 检出仓库
         uses: actions/checkout@v4
@@ -87,11 +89,18 @@ jobs:
         # 根因是 crawl_rival_perf.py 按**标题**搜公司名，而真实公告标题里根本不写
         # 中标单位名字 —— 名字在正文表格里。所以改成反过来：把中标结果/候选人公示
         # 一条条拉下来读出「中标单位名称」字段，建成反向索引，谁也漏不掉。
+        #
+        # 2026-10-27 扩到上海、安徽两站：
+        #   上海 --sh：www.shggzy.com 是 CMS + .jspx，要单独适配器（queryContents.jhtml
+        #      + content/{id}.jhtml）。6 页 = 60 条，工作日实测日均新增 20~45 条，够覆盖。
+        #   安徽 --ah：详情页是前端 JS 塞进 #zbjg 的空壳，正文要 POST /jsgc/newDetailSub。
+        #     这站会间歇性返回空包，ah_detail 里加了 2 次重试，命中率 97.5%。
         working-directory: tools
         continue-on-error: true
-        timeout-minutes: 25
+        timeout-minutes: 38
         run: |
-          python scan_awards.py --to $(date -u +%Y-%m) --cats result,cand --max 900 --zj
+          python scan_awards.py --to $(date -u +%Y-%m) --cats result,cand --max 900 --zj \
+                                --sh --sh-pages 6 --ah --ah-max 120
 
       - name: 3.6) 把中标索引并进业绩库
         # 2026-10-26 新增：3.5 只是把公告读成索引（award_index.json），不并进
