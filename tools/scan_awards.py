@@ -395,9 +395,31 @@ def parse_detail(html):
             owner = cand
             break
     price = ''
-    m = _RE_PRICE.search(txt) or _RE_PRICE2.search(txt)
-    if m:
-        price = m.group(1).replace(' ', '')
+    # ⚠ 2026-10-27 踩坑（用户抓到「32.7元」的离谱数据）：候选人公示的报价表是
+    #   「投标报价 32.7元/平方米」——这是**单价**，不是合同总价！
+    #   老代码一次匹配就收，把单价存成总价，下游 32.7 被前端当「亿」显示。
+    #   修法：逐个候选扫描，跳过单价（元/㎡、元/平方米、元/亩、元/吨…）和 %，
+    #   优先取带「万元/亿元」的，其次 ≥1 万元整数位的「元」；找不到就空着 —— 宁缺毋假。
+    UNIT_PRICE = re.compile(r'/\s*(?:平方米|m2|㎡|M2|亩|吨|千瓦|KW|MW|度|立方米|m3)')
+    m0 = _RE_PRICE.search(txt)
+    cands = []
+    pos = m0.start() if m0 else 0
+    for rex in (_RE_PRICE, _RE_PRICE2):
+        for mm in rex.finditer(txt):
+            cands.append((mm.group(1).replace(' ', ''), mm.end()))
+    for p, endp in cands:
+        tail = txt[endp:endp + 8]
+        if UNIT_PRICE.search(tail) or '%' in p:
+            continue
+        price = p
+        if '万' in p:
+            break                      # 带万元单位的优先级最高，直接用
+    if price and '万' not in price:
+        try:
+            if float(price.replace(',', '')) < 1e4:
+                price = ''             # 裸「元」小于 1 万的基本是单价/订金，不收
+        except ValueError:
+            price = ''
     return {'win': win, 'owner': owner, 'price': price, 'amt': parse_amt(price), 'txt': txt}
 
 
