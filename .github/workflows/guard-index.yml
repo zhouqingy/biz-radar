@@ -1,0 +1,73 @@
+name: 页面版本守卫（防回滚）
+
+# 2026-10-27 新增
+# ── 为什么需要它 ──────────────────────────────────────────────
+# 网盘备份包 bizradar全量备份_latest.zip 里的 index.html 曾停留在老版 v2.0（1556 行）。
+# 定时任务每轮「从网盘恢复沙箱 → publish_gh.py 推送」，把线上页面整片推回老版
+#   （提交记录表现为：只改 index.html，+334 / -4459，一个数据文件都不碰），
+#   再经任务回传网盘，形成「拉旧的 → 推旧的 → 存旧的」死循环。
+# 已做的修复：① 网盘备份换成新版 ② 三个定时任务各加「发布前从 GitHub 拉最新页面」步骤。
+# 本流程是第三道兜底：不依赖任何外部任务，自己盯着线上页面，被推回老版就自动恢复。
+#
+# ── 机制 ─────────────────────────────────────────────────────
+# 仓库里存一份「正版副本」_src/index.html。本流程每 30 分钟检查根 index.html：
+#   行数 < 3000  或  全文不含「业务信号」  →  判定被推回老版 → 用副本覆盖并推送。
+# 判据说明：新版 5700 行左右且含「业务信号检测」板块；老版 1556 行、无此板块。
+#
+# ⚠️ 以后改页面必须同步更新 _src/index.html，否则守卫会把正常的新改动当成「老版」回滚掉。
+#    同理，若将来有意做一次行数更少的大改版，也要先把 _src/index.html 一起更新。
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 1) 检查根 index.html 是否被推回老版
+        id: chk
+        run: |
+          lines=$(wc -l < index.html)
+          sig=$(grep -c '业务信号' index.html || true)
+          ref=$(wc -l < _src/index.html)
+          echo "当前 index.html：${lines} 行，业务信号命中 ${sig}；正版副本 ${ref} 行"
+          if [ "$lines" -lt 3000 ] || [ "$sig" -eq 0 ]; then
+            echo "bad=true" >> "$GITHUB_OUTPUT"
+            echo ">> 判定：被推回老版，需要恢复"
+          else
+            echo "bad=false" >> "$GITHUB_OUTPUT"
+            echo ">> 判定：版本正常，无需处理"
+          fi
+
+      - name: 2) 用正版副本恢复并推送
+        if: steps.chk.outputs.bad == 'true'
+        run: |
+          cp _src/index.html index.html
+          git config user.name  "biz-radar-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add index.html
+          git commit -m "页面版本守卫：检测到老版回滚，已用正版副本恢复（$(date -u '+%Y-%m-%d %H:%M') UTC）"
+
+          git -c rebase.autoStash=true pull --rebase --strategy-option=ours origin main || {
+            git rebase --abort 2>/dev/null || true
+            git pull --no-rebase --strategy-option=ours origin main
+          }
+
+          for i in 1 2; do
+            if git push; then
+              echo "恢复推送成功（第 $i 次尝试）"
+              exit 0
+            fi
+            echo "第 $i 次推送被拒，拉取后重试"
+            git pull --rebase --strategy-option=ours origin main || true
+            sleep 5
+          done
+          echo "两次恢复推送均失败"
+          exit 1
