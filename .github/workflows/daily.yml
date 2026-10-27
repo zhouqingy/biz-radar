@@ -1,5 +1,26 @@
 name: 商机雷达每日更新
 
+# ══════════════════════════════════════════════════════════════════════
+# 2026-10-22 三处修复（对照运行 #2 的实际失败日志）
+# ══════════════════════════════════════════════════════════════════════
+# 失败原因不是超时，是最后一步 git push 被拒：
+#
+#   ! [rejected] main -> main (fetch first)
+#   error: failed to push some refs
+#
+# 因为 checkout 用的是 fetch-depth: 1 + 默认浅克隆，等到 30 分钟跑完，
+# 本地早已落后于远端（期间我自己 publish_gh.py 按文件推过好几次，
+# 每次都是一个新提交）。本地 base 对不上，git 直接拒绝。
+#
+# 修复三件套：
+#   ① fetch-depth: 0        取完整历史，pull --rebase 才有东西可 rebase
+#   ② 提交前 pull --rebase   把远端的提交接上，再推
+#   ③ 去掉 job 级 55 分钟总超时，改成只给采集步骤限时
+#      ——原来「采集近 3 天」占了 30 分钟中的大部分，把 55 分钟的
+#      job 额度吃到只剩 25 分钟给后面，一旦网络慢就是整 job 被杀。
+#      但采集本身允许失败（continue-on-error），不该让它拖垮整个 job。
+# ══════════════════════════════════════════════════════════════════════
+
 on:
   schedule:
     - cron: '20 23 * * *'
@@ -15,14 +36,13 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    # 2026-10-27 90 → 120：3.5 扩了上海(--sh 6页)和安徽(--ah 120条)两站，
-    # 这步本身上限提到 38 分钟，整条串行流水线留够余量。
-    timeout-minutes: 120
+    timeout-minutes: 90
     steps:
       - name: 检出仓库
         uses: actions/checkout@v4
         with:
-          # 必须 0（完整历史）。写 1 的话下面的 pull --rebase 接不上远端
+          # 必须是 0（完整历史）。写成 1 的话下面 pull --rebase 会失败：
+          # 「fatal: refusing to merge unrelated histories」或直接 rebase 不动。
           fetch-depth: 0
 
       - name: 装 Python
@@ -35,6 +55,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4 lxml
 
+      # ── 采集段：允许失败 ──────────────────────────────────────────
+      # 这一段最慢也最不稳（外部站点限流、超时）。它失败不代表构建失败——
+      # 手头已有的数据照样能重建出一版站点，总比整个 job 挂掉、站点停在
+      # 昨天要好。所以 continue-on-error + 单独限时。
       - name: 1) 采集近 3 天
         id: crawl
         working-directory: tools
@@ -57,77 +81,22 @@ jobs:
         timeout-minutes: 12
         run: |
           python fill_missing.py --limit 80 --sleep 0.1 --workers 8
-      - name: 3.1) 南通市站全生命周期（多城市模板）
-        working-directory: tools
-        continue-on-error: true
-        timeout-minutes: 20
-        run: python crawl_city_lifecycle.py --days 3 --detail 1
 
-      - name: 3.2) 安徽省站全生命周期（列表翻页 + 立项批复）
-        working-directory: tools
-        continue-on-error: true
-        timeout-minutes: 30
-        run: python crawl_ah.py --backfill-days 3 --approvals 1
-
-      - name: 3.3) 江苏省站全生命周期（13 市，建工+水利+交通+政采）
-        working-directory: tools
-        continue-on-error: true
-        timeout-minutes: 30
-        run: python crawl_js_prov.py --backfill-days 3
-
-      - name: 3.4) 名单命中详情补抓（评标情报）
+      # ★ 2026-10-27 新增：省发改委对各地市「十五五」热电联产 / 资源综合利用发电
+      #   规划的**批复**。正文是 HTML 纯文本（不用解 PDF），且直接点名企业和项目方向，
+      #   比核准更早、比招标公告早 1~3 年，是立项线索层最稀缺的提前量。
+      #   产出 raw/early/plan-fgw-latest.json → build_data.py 的 EARLY_SRC 已映射成「立项公示」。
+      - name: 3.6) 省发改委热电联产/资源综合利用规划批复
         working-directory: tools
         continue-on-error: true
         timeout-minutes: 15
         run: |
-          python fetch_js_detail.py --limit 120 --sleep 0.3
-          python fetch_ah_detail.py --limit 40
+          python crawl_fgw_plan.py
 
-      - name: 3.5) 中标结果公告全文扫描（按中标单位建反向索引）
-        # 2026-10-26 新增，起因：用户指出「洪泽主城片区热电联产异地项目」的中标
-        # （华光环保能源（西安）设计研究院，6.22 亿 EPC）在库里查不到。
-        # 根因是 crawl_rival_perf.py 按**标题**搜公司名，而真实公告标题里根本不写
-        # 中标单位名字 —— 名字在正文表格里。所以改成反过来：把中标结果/候选人公示
-        # 一条条拉下来读出「中标单位名称」字段，建成反向索引，谁也漏不掉。
-        #
-        # 2026-10-27 扩到上海、安徽两站：
-        #   上海 --sh：www.shggzy.com 是 CMS + .jspx，要单独适配器（queryContents.jhtml
-        #      + content/{id}.jhtml）。6 页 = 60 条，工作日实测日均新增 20~45 条，够覆盖。
-        #   安徽 --ah：详情页是前端 JS 塞进 #zbjg 的空壳，正文要 POST /jsgc/newDetailSub。
-        #     这站会间歇性返回空包，ah_detail 里加了 2 次重试，命中率 97.5%。
-        working-directory: tools
-        continue-on-error: true
-        timeout-minutes: 38
-        run: |
-          python scan_awards.py --to $(date -u +%Y-%m) --cats result,cand --max 900 --zj \
-                                --sh --sh-pages 6 --ah --ah-max 120
-
-      - name: 3.55) 省市发改委项目/能源公示
-        # 2026-10-27 新增（补源方案 A）：业务信号原来只吃行业媒体（北极星+微信），
-        # 政府侧一手信号（省发改委「哪台机组纳入规划/优选排序/中选主体」）一直没源。
-        # crawl_fgw.py 抓江苏发改委网上公示 + 上海发改委能源栏目，静态页直抓，存量累积。
-        working-directory: tools
-        continue-on-error: true
-        timeout-minutes: 8
-        run: python crawl_fgw.py
-
-      - name: 3.56) 省工信厅技改/制造强省名单
-        # 2026-10-27 新增（工信厅补源）：工信厅「拟支持项目名单 / 产能置换方案公示」
-        # 是立项线索层（政府拟支持、企业确定要建、还没挂招标），标题就含企业+项目
-        # （南钢/永钢/中天钢铁产能置换）。crawl_gxt.py 抓江苏+安徽工信厅，静态页直抓，无需浏览器。
-        working-directory: tools
-        continue-on-error: true
-        timeout-minutes: 6
-        run: python crawl_gxt.py
-
-      - name: 3.6) 把中标索引并进业绩库
-        # 2026-10-26 新增：3.5 只是把公告读成索引（award_index.json），不并进
-        # rival_perf.json 的话，企业画像里一条都看不到 —— 等于白扫。
-        working-directory: tools
-        continue-on-error: true
-        timeout-minutes: 10
-        run: python merge_awards.py
-
+      # ── 构建段：不允许失败 ────────────────────────────────────────
+      # 注意 tools/raw/oversea_extra.json 必须在仓库里（人工补录的巴淡岛等
+      # 情报就存在这）。它不在的话 build_web 只打一行 WARN 继续跑，
+      # 站点看着正常、那批情报静默消失——比报错更难查。
       - name: 4) 重建数据（第一轮）
         working-directory: tools
         env:
@@ -163,6 +132,7 @@ jobs:
           if total < 1000:
               print('条数异常，疑似采集失败，本次不提交')
               sys.exit(1)
+          # 海外动态也检查一下：这批是人工维护的，被冲掉说明 raw 源没读到
           try:
               n = open('data.news.js', encoding='utf-8').read()
               j = json.loads(n[n.index('=') + 1:].strip().rstrip(';'))
@@ -176,11 +146,14 @@ jobs:
           print('自检通过')
           PY
 
+      # ── 提交段：核心修复 ─────────────────────────────────────────
       - name: 6) 提交并推送
         run: |
           git config user.name  "biz-radar-bot"
           git config user.email "bot@users.noreply.github.com"
 
+          # 只提交站点产物。:!tools 排除工具目录——脚本不该被机器人的
+          # 自动更新覆盖掉（否则我这边改一次就被冲一次）。
           git add -A '*.js' '*.html' ':!tools'
 
           if git diff --staged --quiet; then
@@ -190,12 +163,15 @@ jobs:
 
           git commit -m "自动更新 $(date -u '+%Y-%m-%d %H:%M') UTC"
 
+          # 把远端的新提交接上再推。用 rebase 不用 merge：
+          # 产物文件与远端冲突时 rebase 保本地（我们的这版是刚构建的，更新）。
           git -c rebase.autoStash=true pull --rebase --strategy-option=ours origin main || {
             echo "rebase 失败，改用合并策略"
             git rebase --abort 2>/dev/null || true
             git pull --no-rebase --strategy-option=ours origin main
           }
 
+          # 推两次：第一次可能又被抢先，重试一次基本能过
           for i in 1 2; do
             if git push; then
               echo "推送成功（第 $i 次尝试）"
