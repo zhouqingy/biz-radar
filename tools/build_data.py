@@ -514,8 +514,12 @@ def merge_into(keep, drop):
                 kf.append(f); seenf.add((f.get('n'), f.get('u')))
         keep['files'] = kf
     keep.setdefault('hist', [])
-    keep['hist'].append({'st': drop['st'], 'd': drop['d'], 'url': drop['url'],
-                         'p': drop['p'], 'win': drop['win'], 'amt': drop['amt']})
+    # ⚠ 2026-10-27 用户抓到「宁波钢铁 15MW」弹层里全过程 2 条一模一样：
+    #   老代码追加 hist 之前不查重，同一阶段的记录来自两个来源（或子串合并触发两次）就翻倍。
+    _hk = (drop['st'], drop['d'], drop['url'])
+    if not any((h['st'], h['d'], h['url']) == _hk for h in keep['hist']):
+        keep['hist'].append({'st': drop['st'], 'd': drop['d'], 'url': drop['url'],
+                             'p': drop['p'], 'win': drop['win'], 'amt': drop['amt']})
     if drop.get('_new'):
         keep['_new'] = True
     return keep
