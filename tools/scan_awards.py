@@ -511,6 +511,455 @@ def scan_zj(max_per_kw=40, dry=False, workers=8):
     return todo, got
 
 
+# ══════════════════════════════════════════════════════════════════════════
+# 上海站（www.shggzy.com）—— 2026-10-27 接入
+# ══════════════════════════════════════════════════════════════════════════
+# 这个站跟江苏/浙江的 ES 接口完全是两码事：JEECMS（Java CMS）静态渲染。
+# 踩了 5 个小时的坑，结论如下（省得下次重踩）：
+#
+#   ✗ /jyxxgc.jhtml                  建设工程总列表，104524 条，**不分公告类型**
+#   ✗ /jyxxgc?channelId=33           参数被忽略，还是那个总列表
+#   ✗ /jyxxgc_2.jhtml                翻页 URL 形状对，但服务端返回 0 字节
+#   ✗ /jyxxgcgs/9128049              详情 URL 形状对，**Content-Length: 0**
+#                                    （内容靠前端 JS 填，curl 拿不到正文）
+#   ✓ /search/queryContents.jhtml?channelId=33&pageNo=N
+#                                    这才是真接口：channelId=33 中标结果公示
+#                                    （35022 条）、32 中标候选人公示、29 招标公告；
+#                                    pageNo 翻页有效，每页 10 条
+#   ✓ /content/9128049.jhtml         真·详情页，177 KB HTML 里带
+#                                    「中标人名称」「中标价：948.2416万元」「招标人」
+#                                    三项都是 <ul class="table_1_ul"> 的结构化字段
+#
+# 所以流程是：queryContents 列表拿 id → content/{id}.jhtml 拿结构化字段。
+SH_HOST = 'https://www.shggzy.com'
+SH_CHANNEL = {
+    'gs': ('33', 'sh-中标结果'),      # 中标结果公示
+    'hx': ('32', 'sh-候选人'),        # 中标候选人公示
+}
+SH_UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+         '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36')
+
+
+def sh_get(url, timeout=40):
+    r = subprocess.run(['curl', '-sL', '-m', str(timeout), url,
+                        '-H', 'User-Agent: ' + SH_UA,
+                        '-H', 'Referer: ' + SH_HOST + '/jyxxgc'],
+                       capture_output=True)
+    return r.stdout.decode('utf-8', 'ignore')
+
+
+def sh_list(channel, page, timeout=40):
+    """一页 10 条：<li onclick="window.open('/jyxxgcgs/9128049?cExt=&isIndex=')">
+                    <span class="cs-span2" …>标题</span>
+                    <span …>项目编号</span><span>2026-10-26</span>"""
+    url = '%s/search/queryContents.jhtml?channelId=%s&pageNo=%d' % (SH_HOST, channel, page)
+    html = sh_get(url, timeout)
+    out = []
+    for m in re.finditer(
+            r"window\.open\('(/jyxxgc(?:gs|hx|gg)/(\d+))[^']*'\)\)?[^>]*>([\s\S]{0,900}?)</li>", html):
+        path, sid, body = m.groups()
+        tm = re.search(r'class="cs-span2"[^>]*>\s*([\s\S]{3,200}?)\s*</span>', body)
+        dm = re.search(r'>\s*(20\d\d-\d\d-\d\d)\s*<', body)
+        cm = re.search(r'>\s*(e[0-9]{15,25})\s*&?n?b?s?p?;?\s*<', body)
+        if not tm:
+            continue
+        title = re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', '', tm.group(1))).strip()
+        out.append({'id': sid, 't': title,
+                    'd': dm.group(1) if dm else '',
+                    'code': cm.group(1) if cm else '',
+                    'url': SH_HOST + path})
+    # 总条数（showCount = 35022）
+    total = 0
+    mt = re.search(r'var\s+showCount\s*=\s*(\d+)', html)
+    if mt:
+        total = int(mt.group(1))
+    return out, total
+
+
+def sh_detail(url):
+    """详情页是真 HTML（不是 /jyxxgcgs/{id} 那个空壳）。
+       结构化字段都在 <ul class="table_1_ul"><li>键:</li><li>值</li></ul>。"""
+    sid = re.search(r'/(\d+)(?:\?|$)', url)
+    if not sid:
+        return None
+    html = sh_get('%s/content/%s.jhtml' % (SH_HOST, sid.group(1)))
+    if len(html) < 5000:
+        return None
+    kv = {}
+    for m in re.finditer(r'<li>([^<>:：]{2,20})[:：]</li>\s*<li[^>]*>([\s\S]{0,4000}?)</li>', html):
+        k = m.group(1).strip()
+        v = re.sub(r'<[^>]+>', '', m.group(2))
+        v = re.sub(r'\s+', ' ', v.replace('&nbsp;', ' ')).strip()
+        if k and v and k not in kv:
+            kv[k] = v
+    win = kv.get('中标人名称') or ''
+    # 「公示内容」里那句自然语言也常带，作兜底
+    if not win:
+        mc = re.search(r'中标人[:：]\s*([^，,。；;]{4,60})', kv.get('公示内容') or '')
+        if mc:
+            win = mc.group(1).strip()
+    owner = kv.get('招标人') or ''
+    if not owner:
+        mo = re.search(r'招标人[:：]\s*([^，,。；;]{4,60})', kv.get('公示内容') or '')
+        if mo:
+            owner = mo.group(1).strip()
+    price = kv.get('中标价') or ''
+    if not price:
+        mp = re.search(r'中标价[:：]\s*([0-9][0-9,.]*\s*(?:万)?元)', kv.get('公示内容') or '')
+        if mp:
+            price = mp.group(1)
+    amt = parse_amt(price)
+    title = ''
+    mt = re.search(r'<h2>([^<]{4,200})</h2>', html)
+    if mt:
+        title = re.sub(r'\s+', '', mt.group(1))
+    if not win:
+        return None
+    return {'win': win, 'owner': owner, 'amt': amt, 'price': price, 'title': title}
+
+
+def scan_sh(max_pages=6, dry=False, workers=8, channel='gs'):
+    """上海站：按 channelId 翻页抓「中标结果公示」→ 逐条抓详情拿中标人。"""
+    ch, tag = SH_CHANNEL.get(channel, SH_CHANNEL['gs'])
+    todo, seen = [], set()
+    total = 0
+    for pg in range(1, max_pages + 1):
+        rows, tot = sh_list(ch, pg)
+        total = tot or total
+        if not rows:
+            break
+        for x in rows:
+            if x['id'] in seen:
+                continue
+            seen.add(x['id'])
+            todo.append({'cat': tag, 't': x['t'], 'd': x['d'], 'url': x['url'],
+                         'city': '上海', 'id': 'sh' + x['id'], 'code': x.get('code', '')})
+        time.sleep(0.3)
+    print('  上海频道 %s 共 %d 条，收前 %d 条' % (tag, total, len(todo)), flush=True)
+    if dry:
+        return todo, []
+
+    def one(it):
+        try:
+            d = sh_detail(it['url'])
+        except Exception:
+            return None
+        if not d:
+            return None
+        rec = dict(it)
+        rec.update({'win': d['win'], 'owner': d['owner'],
+                    'amt': d['amt'], 'price': d['price']})
+        if d.get('title'):
+            rec['t'] = d['title']
+        return rec
+
+    got = []
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        for i, r in enumerate(ex.map(one, todo), 1):
+            if r:
+                got.append(r)
+            if i % 50 == 0:
+                print('    sh %d/%d 命中 %d' % (i, len(todo), len(got)), flush=True)
+    return todo, got
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 安徽站（ggzy.ah.gov.cn）—— 2026-10-27 补齐详情
+# ══════════════════════════════════════════════════════════════════════════
+# 之前 crawl_ah.py 只抓到列表标题，详情页打开是「此流程暂无信息」的空壳
+# —— 正文是前端 JS 往 #zbjg 里塞的。翻了页面源码找到真接口：
+#
+#   POST /jsgc/newDetailSub
+#   data: type=zbjg&bulletinNature=3&guid={guid}&statusGuid=
+#   返回：中标公示的完整 HTML（含 <table>），字段有
+#         中标人名称 / 投标报价 / 项目负责人 / 招标人 / 项目名称
+#
+# ⚠ 注意：curl 不能用 -k（加 -k 会 502），http 头也别乱加。
+AH_HOST = 'https://ggzy.ah.gov.cn'
+
+
+def _ah_flat_text(html):
+    """把 HTML 拍平成一条纯文本流，单元格之间用 | 分隔。
+    安徽的表格「键」「值」会被拆成好几个 td（「中标」「成交单位」「名称」「XX公司」），
+    按 td 配对的写法全废，只能拍平了用「标记串」找。"""
+    t = re.sub(r'<script[\s\S]*?</script>', ' ', html or '')
+    t = re.sub(r'<style[\s\S]*?</style>', ' ', t)
+    t = re.sub(r'</t[dh]>', '|', t)
+    t = re.sub(r'</tr>', '|', t)
+    t = re.sub(r'<[^>]+>', '', t)
+    t = t.replace('&nbsp;', ' ').replace('&amp;', '&')
+    # ⚠ 必须先合并所有空白（含换行）再处理分隔符：HTML 里 </td> 后面跟着 \n，
+    #   不合并的话「中标（成交）单位名称\n|」匹配不上「名称|」。
+    t = re.sub(r'\s+', '', t)
+    t = re.sub(r'\|{2,}', '|', t)
+    return t
+
+
+# 安徽站的「中标单位」标签有这些写法（实测）：
+#   中标人名称 / 中标（成交）单位名称 / 中标（成交）单位 / 中标单位名称
+_AH_WIN_MARK = ('中标（成交）单位名称', '中标(成交)单位名称', '中标（成交）单位',
+                '中标(成交)单位', '中标单位名称', '中标人名称', '中标人', '中标单位',
+                '成交单位名称', '成交供应商')
+_AH_OWNER_MARK = ('招标人名称', '招标人', '采购人名称', '采购人', '建设单位名称', '建设单位')
+# 值里出现这些词说明抓到的是下一个字段名，不是单位
+_AH_STOP = ('地址', '联系', '电话', '项目', '标段', '工期', '质量', '负责人', '资格',
+            '方式', '办法', '时间', '金额', '限价', '费率', '投标价', '备注', '公示',
+            '代理', '编号', '评审', '响应', '计划', '被否决', '技术', '企业', '标准')
+
+
+def _ah_clean_win(v):
+    """把中标单位名清洗成可读形式（2026-10-27 加）。
+    安徽的联合体写法是**人话叙述**，直接存下来企业画像里看不到是谁：
+        「联合体牵头单位：上海城建水务工程有限公司联合体成员单位：潜山市润屿建设工程有限公司」
+        「联合体牵头人：安徽殊霆建设工程有限公司联合体成员1：安徽省建筑设计研究总院…」
+        「安徽夏森工程建设有限公司、铭扬工程设计集团有限公司（联合体）」
+    统一成和江苏/上海一致的 `A;B;C` 分号分隔（下游 build_web / 画像按 ; 拆家数）。"""
+    if not v:
+        return ''
+    s = v.strip(' ；;、,，')
+    # 「（联合体单位：X）」「(联合体成员：X)」是括号里包着第二个单位，直接拆成分号。
+    # ⚠ 不能用 `[^）)]*`：X 本身可能带括号（「九宜云商管理咨询（上海）有限公司」就带），
+    #   要用「从『联合体单位：』往后找到与之配对的右括号」的写法。
+    def _split_paren(m):
+        inner = m.group(2)
+        return ';' + inner
+    s = re.sub(r'([（(])\s*联合体(?:成员)?(?:单位)?\s*[:：]((?:[^（(）)]|[（(][^）)]*[）)])*)[）)]',
+               _split_paren, s)
+    s = re.sub(r'[（(]\s*联合体(?:成员)?(?:单位)?\s*[）)]', '', s)
+    # 「（联合体牵头单位）」「（联合体成员1）」这种是**后缀标注**，直接删掉
+    s = re.sub(r'[（(]\s*联合体(?:牵头)?(?:成员)?(?:单位|人|方)?\s*[0-9]*\s*[）)]', '', s)
+    s = re.sub(r'联合体牵头(?:单位|人|方)?[:：]?', '', s)
+    # 清掉「（;1）」「（1）」这类编号残渣
+    s = re.sub(r'[（(]\s*[;；]?\s*[0-9一二三四五六七八九十]*\s*[）)]', '', s)
+    # 去掉叙述性前缀词，只留单位名
+    s = re.sub(r'联合体牵头(?:单位|人)?[:：]', '', s)
+    s = re.sub(r'联合体成员(?:单位)?\s*[0-9一二三四五六七八九十]*\s*[:：]', ';', s)
+    s = s.replace('联合体成员单位', ';').replace('联合体成员', ';')
+    # 各种顿号/逗号/加号分隔都换成分号
+    s = re.sub(r'[、,，]\s*(?=[\u4e00-\u9fa5])', ';', s)
+    s = re.sub(r'和(?=[\u4e00-\u9fa5]{4,}(?:公司|集团|院|局))', ';', s)
+    s = re.sub(r'(有限公司|有限责任公司|集团公司|股份有限公司)(?=[\u4e00-\u9fa5]{4,}(?:公司|集团|院|局))',
+               r'\1;', s)
+    # 收尾：去空段、去尾部「联合体」残字、去孤立括号
+    parts = [p.strip(' ;；、') for p in s.split(';')]
+    parts = [re.sub(r'联合体$', '', p).strip() for p in parts if p.strip(' ;；、')]
+    parts = [re.sub(r'^[（(]', '', p) for p in parts]
+    out = ';'.join(parts)
+    return out[:160]
+
+
+def _ah_pick_win(flat):
+    """从拍平的文本流里找中标单位。
+    安徽的表格**不是两列结构**，是「键|值|键|值|…」平铺成一长串，
+    而且键名五花八门（实测见过这几种）：
+        中标人名称|河南田野文化艺术有限公司
+        中标（成交）单位名称|联合体牵头人：…
+        中标人|名称|安徽建工三建集团有限公司     ← 值前面还夹了个「名称」标签
+        中标单位|…
+    所以策略是：找到「中标/成交」开头的那个键，往后跳最多 3 个格子，
+    取第一个**长得像单位名**的值（带公司/集团/院/局等后缀）。
+
+    ⚠ 2026-10-27 补的第二条腿：安徽还有一类公告**根本没有表格**，
+      正文就是一段话（县级项目特别多）：
+          「…评审、公示结束，中标人已确定，现将中标结果公示如下：
+            中标人名称：黄山永宁营造工程有限公司（联合体成员单位：…）
+            中标价：9410073.96元…」
+      拍平后整段是一格，没有 '|'，上面那套格子扫描永远扫不到。
+      所以先用正则按「键：值」在整段文本里捞一遍，捞不到再退回格子扫描。"""
+    # ---- 腿一：纯文本「中标人名称：XXX / 中标（成交）单位名称：XXX」 ----
+    TXT_PAT = [r'中标（成交）单位名称[:：]', r'中标\(成交\)单位名称[:：]',
+               r'中标（成交）单位[:：]', r'中标\(成交\)单位[:：]',
+               r'中标人名称[:：]', r'中标单位名称[:：]', r'中标供应商名称[:：]',
+               r'中标人[:：]', r'中标单位[:：]', r'成交供应商[:：]', r'成交单位[:：]']
+    for pat in TXT_PAT:
+        for m in re.finditer(pat, flat):
+            seg = flat[m.end():m.end() + 160]
+            # 截到下一个字段名（「中标价」「工期」「地址」…）为止
+            cut = re.search(r'(中标价|中标金额|投标报价|工期|项目负责人|地址|联系人|'
+                            r'公示|评标|代理服务|招标代理|质量|注册|证书)', seg)
+            if cut:
+                seg = seg[:cut.start()]
+            seg = seg.strip(' ：:')
+            if len(seg) >= 4 and any(t in seg for t in _ORG_TAIL):
+                return _ah_clean_win(seg)
+    # ---- 腿二：表格「键|值」平铺 ----
+    cells = [c for c in flat.split('|')]
+    for i, c in enumerate(cells):
+        c2 = c.strip()
+        if not c2 or len(c2) > 22:
+            continue
+        if not (c2.startswith('中标') or c2.startswith('成交') or c2.startswith('中选')):
+            continue
+        # 「中标结果公示」这种标题、说明句跳过
+        # ⚠ 注意别把「中标成交单位」也拦掉（东至县那条就是栽在「单位」上）
+        if any(w in c2 for w in ('公示', '公告', '已经', '确定', '结果如下', '候选人',
+                                 '内容', '情况', '信息', '日期', '时间', '价', '金额',
+                                 '费率', '工期', '范围', '须知')):
+            continue
+        for j in range(i + 1, min(i + 5, len(cells))):
+            v = cells[j].strip()
+            if v == '名称' or not v:
+                continue
+            if len(v) < 4 or len(v) > 90:
+                continue
+            if not any(t in v for t in _ORG_TAIL) and '联合体' not in v:
+                continue
+            return _ah_clean_win(v)
+    return ''
+
+
+def ah_detail(guid, nature='3', timeout=60, retry=2):
+    # ⚠ 超时从 35s 提到 60s：实测安徽站偶尔 6s+ 才回包，35s 在 8 并发下会成片超时
+    # ⚠ 2026-10-27 加重试：这站会**间歇性返回空包/超时**（同一 guid 隔几秒再请求就正常，
+    #   HTTP 200 + 固定大小，纯粹是服务端限流），单发不重试时命中率 9/14，重试后 12/14。
+    html = ''
+    for _try in range(max(1, retry + 1)):
+        r = subprocess.run(
+            ['curl', '-s', '-m', str(timeout), '-X', 'POST',
+             AH_HOST + '/jsgc/newDetailSub',
+             '-H', 'User-Agent: ' + UA,
+             '-H', 'Referer: %s/jsgc/newDetail?guid=%s&tenderProjectType=1&bulletinNature=%s'
+                   % (AH_HOST, guid, nature),
+             '--data', 'type=zbjg&bulletinNature=%s&guid=%s&statusGuid=' % (nature, guid)],
+            capture_output=True)
+        html = r.stdout.decode('utf-8', 'ignore')
+        if len(html) >= 300:
+            break
+        time.sleep(1.2 + _try * 1.5)
+    if len(html) < 300:
+        return None
+    flat = _ah_flat_text(html)
+    if len(flat) < 20:
+        return None
+
+    win = _ah_pick_win(flat)
+    if not win:
+        return None
+
+    # 业主：招标人后面的值，可能是「名称|XX公司」两格
+    owner = ''
+    for mk in ('招标人', '采购人', '建设单位'):
+        for m in re.finditer(re.escape(mk) + r'\|', flat):
+            seg = flat[m.end():m.end() + 160].split('|')
+            for v in seg[:3]:
+                v = v.strip()
+                if v == '名称' or len(v) < 3:
+                    continue
+                if any(s in v[:4] for s in _AH_STOP):
+                    break
+                owner = v
+                break
+            if owner:
+                break
+        if owner:
+            break
+
+    # 金额：⚠ 踩的坑（华佗中医药那条）：公告里**没有「中标价」**，只有「投标报价|79.98」，
+    #   老写法取 seg 后 60 个字符再搜索数字，一路越过了 `|` 抓到后面
+    #   「证书编号：豫1412007200906393」→ amt 变成 1.4 亿亿。三处收紧：
+    #   ① 只在**同一格**内取（遇到 `|` 就截断）
+    #   ② 优先带「元」的写法；纯数字必须 ≥6 位且**不能跟在「编号/证书」后面**
+    #   ③ 「投标报价|79.98」这种小数（万元）单独换算
+    #   ④ 键名带单位后缀（`中标价（元）` / `中标金额（元）` / `中标价(万元)`）也要认
+    #   ⑤ 值是「肆佰陆拾壹万叁仟壹佰陆拾陆元肆角玖分（小写：4613166.49元）」这种，
+    #      优先抓「小写：」后面的数字
+    price = ''
+    for mk in ('中标价', '中标金额', '中标（成交）价', '中标(成交)价', '中标价格',
+               '中标（成交）金额', '投标报价', '投标价', '成交价', '成交金额'):
+        # ④ 先精确找「键|」，再找「键（元）|」「键(万元)|」这类带单位后缀的
+        i = -1
+        for pat in (re.escape(mk) + r'\|',
+                    re.escape(mk) + r'[（(](?:元|万元|人民币)[）)]\|'):
+            mm = re.search(pat, flat)
+            if mm:
+                i = mm.start()
+                after = mm.end()
+                break
+        if i < 0:
+            continue
+        seg = flat[after:after + 140].split('|')[0]        # ① 只取同一格
+        # ⑤ 「小写：4613166.49元」优先
+        m = re.search(r'小写[:：]?\s*([0-9][0-9,.]*)\s*(万元|元)?', seg)
+        if m:
+            price = m.group(1) + (m.group(2) or '元')
+        if not price:
+            m = re.search(r'([0-9][0-9,.]*)\s*万元', seg)
+            if m:
+                price = m.group(1) + '万元'
+            else:
+                m = re.search(r'([0-9][0-9,.]*)\s*元', seg)
+                if m:
+                    price = m.group(1) + '元'
+                else:
+                    m = re.match(r'^([0-9]{6,}(?:\.[0-9]{1,2})?)$', seg.strip())
+                    if m:
+                        price = m.group(1) + '元'
+                    else:
+                        # ③ 「79.98」= 79.98 万元
+                        m = re.match(r'^([0-9]{1,7}\.[0-9]{1,2})$', seg.strip())
+                        if m:
+                            price = m.group(1) + '万元'
+        if price:
+            break
+
+    title = ''
+    mt = re.search(r'class="article-title[^"]*"[^>]*>([\s\S]{4,300}?)</p>', html)
+    if mt:
+        title = re.sub(r'\s+', '', re.sub(r'<[^>]+>', '', mt.group(1)))
+    return {'win': win, 'owner': owner, 'amt': parse_amt(price),
+            'price': price, 'title': title}
+
+
+def scan_ah(max_n=0, dry=False, workers=8, src_json=None):
+    """从 crawl_ah.py 已抓好的 ah_lifecycle.json 里取「中标结果」逐条补详情。"""
+    path = src_json or os.path.join(RAW, 'ah_lifecycle.json')
+    if not os.path.exists(path):
+        print('  [安徽] 找不到 %s，先跑 crawl_ah.py' % path, flush=True)
+        return [], []
+    d = json.load(open(path, encoding='utf-8'))
+    items = [x for x in (d.get('items') or []) if x.get('cat') == 'result']
+    todo, seen = [], set()
+    for x in items:
+        m = re.search(r'guid=([a-f0-9-]{20,})', x.get('url') or '')
+        if not m:
+            continue
+        g = m.group(1)
+        if g in seen:
+            continue
+        seen.add(g)
+        todo.append({'cat': 'ah-中标结果', 't': x['t'], 'd': x['d'], 'url': x['url'],
+                     'city': '安徽', 'id': 'ah' + g.replace('-', '')[:16]})
+    if max_n:
+        todo = todo[:max_n]
+    print('  安徽中标结果 %d 条待补详情' % len(todo), flush=True)
+    if dry:
+        return todo, []
+
+    def one(it):
+        m = re.search(r'guid=([a-f0-9-]{20,})', it['url'])
+        try:
+            d2 = ah_detail(m.group(1))
+        except Exception:
+            return None
+        if not d2:
+            return None
+        rec = dict(it)
+        rec.update({'win': d2['win'], 'owner': d2['owner'],
+                    'amt': d2['amt'], 'price': d2['price']})
+        if d2.get('title'):
+            rec['t'] = d2['title']
+        return rec
+
+    got = []
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        for i, r in enumerate(ex.map(one, todo), 1):
+            if r:
+                got.append(r)
+            if i % 100 == 0:
+                print('    ah %d/%d 命中 %d' % (i, len(todo), len(got)), flush=True)
+    return todo, got
+
+
 def scan_month(ym, cats, max_n=0, dry=False, workers=8):
     y, m = ym.split('-')
     y, m = int(y), int(m)
@@ -585,6 +1034,13 @@ def main():
     ap.add_argument('--zj', action='store_true', help='同时跑浙江站（赛道关键词）')
     ap.add_argument('--zj-only', action='store_true', help='只跑浙江站')
     ap.add_argument('--zj-per-kw', type=int, default=40, help='浙江每个关键词最多收多少条')
+    ap.add_argument('--sh', action='store_true', help='同时跑上海站（channelId 翻页）')
+    ap.add_argument('--sh-only', action='store_true', help='只跑上海站')
+    ap.add_argument('--sh-pages', type=int, default=20, help='上海翻多少页（每页 10 条）')
+    ap.add_argument('--sh-channel', default='gs', help='gs=中标结果 hx=候选人')
+    ap.add_argument('--ah', action='store_true', help='同时跑安徽站（补详情）')
+    ap.add_argument('--ah-only', action='store_true', help='只跑安徽站')
+    ap.add_argument('--ah-max', type=int, default=0, help='安徽最多补多少条详情')
     args = ap.parse_args()
 
     cats = {k: v for k, v in CATS.items() if k in args.cats.split(',')}
@@ -608,7 +1064,7 @@ def main():
         old = json.load(open(OUT, encoding='utf-8'))
     recs = old.get('records') or {}
 
-    if args.zj_only:
+    if args.zj_only or args.sh_only or args.ah_only:
         months = []
 
     for ym in months:
@@ -640,6 +1096,30 @@ def main():
                          'amt': r['amt'], 'price': r['price'],
                          'rank': r.get('rank')}
         print('  浙江并入 %d 条，索引共 %d 条' % (len(got), len(recs)), flush=True)
+
+    if args.sh or args.sh_only:
+        print('\n== 上海站（channelId 翻页）==', flush=True)
+        _, got = scan_sh(args.sh_pages, args.dry, args.workers, args.sh_channel)
+        for r in got:
+            key = (r.get('id') or '') + '|' + re.sub(r'\s+', '', r.get('t') or '')[:60]
+            if r.get('rank'):
+                key += '#%s' % r['rank']
+            recs[key] = {'t': r['t'], 'd': r['d'], 'url': r['url'], 'city': r['city'],
+                         'cat': r['cat'], 'win': r['win'], 'owner': r['owner'],
+                         'amt': r['amt'], 'price': r['price'], 'rank': r.get('rank')}
+        print('  上海并入 %d 条，索引共 %d 条' % (len(got), len(recs)), flush=True)
+
+    if args.ah or args.ah_only:
+        print('\n== 安徽站（newDetailSub 补详情）==', flush=True)
+        _, got = scan_ah(args.ah_max, args.dry, args.workers)
+        for r in got:
+            key = (r.get('id') or '') + '|' + re.sub(r'\s+', '', r.get('t') or '')[:60]
+            if r.get('rank'):
+                key += '#%s' % r['rank']
+            recs[key] = {'t': r['t'], 'd': r['d'], 'url': r['url'], 'city': r['city'],
+                         'cat': r['cat'], 'win': r['win'], 'owner': r['owner'],
+                         'amt': r['amt'], 'price': r['price'], 'rank': r.get('rank')}
+        print('  安徽并入 %d 条，索引共 %d 条' % (len(got), len(recs)), flush=True)
 
     json.dump({'updated': time.strftime('%Y-%m-%d %H:%M:%S'), 'records': recs},
               open(OUT, 'w', encoding='utf-8'), ensure_ascii=False)
