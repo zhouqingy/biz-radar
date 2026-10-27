@@ -1611,6 +1611,49 @@ try:
                             _neval += 1
                             break
         print('并网[%s]: 累计业绩 +%d, 评标出场 +%d' % (_fn, _nperf, _neval))
+
+    # ── 全量库回填业绩（2026-10-27 补）────────────────────────────────
+    # ⚠ 用户抓到「马鞍山钢铁画像里一条业绩都没有」：并网只从 3 个 lifecycle 文件读，
+    #   而 merged.json（我们自己扫出来的 3486 条全量库）从来没回灌进业绩库。
+    #   结果 452 家里 33 家 n=0，其中 28 家在 merged.json 里明明躺着记录。
+    #   业主(kind=owner)只回填它作为 buyer 的**发包**记录；对手(rival)只回填**中标**记录，
+    #   不能混——对手当业主发的包不是它的业绩。
+    _mg_all = None
+    for _mf in (os.path.join(ROOT, 'merged.json'), os.path.join(RAW, 'merged.json')):
+        if os.path.exists(_mf):
+            try:
+                _mg_all = json.load(open(_mf, encoding='utf-8'))
+            except Exception:
+                _mg_all = None
+            break
+    _nback = 0
+    if _mg_all:
+        # 归一化只算一次：452×3486 全量比对会跑 157 万次正则，太慢
+        _mg_idx = [(_rname_norm(_r.get('buyer') or ''),
+                    _rname_norm(_r.get('win') or ''),
+                    _rname_norm(_r.get('t') or ''), _r) for _r in _mg_all]
+        for _nm, _rec in _db.items():
+            _kn = _rname_norm(_rec.get('kw') or _nm)
+            if len(_kn) < 4:
+                continue
+            _isown = (_rec.get('kind') == 'owner')
+            _have = {_rname_norm(i.get('t')) for i in (_rec.get('items') or [])}
+            for _nb, _nw, _nt, _r in _mg_idx:
+                if not _nt or _nt in _have:
+                    continue
+                if _kn not in (_nb if _isown else _nw):
+                    continue
+                _rec.setdefault('items', []).append({
+                    't': _r.get('t') or '', 'd': _r.get('d') or '',
+                    'rg': _r.get('rg') or '', 'p': _r.get('p') or '',
+                    'url': _r.get('url') or '', 'amt': _r.get('amt') or 0,
+                    'owner': _r.get('buyer') or '', 'win': _r.get('win') or '',
+                    'src': 'merged',
+                })
+                _have.add(_nt)
+                _nback += 1
+            _rec['n'] = len(_rec.get('items') or [])
+        print('全量库回填业绩 +%d 条（merged.json 回灌）' % _nback)
     _n = dump('rivalperf', {'updated': _rp.get('updated'), 'db': _db})
     print('rivalperf: %d 家, %.0fKB' % (len(_db), _n / 1024))
 except Exception as e:
