@@ -62,6 +62,18 @@ SCRIPTS = [
     'seg_match.py',
     'seed_batam.py',       # 巴淡岛情报入库
     'seed_cutwhy.py',      # 切口理由
+    'scan_awards.py',      # ★ 2026-10-26 新增：中标结果公告全文扫描（反向索引）
+    'crawl_fgw.py',        # ★ 2026-10-27 新增：省市发改委项目/能源公示（业务信号补源方案A）
+    'crawl_gxt.py',        # ★ 2026-10-27 新增：省工信厅技改/制造强省/产能置换名单（立项线索层）
+    'merge_awards.py',     # ★ 2026-10-26 新增：把 award_index 并进 rival_perf
+    'crawl_js_prov.py',
+    'crawl_ah.py',
+    'crawl_rival_perf.py',
+]
+
+# raw/early/ 下的静态存量（线上不自动生成，必须推）
+RAW_EARLY = [
+    'cninfo-legacy-static.json',   # ★ 2026-10-27：巨潮渠道下线后保留的 2 条竞对情报
 ]
 
 # 要同步的数据源（tools/raw/ 下）
@@ -81,6 +93,8 @@ RAW = [
     'anhui.json',
     'shanghai.json',
     'link_health.json',
+    'award_index.json',     # ★ 2026-10-26：中标结果反向索引（4.4 MB，CI 复用可省一次全扫）
+    'rival_perf.json.gz',   # ★ 2026-10-26：业绩库（含本次新增 294 条）
 ]
 
 
@@ -158,6 +172,11 @@ def main():
 
     jobs = [(os.path.join(LOCAL, f), '%s/%s' % (PREFIX, f)) for f in SCRIPTS]
     jobs += [(os.path.join(LOCAL, 'raw', f), '%s/raw/%s' % (PREFIX, f)) for f in RAW]
+    # raw/early/ 子目录：这里放的是**静态存量**数据，线上工作流不会自己生成，
+    # 不推过去线上就永远缺这几条（2026-10-27 巨潮下线时踩到：2 条竞对情报跟着渠道一起消失）。
+    # 对比：raw/ 根下的都是每日采集产物，线上自己会重新跑，不需要推。
+    jobs += [(os.path.join(LOCAL, 'raw', 'early', f), '%s/raw/early/%s' % (PREFIX, f))
+             for f in RAW_EARLY]
 
     cache, ok, bad, size = {}, 0, 0, 0
     for lp, rp in jobs:
