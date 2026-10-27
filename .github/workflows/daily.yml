@@ -102,6 +102,15 @@ jobs:
           python scan_awards.py --to $(date -u +%Y-%m) --cats result,cand --max 900 --zj \
                                 --sh --sh-pages 6 --ah --ah-max 120
 
+      - name: 3.55) 省市发改委项目/能源公示
+        # 2026-10-27 新增（补源方案 A）：业务信号原来只吃行业媒体（北极星+微信），
+        # 政府侧一手信号（省发改委「哪台机组纳入规划/优选排序/中选主体」）一直没源。
+        # crawl_fgw.py 抓江苏发改委网上公示 + 上海发改委能源栏目，静态页直抓，存量累积。
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 8
+        run: python crawl_fgw.py
+
       - name: 3.6) 把中标索引并进业绩库
         # 2026-10-26 新增：3.5 只是把公告读成索引（award_index.json），不并进
         # rival_perf.json 的话，企业画像里一条都看不到 —— 等于白扫。
