@@ -1087,6 +1087,79 @@ TRENDS = ([t for t in IND.get('trends', [])
              for d in digest.get('items', [])
              if d.get('tag') in ('行业动向', '政策资质')])
 
+# 省市发改委「项目/能源公示」（2026-10-27 补源方案 A 新建 crawl_fgw.py）：
+# 政府侧一手信号 —— 省发改委「哪台机组纳入规划/优选排序/中选主体」这类名单，
+# 行业媒体不会报。存量会累积（去重按标题前 34 字），一天几十条。
+try:
+    _fgw = json.load(open(os.path.join(RAW, 'fgw_news.json'), encoding='utf-8'))
+    _have3 = {t['title'][:34] for t in TRENDS}
+    _add3 = [{'title': x['t'], 'desc': '', 'date': x.get('d', ''),
+              'source': x.get('src', ''), 'tag': x.get('cat', '项目与能源公示'),
+              'url': x.get('url', '')}
+             for x in _fgw if x.get('t') and x['t'][:34] not in _have3]
+    TRENDS += _add3
+    print('省市发改委公示并入行业动态 %d 条' % len(_add3))
+except Exception as e:
+    print('[WARN] fgw_news.json 未并入：%s' % e)
+
+# ── 立项 / 核准公示 → 业务信号（2026-10-27 补源方案 A）────────────────────────
+# 用户问「业务信息监测为什么只有 3 条」，根因是 trends 池只吃行业媒体（北极星 + 微信），
+# 而电力垂直媒体根本不报「马钢要建 145MW 煤气发电」这种事——
+# 这类「有厂要建」的一手信号其实一直躺在 merged.json 里（642 条立项公示，422 条命中赛道），
+# 只是从没喂给信号判定。这里把它们转成 trends 条目，sigJudge 会自动打标。
+#   · 只收近 24 个月（太旧的立项早变招标/中标，不该再当"信号"）
+#   · 必须命中赛道词（热电/余热/煤气/自备电/冶炼…），光伏风电单独限流避免刷屏
+#   · desc 里拼上 地点·规模·业主·来源，卡片上一眼能看出是不是目标项目
+try:
+    _mg = json.load(open(os.path.join(ROOT, 'merged.json'), encoding='utf-8'))
+    _cut2 = (datetime.date.today() - datetime.timedelta(days=730)).isoformat()
+    _SIG_KW = re.compile(
+        r'热电|供热|余热|发电|锅炉|燃气轮机|蒸汽|煤气|高炉|转炉|烧结|焦化|焦炉|'
+        r'焚烧|生物质|钢铁|冶炼|电解铝|有色|自备电|能源站|数据中心|储能|垃圾|污泥|'
+        r'超超临界|亚临界|背压|热电联产|CCPP|余压|余气')
+    _PV_KW = re.compile(r'光伏|风电|太阳能')
+    _have2 = {t['title'][:34] for t in TRENDS}
+    _add2, _pv_n = [], 0
+    for _r in (_mg or []):
+        if _r.get('st') not in ('立项公示', '招标计划'):
+            continue
+        _t = (_r.get('t') or '').strip()
+        if not _t or _t[:34] in _have2:
+            continue
+        _d = _r.get('d') or ''
+        if not _d or _d < _cut2:
+            continue
+        if not _SIG_KW.search(_t):
+            continue
+        if _PV_KW.search(_t):
+            _pv_n += 1
+            if _pv_n > 25:          # 光伏风电项目量大，限流，别把真信号冲掉
+                continue
+        _bits = []
+        if _r.get('city'):
+            _bits.append(_r['city'])
+        if _r.get('rg'):
+            _bits.append(_r['rg'])
+        if _r.get('mw'):
+            _bits.append('%sMW' % int(_r['mw']))
+        if _r.get('amt'):
+            _bits.append('%.2f 亿' % (float(_r['amt']) / 1e8))
+        if _r.get('buyer'):
+            _bits.append('业主 ' + str(_r['buyer'])[:20])
+        _desc = (_r.get('snip') or '').strip()[:150]
+        if _bits:
+            _desc = (' · '.join(_bits)) + ('　' + _desc if _desc else '')
+        _add2.append({'title': _t, 'desc': _desc, 'date': _d,
+                      'source': (_r.get('p') or '')[:30] or '项目立项公示',
+                      'tag': '项目立项',
+                      'url': _r.get('url') or ''})
+        if len(_add2) >= 320:
+            break
+    TRENDS += _add2
+    print('立项/核准公示并入行业动态 %d 条（近 24 个月·赛道命中）' % len(_add2))
+except Exception as e:
+    print('[WARN] merged.json 立项公示未并入：%s' % e)
+
 # 北极星电力网（2026-10-20 新增渠道）：行业动态原来只靠微信快讯，微信渠道堵死后断粮，
 # 北极星是电力/环保垂直媒体且静态可直抓，实测每轮 190+ 条。只收 30 天内、带日期的。
 try:
