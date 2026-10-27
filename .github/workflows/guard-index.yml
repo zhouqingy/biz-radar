@@ -18,6 +18,11 @@ name: 页面版本守卫（防回滚）
 #    同理，若将来有意做一次行数更少的大改版，也要先把 _src/index.html 一起更新。
 
 on:
+  # ① 任何人推了 index.html 就立刻检查——被推回老版当场恢复，不用等半小时
+  push:
+    paths:
+      - 'index.html'
+  # ② 兜底轮询：万一 push 事件没触发（例如用 API 提交没走 git），每 30 分钟扫一次
   schedule:
     - cron: '*/30 * * * *'
   workflow_dispatch:
