@@ -108,6 +108,19 @@ jobs:
           python plan_pdf_auto.py
           python conv_plan_pdf.py
 
+      # ★ 2026-10-28 新增：安徽线。市县级规划站点全是空壳（芜湖不通、马鞍山/安庆栏目
+      #   空壳、铜陵栏目里全是人大会议决定、宣城列表 ajax 渲染失败），所以改走省级通道：
+      #   省发改委「企业投资项目核准」+「节能审查」+「项目公示」三个栏目，异步列表接口
+      #   直接 curl 可拿 JSON。节能审查正文最肥——项目代码（区划码定位城市）、总投资、
+      #   装机、技术方案全都写在里面，是项目级一手信息。
+      #   产出 raw/early/ah-nygs-latest.json（early='热电规划' → 立项线索层）。
+      - name: 3.8) 安徽省发改委·项目核准与节能审查
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          python crawl_ah_nygs.py
+
       # ── 构建段：不允许失败 ────────────────────────────────────────
       # 注意 tools/raw/oversea_extra.json 必须在仓库里（人工补录的巴淡岛等
       # 情报就存在这）。它不在的话 build_web 只打一行 WARN 继续跑，
