@@ -126,13 +126,18 @@ def main():
             lowered += 1
 
     # ---------- R4 同 URL 重复 ----------
+    # ⚠ 2026-10-28 修：原来只用 url 做分组键，结果一篇省发改委规划批复里点名的
+    #   多家企业（南京那篇点了南钢、梅山钢铁、南化、扬子石化 4 家）被压成 1 条——
+    #   41 条规划线索只剩 13 条；规划 PDF 同理，一份附件提 3~5 个热源点业主，
+    #   按 url 合并后 19 条只剩 4 条。这些都是**不同业主的不同商机**，不能合并。
+    #   所以分组键加上 buyer：同一 url 同一业主才算真冗余。
     by_url = defaultdict(list)
     for r in data:
         u = (r.get('url') or '').strip()
         if u and u not in ('None', 'null'):
-            by_url[u].append(r)
+            by_url[(u, (r.get('buyer') or '').strip())].append(r)
     drop = set()
-    for u, rows in by_url.items():
+    for (u, _buyer), rows in by_url.items():
         if len(rows) < 2:
             continue
         rows.sort(key=info_score, reverse=True)
