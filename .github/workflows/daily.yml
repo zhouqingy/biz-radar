@@ -93,6 +93,21 @@ jobs:
         run: |
           python crawl_fgw_plan.py
 
+      # ★ 2026-10-27 新增：浙江全省各县市的热电联产规划只在「征求公众意见」公示，
+      #   正文不点名企业，干货（谁是热源点业主、装几台炉）全在附件《规划（报批稿）》
+      #   PDF 里。plan_pdf_auto.py 下载 PDF → pdftotext → 抽热源点清单，
+      #   再由 conv_plan_pdf.py 转成 raw/early/ 入库格式。
+      #   ⚠ 依赖 poppler-utils（pdftotext）。ubuntu-latest 镜像自带，装一下是双保险。
+      #   ⚠ 已经提取过的 key 会跳过（不覆盖人工校对过的版本），要重跑加 --force。
+      - name: 3.7) 规划 PDF 自动提取（热源点清单）
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 25
+        run: |
+          which pdftotext || (sudo apt-get update -qq && sudo apt-get install -y poppler-utils) || true
+          python plan_pdf_auto.py
+          python conv_plan_pdf.py
+
       # ── 构建段：不允许失败 ────────────────────────────────────────
       # 注意 tools/raw/oversea_extra.json 必须在仓库里（人工补录的巴淡岛等
       # 情报就存在这）。它不在的话 build_web 只打一行 WARN 继续跑，
