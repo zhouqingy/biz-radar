@@ -1,0 +1,49 @@
+{
+ "meta": {
+  "src_files": [
+   "江山市热电联产（集中供热）规划（2025~2030年）+报批稿+20260514+(1).pdf"
+  ],
+  "region": "浙江 衢州",
+  "plan_period": "2030",
+  "layer": "立项线索",
+  "pub_date": "2026-05-22",
+  "pub_url": "https://fzggw.zj.gov.cn/col/col1599567/art/2026/art_05c3d13d7c7f4a65b77fa05710bb53b8.html",
+  "plan_name": "江山市热电联产（集中供热）规划（2025-2030年）",
+  "extracted": "auto",
+  "note": "plan_pdf_auto.py 自动提取（PDF → pdftotext → 热源点清单）"
+ },
+ "chp_sources": [
+  {
+   "area": "峡口区块",
+   "name": "江山石煤综合利用热电有限公司",
+   "now": "",
+   "plan": "从 2011 年开始，浙江虎霸集团有限公司对下属子公司江山石煤综合利用热电有限公司机组实施生物质发电改造，截止 2023 年底，已改造完成一台，另一台仍在建设",
+   "cap_tph": null,
+   "type": "技改",
+   "scale": "",
+   "invest_wan": null
+  },
+  {
+   "area": "峡口区块",
+   "name": "莲华山热电厂",
+   "now": "",
+   "plan": "规划建设莲华山热电厂，近期选用 2 台 12MW 背压式汽轮机组，配套 2 台 130t/h 循环流化床锅炉，远期视热负荷增长情况扩建 2 台 30MW 背压式汽轮机组，3 台130t/h 循环流化床锅炉",
+   "cap_tph": null,
+   "type": "新建",
+   "scale": "锅炉 130、130 t/h；机组 12、30 MW",
+   "invest_wan": null
+  },
+  {
+   "area": "中部区块",
+   "name": "江山锦汇热电有限公司",
+   "now": "",
+   "plan": "5.2.4 热源点建设条件1、厂址情况（1）锦汇热电锦汇热电扩建机组利用原厂预留扩建土地，无需新征土地",
+   "cap_tph": null,
+   "type": "扩建",
+   "scale": "",
+   "invest_wan": null
+  }
+ ],
+ "resource_projects": [],
+ "surplus_resource_owners": []
+}
