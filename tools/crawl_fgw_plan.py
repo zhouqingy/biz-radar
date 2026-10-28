@@ -41,20 +41,34 @@ UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
 ROOT = os.path.dirname(os.path.abspath(__file__))
 EARLY_DIR = os.path.join(ROOT, 'raw', 'early')
 
-# (省份, 站点名, 列表接口模板, 栏目首页, 解析器key)
-# 列表模板里 {a}/{b} 分别是 startrecord / endrecord
+# (省份, 站点名, 列表接口模板, 栏目首页, 解析器key, 翻页数)
+# 列表模板里 {a}/{b} 分别是 startrecord / endrecord（浙江源不支持翻页，填 0）
 FEEDS = [
     ('江苏', '江苏省发改委·规划批复',
      'https://fzggw.jiangsu.gov.cn/module/web/jpage/dataproxy.jsp'
      '?startrecord={a}&endrecord={b}&perpage=30&col=1&appid=1&webid=3'
      '&path=%2F&columnid=51012&unitid=394686&webname=&permissiontype=0',
-     'https://fzggw.jiangsu.gov.cn/col/col51012/index.html', 'js'),
+     'https://fzggw.jiangsu.gov.cn/col/col51012/index.html', 'js', 3),
+    # 浙江不发「批复」，只把这批规划的**报批稿公示**出来（省发改委「调查征集」栏目）。
+    # 栏目页是空壳，列表由 JS 异步拉；真实接口是 jpaas-publish-server/front/page/build/unit
+    # （浏览器渲染时抓到的 XHR，实测 curl 可直接调，返回 JSON，列表在 data.html 里）。
+    # ⚠ 分页参数试过 pageIndex/pageNo/currentPage/page 都无效，只能拿到最新 15 条——
+    #   好在这是「征求意见」栏目，发文频率低，15 条够覆盖近几个月。
+    ('浙江', '浙江省发改委·调查征集（规划公示）',
+     'https://fzggw.zj.gov.cn/api-gateway/jpaas-publish-server/front/page/build/unit'
+     '?parseType=bulidstatic&webId=3185&tplSetId=o0YcVHHq5vWtr3uiCp4SY&pageType=column'
+     '&tagId=%E4%BF%A1%E6%81%AF%E5%88%97%E8%A1%A8&editType=null&pageId=1599567',
+     'https://fzggw.zj.gov.cn/col/col1599567/index.html', 'zj', 1),
 ]
 
 # 只要规划类批复本身（不是配套通知、不是征求意见）
-WANT = re.compile(r'热电联产规划|资源综合利用.{0,6}发电规划|供热专项规划|热电联产.{0,8}规划')
-# 明显噪声：征求意见、废止、评估、培训
-SKIP = re.compile(r'征求意见|废止|培训|会议|通报|考核|先进|表彰')
+WANT = re.compile(r'热电联产规划|资源综合利用.{0,6}发电规划|供热专项规划|热电联产.{0,8}规划|'
+                  r'集中供热.{0,4}规划')
+# 明显噪声：废止、评估、培训。
+# ⚠ 原来这里还有「征求意见」——浙江全省各县市的热电联产规划**只在征求公众意见这一环公开**
+#   （附规划报批稿全文），江苏那边正式批复的正文里才点名企业。把「征求意见」写进 SKIP
+#   会把浙江整条线滤成空的，所以去掉。
+SKIP = re.compile(r'废止|培训|会议|通报|考核|先进|表彰')
 
 # 企业全称。⚠ 后缀里**不能放单独的「集团」**：否则「中国石化集团南京化学工业有限公司」
 # 会在「集团」处提前截断成「原则同意中国石化集团」。只保留「集团公司」这种完整写法。
@@ -114,7 +128,30 @@ COUNTY2CITY = {
     '乐清': '温州', '瑞安': '温州', '平阳': '温州',
     '义乌': '金华', '东阳': '金华', '永康': '金华', '兰溪': '金华',
     '长兴': '湖州', '德清': '湖州', '安吉': '湖州',
+    # 浙江县市（省发改委公示只写「常山县」「江山市」，设区市名根本不出现）
+    '常山': '衢州', '江山': '衢州', '龙游': '衢州', '开化': '衢州',
+    '婺城': '金华', '金东': '金华', '浦江': '金华', '武义': '金华',
+    '淳安': '杭州', '桐庐': '杭州', '建德': '杭州', '临安': '杭州',
+    '新昌': '绍兴', '天台': '台州', '仙居': '台州', '三门': '台州',
+    '永嘉': '温州', '苍南': '温州', '文成': '温州', '泰顺': '温州',
+    '岱山': '舟山', '嵊泗': '舟山', '青田': '丽水', '缙云': '丽水',
+    '松阳': '丽水', '遂昌': '丽水', '云和': '丽水', '龙泉': '丽水',
 }
+
+
+def guess_city_in(rg, text):
+    """严格版：只在**指定文本**里找城市/县市名，不做正文兜底。
+
+    为什么要有这个：浙江公示的正文里一定会写「通信地址：杭州市西湖区省府路8号」，
+    那是省发改委自己的地址。用正文兜底会把常山、江山全都归到杭州去。
+    """
+    for c in CITIES.get(rg, []):
+        if c in text:
+            return c
+    for k, v in COUNTY2CITY.items():
+        if k in text:
+            return v
+    return ''
 
 
 def guess_city(rg, text):
@@ -155,13 +192,41 @@ def parse_js(html, rg):
     return out
 
 
-PARSERS = {'js': parse_js}
+def parse_zj(raw, rg):
+    """浙江：接口返回的是 JSON，列表 HTML 在 data.html 里。"""
+    try:
+        import json as _json
+        d = _json.loads(raw)
+        html = (d.get('data') or {}).get('html') or ''
+    except Exception:
+        html = raw
+    out, seen = [], set()
+    # <a ... href="/col/col1599567/art/2026/art_xxx.html" ... title="标题">
+    for m in re.finditer(r'<a\b[^>]*?>[\s\S]{0,300}?</a>', html):
+        tag = m.group(0)
+        hm = re.search(r'href="(/col/col\d+/art/(\d{4})/art_[0-9a-f]+\.html)"', tag)
+        if not hm:
+            continue
+        href, year = hm.group(1), hm.group(2)
+        tm = re.search(r'title="([^"]*)"', tag)
+        t = (tm.group(1) if tm else '') or re.sub(r'<[^>]+>', '', tag)
+        t = re.sub(r'\s+', ' ', t).strip()
+        if len(t) < 8 or len(t) > 120 or href in seen:
+            continue
+        seen.add(href)
+        # 浙江这条接口不给具体日期，只有年份；详情页正文里会有「发布时间」，交给 parse_detail 补
+        out.append({'t': t, 'd': year + '-01-01', 'aid': href.rsplit('/', 1)[-1][:24],
+                    'url': 'https://fzggw.zj.gov.cn' + href})
+    return out
+
+
+PARSERS = {'js': parse_js, 'zj': parse_zj}
 
 
 def crawl_list(rg, name, api_tpl, home, pk, pages=3):
     """翻页抓列表，只留规划类批复。"""
     rows, seen = [], set()
-    for p in range(pages):
+    for p in range(max(1, pages)):
         a, b = p * 90 + 1, (p + 1) * 90
         html = fetch(api_tpl.format(a=a, b=b), referer=home)
         if len(html) < 2000:
@@ -248,28 +313,112 @@ def parse_detail(rg, name, x):
     return out
 
 
+def parse_detail_zj(rg, name, x):
+    """浙江：正文只有「某县发改局编制完成、上报我委审批」，**不点名企业**——
+    真正的项目清单在附件规划报批稿 PDF 里。所以这里只产一条「区域规划」线索：
+    告诉营销经理哪个县市在做热电联产规划、附件在哪下载。"""
+    html = fetch(x['url'])
+    if len(html) < 2000:
+        return []
+    txt = re.sub(r'\s+', ' ', html_text(html))
+
+    d = x['d']
+    m = re.search(r'(?:发布|发文)日期[:：]\s*(\d{4})-(\d{1,2})-(\d{1,2})', txt)
+    if m:
+        d = '%s-%02d-%02d' % (m.group(1), int(m.group(2)), int(m.group(3)))
+
+    m = re.search(r'《([^》]{4,80})》', x['t'])
+    pname = m.group(1) if m else re.sub(r'关于公开征求|意见的通知', '', x['t']).strip('《》 ')
+    if '热电联产' in pname or '集中供热' in pname:
+        kind = '热电联产'
+    elif '资源综合利用' in pname:
+        kind = '资源综合利用发电'
+    else:
+        kind = '供热'
+    # ⚠ 只从规划名推断城市。正文里那句「杭州市西湖区省府路8号」是省发改委自己的
+    #   通信地址，拿正文兜底会把常山、江山全归到杭州去。
+    city = guess_city_in(rg, pname)
+
+    # 编制/上报单位：正文里「已由 XX 发展改革局编制完成」
+    org = ''
+    m = re.search(r'已由([^，。；]{2,30}?)(?:编制完成|组织编制|编制)', txt)
+    if m:
+        org = m.group(1).strip()
+
+    # 附件（规划报批稿 PDF）
+    files, seen_f = [], set()
+    for fm in re.finditer(
+            r'href="(/api-gateway/jpaas-web-server/front/document/download\?[^"]*)"', html):
+        u = fm.group(1).replace('&amp;', '&')
+        nm = ''
+        qm = re.search(r'fileName=([^&]*)', u)
+        if qm:
+            try:
+                import urllib.parse as _up
+                nm = _up.unquote(qm.group(1))
+            except Exception:
+                nm = qm.group(1)
+        # 同一份 PDF 在页面里常常既挂在「附件」区又挂一份隐藏链接，按 URL 去重
+        key = re.sub(r'&fileName=.*$', '', u) or u
+        if key in seen_f:
+            continue
+        seen_f.add(key)
+        files.append({'n': nm or '规划报批稿', 'u': 'https://fzggw.zj.gov.cn' + u})
+
+    # 公示期
+    pub = ''
+    m = re.search(r'公开征求意见时间为\s*([^。；]{4,60})', txt)
+    if m:
+        pub = '公示期 %s' % m.group(1).strip()
+
+    snip = '浙江省发改委%s规划公示' % kind
+    if org:
+        snip += '：已由%s编制完成并上报审批' % org
+    if pub:
+        snip += '；%s' % pub
+    if files:
+        snip += '。附件含规划报批稿全文（热源点布局、装机方案、项目清单），需下载 PDF 查看具体企业项目'
+    # 只摘正文第一句（「《XX规划》已由XX编制完成，并上报我委审批…」），
+    # 别把整页导航（当前位置：首页 > 政务公开 > …）粘进来。
+    m = re.search(r'《[^》]{4,80}》[^。]{0,80}。', txt)
+    if m:
+        snip += '。原文：%s' % re.sub(r'\s+', ' ', m.group(0))
+
+    return [{
+        't': pname, 'rg': rg, 'city': city, 'buyer': '',
+        'amt': None, 'amtTxt': '', 'd': d, 'dl': '',
+        'p': name, 'url': x['url'], 'snip': snip[:400],
+        'mode': '', 'early': '热电规划', 'expect': '', 'files': files,
+    }]
+
+
+DETAIL = {'js': parse_detail, 'zj': parse_detail_zj}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--dry', action='store_true')
     a = ap.parse_args()
 
     allrows, seent = [], set()
-    for rg, name, api_tpl, home, pk in FEEDS:
+    for rg, name, api_tpl, home, pk, pages in FEEDS:
         print('[%s] %s' % (rg, name))
-        rows = crawl_list(rg, name, api_tpl, home, pk)
+        rows = crawl_list(rg, name, api_tpl, home, pk, pages)
         print('  列表命中规划批复: %d 篇' % len(rows))
+        fn = DETAIL[pk]
         with ThreadPoolExecutor(max_workers=4) as ex:
-            for got in ex.map(lambda x: parse_detail(rg, name, x), rows):
+            for got in ex.map(lambda x: fn(rg, name, x), rows):
                 for r in got:
                     k = (r['buyer'], r['t'])
                     if k in seent:
                         continue
                     seent.add(k)
                     allrows.append(r)
-    # 同一家企业可能被多篇批复点名（如江阴热电出现 3 次），按 buyer 去重，留最新那篇
+    # 同一家企业可能被多篇批复点名（如江阴热电出现 3 次），按 buyer 去重，留最新那篇。
+    # 浙江那批没有 buyer（正文不点名企业），改用标题做键，否则会全被合并成 1 条。
     by_buyer = {}
     for r in allrows:
-        b = r['buyer']
+        b = r['buyer'] or ('T:' + r['t'])
         if b not in by_buyer or r['d'] > by_buyer[b]['d']:
             by_buyer[b] = r
     allrows = sorted(by_buyer.values(), key=lambda x: x['d'], reverse=True)
@@ -283,8 +432,15 @@ def main():
         return
 
     os.makedirs(EARLY_DIR, exist_ok=True)
-    import datetime
-    fn = os.path.join(EARLY_DIR, 'plan-fgw-%s.json' % datetime.date.today().isoformat())
+    # ⚠ 固定文件名、每次覆盖：线上每天跑一次，用日期做文件名会在 raw/early/ 下
+    # 堆出一串同名内容的文件（去重虽能兜住，但白白占仓库）。所以先清旧、再写新。
+    for fn0 in os.listdir(EARLY_DIR):
+        if fn0.startswith('plan-fgw-2') and fn0.endswith('.json'):
+            try:
+                os.remove(os.path.join(EARLY_DIR, fn0))
+            except OSError:
+                pass
+    fn = os.path.join(EARLY_DIR, 'plan-fgw-latest.json')
     json.dump(allrows, open(fn, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print('写入 %s' % fn)
 
