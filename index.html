@@ -865,6 +865,40 @@ details.sub li{padding:2px 0}
   border:1px solid #cfd9e6;background:#fff;color:var(--tx2)}
 .ep-x:hover{background:#eef2f7;color:var(--tx)}
 .ep-sec{margin-top:16px;padding-top:12px;border-top:1px dashed var(--line)}
+
+/* ── 全网业绩速查（2026-10-29）── 与 rperfTable 并列，视觉上要能分清是两块数据 */
+.epq .epq-hd{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:8px}
+.epq .epq-hd b{font-size:14px;color:var(--tx)}
+.epq .epq-cnt{font-size:11px;color:#fff;background:var(--brand);border-radius:9px;padding:1px 8px}
+.epq .epq-tip{font-size:11.5px;color:var(--tx3)}
+/* 数据日期与过期提醒（2026-10-29）：这份速查是人工按企业名检索的，不随每日
+   采集更新。不写日期，用的人会把它当成"实时的"，三个月后还在当新情报看。 */
+.epq .epq-dt{font-size:11px;color:var(--tx3);border:1px solid var(--line);border-radius:9px;padding:0 7px}
+.epq .epq-stale{font-size:11px;color:#f5a623;background:rgba(245,166,35,.12);border-radius:9px;padding:1px 8px}
+.epq .epq-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+.epq .epq-chips a{font-size:11.5px;padding:3px 10px;border:1px solid var(--line2);border-radius:12px;
+  color:var(--tx2);text-decoration:none;background:#fff}
+.epq .epq-chips a i{font-style:normal;color:var(--tx3);margin-left:2px}
+.epq .epq-chips a.on{background:#eef4ff;border-color:#9dbdf0;color:var(--brand-d);font-weight:600}
+.epq .epq-chips a.on i{color:var(--brand-d)}
+.epq-tb{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.epq-tb col.c1{width:70px}.epq-tb col.c2{width:23%}.epq-tb col.c3{width:22%}
+.epq-tb col.c4{width:86px}.epq-tb col.c5{width:96px}.epq-tb col.c6{width:16%}.epq-tb col.c7{width:40px}
+.epq-tb th{text-align:left;font-weight:500;color:var(--tx3);padding:5px 7px;border-bottom:1px solid var(--line);white-space:nowrap}
+.epq-tb td{padding:7px;border-bottom:1px solid #f0f2f6;vertical-align:top;line-height:1.6}
+.epq-tb tr:last-child td{border-bottom:none}
+.epq-tb td.d{color:var(--tx3);font-size:11px;word-break:break-all}
+.epq-tb td.p{font-weight:600;color:var(--tx);word-break:break-word}
+.epq-tb td.s{color:var(--tx2);word-break:break-word}
+.epq-tb td.a{color:var(--red);white-space:nowrap;font-weight:600}
+.epq-tb td.st{color:var(--tx2);font-size:11.5px;word-break:break-word;line-height:1.5}
+.epq-tb td.w{color:var(--tx3);font-size:11.5px;word-break:break-word}
+.epq .epq-mt{display:inline-block;font-size:10px;color:#a8620a;background:#fdf3e3;border-radius:3px;
+  padding:0 4px;margin-left:5px;vertical-align:1px;font-weight:400}
+.epq .epq-sm{font-size:12px;color:var(--tx2);background:#fafbfd;border-left:3px solid var(--brand);
+  padding:8px 11px;border-radius:0 4px 4px 0;margin:10px 0 0;line-height:1.7}
+.epq .epq-sm b{color:var(--tx3);font-weight:500;margin-right:4px}
+.epq .epq-empty{font-size:12px;color:var(--tx3);padding:10px 0}
 .ep-sec>b{display:block;font-size:13.5px;color:var(--tx);margin-bottom:8px}
 .ep-sec p{font-size:12.5px;color:var(--tx2);line-height:1.8;margin:3px 0}
 .ep-sec p b{color:var(--tx3);font-weight:600;margin-right:4px}
@@ -2142,6 +2176,13 @@ function cardHtml(x){
     var nf=(x.files&&x.files.length)?x.files.length:0;
     acts='<div class="pj-act">'+
       (nf?'<a href="javascript:void(0)" class="act-file" onclick="toggleFiles(\''+esc(x.id)+'\')" title="展开附件清单，自己挑要下的">📎 附件 '+nf+' 个</a>':'')+
+      /* ★ 2026-10-28 用户要求：每条线索都要能一键跳政府原文。
+         标题虽然已经是链接，但那个「原文 ↗」是小字，营销经理扫卡片时看不见；
+         这里在操作区再给一个显眼按钮，点到就是红头文件本身。
+         linkbad（转载站空壳链接）不给——那种点开是死链，改给「搜官方源」找真文件。 */
+      (x.url&&!x.linkbad
+        ?'<a href="'+esc(fullUrl(x.url))+'" target="_blank" rel="noopener" class="act-src" '+
+         'title="在新标签打开这条线索的政府原文页面（批文 / 公告 / 公示原件）">📄 查看原文 ↗</a>':'')+
       (bq?'<a href="https://www.qcc.com/web/search?key='+encodeURIComponent(bq)+'" target="_blank" rel="noopener nofollow" title="跳转企查查查该业主工商信息（外部站点，需自行登录）">查业主工商信息 ↗</a>':'')+
       (x.linkbad?'<a href="https://www.baidu.com/s?wd='+encodeURIComponent(esc(x.t.replace(/[\[\]]/g,'')))+'" target="_blank" rel="noopener nofollow" class="act-src" title="这个来源是转载站，原文打不开。用标题去搜官方公告页">搜官方源 ↗</a>':'')+
 
@@ -3212,6 +3253,159 @@ function encyCard(x){
 /* ---- 企业画像（全屏档案）----
    点卡头或「企业画像」弹全屏，五段式：
    身份沿革 / 能力资质 / 代表业绩（可跳转）/ 领导班子（找人）/ 库内实证+盯防 */
+/* ── 全网业绩速查（2026-10-29 新增）────────────────────────────
+   用户原话：「如果我单独问你这些企业有哪些业绩情况，你能不能直接答出来，
+   我问豆包都可以将这些信息以及他的来源说清楚，怎么直接去找反而显得更加麻烦呢」
+   「点企业名直接出这张卡」。
+
+   结论摆在这里：按企业名定向检索（省市交易平台 + 企业官网 + 总包方采购公告 +
+   建设通类中标汇总站）比自建全量库更快更准 —— 205 家 605 条，全部带原文链接。
+   数据在 data.entprobe.js（按需加载 274KB），点开任何一处企业画像才拉。
+
+   ⚠ 与上面 rperfTable 的分工，别再混：
+     rperfTable = 本库自己抓的公告，强在评标排名 / 竞标家数 / 全过程时间链
+     _epSection = 本库抓不到的：企业官网、总包方发的分包采购、外地与海外项目、
+                  以及「一篇给出半年全部中标」的汇总文章
+   两者互补，但同一项目会重叠，所以调用方传 dupTitles 进来按项目名去重。 */
+var _epIx = null;
+function _epNorm(s){
+  s = String(s||'').replace(/[（(][^）)]*[）)]/g,'')
+    .replace(/\s+/g,'');
+  /* 后缀要循环剥：「红狮控股集团有限公司」剥一次只剩「红狮控股集团」，
+     而数据里存的是「红狮控股」，一次替换对不上。最多剥三层。 */
+  var re=/(有限责任公司|股份有限公司|有限公司|集团|总公司|公司)$/;
+  for(var i=0;i<3&&re.test(s);i++) s=s.replace(re,'');
+  return s;
+}
+function _epIndex(){
+  if(_epIx) return _epIx;
+  _epIx={};
+  var A=(window.DATA_ENTPROBE && window.DATA_ENTPROBE.firms) || [];
+  A.forEach(function(f){ _epIx[_epNorm(f.n)]=f; });
+  return _epIx;
+}
+function _epFind(name){
+  var I=_epIndex(), k=_epNorm(name);
+  if(!k) return null;
+  if(I[k]) return I[k];
+  /* 全称对不上时按前缀收：雷达里常写简称（「江苏院」「中机一院」），
+     entprobe 存全称，两边取公共前缀且长度都 >=6 才认，避免误配。 */
+  var best=null, bl=0;
+  for(var q in I){
+    if(q.length>=6 && k.length>=6 && (q.indexOf(k)===0 || k.indexOf(q)===0)){
+      if(q.length>bl){ best=I[q]; bl=q.length; }
+    }
+  }
+  return best;
+}
+function _epAmt(a){
+  if(!a) return '—';
+  var s=String(a).replace(/[,，\s]/g,'');
+  var m=s.match(/^([\d.]+)元$/);
+  if(m){
+    var v=parseFloat(m[1]);
+    if(v>=1e8) return (v/1e8).toFixed(2)+' 亿';
+    if(v>=1e4) return Math.round(v/1e4)+' 万';
+  }
+  return String(a);
+}
+function _epRows(f, mode, dupTitles){
+  var out=[], seen={};
+  (dupTitles||[]).forEach(function(t){
+    var k=String(t||'').replace(/\s+/g,'').slice(0,10);
+    if(k.length>=6) seen[k]=1;
+  });
+  (f.h||[]).forEach(function(h){
+    if(mode==='en' && !h.e) return;          // 只看能源相关
+    if(mode==='clean' && h.m) return;        // 隐藏纯技改
+    if(mode==='clean' && !h.e) return;
+    var k=String(h.p||'').replace(/\s+/g,'').slice(0,10);
+    /* 只在前两档去重。「全部」要给人看 100% 原样，否则一旦记录全被本库覆盖，
+       这一档也会空，「全部」就名不副实了。 */
+    if(mode!=='all' && k.length>=6 && seen[k]) return;       // 与本库公告表重复，交给上表
+    out.push(h);
+  });
+  return out;
+}
+function _epSection(name, dupTitles){
+  var id='epq'+Math.random().toString(36).slice(2,9);
+  window._epCache=window._epCache||{};
+  /* ⚠ 这里不能返回带 <script> 的片段：弹层是用 innerHTML 塞进去的，
+     innerHTML 里的 script 浏览器根本不执行（2026-10-29 踩过）。
+     所以改成「先占位、加载完再渲染」：数据没到就 need 拉一次，
+     回调里再画；数据已在就直接下一帧画。 */
+  function build(){
+    var f=_epFind(name);
+    var el=document.getElementById(id);
+    function drop(){ if(el && el.parentNode) el.parentNode.removeChild(el); }
+    if(!f || !(f.h||[]).length){ drop(); return; }
+    window._epCache[id]={f:f, dup:dupTitles||[]};
+    /* 默认「能源相关 + 去技改」；这两档都空时自动退到下一档，
+       否则市政/房建类企业会弹出一张空表，看着像坏了 */
+    var m='clean';
+    if(!_epRows(f,m,dupTitles).length) m = _epRows(f,'en',dupTitles).length ? 'en' : 'all';
+    _epRender(id,m);
+  }
+  if(window.DATA_ENTPROBE) setTimeout(build,0);
+  else need('entprobe', build);
+  return '<div class="prof-sec epq" id="'+id+'"></div>';
+}
+function _epRender(id, mode){
+  var c=window._epCache&&window._epCache[id], box=document.getElementById(id);
+  if(!c||!box) return;
+  var f=c.f, all=f.h||[], rows=_epRows(f, mode, c.dup);
+  var nEn=all.filter(function(h){return h.e}).length;
+  var nMt=all.filter(function(h){return h.m}).length;
+  var h='';
+  /* 数据日期 + 过期提醒：速查是人工检索的快照，官方数据不会自己变新 */
+  var up=(window.DATA_ENTPROBE&&window.DATA_ENTPROBE.updated)||'';
+  var stale='';
+  if(up){
+    var days=Math.floor((Date.now()-new Date(up+'T00:00:00').getTime())/86400000);
+    if(days>60) stale='<span class="epq-stale">'+days+' 天前检索，该重查了</span>';
+  }
+  h+='<div class="epq-hd"><b>全网业绩速查</b>'+
+     '<span class="epq-cnt">'+all.length+' 条</span>'+
+     (up?'<span class="epq-dt">数据截至 '+up+'</span>':'')+stale+
+     '<span class="epq-tip">按企业名定向检索 · 每条可点原文 · 与上表互补，已折叠重叠项</span></div>';
+  /* 筛选 chips：默认「能源 + 去技改」，用户 2026-10-29 明确「技改单独不需要」 */
+  var chips=[['clean','能源相关·去技改',rows.length],
+             ['en','仅能源相关',nEn],
+             ['all','全部',all.length]];
+  h+='<div class="epq-chips">'+chips.map(function(c2){
+    return '<a href="javascript:void(0)" data-epq="'+id+'|'+c2[0]+'"'+
+      (c2[0]===mode?' class="on"':'')+'>'+c2[1]+' <i>'+c2[2]+'</i></a>';
+  }).join('')+'</div>';
+  if(!rows.length){
+    h+='<p class="epq-empty">这一档 '+all.length+' 条记录都出现在上面的本库公告表里，已折叠避免重复；'+
+       '点「全部」可以看到原样全量。</p>';
+    box.innerHTML=h; return;
+  }
+  h+='<table class="epq-tb"><colgroup><col class="c1"><col class="c2"><col class="c3">'+
+     '<col class="c4"><col class="c5"><col class="c6"><col class="c7"></colgroup>'+
+     '<thead><tr><th>日期</th><th>项目 / 事项</th><th>规模 / 内容</th>'+
+     '<th>金额</th><th>阶段</th><th>业主 / EPC</th><th>原文</th></tr></thead><tbody>';
+  rows.forEach(function(x){
+    h+='<tr><td class="d">'+esc(x.d||'—')+'</td>'+
+      '<td class="p">'+esc(x.p||'')+(x.m?'<span class="epq-mt">技改</span>':'')+'</td>'+
+      '<td class="s">'+esc(x.s||'')+'</td>'+
+      '<td class="a" title="'+esc(x.a||'')+'">'+esc(_epAmt(x.a))+'</td>'+
+      '<td class="st">'+esc(x.st||'—')+'</td>'+
+      '<td class="w">'+esc(x.who||'—')+'</td>'+
+      '<td>'+(x.u?'<a class="lk" href="'+esc(x.u)+'" target="_blank" rel="noopener nofollow" title="打开原文">↗</a>':'—')+'</td></tr>';
+  });
+  h+='</tbody></table>';
+  if(f.sm) h+='<p class="epq-sm"><b>这家在干什么</b> '+esc(f.sm)+'</p>';
+  box.innerHTML=h;
+}
+document.addEventListener('click',function(e){
+  var a=e.target.closest?e.target.closest('[data-epq]'):null;
+  if(!a) return;
+  e.preventDefault();
+  var p=a.getAttribute('data-epq').split('|');
+  _epRender(p[0], p[1]);
+});
+
 function encyProf(name){
   var u=(_encyAll())[name], E=D.ency||{};
   if(!u) return;
@@ -3295,6 +3489,9 @@ function encyProf(name){
        '——要么它在四地确实不活跃（项目多在西北/西南/海外），要么是我们的抓取还没覆盖到它的公告。'+
        '这条本身就是情报：跟这家在江浙沪皖正面撞上的概率，目前看不高。</p></div>';
   }
+
+  /* 五之二、全网业绩速查（2026-10-29）：本库抓不到的官网/总包采购/外地与海外 */
+  h+=_epSection(u.name);
 
   /* 六、盯防要点 + 来源 */
   if(u.watch) h+='<div class="ep-sec"><b>⑥ 盯防要点</b><p style="color:#1053c9">'+esc(u.watch)+'</p></div>';
@@ -4986,6 +5183,10 @@ function profPage(kind, o){
      含不我们做的业务，用于判断风向 —— 与上面「本库中标记录」口径互补 */
   var rperfHtml=rperfTable(o.name, _rperfNewsFromItems);
 
+  /* 2026-10-29 全网业绩速查：把本库公告之外的（官网 / 总包采购 / 外地海外）补上。
+     传 _realAll 的标题进去做去重——同一个项目在两块都出现时只留在上面的公告表里。 */
+  var epHtml=_epSection(o.name, _realAll.map(function(x){return x.t}));
+
   return '<div class="prof">'+
     '<div class="prof-hd"><div><h3>'+nm+'</h3>'+
       '<div class="prof-sub"><span class="kbadge '+K.cls+'">'+K.label+'</span>'+
@@ -4994,7 +5195,7 @@ function profPage(kind, o){
               :'<span class="pm-i">本库暂无它的中标公告，下面的企业档案来自公开资料</span>'))+
       (o.latest?'<span class="pm-i">最近动态 '+esc(o.latest)+'</span>':'')+
       '</div></div></div>'+
-    kpiHtml+idHtml+aboutHtml+ctcHtml+tb+rperfHtml+distHtml+relHtml+insHtml+act+'</div>';
+    kpiHtml+idHtml+aboutHtml+ctcHtml+tb+rperfHtml+epHtml+distHtml+relHtml+insHtml+act+'</div>';
 }
 
 /* 对手：从 rivals 数据转成通用档案结构
@@ -5685,6 +5886,9 @@ function boot_main(){
   /* 全网业绩库后台预载（~KB 级，不阻塞）：首次打开对手/业主画像就有数据，
      不用在画像函数里搞「加载后重渲」的复杂度 */
   setTimeout(function(){ need('rivalperf', function(){}); }, 2500);
+  /* 全网业绩速查（274KB）也后台预载：画像弹层是同步拼字符串的，
+     数据没到就只能等加载完再补画，用户会先看到一段空白，观感差。 */
+  setTimeout(function(){ need('entprobe', function(){}); }, 3000);
 }
 /* 地址栏带 #t2 这类深链时再补渲对应面板 */
 (function(){
