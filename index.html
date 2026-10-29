@@ -902,6 +902,31 @@ details.sub li{padding:2px 0}
   padding:8px 11px;border-radius:0 4px 4px 0;margin:10px 0 0;line-height:1.7}
 .epq .epq-sm b{color:var(--tx3);font-weight:500;margin-right:4px}
 .epq .epq-empty{font-size:12px;color:var(--tx3);padding:10px 0}
+/* ── 业绩总表 pf（2026-10-29 晚）：本库/省平台/定向/评标/动态 五源合成一张表 ── */
+.pf-tb{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.pf-tb col.c1{width:76px}.pf-tb col.c2{width:30%}.pf-tb col.c3{width:20%}
+.pf-tb col.c4{width:82px}.pf-tb col.c5{width:86px}.pf-tb col.c6{width:15%}.pf-tb col.c7{width:56px}
+.pf-tb th{text-align:left;font-weight:500;color:var(--tx3);padding:6px 8px;
+  border-bottom:1px solid var(--line);white-space:nowrap}
+.pf-tb td{padding:8px;border-bottom:1px solid #f0f2f6;vertical-align:top;line-height:1.55}
+.pf-tb tr:last-child td{border-bottom:none}
+.pf-tb td.d{color:var(--tx3);font-size:11px;word-break:break-all}
+.pf-tb td.p{word-break:break-word}
+.pf-tb td.p b{color:var(--tx);font-weight:600}
+.pf-tb td.s{color:var(--tx2);font-size:11.5px;word-break:break-word}
+.pf-tb td.a{color:var(--red);font-weight:600;white-space:nowrap}
+.pf-tb td.st,.pf-tb td.w{color:var(--tx2);font-size:11.5px;word-break:break-word}
+.pf-tb .pf-ctrl{color:var(--tx3);font-size:10.5px}
+.pf-tags{margin-top:5px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.pf-s{font-size:10px;padding:1px 6px;border-radius:3px;border:1px solid;white-space:nowrap;font-weight:400}
+.pf-s-lib{color:#1e7a46;background:#eefaf2;border-color:#c6e9d5}
+.pf-s-prov{color:#1053c9;background:#eef4ff;border-color:#cddcf7}
+.pf-s-probe{color:#8a5a00;background:#fff8e8;border-color:#f0dfb8}
+.pf-s-eval{color:#6b3fa0;background:#f5f0ff;border-color:#ded0f5}
+.pf-s-news{color:#666;background:#f5f6f8;border-color:#e0e3e9}
+.pf-n{font-size:10px;color:var(--tx3);margin-left:2px}
+.pf-fs{margin:2px 0 8px}
+.pf-nofix{margin-left:6px}
 .ep-sec>b{display:block;font-size:13.5px;color:var(--tx);margin-bottom:8px}
 .ep-sec p{font-size:12.5px;color:var(--tx2);line-height:1.8;margin:3px 0}
 .ep-sec p b{color:var(--tx3);font-weight:600;margin-right:4px}
@@ -1324,8 +1349,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610291610"></script>
-<script src="data.items.js?v=202610291610"></script>
+<script src="data.core.js?v=202610291730"></script>
+<script src="data.items.js?v=202610291730"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1390,7 +1415,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610291610';
+var VER='?v=202610291730';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3511,28 +3536,16 @@ function encyProf(name){
     h+='</div>';
   }
 
-  /* 五、本库中标记录（我们自己在公告里抓到的，不是抄来的） */
+  /* 五、业绩总表（2026-10-29 晚 · 第二版）
+     ── 原来这里是两块：⑤ 本库中标记录（div 列表）+ 全网业绩速查（另一张表），
+        同一个项目在两块各出现一次 —— 跟画像页上一版一模一样的毛病。
+        用户说「其他地方同理」，这里一并合成一张。
+     ── db_wins 的 amt 单位是**元**，pf 统一按亿元，所以这里除 1e8。 */
   var dw=_arrE(u.db_wins);
-  if(dw.length){
-    h+='<div class="ep-sec"><b>⑤ 本库中标记录 '+dw.length+' 条 '+
-       '<span style="color:var(--tx3);font-weight:400">（我们从各地公告里抓到的，合计 '+(u.db_amt||0)+' 亿）</span></b>';
-    dw.forEach(function(w){
-      h+='<div class="en-pj"><span>'+esc(w.t||'')+
-         '<br><span style="color:var(--tx3);font-size:11px">'+
-         esc([w.d,(w.amt>0?(Math.round(w.amt/1e8*100)/100)+'亿':''),w.buyer].filter(Boolean).join(' · '))+
-         '</span></span>'+
-         (w.url?'<a href="'+esc(w.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+
-         '<a href="javascript:void(0)" data-sf="'+esc(String(w.t||'').slice(0,8))+'">库内 🔍</a></div>';
-    });
-    h+='</div>';
-  }else{
-    h+='<div class="ep-sec"><b>⑤ 本库中标记录</b><p style="color:var(--tx3)">本库暂未抓到该单位在江浙沪皖的中标记录'+
-       '——要么它在四地确实不活跃（项目多在西北/西南/海外），要么是我们的抓取还没覆盖到它的公告。'+
-       '这条本身就是情报：跟这家在江浙沪皖正面撞上的概率，目前看不高。</p></div>';
-  }
-
-  /* 五之二、全网业绩速查（2026-10-29）：本库抓不到的官网/总包采购/外地与海外 */
-  h+=_epSection(u.name);
+  h+=pfSection(u.name, {kind:'rival', title:'⑤ 业绩总表', lib:dw.map(function(w){
+      return {t:w.t||'', d:w.d||'', amt:(w.amt||0)/1e8, url:w.url||'',
+              owner:w.buyer||'', win:'', seg:'', st:''};
+    }), news:[]});
 
   /* 六、盯防要点 + 来源 */
   if(u.watch) h+='<div class="ep-sec"><b>⑥ 盯防要点</b><p style="color:#1053c9">'+esc(u.watch)+'</p></div>';
@@ -4313,6 +4326,269 @@ function rperfTable(name, extraNews, haveBase){
      '灰色徽章（监理/货物/资产等）不是我们的业务，看「EPC·总承包」「设计」「施工」就行。</div></div>';
   return h;
 }
+/* ══════════════════════════════════════════════════════════════════════════
+   业绩总表 pf*（2026-10-29 晚 · 第二版）
+   ── 起因：画像页并排三块「本库中标记录 / 全网公告 / 全网业绩速查」，
+      「连云港热电联产」「南通美亚生物质」在两块里各出现一次，
+      用户截图圈出两处红框：「这两个模块不行合成一个表呢，去下重复」。
+   ── 做法：**一张表、一行一个项目**。五个来源合并，来源用徽章标；
+      同项目多源 → 并成一行，徽章并列，原文列给多个链接。
+   ── rperfTable 保留不动（「国内重点客户」「海外」等老入口还在调它），
+      画像页改走 pfSection —— 只换调用方，不删旧函数，出问题还能退回去。
+   ══════════════════════════════════════════════════════════════════════════ */
+var PF_SRC = {
+  lib:  ['本库',  '本库商机库抓到的公告 · 有业主、有金额、口径跟我们一致'],
+  prov: ['省平台','省/市公共资源交易平台全量抓取 · 含不在我们业务范围内的项目'],
+  probe:['定向',  '按企业名定向检索 · 官网 / 总包方采购 / 外地与海外，人工核对过原文'],
+  eval: ['评标',  '候选人公示抽出的出场记录 · 排名、报价、招标控制价、几家竞标'],
+  news: ['动态',  '竞对官网 / 公众号报道 · 无公告原文，只能参考，不能当投标依据']
+};
+var PF_ORDER = ['lib','prov','probe','eval','news'];
+
+/* 剥流程尾巴，只做清洗不截断 —— 表里显示的标题用它。
+   三源标题写法不同的地方全在尾巴上（「…中标结果公告(重发公告第3次)」），
+   剥掉之后本体一致，归并也才合得上。 */
+function pfClean(t){
+  return String(t||'')
+    /* 省平台标题常整体套一层方括号：「[XX项目]招标公告」——
+       剥掉包裹，只留里面的项目名 */
+    .replace(/^[\[［]([^\]］]{4,})[\]］]\s*/,'$1')
+    .replace(/^\[(招标文件|资格后审|重新招标|重发)[^\]]*\]/,'')
+    .replace(/[（(]\s*(重发|重新招标|二次|三次)[^）)]*[）)]/g,'')
+    /* 交易平台的内部编号（[A3306030730002659001002]）不是项目名的一部分 */
+    .replace(/[[［][A-Za-z0-9\-_]{6,}[\]］]\s*$/,'')
+    .replace(/(中标结果公告|中标候选人公示|中标公告|成交公告|招标公告|招标计划|合同公告|变更公告|更正公告|见证书|中标通知书|资格预审公告|评标结果公示|开标记录|评标公示|开标公示).*$/,'')
+    .replace(/[\s　]+$/,'');
+}
+/* 项目归并键：清洗后去空白取前 18 字 */
+function pfKey(t){
+  return pfClean(t).replace(/[\s　]/g,'').slice(0,18);
+}
+/* 防误并：项目名很长时，前 18 字可能一样而期号/标段不同，
+   「一期」和「二期」是两个真项目，不能并成一行。 */
+function pfPhase(t){
+  var m=String(t||'').match(/(?:第)?([一二三四五六七八九十\d]+)\s*(期|标段|阶段|号机组)/);
+  return m ? m[1]+m[2] : '';
+}
+function pfStage(tit, st){
+  if(st) return st;
+  var t=String(tit||'');
+  if(/中标候选人|候选人公示/.test(t)) return '中标候选人';
+  if(/合同/.test(t)) return '合同';
+  if(/中标|成交|结果/.test(t)) return '中标';
+  if(/招标计划/.test(t)) return '招标计划';
+  if(/招标公告|招标文件|采购公告/.test(t)) return '招标中';
+  return '';
+}
+
+/* 五个来源收集成统一行。金额一律折成「亿元」，
+   ⚠ 不能混用单位：rperf 的 amt 是**元**字符串，items 的 amt 已是亿元，
+     epq 的 a 是「4.46亿」这种中文串 —— 直接塞进一个列就会出现「4.46亿 → 446000000亿」。 */
+function pfCollect(st){
+  var rows=[], name=st.name;
+  /* ① 本库 */
+  (st.lib||[]).forEach(function(x){
+    rows.push({t:x.t||'', d:x.d||'', amt:x.amt||0, url:x.url||'',
+               own:x.owner||x.buyer||x.o||'', win:x.win||'',
+               seg:x.sub||x.sg||'', st:x.st||'', src:{lib:1}, pri:1});
+  });
+  /* ② ③ 省平台公告 + 评标出场（同集团法人主体已由 rperfGroup 合并） */
+  var grp=rperfGroup(name);
+  (grp.items||[]).forEach(function(x){
+    rows.push({t:x.t||'', d:x.d||'', amt:rpAmtYi(x.amt), url:x.url||'',
+               own:x.owner||'', win:'', seg:'', st:'', src:{prov:1}, pri:2});
+  });
+  (grp.eval||[]).forEach(function(x){
+    rows.push({t:x.t||'', d:x.d||'', amt:rpAmtYi(x.win_amt), url:x.url||'',
+               own:'', win:'', seg:'', st:'', src:{prov:1,eval:1}, pri:2,
+               rank:x.rank||0, won:x.won?1:0, nc:x.nCands||0,
+               quote:rpAmtYi(x.quote), ctrl:rpAmtYi(x.control)});
+  });
+  /* ④ 定向检索 */
+  var f=_epFind(name);
+  ((f&&f.h)||[]).forEach(function(h){
+    rows.push({t:h.p||'', d:h.d||'', amt:parseAmtAny(h.a)||0, url:h.u||'',
+               own:h.who||'', win:'', seg:'', st:h.st||'', src:{probe:1}, pri:3,
+               body:h.s||'', tech:h.m?1:0});
+  });
+  /* ⑤ 官网/公众号动态（无原文） */
+  (st.news||[]).forEach(function(x){
+    rows.push({t:x.t||'', d:x.d||'', amt:parseAmtAny(x.amt)||0, url:x.url||'',
+               own:'', win:'', seg:'', st:'', src:{news:1}, pri:4});
+  });
+  return rows;
+}
+
+/* 同一项目的多条记录 → 一行 */
+function pfPack(list){
+  var src={}, urls=[], body='', own='', win='', seg='', st='', d='', amt=0;
+  var tech=0, rank=0, won=0, nc=0, quote=0, ctrl=0, pri=9, main=null;
+  list.forEach(function(r){
+    for(var k in r.src) src[k]=1;
+    if(r.url) urls.push({u:r.url, s:Object.keys(r.src).map(function(k){return PF_SRC[k][0]}).join('+')});
+    if(!body && r.body) body=r.body;
+    if(!own && r.own) own=r.own;
+    if(!win && r.win) win=r.win;
+    if(!seg && r.seg) seg=r.seg;
+    if(!st && r.st) st=r.st;
+    if((r.amt||0)>amt) amt=r.amt;
+    if(String(r.d||'')>d) d=r.d;
+    if(r.tech) tech=1;
+    if(r.won) won=1;
+    if(r.rank&&(!rank||r.rank<rank)) rank=r.rank;
+    if((r.nc||0)>nc) nc=r.nc;
+    if((r.quote||0)>quote) quote=r.quote;
+    if((r.ctrl||0)>ctrl) ctrl=r.ctrl;
+    if(r.pri<pri){ pri=r.pri; main=r; }
+  });
+  main=main||list[0]||{};
+  return {t:main.t||'', d:d, amt:amt, own:own, win:win, seg:seg, st:pfStage(main.t,st),
+          src:src, urls:urls, body:body, tech:tech, rank:rank, won:won, nc:nc,
+          quote:quote, ctrl:ctrl, n:list.length};
+}
+
+function pfMerge(rows){
+  var byK={}, out=[];
+  rows.forEach(function(r){
+    var k=pfKey(r.t)||('#'+r.t);
+    (byK[k]=byK[k]||[]).push(r);
+  });
+  Object.keys(byK).forEach(function(k){
+    var g=byK[k];
+    /* 组里出现两个以上不同期号才拆，「一期/二期」不能并成一行 */
+    var ph={};
+    g.forEach(function(r){ var p=pfPhase(r.t); if(p) ph[p]=1; });
+    if(Object.keys(ph).length>1){
+      var sub={};
+      g.forEach(function(r){ var p=pfPhase(r.t)||'_'; (sub[p]=sub[p]||[]).push(r); });
+      Object.keys(sub).forEach(function(p){ out.push(pfPack(sub[p])); });
+    } else {
+      out.push(pfPack(g));
+    }
+  });
+  out.sort(function(a,b){ return String(b.d||'').localeCompare(String(a.d||'')) });
+  return out;
+}
+
+function pfSection(name, opt){
+  opt=opt||{};
+  var id='pfx'+Math.random().toString(36).slice(2,9);
+  window._pfBoxes=window._pfBoxes||{};
+  window._pfBoxes[id]={name:name, kind:opt.kind||'rival', lib:opt.lib||[],
+                       news:opt.news||[], mode:'', nofix:false,
+                       title:opt.title||'业绩总表'};
+  /* entprobe 是按需加载的 274KB。没到货就先画前四个源，到了再**整块重画** ——
+     ⚠ 不能「追加一块」，那样又变回两张表，正是这次要消灭的形状。 */
+  if(!window.DATA_ENTPROBE){
+    need('entprobe', function(){
+      var b=document.getElementById(id); if(b) pfPaint(b);
+    });
+  }
+  setTimeout(function(){ var b=document.getElementById(id); if(b) pfPaint(b); },0);
+  return '<div class="prof-sec pf-sec" id="'+id+'" data-pfbox="1"></div>';
+}
+
+function pfPaint(box){
+  var st=(window._pfBoxes||{})[box.id];
+  if(!st) return;
+  st._projs=pfMerge(pfCollect(st));
+  pfDraw(box, st);
+}
+
+function pfDraw(box, st){
+  var all=st._projs||[], mode=st.mode||'', nofix=!!st.nofix;
+  var cnt={lib:0,prov:0,probe:0,eval:0,news:0};
+  all.forEach(function(p){ for(var k in p.src) if(cnt[k]!=null) cnt[k]++; });
+  var nTech=all.filter(function(p){return p.tech}).length;
+
+  var list=all.filter(function(p){
+    if(nofix && p.tech) return false;
+    if(mode && !p.src[mode]) return false;
+    return true;
+  });
+
+  var h='<h4><i></i>'+(st.title||'业绩总表')+' <small>'+all.length+' 个项目 · 五个来源合成一张表，'+
+        '同一项目只出现一次（'+list.length+' 条在显示）</small></h4>';
+
+  /* chips：来源维度。数量按「含该来源的项目数」算，不是记录数 ——
+     一个项目在本库和省平台都有，两个 chip 都会计它一次，这是有意的。 */
+  var chips=[['','全部 '+all.length]];
+  PF_ORDER.forEach(function(k){ if(cnt[k]) chips.push([k, PF_SRC[k][0]+' '+cnt[k]]); });
+  h+='<div class="rp-fs pf-fs">'+chips.map(function(c){
+    return '<span class="rp-f'+(c[0]===mode?' on':'')+'" data-pff="'+c[0]+'">'+c[1]+'</span>';
+  }).join('')+
+  (nTech?'<span class="rp-f pf-nofix'+(nofix?' on':'')+'" data-pfnofix="1">不含技改 '+nTech+'</span>':'')+
+  '</div>';
+
+  h+='<div class="prof-tbwrap"><table class="pf-tb"><colgroup><col class="c1"><col class="c2">'+
+     '<col class="c3"><col class="c4"><col class="c5"><col class="c6"><col class="c7"></colgroup>'+
+     '<thead><tr><th>日期</th><th>项目 / 标的</th><th>规模 · 内容</th><th style="text-align:right">金额</th>'+
+     '<th>阶段</th><th>业主 / 中标方</th><th>原文</th></tr></thead><tbody>';
+
+  if(!list.length){
+    h+='<tr><td colspan="7" class="pm-empty">这一档没有记录。'+
+       (all.length?'点「全部」可看 '+all.length+' 个项目。':
+        '本库和专项检索都还没抓到它在江浙沪皖的项目 —— 要么它确实不活跃，要么抓取还没覆盖到它的公告。')+
+       '</td></tr>';
+  }
+  list.forEach(function(p){
+    var tp=rperfType(p.t||'');
+    var tags='';
+    if(p.seg) tags+='<span class="tg2 '+(SEG_TONE[p.seg]||'t3')+'">'+esc(p.seg)+'</span>';
+    PF_ORDER.forEach(function(k){
+      if(p.src[k]) tags+='<span class="pf-s pf-s-'+k+'" title="'+esc(PF_SRC[k][1])+'">'+PF_SRC[k][0]+'</span>';
+    });
+    if(p.tech) tags+='<span class="epq-mt">技改</span>';
+    if(p.n>1) tags+='<span class="pf-n" title="同一项目的 '+p.n+' 条过程记录已合并成这一行">全过程 '+p.n+' 条</span>';
+
+    var who = st.kind==='owner' ? (p.win||'') : (p.own||'');
+    if(!who && st.kind==='owner') who=p.own||'';
+    var whoCell = who ? esc(who) : '<span class="pm-na">未公示</span>';
+
+    var amtCell=p.amt>0 ? money(p.amt) : '<span class="pm-na">—</span>';
+    var links='';
+    if(p.urls.length){
+      links=p.urls.slice(0,3).map(function(o,i){
+        return '<a class="lk" href="'+esc(o.u)+'" target="_blank" rel="noopener nofollow" title="'+
+          esc(o.s)+'公告原文">'+(p.urls.length>1?('①②③'.charAt(i)):'↗')+'</a>';
+      }).join('');
+    } else links='<span class="pm-na">—</span>';
+
+    var ctrlTxt = p.ctrl>0 ? '<br><span class="pf-ctrl" title="招标控制价">控 '+money(p.ctrl)+'</span>' : '';
+
+    h+='<tr>'+
+      '<td class="d">'+esc(p.d||'—')+ctrlTxt+'</td>'+
+      '<td class="p"><i class="rp-t rp-'+tp[1]+'">'+tp[0]+'</i><b title="'+esc(p.t)+'">'+
+        esc(pfClean(p.t))+'</b>'+
+        (tags?'<div class="pf-tags">'+tags+'</div>':'')+'</td>'+
+      '<td class="s">'+(p.body?esc(p.body.slice(0,90))+(p.body.length>90?'…':''):'—')+'</td>'+
+      '<td class="a">'+amtCell+'</td>'+
+      '<td class="st">'+esc(p.st||'—')+'</td>'+
+      '<td class="w">'+whoCell+'</td>'+
+      '<td>'+links+'</td></tr>';
+  });
+  h+='</tbody></table></div>';
+
+  h+='<div class="prof-note">一张表看完这家在江浙沪皖干过什么。'+
+     '徽章说明：<b>本库</b>=我们抓的公告、口径最稳；<b>省平台</b>=省市交易平台全量；'+
+     '<b>定向</b>=按企业名人工检索（含官网、总包采购、外地海外）；<b>评标</b>=带排名和报价；'+
+     '<b>动态</b>=媒体报道、没有原文。<br>'+
+     '同一项目在多个来源都出现时只列一行，徽章并列 —— 想看各自原文点右侧编号。</div>';
+
+  box.innerHTML=h;
+}
+
+/* 业绩总表 chips 交互 */
+document.addEventListener('click', function(ev){
+  var a=ev.target.closest?ev.target.closest('[data-pff],[data-pfnofix]'):null;
+  if(!a) return;
+  var box=a.closest('[data-pfbox]'); if(!box) return;
+  var st=(window._pfBoxes||{})[box.id]; if(!st) return;
+  if(a.hasAttribute('data-pfnofix')) st.nofix=!st.nofix;
+  else { var v=a.getAttribute('data-pff'); st.mode=(st.mode===v?'':v); }
+  pfDraw(box, st);
+});
+
 /* 兼容旧调用名：外部还有地方按老名字调，保留一层壳慢慢替换 */
 function rperfSec(name){ return rperfTable(name, window._profNews && window._profNews[name]); }
 function rperfEvalSec(){ return ''; }
@@ -4404,20 +4680,14 @@ function domOwnerProf(name){
     bits.forEach(function(b){ h+='<tr><th>'+esc(b[0])+'</th><td>'+esc(b[1])+'</td></tr>'; });
     h+='</table></div>';
   }
-  /* ③ 本库项目：每条都能跳原文 */
-  if((x.items||[]).length){
-    h+='<div class="ep-sec"><b>③ 本库项目 '+x.items.length+' 条 <span style="color:var(--tx3);font-weight:400">（每条可跳原文）</span></b>';
-    x.items.slice(0,20).forEach(function(it){
-      var meta=[it.st,it.d,(it.win?'中：'+it.win:'')].filter(Boolean).join(' · ');
-      var _tp=rperfType(it.t||'');
-      h+='<div class="en-pj"><span><i class="rp-t rp-'+_tp[1]+'">'+_tp[0]+'</i>'+esc(it.t||'')+(it.amt?' <b>'+money(it.amt)+'</b>':'')+
-         (meta?'<br><span style="color:var(--tx3);font-size:11px">'+esc(meta)+'</span>':'')+'</span>'+
-         (it.url?'<a href="'+esc(it.url)+'" target="_blank" rel="noopener nofollow">原文 ↗</a>':'')+
-         '</div>';
-    });
-    if(x.items.length>20) h+='<p style="color:var(--tx3)">仅列前 20 条，共 '+x.items.length+' 条</p>';
-    h+='</div>';
-  }
+  /* ③ 业绩总表（2026-10-29 晚 · 合并）
+     ── 原来这里是两块：③ 本库项目（列表、最多 20 条）+ ⑤ 全网公告（省平台全量），
+        同一个项目两边各出现一次 —— 跟画像页是同一个毛病，一并合成一张。
+     ── x.items[].amt 已经是亿元，pf 也收亿元，不用换算。 */
+  h+=pfSection(x.name, {kind:'owner', title:'③ 业绩总表', lib:(x.items||[]).map(function(it){
+      return {t:it.t||'', d:it.d||'', amt:it.amt||0, url:it.url||'',
+              owner:'', win:it.win||'', seg:'', st:it.st||''};
+    }), news:[]});
   /* ④ 常中标单位：营销最想看的一段 */
   if((x.wins||[]).length){
     h+='<div class="ep-sec"><b>④ 常中标单位</b><div class="en-tags">'+
@@ -4425,9 +4695,8 @@ function domOwnerProf(name){
          return '<span>'+esc(w.n)+(w.c>1?' ×'+w.c:'')+'</span>';
        }).join('')+'</div></div>';
   }
-  /* ⑤ 业绩与动态（2026-10-24 合并成一张表：
-       省交易平台全量公告 + 评标出场 + 同集团其他主体，全部按日期倒序排在一张表里） */
-  h+=rperfTable(name);
+  /* ⑤ 原来的「全网公告」表已并入上面 ③ 的业绩总表（2026-10-29 晚），
+     这里不再单独出一块 —— 两块并排就是这个页面之前被吐槽的「两个一样的表」。 */
   var sub='国内重点客户'+(x.rg?' · '+x.rg:'')+(x.main?' · '+x.main:'');
   openUniProf(x.name, sub, h);
 }
@@ -5128,7 +5397,7 @@ function profPage(kind, o){
          在那里统一排在业绩表末尾并标注「无原文、仅参考」。
          这里再列一遍就是同一批事出现两次，翻起来更乱。 */
       (_list.length?'<div class="prof-note">另有 '+_list.length+' 条官网/公众号动态，'+
-        '已并入下方「业绩与动态」表末尾，统一按日期排。</div>':'')+
+        '已并入下方「业绩总表」，跟公告一起按日期排。</div>':'')+
       '</div>';
   })();
 
@@ -5139,67 +5408,12 @@ function profPage(kind, o){
       var m={}; o.rgs.forEach(function(r){ m[r.k]=(m[r.k]||0)+r.n }); o.rgAll=m;
     }
   })();
-  var items=_realAll.map(function(x){
-    return {t:x.t, amt:parseAmtAny(x.amt), d:x.d, rg:cleanRg(x.rg), url:x.url,
-            st:x.st, sub:x.sub||x.sg, win:x.win, owner:x.owner||x.buyer||x.o, buyer:x.buyer};
-  });
-  /* 同一项目的多个阶段只留一条（2026-10-29 晚）。
-     实测华光档案里「南通美亚生物质锅炉技改」出现两次：
-       一次叫「…（第一期）工程总承包项目中标结果公告(重发公告第3次)」
-       一次叫「…(一期)工程总承包」
-     用户看到就是「同一个项目两条、两个表都列」。按 rperfBase 归并键去重，
-     同组里优先留**有金额、日期更晚**的那条（信息最全）。 */
-  (function(){
-    var best={};
-    items.forEach(function(x){
-      var b=rperfBase(x.t||'')||String(x.t||'').slice(0,14);
-      var cur=best[b];
-      if(!cur){ best[b]=x; return; }
-      var s1=(x.amt||0), s2=(cur.amt||0);
-      if(s1>s2 || (s1===s2 && String(x.d||'')>String(cur.d||''))) best[b]=x;
-    });
-    items=Object.keys(best).map(function(k){ return best[k]; });
-  })();
-  items.sort(function(a,b){return (b.amt||0)-(a.amt||0)});
-  /* ⚠ 2026-10-29 晚：这块原来叫「中标业绩」，而下面 rperfTable 那块叫
-     「中标业绩 · 近期动态」—— 两个标题都带「中标业绩」，紧挨着排，
-     用户看就是「两个一样的表」。两块数据其实是：
-       · 这块 = **本库** items 里记录的、它作为中标方的公告（本库口径，有业主有金额）
-       · 下面 = **省平台全量抓取**的它的全部公告（含别的业务、含评标排名）
-     重叠约 18%（2841 条里 503 条同标题）。
-     所以标题改成「本库中标记录」，跟下面的「全网公告」明确区分开，
-     并在小字里写清楚两者是什么关系 —— 让人一眼知道这不是重复。 */
-  var tb='<div class="prof-sec"><h4><i></i>'+(kind==='owner'?'发包记录':'本库中标记录')+
-    ' <small>本库商机库里有据可查的 '+(kind==='owner'?'发包':'中标')+'记录 · 按金额降序 · 共 '+items.length+' 条'+
-    (kind==='rival'?'（下面的「全网公告」是省平台全量抓取，比这块多）':'')+'</small></h4>'+
-    '<div class="prof-tbwrap"><table class="prof-tb"><thead><tr>'+
-    '<th style="width:88px">日期</th><th>项目 / 赛道</th>'+
-    (kind==='owner'?'<th style="width:150px">中标单位</th>':'<th style="width:140px">业主</th>')+
-    '<th style="width:80px;text-align:right">金额</th><th style="width:60px">原文</th></tr></thead><tbody>'+
-    (items.length?items.map(function(x){
-      var _tp=rperfType(x.t||'');
-      return '<tr><td class="d">'+esc(x.d||'—')+'</td>'+
-        '<td class="p"><i class="rp-t rp-'+_tp[1]+'">'+_tp[0]+'</i><b>'+esc(x.t||'')+'</b>'+
-          '<span class="tg2 '+(SEG_TONE[x.sub||x.sg]||'t3')+'">'+esc(x.sub||x.sg||'未分类')+'</span>'+
-          (x.st?'<span class="tg3">'+esc(x.st)+'</span>':'')+'</td>'+
-        (kind==='owner'
-          ? '<td class="o">'+(x.win?esc(x.win):'<span class="pm-na">未公示</span>')+'</td>'
-          : '<td class="o">'+esc(x.owner||x.buyer||x.o||'—')+'</td>')+
-        '<td class="m">'+profMoney(x.amt)+'</td>'+
-        '<td>'+(x.url?'<a class="lk" href="'+esc(x.url)+'" target="_blank" rel="noopener" title="打开公告原文">↗</a>':'—')+'</td></tr>';
-    }).join(''):'<tr><td colspan="5" class="pm-empty">'+
-      /* 2026-10-23：空表不能只写「本库暂无记录」。用户看到大企业的档案是空表，
-         第一反应是「这系统没数据/坏了」。要说清为什么空、去哪能看到，
-         这才叫把话说完整。 */
-      (kind==='rival'
-        ? '本库 '+meta.total+' 条公告里，还没有一条把这家写成中标单位。<br>'+
-          '常见原因有两个：<b>①</b> 它常以下属工程公司或联合体成员身份中标，公告上公示的是牵头方；'+
-          '<b>②</b> 它主做设计/咨询，我们库里这类公告本身收录得少。'
-        : '本库暂无记录')+
-      '</td></tr>')+
-    '</tbody></table></div>'+
-    (A.amtCov<100?'<div class="plegend">金额覆盖率 '+A.amtCov+'%（'+A.withAmt+' / '+A.n+
-      ' 条有金额）—— 上游公告本身不写金额，不是我们漏抓。</div>':'')+'</div>';
+  /* ③ 业绩总表（2026-10-29 晚 · 第二版）
+     ── 这里原来是三块并排：本库中标记录 + 全网公告（rperfTable）+ 全网业绩速查（_epSection），
+        同一项目（连云港热电联产、南通美亚生物质）在两块里各出现一次。
+        用户截图圈出这两处原话：「这两个模块不行合成一个表呢，去下重复」。
+     ── 现在只调 pfSection：本库 / 省平台 / 定向 / 评标 / 动态 五个来源
+        在 pfMerge 里按项目归并成一行，来源用徽章标，想看原文点右侧编号。 */
 
   /* ④ 分布 */
   /* 2026-10-23：本库零业绩时，四个分布图全是「暂无」，占了半屏还显得像坏了。
@@ -5275,13 +5489,13 @@ function profPage(kind, o){
      用户看到的就是「同一个项目两个表里都有」，自然会问「搞两个一样的什么意思」。
      现在按项目归并键去重：本库里已有的，全网公告只留「本库没有的那个阶段」
      （比如本库只到中标公告、全网还有后来的合同公告，那种带补充信息的要留下）。 */
-  var _haveBase={};
-  _realAll.forEach(function(x){ var b=rperfBase(x.t||''); if(b) _haveBase[b]=1; });
-  var rperfHtml=rperfTable(o.name, _rperfNewsFromItems, _haveBase);
-
-  /* 2026-10-29 全网业绩速查：把本库公告之外的（官网 / 总包采购 / 外地海外）补上。
-     传 _realAll 的标题进去做去重——同一个项目在两块都出现时只留在上面的公告表里。 */
-  var epHtml=_epSection(o.name, _realAll.map(function(x){return x.t}));
+  /* 2026-10-29 晚 · 第二版：一件事只在一张表里说一次。
+     ── 上一版把三块都留着、只改了标题和去重，用户截图回了一句
+        「这两个模块不行合成一个表呢，去下重复」—— 对，标题改得再好也还是两块。
+     ── 现在合成一张：本库 / 省平台 / 定向 / 评标 / 动态，
+        pfMerge 按项目归并键并成一行，来源用徽章标，多来源时原文列给编号。
+     ── rperfTable 只在「国内重点客户 / 海外」那条老链路里还在用，画像页不再调。 */
+  var pfHtml=pfSection(o.name, {kind:kind, lib:_realAll, news:_rperfNewsFromItems});
 
   return '<div class="prof">'+
     '<div class="prof-hd"><div><h3>'+nm+'</h3>'+
@@ -5291,7 +5505,7 @@ function profPage(kind, o){
               :'<span class="pm-i">本库暂无它的中标公告，下面的企业档案来自公开资料</span>'))+
       (o.latest?'<span class="pm-i">最近动态 '+esc(o.latest)+'</span>':'')+
       '</div></div></div>'+
-    kpiHtml+idHtml+aboutHtml+ctcHtml+tb+rperfHtml+epHtml+distHtml+relHtml+insHtml+act+'</div>';
+    kpiHtml+idHtml+aboutHtml+ctcHtml+pfHtml+distHtml+relHtml+insHtml+act+'</div>';
 }
 
 /* 对手：从 rivals 数据转成通用档案结构
