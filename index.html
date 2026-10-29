@@ -224,6 +224,9 @@ button{font-family:inherit}
    标签是给眼睛扫的，第 5 个标签的边际价值远不如「一排卡片一样高」。 */
 .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;min-height:22px;max-height:44px;overflow:hidden}
 .tg{font-size:10.5px;padding:1.5px 8px;border-radius:20px;font-weight:600;white-space:nowrap}
+/* 非投标签：只在「全部」档出现，与上面那张明细表的 .dp-tag 同一套语义 */
+.tg-iv{background:#fdecea;color:#b03a2e;border:1px solid #f3c8c3;cursor:help}
+.tg-iv::before{content:'⛔ '}
 .tg-biz{background:#e9f7ef;color:#14713a}
 .tg-rg{background:#f0f2f6;color:#5a6270}
 .tg-st{background:#f3e9ff;color:#6a2fd0}
@@ -1321,8 +1324,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610290245"></script>
-<script src="data.items.js?v=202610290245"></script>
+<script src="data.core.js?v=202610291305"></script>
+<script src="data.items.js?v=202610291305"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1387,7 +1390,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610290245';
+var VER='?v=202610291305';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -2118,6 +2121,17 @@ function cardHtml(x){
   var _segBg = x.hm ? 'background:#eaf3ff;color:#1053c9'
                     : 'background:#f2f4f7;color:#7b8494';
   var tags='<span class="tg" style="'+_segBg+'">'+esc(_segN)+'</span>'+
+    /* 2026-10-29 用户反馈：截图点出「纯采购 / 纯施工」的项目混在商机库里。
+       这些其实早被 biz_rules.judge 判成 iv=0（不进可投三档），只是在「全部」档里
+       和正常条目长得一模一样 —— 隔着屏幕看不出哪条能投。
+       规则是对的，坏在没把结论露出来。
+       ⚠ 2026-10-29 晚修订：第一版把剔除原因也打在标签上（「非投 · 管网类」），
+         实测「能投标」档 983 条里有 835 条是 iv=0、「已出结果」972 条里 798 条是
+         iv=0 —— 因为这两档走的是「同业/客户全留」通道，本来就该混着。
+         按原因分门别类打标签，结果是满屏红字，提示信息淹没成背景噪音。
+         所以标签只回答一个问题：**这活我们能投吗**。答案是「不能」就一个「非投」，
+         具体为什么放 tooltip，想深究再悬浮看。 */
+    (x.iv===0?'<span class="tg tg-iv" title="不进找商机：'+esc(x.dp||'不符合找商机口径')+'">非投</span>':'')+
     (x.ind&&x.ind!=='其他'?'<span class="tg" style="background:#eef6ff;color:#0f5aa8">'+esc(x.ind)+'</span>':'')+
     '<span class="tg tg-st">'+esc(x.st)+'</span>'+
     (x.mode?'<span class="tg tg-mode">'+esc(x.mode)+'</span>':'')+
