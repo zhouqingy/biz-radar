@@ -632,6 +632,10 @@ details.sub li{padding:2px 0}
 .prof-ins .ins .no{flex:none;width:19px;height:19px;border-radius:50%;background:var(--brand);
   color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:2px}
 .prof-ins .ins b{color:var(--tx);font-weight:700}
+/* 一句话总结（2026-10-29 晚）：把 4-6 条长结论压成一段 */
+.ins-one{font-size:13.2px;line-height:1.9;color:var(--tx2);background:#f7f9fd;border-radius:8px;
+  padding:11px 14px;border-left:3px solid var(--brand)}
+.ins-one b{color:var(--tx);font-weight:700}
 .prof-note{font-size:11.5px;color:var(--tx3);line-height:1.75;background:#fafbfd;
   border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin-top:10px}
 .prof-note b{color:var(--tx2)}
@@ -851,6 +855,11 @@ details.sub li{padding:2px 0}
 .ec-brief{font-size:12.5px;color:var(--tx2);line-height:1.7;margin:6px 0 2px}
 .ec-people{font-size:12px;color:var(--tx2);line-height:1.7;margin:4px 0 0}
 .ec-people b{color:var(--tx3);font-weight:600;margin-right:3px}
+/* 整卡可点（2026-10-29 晚）：光标 + 悬停暗示，别让人以为只有按钮能点 */
+.ccard.ec-click{cursor:pointer;transition:box-shadow .15s,transform .15s}
+.ccard.ec-click:hover{box-shadow:0 4px 16px rgba(20,40,80,.12);transform:translateY(-1px)}
+.ccard.ec-click:hover .ec-name{color:var(--brand-d)}
+.ec-more{font-size:11px;color:var(--brand);margin-left:auto;white-space:nowrap;font-weight:600}
 
 /* 全屏画像弹层 */
 #encyProfBox,#uniProfBox{display:none;position:fixed;inset:0;z-index:9000;background:rgba(15,23,42,.55);
@@ -927,6 +936,7 @@ details.sub li{padding:2px 0}
 .pf-n{font-size:10px;color:var(--tx3);margin-left:2px}
 .pf-fs{margin:2px 0 8px}
 .pf-nofix{margin-left:6px}
+.pf-filt.on{background:#eaf7ee;border-color:#8fd0a8;color:#14713a}
 .ep-sec>b{display:block;font-size:13.5px;color:var(--tx);margin-bottom:8px}
 .ep-sec p{font-size:12.5px;color:var(--tx2);line-height:1.8;margin:3px 0}
 .ep-sec p b{color:var(--tx3);font-weight:600;margin-right:4px}
@@ -1349,8 +1359,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610291730"></script>
-<script src="data.items.js?v=202610291730"></script>
+<script src="data.core.js?v=202610291750"></script>
+<script src="data.items.js?v=202610291750"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1415,7 +1425,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610291730';
+var VER='?v=202610291750';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -2740,6 +2750,14 @@ function gotoUnit(names){
       c.classList.add('hit');
       c.scrollIntoView({behavior:'smooth',block:'center'});
       setTimeout(function(){c.classList.remove('hit')},2600);
+      /* 2026-10-29 晚（用户要求：「深度档案直接改成点击就出来吧」）：
+         原来点单位名只滚到卡片、不弹档案，还得再点一次「企业画像」。
+         现在定位到位后直接把档案弹出来。延迟 260ms 让滚动先动起来，
+         不然弹层一出、背景锁滚，滚动动画看着像没执行。 */
+      var _nm=arr[hit].name||'';
+      setTimeout(function(){
+        try{ gPick('rival', _nm); }catch(e){}
+      }, 260);
     }
     return;
   }
@@ -3286,54 +3304,35 @@ function _pjRow(t){
     '<a href="https://www.baidu.com/s?wd='+encodeURIComponent((t||'').slice(0,40))+'" target="_blank" rel="noopener nofollow" title="去全网核这条业绩的原文">全网 ↗</a></div>';
 }
 
+/* 单位百科卡片（2026-10-29 晚 · 用户要求精简）
+   ── 用户原话：「这个资质啥的放在详情里面吧，就是深度档案，直接改成点击就出来吧」。
+   ── 改动：
+      ① 卡片上不再铺「业务范围 / 简介长句 / 当家人」，那些进画像
+      ② 整张卡片可点（不是只有一个「企业画像」按钮），点了直接出全屏档案
+      ③ 只留三个最要紧的判断依据：地区、主攻赛道、本库中标次数
+      ④ 「查资质」这个外链**从卡片上撤掉**，挪进画像的动作条 ——
+         卡片上挂个跳出去的按钮，跟「点开看档案」抢点击，用户还得分辨点哪个 */
 function encyCard(x){
-  var h='<div class="ccard ec">';
-  h+='<div class="cc-h"><b onclick="encyProf(\''+esc(x.name)+'\')" class="ec-name" title="点开企业画像（全屏档案）">'+esc(x.name)+'</b>';
+  var _dw0=_arrE(x.db_wins);
+  var h='<div class="ccard ec ec-click" onclick="encyProf(\''+esc(x.name)+'\')" title="点开企业画像">';
+  h+='<div class="cc-h"><b class="ec-name">'+esc(x.name)+'</b>';
   if(x.city) h+='<span class="cc-tag none">'+esc(x.city)+'</span>';
   if(x.type) h+='<span class="cc-tag" style="background:'+(x.type==='设计院'?'#e8f4ff;color:#1053c9':'#fff2e0;color:#a85c10')+'">'+esc(x.type)+'</span>';
   var cf=x.confidence||'';
   h+='<span class="cc-tag" style="background:'+(cf==='查证'?'#eaf7ee;color:#14713a':'#fff8e6;color:#a85c10')+'" title="'+esc(x.src||'')+'">'+(cf==='查证'?'已查证':'待核实')+'</span>';
   if(x.overseas) h+='<span class="cc-tag" style="background:#e8f4ff;color:#1053c9">有海外</span>';
-  var _dw=_arrE(x.db_wins);
-  if(_dw.length) h+='<span class="cc-tag" style="background:#fff2e0;color:#a85c10" title="本库抓到它在江浙沪皖中标 '+_dw.length+' 单，合计 '+(x.db_amt||0)+' 亿">本库 '+_dw.length+' 单</span>';
-  h+='<button class="rival-dw" onclick="encyProf(\''+esc(x.name)+'\')">企业画像</button></div>';
+  if(_dw0.length) h+='<span class="cc-tag" style="background:#fff2e0;color:#a85c10" title="本库抓到它在江浙沪皖中标 '+_dw0.length+' 单，合计 '+(x.db_amt||0)+' 亿">本库 '+_dw0.length+' 单</span>';
+  h+='<span class="ec-more">点开看全档 ›</span></div>';
+  /* 只留赛道标签 + 关系一句。这两项决定「要不要主动找它」，其他进档案。 */
+  var bz=_arrE(x.biz).concat(_arrE(x.focus3));
+  if(bz.length) h+='<div class="en-tags">'+bz.slice(0,8).map(function(k){return '<span>'+esc(k)+'</span>'}).join('')+'</div>';
   if(x.relation){
     var isStar=(x.relation||'').indexOf('⭐')>=0;
     h+='<div class="cc-track" style="'+(isStar?'background:#fffbf0;border-color:#f0dcae':'')+'"><i>关系</i>'+
-       '<span style="flex:1;min-width:0">'+esc(x.relation.replace(/⭐/g,'★'))+'</span></div>';
+       '<span style="flex:1;min-width:0">'+esc(x.relation.replace(/⭐/g,'★').slice(0,70))+'</span></div>';
   }
-  var bz=_arrE(x.biz).concat(_arrE(x.focus3));
-  if(bz.length) h+='<div class="en-tags">'+bz.slice(0,8).map(function(k){return '<span>'+esc(k)+'</span>'}).join('')+'</div>';
-  if(x.strength) h+='<p class="ec-brief">'+esc(x.strength.length>96?x.strength.slice(0,96)+'…':x.strength)+'</p>';
-  var pp=_kvE(x.people);
-  if(pp.length) h+='<p class="ec-people"><b>当家人</b> '+esc(pp.slice(0,2).map(function(a){return a[1].split('（')[0]}).join(' · '))+
-    '<span style="color:var(--tx3)">（共 '+pp.length+' 项，进画像看全）</span></p>';
-  h+='<div class="pj-act">'+
-     '<button class="rival-dw" onclick="encyProf(\''+esc(x.name)+'\')">企业画像</button>'+
-     '<a href="https://jzsc.mohurd.gov.cn/data/company?complexname='+encodeURIComponent(x.name||'')+'" target="_blank" rel="noopener nofollow">查资质 ↗</a>'+
-     '<a href="javascript:searchFor(\''+esc((x.name||'').slice(0,6))+'\')">库内记录 ↗</a>'+
-     '</div>';
   return h+'</div>';
 }
-
-/* ---- 企业画像（全屏档案）----
-   点卡头或「企业画像」弹全屏，五段式：
-   身份沿革 / 能力资质 / 代表业绩（可跳转）/ 领导班子（找人）/ 库内实证+盯防 */
-/* ── 全网业绩速查（2026-10-29 新增）────────────────────────────
-   用户原话：「如果我单独问你这些企业有哪些业绩情况，你能不能直接答出来，
-   我问豆包都可以将这些信息以及他的来源说清楚，怎么直接去找反而显得更加麻烦呢」
-   「点企业名直接出这张卡」。
-
-   结论摆在这里：按企业名定向检索（省市交易平台 + 企业官网 + 总包方采购公告 +
-   建设通类中标汇总站）比自建全量库更快更准 —— 205 家 605 条，全部带原文链接。
-   数据在 data.entprobe.js（按需加载 274KB），点开任何一处企业画像才拉。
-
-   ⚠ 与上面 rperfTable 的分工，别再混：
-     rperfTable = 本库自己抓的公告，强在评标排名 / 竞标家数 / 全过程时间链
-     _epSection = 本库抓不到的：企业官网、总包方发的分包采购、外地与海外项目、
-                  以及「一篇给出半年全部中标」的汇总文章
-   两者互补，但同一项目会重叠，所以调用方传 dupTitles 进来按项目名去重。 */
-var _epIx = null;
 function _epNorm(s){
   s = String(s||'').replace(/[（(][^）)]*[）)]/g,'')
     .replace(/\s+/g,'');
@@ -3343,6 +3342,11 @@ function _epNorm(s){
   for(var i=0;i<3&&re.test(s);i++) s=s.replace(re,'');
   return s;
 }
+/* ⚠ 2026-10-29 晚：这一行 `var _epIx` 原来紧跟在 _epSection 后面，
+   删 encyCardOld 时按「到下一个 function 为止」切，把它一起切掉了，
+   结果 _epIndex() 直接 ReferenceError、整页 JS 挂掉。
+   教训：删函数不要按「下一个 function」切，要按括号配平切。 */
+var _epIx = null;
 function _epIndex(){
   if(_epIx) return _epIx;
   _epIx={};
@@ -3549,6 +3553,15 @@ function encyProf(name){
 
   /* 六、盯防要点 + 来源 */
   if(u.watch) h+='<div class="ep-sec"><b>⑥ 盯防要点</b><p style="color:#1053c9">'+esc(u.watch)+'</p></div>';
+  /* 资质与工商（2026-10-29 晚）：这些原来是卡片上的外链，用户要求挪进档案。
+     本库没有资质数据，给直链让人自己去查，并写清为什么没有 —— 不假装有。 */
+  h+='<div class="ep-sec"><b>⑥ 资质与工商</b>'+
+     '<p style="color:var(--tx3)">本库不含资质证书与工商数据（四库一平台详情接口要人机验证，'+
+     '不该硬爬）。要看直接跳过去：</p>'+
+     '<div class="prof-act" style="padding-top:6px">'+
+     '<a href="https://jzsc.mohurd.gov.cn/data/company?complexname='+encodeURIComponent(u.name||'')+'" target="_blank" rel="noopener nofollow">四库一平台：资质证书 / 注册人员 ↗</a>'+
+     '<a href="https://www.qcc.com/web/search?key='+encodeURIComponent(u.name||'')+'" target="_blank" rel="noopener nofollow">企查查：工商 / 股东 / 诉讼 ↗</a>'+
+     '</div></div>';
   if(u.src) h+='<div class="ep-src">资料来源：'+esc(u.src)+'　·　置信度：'+esc(u.confidence||'')+'</div>';
 
   var box=document.getElementById('encyProfBox');
@@ -4384,8 +4397,50 @@ function pfStage(tit, st){
 /* 五个来源收集成统一行。金额一律折成「亿元」，
    ⚠ 不能混用单位：rperf 的 amt 是**元**字符串，items 的 amt 已是亿元，
      epq 的 a 是「4.46亿」这种中文串 —— 直接塞进一个列就会出现「4.46亿 → 446000000亿」。 */
+/* 企业名归一：剥掉「（含XXX）」「（简称）」这类括注，以及末尾的公司/集团后缀。
+   ⚠ 2026-10-29 晚踩的坑：competitors 里叫
+     「无锡华光环保能源集团股份有限公司（含华光环保能源（西安）设计研究院有限公司）」
+   而本库/省平台里存的是「华光环保能源(西安)设计研究院有限公司」。
+   rperfRecs 用「归一后互相包含」匹配，长名里带了括注就整串对不上，
+   于是「本库 0 条、省平台 0 条」，连已经中标的连云港项目都消失了。
+   所以先取主名再查，查不到再用括注里的别名补一次。 */
+function pfNames(name){
+  var n=String(name||'');
+  var out=[];
+  var inner=(n.match(/[（(]([^（）()]*)[)）]/g)||[])
+    .map(function(x){ return x.replace(/^[（(]|[)）]$/g,'').trim(); })
+    .filter(function(x){ return x.length>=6 && /公司|院|集团|厂/.test(x) });
+  var main=n.replace(/[（(]([^（）()]*)[)）]/g,'').trim();
+  if(inner.length) out=inner.slice();          // 有括注时，括注里的才是真公司名
+  if(main && out.indexOf(main)<0) out.unshift(main);
+  return out.filter(Boolean);
+}
 function pfCollect(st){
-  var rows=[], name=st.name;
+  var rows=[], name=st.name, raw=0;
+  /* 用归一后的名字去查本库/省平台，多取几个候选，谁有数据用谁 */
+  var _names=pfNames(name);
+  var _grp={items:[],eval:[],names:[]};
+  /* ⚠ 不能「谁先有数据就用谁」——华光在省平台有三个键：
+       「华光环保能源(西安)…」4 条、「华光环保能源（西安）…」2 条、「无锡华光…集团」2 条，
+     只取一个就漏。所以**全部候选都取，按 (日期+标题) 并起来**。 */
+  function _mergeGroup(g){
+    if(!g) return;
+    var seen={};
+    _grp.items.forEach(function(x){ seen[(x.d||'')+'|'+String(x.t||'').slice(0,40)]=1; });
+    (g.items||[]).forEach(function(x){
+      var k=(x.d||'')+'|'+String(x.t||'').slice(0,40);
+      if(seen[k]) return; seen[k]=1; _grp.items.push(x);
+      if(_grp.names.indexOf(x.by)<0 && x.by) _grp.names.push(x.by);
+    });
+    var seenE={};
+    _grp.eval.forEach(function(x){ seenE[(x.d||'')+'|'+String(x.t||'').slice(0,40)]=1; });
+    (g.eval||[]).forEach(function(x){
+      var k=(x.d||'')+'|'+String(x.t||'').slice(0,40);
+      if(seenE[k]) return; seenE[k]=1; _grp.eval.push(x);
+    });
+  }
+  _mergeGroup(rperfGroup(name));
+  for(var _i=0;_i<_names.length;_i++) _mergeGroup(rperfGroup(_names[_i]));
   /* ① 本库 */
   (st.lib||[]).forEach(function(x){
     rows.push({t:x.t||'', d:x.d||'', amt:x.amt||0, url:x.url||'',
@@ -4393,7 +4448,7 @@ function pfCollect(st){
                seg:x.sub||x.sg||'', st:x.st||'', src:{lib:1}, pri:1});
   });
   /* ② ③ 省平台公告 + 评标出场（同集团法人主体已由 rperfGroup 合并） */
-  var grp=rperfGroup(name);
+  var grp=_grp;
   (grp.items||[]).forEach(function(x){
     rows.push({t:x.t||'', d:x.d||'', amt:rpAmtYi(x.amt), url:x.url||'',
                own:x.owner||'', win:'', seg:'', st:'', src:{prov:1}, pri:2});
@@ -4404,8 +4459,10 @@ function pfCollect(st){
                rank:x.rank||0, won:x.won?1:0, nc:x.nCands||0,
                quote:rpAmtYi(x.quote), ctrl:rpAmtYi(x.control)});
   });
-  /* ④ 定向检索 */
-  var f=_epFind(name);
+  /* ④ 定向检索：同样试多个候选名 */
+  var f=null;
+  for(var _j=0;_j<_names.length && !f;_j++) f=_epFind(_names[_j]);
+  if(!f) f=_epFind(name);
   ((f&&f.h)||[]).forEach(function(h){
     rows.push({t:h.p||'', d:h.d||'', amt:parseAmtAny(h.a)||0, url:h.u||'',
                own:h.who||'', win:'', seg:'', st:h.st||'', src:{probe:1}, pri:3,
@@ -4413,38 +4470,143 @@ function pfCollect(st){
   });
   /* ⑤ 官网/公众号动态（无原文） */
   (st.news||[]).forEach(function(x){
+    /* 动态也要带阶段：否则「某某项目（4.4584亿元）已中标」这种动态会显示成交—，
+       而且因为它的日期比公告更早，主行可能选中它，阶段就空了。 */
     rows.push({t:x.t||'', d:x.d||'', amt:parseAmtAny(x.amt)||0, url:x.url||'',
-               own:'', win:'', seg:'', st:'', src:{news:1}, pri:4});
+               own:'', win:'', seg:'', st:pfStage(x.t,''), src:{news:1}, pri:4});
   });
+  /* 相关性过滤。**只过滤检索来的三类**（省平台/定向/动态）：
+     本库那部分不动 —— 它是我们自己的商机库口径，筛掉了会跟「找商机」对不上数。 */
+  var before=rows.length;
+  rows=rows.filter(function(r){
+    if(r.src.lib) return true;
+    return pfKeepSearch(r, st);
+  });
+  st._dropped=before-rows.length;
   return rows;
 }
 
+/* ── 相关性判定（2026-10-29 晚）──────────────────────────────────
+   用户原话：「业绩也瞎放，起码作为对手得沾点边吧」。
+   两条独立的判断，缺一不可：
+     ① 是不是能源/工业工程   —— 剔掉隧道养护、绿化、网络安全运维、戒毒系统这类
+     ② 跟它自己的赛道沾不沾边 —— 剔掉「同行偶然跨行」的单子
+   只要有一条命中的能源关键词，或者赛道能对上，就留。
+   宁可多留也不误杀：`pfKeepHit` 命中就留，只有**两条都不沾**才剔。 */
+var PF_ENERGY = ['热电','供热','热力','余热','锅炉','汽轮','发电','电厂','电站','能源','脱硫',
+  '脱硝','除尘','煤气','焚烧','垃圾','海水淡化','海淡','零排放','背压','燃机','机组','装机',
+  '蒸汽','烧结','焦炉','高炉','干熄焦','污泥','变电','升压站','输电','输煤','光伏','风电','储能',
+  '生物质','垃圾发电','余热利用','节能改造','能效','天然气','LNG','煤气化','煤化工','炼化','化工',
+  '冶金','钢铁','有色','水泥','造纸','制药','污水处理'];
+/* 明确「不是我们这行」的：出现就剔（即便顺带出现能源词，比如「隧道配套照明工程」） */
+var PF_OFFTOPIC = ['隧道','道路','公路','桥梁','房建','学校','医院','学校宿舍','公寓','办公用房',
+  '戒毒','公安','法院','检察','税务','社保','民政','档案','图书','安保','保洁','物业','绿化',
+  '苗木','景观','河道','清淤','管网普查','网络安全','信息化运维','软件','数据中心运维','食堂',
+  '服装','车辆','燃油'];
+function pfIsEnergy(t){
+  var s=String(t||'');
+  if(PF_OFFTOPIC.some(function(k){ return s.indexOf(k)>=0 })) return false;
+  return PF_ENERGY.some(function(k){ return s.indexOf(k)>=0 });
+}
+/* 跟这家单位的赛道对不对得上。赛道名是「热电联产·集中供热」这种，
+   拆成词根逐个比；只要有一个词根出现在项目名里就算沾边。 */
+function pfSegHit(t, segs){
+  if(!segs || !segs.length) return false;
+  var s=String(t||'');
+  for(var i=0;i<segs.length;i++){
+    var ws=String(segs[i]||'').split(/[·\/、,，\s（）()]+/).filter(function(w){ return w.length>=2 });
+    for(var j=0;j<ws.length;j++){
+      if(s.indexOf(ws[j])>=0) return true;
+    }
+  }
+  return false;
+}
+function pfKeepSearch(r, st){
+  if(st.filt!=='seg') return true;          // 用户手动关了过滤，全看
+  if(pfIsEnergy(r.t) || pfSegHit(r.t, st.seg)) return true;
+  return false;
+}
+
 /* 同一项目的多条记录 → 一行 */
+/* 阶段推进序：数字越大越靠后。
+   ⚠ 2026-10-29 用户抓到的错：「这都已经结果公示了，你怎么还在拟中标候选人阶段」。
+     根因是同一个项目在四个来源里各有记录、日期各不同：
+       中瑞 07-07「中标候选人（第一）」
+       华光 07-21「拟中标候选人（复议后递补）」
+       业主 07-30「招标」（它存的是招标公告那条）
+       本库 07-28「中标 4.4584 亿」
+     原来取「最早一条的标题 + 最晚一条的日期」，于是显示「拟中标候选人」配 07-21，
+     而真正的结果是 07-28 已经中标了。判断阶段不能看谁日期早，要看**项目走到哪一步**。 */
+var PF_STAGE_RANK = [
+  [/废标|流标|终止|失败/, 0],
+  [/可研|立项|核准|环评|规划/, 1],
+  [/招标计划/, 2],
+  [/资格预审|招标文件|澄清|答疑/, 3],
+  [/招标公告|采购公告|招标$|招标\b/, 4],
+  [/开标|评标/, 5],
+  [/中标候选人|拟中标|候选人公示/, 6],
+  [/中标结果|中标公告|中标\(|成交|结果公告|结果公示|已招完/, 7],
+  [/合同|签约/, 8],
+  [/开工|在建|投产/, 9]
+];
+function pfStageRank(t, st){
+  var s=String(st||'')+' '+String(t||'');
+  for(var i=PF_STAGE_RANK.length-1;i>=0;i--){
+    if(PF_STAGE_RANK[i][0].test(s)) return i;
+  }
+  return -1;
+}
+/* 显示用阶段名：取整组里**最靠后**那一步 */
+function pfStageName(rank, t){
+  var map={0:'终止/废标',1:'可研立项',2:'招标计划',3:'招标文件',4:'招标中',
+           5:'开标评标',6:'中标候选人',7:'中标',8:'合同',9:'在建/投产'};
+  if(rank>=0) return map[rank]||'';
+  return pfStage(t,'')||'—';
+}
+
 function pfPack(list){
-  var src={}, urls=[], body='', own='', win='', seg='', st='', d='', amt=0;
-  var tech=0, rank=0, won=0, nc=0, quote=0, ctrl=0, pri=9, main=null;
+  var src={}, urls=[], body='', own='', win='', seg='', amt=0;
+  var tech=0, rank=0, won=0, nc=0, quote=0, ctrl=0, n=0;
+  /* 两组信息分开记：
+     - 主行（标题/原文/日期）：取**阶段最靠后**的那条，它的标题和链接最接近最终结果
+     - 辅助（金额/业主/规模）：取**信息最全**的那条，可以把各条互补拼起来 */
+  var bestStage=-2, mainR=null;
+  list.forEach(function(r){
+    var sr=pfStageRank(r.t, r.st);
+    if(sr>bestStage || (sr===bestStage && String(r.d||'')>String(mainR&&mainR.d||''))){
+      bestStage=sr; mainR=r;
+    }
+  });
   list.forEach(function(r){
     for(var k in r.src) src[k]=1;
-    if(r.url) urls.push({u:r.url, s:Object.keys(r.src).map(function(k){return PF_SRC[k][0]}).join('+')});
+    if(r.url) urls.push({u:r.url, s:Object.keys(r.src).map(function(k){return PF_SRC[k][0]}).join('+'), r:pfStageRank(r.t,r.st)});
     if(!body && r.body) body=r.body;
     if(!own && r.own) own=r.own;
     if(!win && r.win) win=r.win;
     if(!seg && r.seg) seg=r.seg;
-    if(!st && r.st) st=r.st;
     if((r.amt||0)>amt) amt=r.amt;
-    if(String(r.d||'')>d) d=r.d;
     if(r.tech) tech=1;
     if(r.won) won=1;
     if(r.rank&&(!rank||r.rank<rank)) rank=r.rank;
     if((r.nc||0)>nc) nc=r.nc;
     if((r.quote||0)>quote) quote=r.quote;
     if((r.ctrl||0)>ctrl) ctrl=r.ctrl;
-    if(r.pri<pri){ pri=r.pri; main=r; }
+    n++;
   });
-  main=main||list[0]||{};
-  return {t:main.t||'', d:d, amt:amt, own:own, win:win, seg:seg, st:pfStage(main.t,st),
+  mainR=mainR||list[0]||{};
+  /* 主行如果没金额，从组里别的记录补（同项目不同来源，有的写了有的没写） */
+  if(!(amt>0)){ amt=0; }
+  /* 阶段为空时，从组内最靠后的**非空**阶段反推 */
+  if(bestStage<0){
+    list.forEach(function(r){ var sr=pfStageRank(r.t,r.st); if(sr>bestStage){ bestStage=sr; } });
+  }
+  /* 原文按阶段倒序：最接近最终结果的排第一（用户点 ① 就想看结果公告） */
+  urls.sort(function(a,b){ return (b.r||0)-(a.r||0); });
+  /* 日期也给**最靠后那条**的日期，避免「阶段=中标」配一个候选人的日期 */
+  return {t:mainR.t||'', d:mainR.d||'', amt:amt, own:own, win:win, seg:seg,
+          st:pfStageName(bestStage, mainR.t), stageRank:bestStage,
           src:src, urls:urls, body:body, tech:tech, rank:rank, won:won, nc:nc,
-          quote:quote, ctrl:ctrl, n:list.length};
+          quote:quote, ctrl:ctrl, n:n};
 }
 
 function pfMerge(rows){
@@ -4476,7 +4638,16 @@ function pfSection(name, opt){
   window._pfBoxes=window._pfBoxes||{};
   window._pfBoxes[id]={name:name, kind:opt.kind||'rival', lib:opt.lib||[],
                        news:opt.news||[], mode:'', nofix:false,
-                       title:opt.title||'业绩总表'};
+                       title:opt.title||'业绩总表',
+                       /* 相关性过滤（2026-10-29 晚）。用户原话：
+                          「业绩也瞎放，起码作为对手得沾点边吧」——
+                          截图里中国联合工程公司名下全是「延安路隧道设施养护」
+                          「省戒毒局网络安全保障服务」，跟能源工程一点关系没有。
+                          它确实是我们的对手（中联有电力院），但那些业绩不是它的
+                          主业，摆在这里会误导判断。
+                          默认开启；页面给一个「含非能源业务」开关，想看全量随时能开。 */
+                       seg:opt.seg||[],      // 这家单位的主攻赛道（来自 org 数据）
+                       filt:'seg'};           // 'seg'=按赛道相关 | ''=全看
   /* entprobe 是按需加载的 274KB。没到货就先画前四个源，到了再**整块重画** ——
      ⚠ 不能「追加一块」，那样又变回两张表，正是这次要消灭的形状。 */
   if(!window.DATA_ENTPROBE){
@@ -4507,16 +4678,22 @@ function pfDraw(box, st){
     return true;
   });
 
+  var nFilt=st._dropped||0;
   var h='<h4><i></i>'+(st.title||'业绩总表')+' <small>'+all.length+' 个项目 · 五个来源合成一张表，'+
         '同一项目只出现一次（'+list.length+' 条在显示）</small></h4>';
 
-  /* chips：来源维度。数量按「含该来源的项目数」算，不是记录数 ——
+  /* chips：来源维度 + 两个开关。
+     数量按「含该来源的项目数」算，不是记录数 ——
      一个项目在本库和省平台都有，两个 chip 都会计它一次，这是有意的。 */
   var chips=[['','全部 '+all.length]];
   PF_ORDER.forEach(function(k){ if(cnt[k]) chips.push([k, PF_SRC[k][0]+' '+cnt[k]]); });
   h+='<div class="rp-fs pf-fs">'+chips.map(function(c){
     return '<span class="rp-f'+(c[0]===mode?' on':'')+'" data-pff="'+c[0]+'">'+c[1]+'</span>';
   }).join('')+
+  /* 「沾边」开关。默认开，剔掉的条数写在按钮上，让人知道筛了多少、
+     想看全量点一下就行 —— 不藏数据，但默认不拿无关业绩误导判断。 */
+  (nFilt?'<span class="rp-f pf-filt'+(st.filt==='seg'?' on':'')+'" data-pffilt="1" '+
+      'title="只留能源/工业工程，以及与它主攻赛道沾边的项目；关掉看全量">只看沾边（已剔 '+nFilt+' 条）</span>':'')+
   (nTech?'<span class="rp-f pf-nofix'+(nofix?' on':'')+'" data-pfnofix="1">不含技改 '+nTech+'</span>':'')+
   '</div>';
 
@@ -4580,11 +4757,16 @@ function pfDraw(box, st){
 
 /* 业绩总表 chips 交互 */
 document.addEventListener('click', function(ev){
-  var a=ev.target.closest?ev.target.closest('[data-pff],[data-pfnofix]'):null;
+  var a=ev.target.closest?ev.target.closest('[data-pff],[data-pfnofix],[data-pffilt]'):null;
   if(!a) return;
   var box=a.closest('[data-pfbox]'); if(!box) return;
   var st=(window._pfBoxes||{})[box.id]; if(!st) return;
   if(a.hasAttribute('data-pfnofix')) st.nofix=!st.nofix;
+  else if(a.hasAttribute('data-pffilt')){
+    st.filt = (st.filt==='seg' ? '' : 'seg');
+    pfPaint(box);                 // 过滤条件变了要重新收集，不是重画
+    return;
+  }
   else { var v=a.getAttribute('data-pff'); st.mode=(st.mode===v?'':v); }
   pfDraw(box, st);
 });
@@ -5075,6 +5257,35 @@ function profAgg(items, rgFallback){
 }
 
 /* ---------- ⑤ 看法：只写能从数据里读出来的话，每条带数字 ---------- */
+/* 一句话总结：把 profInsight 那 4-6 条压成一句。
+   取舍标准 —— 只留「决定要不要跟、怎么跟」的信息：
+     业主：在哪 / 买什么 / 盘子多大 / 最近一次 / 常找谁
+     对手：在哪 / 抢什么赛道 / 战绩如何 / 最近一次
+   不带任何推断性评价（「值得马上跟进」这类），那种话要行业经验，本库没有。 */
+function profOneLine(kind, o, A){
+  var nm=(o.name||'').replace(/[（(].*$/,'').slice(0,14);
+  var rg=A.rg.length?A.rg[0].k:'';
+  var seg=A.seg.length?A.seg[0].k:'';
+  var parts=[];
+  if(A.n){
+    if(rg) parts.push('主要在'+rg+'做'+seg);
+    else if(seg) parts.push('主做'+seg);
+    if(A.amtSum>0) parts.push('本库累计 '+money(A.amtSum)+(A.bigN?('、亿元级 '+A.bigN+' 个'):''));
+    if(o.latest) parts.push('最近一次 '+o.latest.slice(0,7));
+    if(kind==='owner' && (o.sups||[]).length){
+      var s0=o.sups.slice().sort(function(a,b){return (b.n||0)-(a.n||0)})[0];
+      if(s0) parts.push('活主要给'+(s0.n>1?('它 '+s0.n+' 次'):'它')+'（'+s0.name.replace(/[（(].*$/,'').slice(0,12)+'）');
+    }
+  }else{
+    parts.push('本库还没抓到它的'+(kind==='owner'?'发包':'中标')+'公告');
+  }
+  var tail = kind==='owner'
+    ? (A.n?'—— 它是货真价实的甲方，进场就照着它的采购口味报。':'—— 暂时不用重点跟，等它出标再说。')
+    : (A.n?'—— 撞单场景清楚，按它的赛道备业绩。':'—— 暂时碰不上，先放观察名单。');
+  return '<b>'+esc(nm)+'</b> '+(parts.length?esc(parts.join('，')):'资料太少')+'。'+
+    '<span style="color:var(--tx3)">'+esc(tail)+'</span>';
+}
+
 function profInsight(kind, o){
   var A=profAgg(o.items||[], o.rgAll || (o.rg&&typeof o.rg==='object'?o.rg:null)), out=[];
   var kn=PROF_KIND[kind]||PROF_KIND.owner;
@@ -5464,14 +5675,15 @@ function profPage(kind, o){
        位置放在「供应商关系」之前：联系方式比关系网更急用。 */
   var ctcHtml=gContacts(o);
 
-  /* ⑤ 看法 */
-  var insHtml='<div class="prof-sec prof-ins"><h4><i></i>基于本库数据的看法 <small>每条结论都带可核对的数字，不做无依据的判断</small></h4>'+
-    (ins.length?ins.map(function(t,i){
-      return '<div class="ins"><span class="no">'+(i+1)+'</span><div>'+t+'</div></div>'}).join(''):
-      '<div class="pm-empty">数据太少，下不了判断</div>')+
-    '<div class="prof-note">以上全部由本库 '+A.n+' 条公开公告聚合得出。'+
-    '「打法判断」这类需要行业经验的内容（比如它报价习惯、技术标得分）本库没有数据，'+
-    '不在这里硬编 —— 那要靠竞标现场记录，或者接第三方招投标数据库。</div></div>';
+  /* ⑤ 一句话总结（2026-10-29 晚 · 用户要求）
+     ── 原来这里是「基于本库数据的看法」，profInsight 会吐 4-6 条带编号的长段，
+        每条都长两三行，用户原话：「基本库看法改成对于业主的总结，一句话就行
+        没有必要搞那么多」。
+     ── 现在只留**一句话**：姓什么（业主/对手）、在哪、买什么、多大、最近一次、
+        跟谁做得最多。一句话读完就知道该怎么下手。 */
+  var insHtml='<div class="prof-sec prof-ins"><h4><i></i>'+
+    (kind==='owner'?'这家业主':'这家对手')+' <small>一句话 · 由本库 '+A.n+' 条公开公告聚合</small></h4>'+
+    '<div class="ins-one">'+profOneLine(kind,o,A)+'</div></div>';
 
   /* 动作条 */
   var act='<div class="prof-act">'+
@@ -5495,7 +5707,13 @@ function profPage(kind, o){
      ── 现在合成一张：本库 / 省平台 / 定向 / 评标 / 动态，
         pfMerge 按项目归并键并成一行，来源用徽章标，多来源时原文列给编号。
      ── rperfTable 只在「国内重点客户 / 海外」那条老链路里还在用，画像页不再调。 */
-  var pfHtml=pfSection(o.name, {kind:kind, lib:_realAll, news:_rperfNewsFromItems});
+  /* seg：这家单位的主攻赛道，pfCollect 用它挑「沾边」的业绩。
+     o.segs 是 {赛道:条数} 字典；也兼容 o.main（单个赛道串）。 */
+  var _pseg=[];
+  if(o.segs && typeof o.segs==='object') _pseg=Object.keys(o.segs);
+  else if(o.seg && typeof o.seg==='string') _pseg=[o.seg];
+  else if(o.main) _pseg=[o.main];
+  var pfHtml=pfSection(o.name, {kind:kind, lib:_realAll, news:_rperfNewsFromItems, seg:_pseg});
 
   return '<div class="prof">'+
     '<div class="prof-hd"><div><h3>'+nm+'</h3>'+
