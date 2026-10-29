@@ -1324,8 +1324,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610291520"></script>
-<script src="data.items.js?v=202610291520"></script>
+<script src="data.core.js?v=202610291610"></script>
+<script src="data.items.js?v=202610291610"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1390,7 +1390,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610291520';
+var VER='?v=202610291610';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -1976,7 +1976,7 @@ function buildFilters(){
       '<div class="ware on" data-bk="all" id="waAllW">全部 <b style="display:none">0</b></div>' +
       '<span class="ware-tog" id="waHide" title="「全部」档里有一批已经开过标的，滤掉它们只剩还能投的">只看还能投的</span>' +
       '<div class="wtip" id="waTip">数字 = <b>这一档点进去看到的条数</b>（随下方筛选条件实时变）。' +
-      '前三档只看关注档（金额 ' + (WA.amt * 10000) + ' 万以上 或 综合分 A/B），「全部」不卡这些条件' +
+      '前三档只留<b>主业 + EPC</b> 的标（已剔除纯采购 / 分包 / 管网 / 后勤），不按金额卡' +
       '<a href="javascript:void(0)" id="waAll" style="margin-left:8px;color:var(--brand);font-weight:600">看全部含小项目</a></div>';
     waBox.onclick = function (e) {
       var pick = function (bk) {
@@ -1987,8 +1987,13 @@ function buildFilters(){
         // 「只看还能投的」开关只在「全部」档下有意义
         var hb = el('waHide');
         if (hb) hb.style.display = (bk === 'all') ? 'inline-block' : 'none';
-        /* 数据分块：立项线索只拉 lead 那块（637 条），
-           全部才把 rest 那块也拉下来（917 条）。 */
+        /* 数据分块：立项线索只拉 lead 那块，全部才把 rest 那块也拉下来。
+           ⚠ 2026-10-29 晚：tender / win 两档也**必须**拉 rest。
+             原来只有 lead 和 all 会去 loadChunk，tender/win 直接 render()，
+             靠首屏那 73 条。但首屏只带 `bk=tender && iv=1` 的 4 条、
+             `bk=win && iv=1` 的 14 条，而全量里这两档还剩一大半在 rest 分片。
+             结果「能投的标」显示 4 张卡，实际有 18 条 —— 页面在骗人，
+             用户按页面判断就会漏掉 14 个能投的标。 */
         var box = el('grid');
         if (bk === 'lead') {
           if (window.__itemsSplit && box) box.innerHTML = '<div class="empty">正在载入立项线索…</div>';
@@ -1998,6 +2003,17 @@ function buildFilters(){
         if (bk === 'all') {
           if (window.__itemsSplit && box) box.innerHTML = '<div class="empty">正在载入全部项目…</div>';
           loadAllItems(function () { render(); });
+          return;
+        }
+        /* tender / win：补拉 rest 再渲染，加载期间先把已到手的画出来，
+           免得出空白（首屏那部分本身也是有内容的）。 */
+        if (window.__itemsSplit && _chunkState['rest'] !== 'done') {
+          render();
+          loadChunk('rest', function () {
+            refreshTabCounts();
+            try { refreshFilterCounts(); } catch (e) { }
+            render();
+          });
           return;
         }
         render();
@@ -2068,13 +2084,21 @@ swimBox.onclick=null;
 
 /* ==================== 筛选逻辑 ==================== */
 function match(x){
-  /* 三档关注库：默认只看「能投的标」里的关注档项目。
-     关注档看 x.w（后端算好：金额≥3000万 或 综合分A/B），
-     「全部」档不做关注过滤，也不做分库过滤。 */
+  /* 三档关注库：只看对应档 + 后端判「能投」（x.iv）。
+     ⚠ 不再按 x.w（关注档：金额≥3000万 或 综合分A/B）二次过滤 ——
+       那会让能投的标被金额门槛砍掉大半，见下面的说明。
+     「全部」档不做分库过滤，只给一个「隐掉已开标」开关。 */
   var bk = F.bk || 'tender';
   if (bk !== 'all') {
     if ((x.bk || 'tender') !== bk) return false;
-    if (bk !== 'lead' && !x.w) return false;     // 立项线索本身就是机会池，不再卡金额
+    /* ⚠ 2026-10-29 晚：这里原来还有一道 `if (bk !== 'lead' && !x.w) return false`，
+       意思是「能投的标 / 已出结果」两档只看关注档（金额≥3000万 或 综合分 A/B）。
+       结果是：全库 tender 档判成能投的有 28 条，其中只有 4 条 w=1 ——
+       页面上「能投的标」只显示 4 张卡，另外 24 条被这道门槛无声无息砍掉了。
+       用户按页面判断，就等于漏掉 24 个能投的标。
+       `w` 是「值不值得优先看」，跟「能不能投」是两码事。既然下面已经用
+       `if (!x.iv) return false` 严筛过一遍，能到这里的都是真能投的活，
+       就不该再按金额砍一刀。金额排序保留（F.sort='amt'），想看大标自己排。 */
     /* 2026-10-23 找商机严筛：后端 biz_rules.judge 判不可投的（纯货物 / 分包施工 /
        管网 / 后期服务 / 兼营 / 不在12个业务层级）不进这三档。
        同业与伙伴、客户与业主两个页签不读 match()，全留口径不受影响。 */
@@ -2115,6 +2139,9 @@ function filtered(){
 }
 
 /* ==================== 渲染 ==================== */
+/* 「非投」标签只在「全部」档显示 —— 那一档里能投/不能投混排，需要区分。
+   三个筛选档本身就是筛过的，再戳红章只会让人以为系统判错了。 */
+function _inAllTab(){ return (F.bk || 'all') === 'all'; }
 function cardHtml(x){
   /* 业务分层标签：一级业务用实心强调色，三级分公司业务用灰色（一眼看出不是主攻） */
   var _segN=SEG_NAME[x.sg]||'其他';
@@ -2125,13 +2152,15 @@ function cardHtml(x){
        这些其实早被 biz_rules.judge 判成 iv=0（不进可投三档），只是在「全部」档里
        和正常条目长得一模一样 —— 隔着屏幕看不出哪条能投。
        规则是对的，坏在没把结论露出来。
-       ⚠ 2026-10-29 晚修订：第一版把剔除原因也打在标签上（「非投 · 管网类」），
-         实测「能投标」档 983 条里有 835 条是 iv=0、「已出结果」972 条里 798 条是
-         iv=0 —— 因为这两档走的是「同业/客户全留」通道，本来就该混着。
-         按原因分门别类打标签，结果是满屏红字，提示信息淹没成背景噪音。
-         所以标签只回答一个问题：**这活我们能投吗**。答案是「不能」就一个「非投」，
-         具体为什么放 tooltip，想深究再悬浮看。 */
-    (x.iv===0?'<span class="tg tg-iv" title="不进找商机：'+esc(x.dp||'不符合找商机口径')+'">非投</span>':'')+
+       ⚠ 2026-10-29 晚修订 2：「非投」标签只在「全部」档显示。
+         「能投的标 / 已出结果 / 立项线索」三档本身就是筛过的，理论上不会出现
+         iv=0 的条目（能投标档 match() 里有 `if(!x.iv) return false`）。
+         但「立项线索」档例外：按双通道口径，lead 档只卡主业层级、不卡 EPC，
+         所以里面本来就混着「招标公告但没写 EPC」的条目 —— 这些条目上戳「非投」
+         会让人以为系统判错了（用户看到马钢那条就是这么炸的）。
+         标签的用途是「在混排的全量里一眼分出能投不能投」，出了「全部」档就是纯噪音。
+         带 _inAllTab 参数判断：只有 F.bk==='all' 时才打这个标签。 */
+    (_inAllTab() && x.iv===0 ? '<span class="tg tg-iv" title="不进找商机：'+esc(x.dp||'不符合找商机口径')+'">非投</span>':'')+
     (x.ind&&x.ind!=='其他'?'<span class="tg" style="background:#eef6ff;color:#0f5aa8">'+esc(x.ind)+'</span>':'')+
     '<span class="tg tg-st">'+esc(x.st)+'</span>'+
     (x.mode?'<span class="tg tg-mode">'+esc(x.mode)+'</span>':'')+
@@ -2219,9 +2248,7 @@ function cardHtml(x){
             'title="在新标签打开这条公告的原文页面">' +
             esc(x.t) + ' <span class="go">原文 ↗</span></a>')
       : '<span class="pj-t">'+esc(x.t)+'</span>')+
-    '<div class="tags">'+tags+
-      /* 2026-10-23：「全部」档里 iv=0 的条目挂出被剔原因，让人知道过滤是真做了 */
-      (x.iv?'':'<span class="dp-tag" title="这条没过找商机严筛口径，只在「全部」里备查">非投：'+esc(x.dp||'不符合找商机口径')+'</span>')+'</div>'+
+    '<div class="tags">'+tags+'</div>'+
     '<div class="pj-meta">'+meta+'</div>'+
     (x.snip?'<div class="pj-snip">'+esc(x.snip)+'</div>':'')+chain+
     /* 弹性占位：把上面「卡头/标题/标签/元信息/摘要/阶段链」整块顶到卡片上端，
@@ -4089,21 +4116,37 @@ function rperfBase(t){
    ⚠ 表里绝不能把「动态」（竞对官网/公众号新闻）和「中标业绩」（公告原文）混为一谈 ——
      前者没有原文可核。所以动态一律带 `NEWS` 徽章、金额列显示「—」、原文列显示「官网 ↗」，
      让人一眼分清哪一行能拿去做投标依据。 */
-function rperfTable(name, extraNews){
+function rperfTable(name, extraNews, haveBase){
+  /* haveBase：本库「中标记录」表里已经有的**项目归并键**。传了就在这块里整组排除，
+     避免同一个项目在两张表里各出现一次（用户反馈「搞两个一样的什么意思」）。
+     同一项目的多个阶段（招标公告→中标→合同）留最新一条就够，
+     那些阶段在「本库中标记录」里本来就已经按项目归并显示过了。 */
   var rec=rperfRecs(name);
   var grp=rperfGroup(name);
-  var items=[], evs=[], news=[];
+  var items=[], evs=[], news=[], dupDropped=0;
 
   /* ① 本库/全网公告（rival_perf），含同集团其他法人主体 */
-  (grp.items||[]).forEach(function(x){ items.push(x) });
-
-  /* ② 评标出场记录（候选人公示抽取：排名/报价/控制价/几家竞标） */
-  (grp.eval||[]).forEach(function(x){ evs.push(x) });
+  (grp.items||[]).forEach(function(x){
+    if(haveBase){
+      var b=rperfBase(x.t||'')||String(x.t||'').slice(0,12);
+      if(haveBase[b]){ dupDropped++; return; }      /* 本库已有，这块不再重复列 */
+    }
+    items.push(x);
+  });
 
   /* ③ 近期动态（竞对官网 / 公众号，没有公告原文） */
   (extraNews||[]).forEach(function(x){ news.push(x) });
 
-  if(!items.length && !evs.length && !news.length) return '';
+  /* 全都排除光了（本库那块已经把这个单位的项目全列过）——不出空表，
+     只在标题那行说明「已并入上面的本库中标记录」，免得看着像丢了数据。 */
+  if(!items.length && !evs.length && !news.length){
+    if(dupDropped){
+      return '<div class="prof-sec"><h4><i></i>全网公告'+
+        ' <small>省交易平台抓到 '+dupDropped+' 条，全部是上面「本库中标记录」已列过的同一批项目，'+
+        '这里不再重复</small></h4></div>';
+    }
+    return '';
+  }
 
   /* 评标记录挂到同项目组上：按归并键 + 日期接近，避免一件事出现两行 */
   var evalByBase={};
@@ -4163,8 +4206,12 @@ function rperfTable(name, extraNews){
     (evs.length?'<span class="rp-f" data-act="rperfF" data-v="__eval">评标出场 '+evs.length+'</span>':'')+
     (news.length?'<span class="rp-f" data-act="rperfF" data-v="__news">近期动态 '+news.length+'</span>':'');
 
-  var h='<div class="prof-sec"><h4><i></i>'+(name.indexOf('华光')>=0?'业绩与动态':'中标业绩 · 近期动态')+
-    ' <small>公告原文 + 评标出场 + 官网动态合成一张表 · 共 '+groups.length+' 个项目'+
+  /* ⚠ 2026-10-29 晚：标题原来叫「中标业绩 · 近期动态」（华光特例叫「业绩与动态」），
+     跟上面那块「中标业绩」撞名。它真实的内容是：省平台全量抓取的这家单位的公告
+     ＋ 评标出场 ＋ 官网动态，**不是**「中标业绩」的子集，而是另一个口径的补集。
+     改叫「全网公告」并写清来源，两个表就不会被当成重复。 */
+  var h='<div class="prof-sec"><h4><i></i>全网公告'+
+    ' <small>省交易平台全量抓取（含非我业务、含评标排名）· 共 '+groups.length+' 个项目'+
     (grp.names.length>1?' · 含同集团 '+grp.names.length+' 家主体':'')+'</small></h4>'+
     '<div class="rp-fs">'+chips+'</div>';
 
@@ -5095,9 +5142,36 @@ function profPage(kind, o){
   var items=_realAll.map(function(x){
     return {t:x.t, amt:parseAmtAny(x.amt), d:x.d, rg:cleanRg(x.rg), url:x.url,
             st:x.st, sub:x.sub||x.sg, win:x.win, owner:x.owner||x.buyer||x.o, buyer:x.buyer};
-  }).sort(function(a,b){return (b.amt||0)-(a.amt||0)});
-  var tb='<div class="prof-sec"><h4><i></i>'+(kind==='owner'?'发包记录':'中标业绩')+
-    ' <small>按金额降序 · 无金额的排后 · 共 '+items.length+' 条</small></h4>'+
+  });
+  /* 同一项目的多个阶段只留一条（2026-10-29 晚）。
+     实测华光档案里「南通美亚生物质锅炉技改」出现两次：
+       一次叫「…（第一期）工程总承包项目中标结果公告(重发公告第3次)」
+       一次叫「…(一期)工程总承包」
+     用户看到就是「同一个项目两条、两个表都列」。按 rperfBase 归并键去重，
+     同组里优先留**有金额、日期更晚**的那条（信息最全）。 */
+  (function(){
+    var best={};
+    items.forEach(function(x){
+      var b=rperfBase(x.t||'')||String(x.t||'').slice(0,14);
+      var cur=best[b];
+      if(!cur){ best[b]=x; return; }
+      var s1=(x.amt||0), s2=(cur.amt||0);
+      if(s1>s2 || (s1===s2 && String(x.d||'')>String(cur.d||''))) best[b]=x;
+    });
+    items=Object.keys(best).map(function(k){ return best[k]; });
+  })();
+  items.sort(function(a,b){return (b.amt||0)-(a.amt||0)});
+  /* ⚠ 2026-10-29 晚：这块原来叫「中标业绩」，而下面 rperfTable 那块叫
+     「中标业绩 · 近期动态」—— 两个标题都带「中标业绩」，紧挨着排，
+     用户看就是「两个一样的表」。两块数据其实是：
+       · 这块 = **本库** items 里记录的、它作为中标方的公告（本库口径，有业主有金额）
+       · 下面 = **省平台全量抓取**的它的全部公告（含别的业务、含评标排名）
+     重叠约 18%（2841 条里 503 条同标题）。
+     所以标题改成「本库中标记录」，跟下面的「全网公告」明确区分开，
+     并在小字里写清楚两者是什么关系 —— 让人一眼知道这不是重复。 */
+  var tb='<div class="prof-sec"><h4><i></i>'+(kind==='owner'?'发包记录':'本库中标记录')+
+    ' <small>本库商机库里有据可查的 '+(kind==='owner'?'发包':'中标')+'记录 · 按金额降序 · 共 '+items.length+' 条'+
+    (kind==='rival'?'（下面的「全网公告」是省平台全量抓取，比这块多）':'')+'</small></h4>'+
     '<div class="prof-tbwrap"><table class="prof-tb"><thead><tr>'+
     '<th style="width:88px">日期</th><th>项目 / 赛道</th>'+
     (kind==='owner'?'<th style="width:150px">中标单位</th>':'<th style="width:140px">业主</th>')+
@@ -5195,7 +5269,15 @@ function profPage(kind, o){
 
   /* 2026-10-24 全网业绩：对手/业主在省交易平台的**全量**公告，
      含不我们做的业务，用于判断风向 —— 与上面「本库中标记录」口径互补 */
-  var rperfHtml=rperfTable(o.name, _rperfNewsFromItems);
+  /* ⚠ 2026-10-29 晚：把「本库中标记录」里已经有的项目传进去，让其在全网公告里排除。
+     实测华光那条：本库 3 条（连云港热电联产 + 南通美亚两阶段），
+     全网公告 6 个「项目」里连云港、南通美亚又各出现一次 ——
+     用户看到的就是「同一个项目两个表里都有」，自然会问「搞两个一样的什么意思」。
+     现在按项目归并键去重：本库里已有的，全网公告只留「本库没有的那个阶段」
+     （比如本库只到中标公告、全网还有后来的合同公告，那种带补充信息的要留下）。 */
+  var _haveBase={};
+  _realAll.forEach(function(x){ var b=rperfBase(x.t||''); if(b) _haveBase[b]=1; });
+  var rperfHtml=rperfTable(o.name, _rperfNewsFromItems, _haveBase);
 
   /* 2026-10-29 全网业绩速查：把本库公告之外的（官网 / 总包采购 / 外地海外）补上。
      传 _realAll 的标题进去做去重——同一个项目在两块都出现时只留在上面的公告表里。 */
