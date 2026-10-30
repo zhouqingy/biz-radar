@@ -667,7 +667,10 @@ details.sub li{padding:2px 0}
 /* ---------- 业务信号卡（2026-10-21）----------
    信号卡要比普通新闻卡「重」：左侧色条 + 大标题 + 「为什么判进来」一行。
    用户扫一眼就该知道「哪里、什么厂、什么动作、我们能不能接」。 */
-.siggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:16px}
+/* ⚠ 2026-10-30：minmax 的下限是硬下限，屏幕比它窄时不会自动收缩，
+   整页被撑出一条横向滚动条（390px 手机上 scrollWidth 到 436px）。
+   用 min(420px,100%) 兜住：宽屏还是 420 起两列，窄屏就压到容器宽。 */
+.siggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(420px,100%),1fr));gap:16px}
 .sigc{background:#fff;border:1px solid #e8edf3;border-radius:12px;padding:15px 16px 13px;
   display:flex;flex-direction:column;position:relative;overflow:hidden;
   box-shadow:0 1px 3px rgba(16,24,40,.05),0 1px 2px rgba(16,24,40,.03);
@@ -790,8 +793,10 @@ details.sub li{padding:2px 0}
 .mstrip::-webkit-scrollbar-thumb{background:rgba(255,255,255,.3);border-radius:3px}
 .mstrip .mslab{font-size:11px;opacity:.8;font-weight:700;display:flex;align-items:center;white-space:nowrap;letter-spacing:.5px;flex:0 0 auto}
 .mstrip .sep{width:1px;background:rgba(255,255,255,.28);margin:3px 5px;flex:0 0 1px}
-.ms{display:flex;flex-direction:column;justify-content:center;gap:1px;background:rgba(255,255,255,.13);padding:5px 11px;border-radius:10px;white-space:nowrap;flex:0 0 auto;transition:background .15s}
-.ms:hover{background:rgba(255,255,255,.22)}
+.ms{display:flex;flex-direction:column;justify-content:center;gap:1px;background:rgba(255,255,255,.13);padding:5px 11px;border-radius:10px;white-space:nowrap;flex:0 0 auto;transition:background .15s;cursor:pointer;position:relative}
+.ms:hover{background:rgba(255,255,255,.26)}
+.ms::after{content:'';position:absolute;left:11px;right:11px;bottom:2px;height:1px;background:rgba(255,255,255,.45);transform:scaleX(0);transition:transform .15s}
+.ms:hover::after{transform:scaleX(1)}
 .ms .r1{display:flex;gap:6px;align-items:baseline}
 .ms .n{font-size:11px;opacity:.9;font-weight:600}
 .ms .v{font-weight:800;font-variant-numeric:tabular-nums;font-size:13.5px}
@@ -800,6 +805,57 @@ details.sub li{padding:2px 0}
 .ms .c{font-weight:700}
 .ms .up{color:#8ef0b4} .ms .dn{color:#ffb3b3}
 .mstrip .dt{font-size:10.5px;opacity:.75;margin-left:auto;align-self:center;white-space:nowrap;padding-left:8px;flex:0 0 auto}
+
+/* ── 历史价格走势（2026-10-30）：点页顶行情条任意一格弹出 ──
+   为什么放在弹层里而不是页面上多一块：这是「想深究时才看」的东西，
+   13 张曲线图铺在首页会把真正要看的商机列表挤下去。 */
+#mhBox{display:none;position:fixed;inset:0;z-index:9200;background:rgba(15,23,42,.55);
+  align-items:flex-start;justify-content:center;padding:32px 16px;overflow:auto;
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.mh-wrap{width:100%;max-width:720px;background:var(--card);border-radius:14px;
+  box-shadow:0 18px 50px rgba(15,23,42,.28);padding:16px 20px 18px;margin:auto 0}
+.mh-head{display:flex;gap:12px;align-items:flex-start}
+.mh-head>div:first-child{flex:1;min-width:0}
+.mh-t{font-size:18px;font-weight:700;color:var(--tx);display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.mh-t .mh-u{font-size:12px;font-weight:400;color:var(--tx3)}
+.mh-t .mh-code{font-size:11px;font-weight:500;color:var(--tx3);border:1px solid var(--line2);
+  border-radius:9px;padding:0 7px;letter-spacing:.3px}
+.mh-px{display:flex;align-items:baseline;gap:10px;margin-top:6px;flex-wrap:wrap}
+.mh-px b{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--tx);line-height:1.1}
+.mh-px .mh-chg{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.mh-px .up{color:var(--red)} .mh-px .dn{color:var(--green)}
+.mh-px .mh-when{font-size:11.5px;color:var(--tx3)}
+.mh-x{flex:0 0 auto;font-size:12px;padding:5px 12px;border-radius:7px;cursor:pointer;
+  border:1px solid #cfd9e6;background:#fff;color:var(--tx2)}
+.mh-x:hover{background:#eef2f7;color:var(--tx)}
+/* 区间切换 */
+.mh-rng{display:flex;gap:5px;margin:13px 0 4px;flex-wrap:wrap}
+.mh-rng span{font-size:12px;padding:4px 12px;border:1px solid var(--line2);border-radius:13px;
+  cursor:pointer;color:var(--tx2);background:#fff;user-select:none;transition:all .12s}
+.mh-rng span:hover{border-color:#9dbdf0;color:var(--brand-d)}
+.mh-rng span.on{background:#eef4ff;border-color:#9dbdf0;color:var(--brand-d);font-weight:600}
+/* 图 */
+.mh-cv{position:relative;margin-top:8px}
+.mh-cv svg{display:block;width:100%;height:auto;overflow:visible}
+.mh-tip{position:absolute;pointer-events:none;background:rgba(15,23,42,.92);color:#fff;
+  font-size:11.5px;line-height:1.5;padding:5px 9px;border-radius:6px;white-space:nowrap;
+  opacity:0;transition:opacity .1s;z-index:2;font-variant-numeric:tabular-nums}
+.mh-tip b{font-weight:700}
+/* 区间结论 */
+.mh-facts{display:flex;gap:0;margin-top:14px;border-top:1px solid var(--line);padding-top:11px}
+.mh-facts>div{flex:1;min-width:0;padding-right:10px}
+.mh-facts .k{font-size:10.5px;color:var(--tx3);margin-bottom:3px;white-space:nowrap}
+.mh-facts .v{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--tx);white-space:nowrap}
+.mh-facts .v.up{color:var(--red)} .mh-facts .v.dn{color:var(--green)}
+.mh-facts .v small{font-size:11px;font-weight:400;color:var(--tx3);margin-left:3px}
+.mh-note{font-size:11.5px;color:var(--tx3);line-height:1.7;margin-top:11px;
+  background:#fafbfd;border-left:3px solid var(--brand);padding:8px 11px;border-radius:0 4px 4px 0}
+.mh-note b{color:var(--tx2);font-weight:600}
+.mh-load{font-size:13px;color:var(--tx3);padding:26px 0;text-align:center}
+@media(max-width:600px){
+  .mh-facts{flex-wrap:wrap;gap:10px 0}
+  .mh-facts>div{flex:0 0 50%}
+}
 /* ---- 周报弹窗 ---- */
 .wkmask{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:99;display:flex;align-items:center;justify-content:center;padding:24px}
 .wkbox{background:#fff;border-radius:14px;max-width:900px;width:100%;max-height:86vh;display:flex;flex-direction:column;box-shadow:0 18px 50px rgba(0,0,0,.3)}
@@ -3172,47 +3228,6 @@ el('f-ocut').onclick=function(e){
 el('f-ogrp').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
   toggle(oGrp,c.dataset.v);c.classList.toggle('on');renderOverseas()};
 
-/* ==================== 金属仪表盘 ==================== */
-var MBLACK={RB:1,HC:1,'I':1,JM:1};
-function renderMetals(){
-  var M=D.metals||{}; var its=M.items||[];
-    el('mtDate').textContent=(M.at?('抓取时间 '+(M.updated||'')+' '+M.at+' · ') : (M.updated?('价格日期 '+M.updated+' · '):''))
-      +'每个工作日收盘 16:05 自动刷新，数据来自上期所公开行情';
-  el('mtGrid').innerHTML=its.map(function(m){
-    var cls=m.chg>0?'up':(m.chg<0?'down':'');
-    var arrow=m.chg>0?'▲':(m.chg<0?'▼':'—');
-    return '<div class="mt '+cls+'"><div class="mn">'+esc(m.name)+
-      '<span class="mcat">'+(MBLACK[m.code]?'黑色系':'有色')+'</span></div>'+
-      '<div class="mp">'+formatNum(m.price)+'<span class="mu">'+esc(m.unit)+'</span>'+
-      '<span class="mc">'+arrow+' '+sign_abs(m)+'</span></div>'+
-      '<div class="mh">'+esc(m.hint)+'</div></div>'}).join('');
-}
-function sign_abs(m){return (m.chg>0?'+':'')+Math.abs(m.chg)+'%'}
-function formatNum(n){return n>=10000?Math.round(n).toLocaleString('en-US'):n}
-function renderMStrip(){
-  var its=(D.metals&&D.metals.items)||[];
-  if(!its.length){el('mstrip').style.display='none';return}
-  var BLACK={RB:1,HC:1,'I':1,JM:1};
-  function card(m){
-    var c=m.chg>0?'up':(m.chg<0?'dn':'');
-    return '<span class="ms"><span class="r1"><span class="n">'+esc(m.name)+'</span>'+
-      '<span class="v">'+formatNum(m.price)+'</span></span>'+
-      '<span class="r2"><span class="u">'+esc(m.unit)+'</span>'+
-      '<span class="c '+c+'">'+(m.chg>0?'▲ +':(m.chg<0?'▼ ':'— '))+Math.abs(m.chg)+'%</span></span></span>';
-  }
-  var nf=its.filter(function(m){return !BLACK[m.code]}), bk=its.filter(function(m){return BLACK[m.code]});
-  var lab='当日行情'+(D.metals.updated?' · '+esc(D.metals.updated).slice(5):'');
-  var tail;
-  if(D.metals.at){ tail='<b style="color:#8ef0b4">'+esc(D.metals.updated||'')+' '+esc(D.metals.at)+'</b> 抓取'; }
-  else if(D.metals.updated){ tail=esc(D.metals.updated)+' 行情'; }
-  else tail='';
-  tail+=' · 每个工作日收盘 16:05 自动刷新';
-  el('mstrip').innerHTML='<span class="mslab">'+lab+'</span>'+
-    nf.map(card).join('')+
-    (bk.length?'<span class="sep"></span><span class="mslab">黑色系</span>'+bk.map(card).join(''):'')+
-    '<span class="dt">'+tail+'</span>';
-}
-
 /* ==================== 重点客户 ==================== */
 /* cRg / cPri / cEx 在下面的「海外中资出海客户」段落里统一定义（2026-10-21 合并，
    原来这里声明过一份 cRg，重复声明会让海外页的筛选状态被前一份覆盖，坑过一次）。*/
@@ -3726,6 +3741,7 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Escape'||e.keyCode===27){
     if(document.getElementById('uniProfBox') && document.getElementById('uniProfBox').style.display==='flex') closeUniProf();
     else if(document.getElementById('encyProfBox') && document.getElementById('encyProfBox').style.display==='flex') encyProfClose();
+    else if(document.getElementById('mhBox') && document.getElementById('mhBox').style.display==='flex') mhClose();
   }
 });
 /* 全局索引：卡上只存名字，画像时再查 */
@@ -3901,13 +3917,18 @@ function renderMetals(){
 }
 function sign_abs(m){return (m.chg>0?'+':'')+Math.abs(m.chg)+'%'}
 function formatNum(n){return n>=10000?Math.round(n).toLocaleString('en-US'):n}
+/* 走势图专用：价格一律取整再千分位。formatNum 对 <10000 的数不取整，
+   焦煤 1427.5、沪铜 108,660 混在一起看着别扭（2026-10-30）。 */
+function mhNum(n){ return Math.round(n).toLocaleString('en-US') }
 function renderMStrip(){
   var its=(D.metals&&D.metals.items)||[];
   if(!its.length){el('mstrip').style.display='none';return}
   var BLACK={RB:1,HC:1,'I':1,JM:1};
   function card(m){
     var c=m.chg>0?'up':(m.chg<0?'dn':'');
-    return '<span class="ms"><span class="r1"><span class="n">'+esc(m.name)+'</span>'+
+    /* 2026-10-30：整格可点，点开近 30/90 天走势（品种代码进 openMetalHist） */
+    return '<span class="ms" title="点开看历史走势 ›" onclick="openMetalHist(\''+esc(m.code)+'\')">'+
+      '<span class="r1"><span class="n">'+esc(m.name)+'</span>'+
       '<span class="v">'+formatNum(m.price)+'</span></span>'+
       '<span class="r2"><span class="u">'+esc(m.unit)+'</span>'+
       '<span class="c '+c+'">'+(m.chg>0?'▲ +':(m.chg<0?'▼ ':'— '))+Math.abs(m.chg)+'%</span></span></span>';
@@ -3923,6 +3944,302 @@ function renderMStrip(){
     nf.map(card).join('')+
     (bk.length?'<span class="sep"></span><span class="mslab">黑色系</span>'+bk.map(card).join(''):'')+
     '<span class="dt">'+tail+'</span>';
+}
+
+/* ==================== 历史价格走势（2026-10-30） ====================
+   点页顶行情条任意一格 → 弹出该品种的折线图，可切 1月/3月/1年/5年/全部。
+
+   数据：data.metalhist.js（按需加载，约 250KB，13 个品种）
+      结构 {updated, src, note, s:{CU:{n,u,sym,start,end,cnt,df,d:[],p:[]}}}
+      d 的编码分两段：df 之前是月末采样，存完整 'YYYY-MM-DD'；
+      df 之后是近 5 年逐日，存 'MMDD'，年份靠 end 倒推（跨年时月份变大就退一年）。
+
+   为什么用 SVG 手画、不上图表库：
+      整个页面一直是零外部依赖，为一张折线图引 echarts（900KB）不值当。
+      而且需求就是「一条线 + 悬停看某天价格」，用不到那么重的东西。
+   ================================================================ */
+var _mhCode='', _mhRange=90, _mhSeries=null, _mhCache=null;
+
+/* 把紧凑编码的日期还原成 'YYYY-MM-DD' 数组。
+   ⚠ 这里是整块逻辑最容易错的地方：逐日段的 'MMDD' 不带年份，
+      正着推需要知道起点年份，倒着推只需要知道终点年份——终点是确定的（end），
+      所以一律从后往前走，遇到月份变大就说明跨过了一个新年。 */
+function mhDates(s){
+  var d=s.d, df=s.df|0, out=new Array(d.length), i;
+  for(i=0;i<df;i++) out[i]=d[i];
+  var e=String(s.end||'').split('-'), y=+e[0], m=+e[1]||12;
+  for(i=d.length-1;i>=df;i--){
+    var mm=parseInt(d[i].slice(0,2),10);
+    if(i<d.length-1 && mm>m) y--;
+    m=mm;
+    out[i]=y+'-'+String(m).padStart(2,'0')+'-'+d[i].slice(2,4);
+  }
+  return out;
+}
+
+function openMetalHist(code){
+  var box=el('mhBox'); if(!box) return;
+  _mhCode=String(code||'').toUpperCase();
+  _mhRange=90;
+  box.style.display='flex';
+  if(!_mhSeries){
+    if(box.innerHTML.indexOf('mh-load')<0){
+      box.innerHTML='<div class="mh-wrap"><div class="mh-load">正在加载历史行情…</div></div>';
+    }
+    /* need() 已经能处理「已加载 / 加载中 / 失败」三种情况，不用自己再判 */
+    need('metalhist', function(){
+      var H=window.DATA_METALHIST||{};
+      _mhSeries=H.s||null;
+      if(!_mhSeries){ box.innerHTML='<div class="mh-wrap"><div class="mh-load">历史行情暂时取不到，请稍后再试。</div></div>'; return; }
+      mhPaint();
+    });
+    return;
+  }
+  mhPaint();
+}
+
+function mhClose(){ var b=el('mhBox'); if(b) b.style.display='none'; }
+
+function mhPaint(){
+  var box=el('mhBox'); if(!box||!_mhSeries) return;
+  var s=_mhSeries[_mhCode];
+  if(!s){ box.innerHTML='<div class="mh-wrap"><div class="mh-load">这个品种暂无历史数据。</div></div>'; return; }
+
+  var dates=mhDates(s), px=s.p;
+  var cur=px[px.length-1], curD=dates[dates.length-1];
+
+  /* 取区间：直接按日期卡，比按下标算准（老段是月采样，下标间距不均匀） */
+  var startD='';
+  if(_mhRange>0){
+    var t=new Date(curD+'T00:00:00');
+    t.setDate(t.getDate()-_mhRange);
+    startD=t.toISOString().slice(0,10);
+  }
+  var idx=[];
+  for(var i=0;i<dates.length;i++) if(!startD || dates[i]>=startD) idx.push(i);
+
+  var body;
+  if(idx.length<2){
+    body='<div class="mh-load">这个区间内历史数据不足（该品种上市较晚）。</div>';
+  }else{
+    body=mhChart(dates,px,idx,curD);
+  }
+
+  var rngs=[[30,'近 1 月'],[90,'近 3 月'],[365,'近 1 年'],[1825,'近 5 年'],[0,'全部']];
+  var rngHtml='<div class="mh-rng">'+rngs.map(function(r){
+    return '<span class="'+(r[0]===_mhRange?'on':'')+'" onclick="mhRange('+r[0]+')">'+r[1]+'</span>';
+  }).join('')+'</div>';
+
+  var chg=(cur-px[idx[0]])/px[idx[0]]*100;
+  var cls=chg>0.0001?'up':(chg<-0.0001?'dn':'');
+
+  box.innerHTML='<div class="mh-wrap">'+
+    '<div class="mh-head"><div>'+
+      '<div class="mh-t">'+esc(s.n)+'<span class="mh-u">'+esc(s.u)+'</span>'+
+        '<span class="mh-code">'+esc(s.sym||_mhCode)+'</span></div>'+
+      '<div class="mh-px"><b>'+mhNum(cur)+'</b>'+
+        '<span class="mh-chg '+cls+'">'+(chg>0?'▲ +':(chg<0?'▼ ':'— '))+chg.toFixed(1)+'%</span>'+
+        '<span class="mh-when">'+esc(curD)+' 收盘 · 区间起 '+esc(dates[idx[0]])+'</span></div>'+
+    '</div><button class="mh-x" onclick="mhClose()">关闭</button></div>'+
+    rngHtml+
+    body+
+    '<div class="mh-facts">'+mhFacts(dates,px,idx,cur)+'</div>'+
+    '<div class="mh-note">'+
+      '<b>怎么看</b>：这条线是期货主力连续合约的收盘价，反映的是原材料市场价，'+
+      '不等于你手上某个项目的投标报价——中间还隔着加工费、运费、品牌溢价。'+
+      '真正有用的是<b>方向</b>：涨得急的品种，报价时要留调价条款的余地，'+
+      '锁价期越长越吃亏。'+
+    '</div>'+
+  '</div>';
+}
+
+function mhRange(d){ _mhRange=d; mhPaint(); }
+
+/* 悬停：热区矩形的 data-hj 就是绘制时的点序号 k，
+   竖线用缓存里的 X[k]、圆点用 Y[k]，不用再算一遍比例。 */
+function mhHover(e){
+  var t=e.target;
+  var hj=t&&t.getAttribute&&t.getAttribute('data-hj');
+  if(hj==null||!_mhCache) return;
+  var k=+hj, C=_mhCache;
+  if(k<0||k>=C.X.length) return;
+  var cx=C.X[k], cy=C.Y[k];
+
+  var vl=el('mhVl'), dot=el('mhDot'), tip=el('mhTip');
+  if(vl){ vl.setAttribute('x1',cx); vl.setAttribute('x2',cx); vl.setAttribute('opacity','.55'); }
+  if(dot){ dot.setAttribute('cx',cx); dot.setAttribute('cy',cy); dot.setAttribute('opacity','1'); }
+  if(tip){
+    tip.innerHTML='<b>'+mhNum(C.px[C.idx[k]])+'</b> · '+esc(C.dates[C.idx[k]]);
+    tip.style.opacity='1';
+    /* 定位：SVG 被 CSS 拉到 100% 宽，坐标要按实际渲染宽度折算回像素 */
+    var svg=document.querySelector('#mhCv svg');
+    if(svg){
+      var rect=svg.getBoundingClientRect();
+      var sc=rect.width/C.W;
+      var lx=cx*sc, ly=cy*sc, tw=tip.offsetWidth;
+      var left=(lx+10+tw>rect.width)?(lx-tw-10):(lx+10);
+      tip.style.left=Math.max(0,left)+'px';
+      tip.style.top=Math.max(0,ly-tip.offsetHeight-8)+'px';
+    }
+  }
+}
+function mhLeave(){
+  var vl=el('mhVl'), dot=el('mhDot'), tip=el('mhTip');
+  if(vl) vl.setAttribute('opacity','0');
+  if(dot) dot.setAttribute('opacity','0');
+  if(tip) tip.style.opacity='0';
+}
+
+/* 折线图本体。用 viewBox 做等比缩放，宽度交给 CSS 100%。 */
+function mhChart(dates,px,idx,curD){
+  /* 窄屏换成更「方」的 viewBox，别靠 CSS 硬撑高度 ——
+     660×210 缩到 318px 宽只剩 101px 高，曲线压成一条，字也糊。
+     窄屏用 420×250，等比缩下来高度约 190px，曲线和标签都看得清。 */
+  var narrow=(window.innerWidth||document.documentElement.clientWidth||1000)<600;
+  var W=narrow?420:660, H=narrow?250:210, PL=narrow?42:52, PR=12, PT=14, PB=24;
+  var iw=W-PL-PR, ih=H-PT-PB;
+  var lo=Infinity, hi=-Infinity, k;
+  for(k=0;k<idx.length;k++){ var v=px[idx[k]]; if(v<lo)lo=v; if(v>hi)hi=v; }
+  if(hi===lo){ hi=lo+1; lo=lo-1; }
+  var n=idx.length;
+
+  /* ── 横轴按**真实时间**排布，不按下标均分 ──
+     ⚠ 这里踩过坑：老段是月末采样（一个月一个点），新段是逐日（一天一个点）。
+        按下标均分的话，2005~2022 这 17 年只占 190 个点、2022~2026 占 1000 个点，
+        曲线会显得「前面十几年几乎没数据、后面突然爆密」，横轴刻度日期也跟着乱。
+        按毫秒时间戳映射，p 点落在它真实的日期位置上。 */
+  var ts=dates.map(function(d){ return Date.parse(d+'T00:00:00')||0; });
+  var t0=ts[idx[0]], t1=ts[idx[n-1]];
+  if(t1<=t0){ t1=t0+86400000; }
+  var X=function(j){ return PL+iw*((ts[idx[j]]-t0)/(t1-t0)); };
+  var Y=function(v){ return PT+ih*(1-(v-lo)/(hi-lo)); };
+  var pts=[];
+  for(k=0;k<n;k++) pts.push([X(k),Y(px[idx[k]])]);
+
+  /* 折线路径 */
+  var line=pts.map(function(p,j){ return (j?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1); }).join('');
+  /* 面积（渐变填充，视觉上压住下方空白） */
+  var area=line+'L'+pts[pts.length-1][0].toFixed(1)+' '+(PT+ih)+'L'+pts[0][0].toFixed(1)+' '+(PT+ih)+'Z';
+
+  var up=px[idx[n-1]]>=px[idx[0]];
+  var col=up?'#c0392b':'#1a7f4b';
+  var gid='mhg'+(_mhCode||'x');
+
+  /* ── 横轴刻度：按时间等距 5 档（首尾各一），标签格式按跨度自动选 ──
+     跨度 ≤ 120 天 → MM-DD；≤ 800 天 → YY-MM；更长 → YYYY。 */
+  var g='';
+  var spanDay=(t1-t0)/86400000;
+  var fmt=spanDay<=120?'md':(spanDay<=800?'ym':'y');
+  function lab(d){
+    if(fmt==='md') return d.slice(5);
+    if(fmt==='ym') return d.slice(2,7);
+    return d.slice(0,4);
+  }
+  /* 5 档在 660px 宽的 viewBox 里每档约 120px，够放；窄屏 420 宽时每档 76px，
+     「2026-10-29」这种 10 字符会撞，减到 4 档。 */
+  var TK=narrow?4:5;
+  for(var ti=0;ti<TK;ti++){
+    var tv=t0+(t1-t0)*ti/(TK-1);
+    /* 找最近的真实数据点（刻度要落在有数据的日期上，不能凭空编一个周末出来） */
+    var bj=0, bd=Infinity;
+    for(k=0;k<n;k++){ var dd=Math.abs(ts[idx[k]]-tv); if(dd<bd){bd=dd;bj=k;} }
+    var xx=X(bj);
+    var anc=(ti===0)?'start':(ti===TK-1?'end':'middle');
+    g+='<text x="'+xx.toFixed(1)+'" y="'+(H-6)+'" font-size="10" fill="#8b929e" text-anchor="'+anc+'">'+
+       esc(lab(dates[idx[bj]]))+'</text>';
+  }
+
+  /* ── 纵轴：先按数据范围留 8% 余量，再把刻度取到「好看」的档位 ──
+     ⚠ 原来是把 padding 后的边界直接三等分，于是出现 113,101 / 108,445 这种数，
+        读者没法快速换算。改成按量级挑步长（1/2/2.5/5 × 10^k）。 */
+  var padY=(hi-lo)*0.08; lo-=padY; hi+=padY;
+  var steps=[1,2,2.5,5,10], rawStep=(hi-lo)/3, mag=Math.pow(10,Math.floor(Math.log(rawStep)/Math.LN10));
+  var step=mag; steps.some(function(m){ if(rawStep<=m*mag){ step=m*mag; return true; } return false; });
+  var yLo=Math.floor(lo/step)*step, yHi=Math.ceil(hi/step)*step;
+  /* 重算 Y —— 刻度对齐后边界变了，坐标必须跟着变，否则线和网格对不上 */
+  Y=function(v){ return PT+ih*(1-(v-yLo)/(yHi-yLo)); };
+  pts=[]; for(k=0;k<n;k++) pts.push([X(k),Y(px[idx[k]])]);
+  line=pts.map(function(p,j){ return (j?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1); }).join('');
+  area=line+'L'+pts[pts.length-1][0].toFixed(1)+' '+(PT+ih)+'L'+pts[0][0].toFixed(1)+' '+(PT+ih)+'Z';
+
+  for(var yy2=yLo; yy2<=yHi+step*0.001; yy2+=step){
+    var yy=Y(yy2);
+    if(yy<PT-1||yy>PT+ih+1) continue;
+    g+='<line x1="'+PL+'" y1="'+yy.toFixed(1)+'" x2="'+(W-PR)+'" y2="'+yy.toFixed(1)+
+       '" stroke="#eef0f4" stroke-width="1"/>'+
+       '<text x="'+(PL-7)+'" y="'+(yy+3.5).toFixed(1)+'" font-size="10" fill="#8b929e" text-anchor="end">'+
+       mhNum(Math.round(yy2*10)/10)+'</text>';
+  }
+  /* 最新点标记 */
+  var last=pts[pts.length-1];
+  g+='<circle cx="'+last[0].toFixed(1)+'" cy="'+last[1].toFixed(1)+'" r="3.5" fill="'+col+'" stroke="#fff" stroke-width="1.5"/>';
+
+  /* 悬停热区：每个数据点一个透明矩形。
+     按时间比例排布后点间距不再均匀（老段宽、新段窄），
+     矩形宽度取「左右到邻点的距离」，保证鼠标在任意位置都能命中最近的点。 */
+  var hot='';
+  for(k=0;k<n;k++){
+    var xl=(k===0)?PL:(pts[k-1][0]+pts[k][0])/2;
+    var xr=(k===n-1)?(W-PR):(pts[k][0]+pts[k+1][0])/2;
+    /* 逐日段相邻点可能只差 0.2px，给个最小宽度，否则根本悬停不到 */
+    if(xr-xl<1.2){ var mid=(xl+xr)/2; xl=mid-0.6; xr=mid+0.6; }
+    hot+='<rect x="'+xl.toFixed(1)+'" y="'+PT+'" width="'+(xr-xl).toFixed(1)+'" height="'+ih+
+         '" fill="transparent" data-hj="'+k+'"/>';
+  }
+
+  /* 把坐标映射存起来给 mhHover 用 —— 绘制时算过的东西不用悬停时再算一遍，
+     两处各算一次等于埋一个「图和高亮对不上」的坑（padding 改了忘同步就错位）。 */
+  _mhCache={code:_mhCode, range:_mhRange, dates:dates, idx:idx,
+            X:pts.map(function(p){return p[0];}), Y:pts.map(function(p){return p[1];}),
+            px:px, W:W};
+
+  return '<div class="mh-cv" id="mhCv">'+
+    '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" '+
+      'onmousemove="mhHover(event)" onmouseleave="mhLeave()">'+
+      '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'+
+        '<stop offset="0%" stop-color="'+col+'" stop-opacity=".18"/>'+
+        '<stop offset="100%" stop-color="'+col+'" stop-opacity="0"/>'+
+      '</linearGradient></defs>'+
+      g+
+      '<path d="'+area+'" fill="url(#'+gid+')"/>'+
+      '<path d="'+line+'" fill="none" stroke="'+col+'" stroke-width="1.7" '+
+        'stroke-linejoin="round" stroke-linecap="round"/>'+
+      '<line id="mhVl" x1="0" y1="'+PT+'" x2="0" y2="'+(PT+ih)+'" stroke="#9aa3b0" stroke-width="1" stroke-dasharray="3 3" opacity="0"/>'+
+      '<circle id="mhDot" r="4" fill="'+col+'" stroke="#fff" stroke-width="1.5" opacity="0"/>'+
+      hot+
+    '</svg>'+
+    '<div class="mh-tip" id="mhTip"></div>'+
+  '</div>';
+}
+
+/* 区间四个结论：区间高低、当前离高点多远、历史分位 */
+function mhFacts(dates,px,idx,cur){
+  var lo=Infinity, hi=-Infinity, loD='', hiD='', k;
+  for(k=0;k<idx.length;k++){
+    var v=px[idx[k]];
+    if(v<lo){lo=v;loD=dates[idx[k]];}
+    if(v>hi){hi=v;hiD=dates[idx[k]];}
+  }
+  /* 历史分位：拿全部历史比，看当前价有多高——这是「现在贵不贵」最直接的答案 */
+  var below=0, tot=px.length;
+  for(k=0;k<tot;k++) if(px[k]<=cur) below++;
+  var pr=tot?below/tot*100:0;
+  var prTxt=pr>=80?'偏高':(pr<=20?'偏低':'中位');
+  var prCls=pr>=80?'up':(pr<=20?'dn':'');
+
+  /* 高低点日期：区间跨年就带年份。只写 MM-DD 在「近5年/全部」里会让人以为
+     那个高点是今年的 —— 沪铜 112,200 那个顶其实在 2024 年。 */
+  var y0=dates[idx[0]].slice(0,4), y1=dates[idx[idx.length-1]].slice(0,4);
+  var withY=(y0!==y1);
+
+  function cell(k0,v0,extra,cls0){
+    return '<div><div class="k">'+k0+'</div><div class="v '+(cls0||'')+'">'+v0+
+      (extra?'<small>'+extra+'</small>':'')+'</div></div>';
+  }
+  return cell('区间最高', mhNum(hi), withY?hiD:hiD.slice(5))+
+         cell('区间最低', mhNum(lo), withY?loD:loD.slice(5))+
+         cell('距区间高点', ((cur-hi)/hi*100).toFixed(1)+'%', '', (cur-hi)>=0?'up':'dn')+
+         cell('历史分位', pr.toFixed(0)+'%', prTxt, prCls);
 }
 
 /* ==================== 重点客户 ==================== */
@@ -6726,4 +7043,5 @@ function boot_main(){
 </script>
 <div id="encyProfBox" onclick="if(event.target===this)encyProfClose()"></div>
 <div id="uniProfBox" onclick="if(event.target===this)closeUniProf()"></div>
+<div id="mhBox" onclick="if(event.target===this)mhClose()"></div>
 <script src="boot.js?v=202610231627"></script>
