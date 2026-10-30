@@ -650,6 +650,10 @@ details.sub li{padding:2px 0}
   background:#fafbfd;border:1px solid var(--line);border-left:3px solid var(--brand);
   border-radius:0 8px 8px 0;padding:11px 14px}
 .about-rec{margin-top:10px}
+/* 联合体定位（2026-10-30）：卡片上那句长文的全文版，绿边=「能不能组队」的判断依据 */
+.role-tx{font-size:12.8px;color:var(--tx2);line-height:1.95;text-align:justify;
+  background:#f6fbf7;border:1px solid #d8ecde;border-left:3px solid #14713a;
+  border-radius:0 8px 8px 0;padding:11px 14px}
 .ar-hd{font-size:11.5px;font-weight:700;color:var(--tx2);margin-bottom:6px}
 .ar-hd small{font-weight:500;color:var(--tx3);margin-left:5px}
 .ar-i{display:flex;gap:9px;align-items:baseline;padding:5px 0;border-bottom:1px dashed #eef0f4;font-size:12.5px}
@@ -860,6 +864,14 @@ details.sub li{padding:2px 0}
 .ccard.ec-click:hover{box-shadow:0 4px 16px rgba(20,40,80,.12);transform:translateY(-1px)}
 .ccard.ec-click:hover .ec-name{color:var(--brand-d)}
 .ec-more{font-size:11px;color:var(--brand);margin-left:auto;white-space:nowrap;font-weight:600}
+/* 长文截断（2026-10-30）：卡片上不再铺 200~280 字的企业简介，
+   裁到 2~3 行，点开整卡看全文。用户原话「这种信息放在详情里面说」。 */
+.clamp2,.clamp3{display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;
+  -webkit-line-clamp:2;line-clamp:2}
+.clamp3{-webkit-line-clamp:3;line-clamp:3}
+/* 卡片里的外链仍然要点得动：整卡 onclick 有守卫，但光标得区分开 */
+.ccard.ec-click a{cursor:pointer}
+.ccard.ec-click .cc-h b{transition:color .15s}
 
 /* 全屏画像弹层 */
 #encyProfBox,#uniProfBox{display:none;position:fixed;inset:0;z-index:9000;background:rgba(15,23,42,.55);
@@ -1359,8 +1371,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202610300306"></script>
-<script src="data.items.js?v=202610300306"></script>
+<script src="data.core.js?v=202610291905"></script>
+<script src="data.items.js?v=202610291905"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1425,7 +1437,7 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202610300306';
+var VER='?v=202610291905';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -2925,18 +2937,32 @@ function trackBlock(x){
   return h;
 }
 
+/* 整卡可点（2026-10-30）
+   ── 用户原话：「深度档案改成点击整个卡片直接出现」。
+   ── 之前卡片右上角挂「深度档案」「查资质」两个小按钮，整卡本身不可点，
+      用户得先找到那个小按钮。现在整张卡就是入口，按钮全撤。
+   ── 但不能把卡里的链接一起吃掉：卡里还有「官网 / 资料」「近期动态」「代表业绩」
+      这些外链，点它们应该跳原文，不该弹档案。所以统一走这个守卫函数。 */
+function cardOpen(ev, name){
+  var t=ev&&ev.target;
+  /* 只有真正需要独立交互的东西才拦：链接、按钮、可展开项、勾选框。
+     ⚠ 别拦 label / span / p —— 卡里到处都是这些，拦了等于整卡点不动。 */
+  if(t && t.closest && t.closest('a,button,summary,details,input,select,textarea')) return;
+  try{ gPick('rival', name||''); }catch(e){}
+}
 function compCard(x){
-    return '<div class="ccard"><div class="cc-h"><b>'+esc(x.name)+'</b>'+
-      '<button class="rival-dw" onclick="gPick(\'rival\',\''+esc((x.name||'').replace(/'/g,''))+'\')" title="打开深度档案（与业主/供应商同一套版式）">深度档案</button>'+
-      '<a class="rival-dw" style="text-decoration:none" href="https://jzsc.mohurd.gov.cn/data/company?complexname='+encodeURIComponent(x.name||'')+'" target="_blank" rel="noopener nofollow" title="跳住建部四库一平台查资质证书与注册人员（本库不含资质数据）">查资质 ↗</a>'+
+    var nm=(x.name||'').replace(/'/g,'');
+    return '<div class="ccard ec-click" onclick="cardOpen(event,\''+esc(nm)+'\')" title="点开深度档案">'+
+      '<div class="cc-h"><b class="ec-name">'+esc(x.name)+'</b>'+
       catTag(x.cat)+
       '<span class="cc-tag">'+esc(x.type)+'</span>'+
       (x.city?'<span class="cc-tag none">'+esc(x.city)+'</span>':'')+
       mineTag(x)+
-      (x.dual?'<span class="cc-tag" style="background:#e8f4ff;color:#1053c9">竞合双身份</span>':'')+'</div>'+
+      (x.dual?'<span class="cc-tag" style="background:#e8f4ff;color:#1053c9">竞合双身份</span>':'')+
+      '<span class="ec-more">点开看全档 ›</span></div>'+
       trackBlock(x)+
       '<div class="cc-body">'+
-        (x.strength?'<p>'+esc(x.strength)+'</p>':'')+
+        (x.strength?'<p class="clamp3">'+esc(x.strength)+'</p>':'')+
         (x.dual?'<p style="color:#1053c9">同时在「合作生态」中列为潜在联合体伙伴——海外项目中多为总包方，我司可作能源动力岛/余热发电分包。</p>':'')+
       '</div>'+
       recentBlock(x,'近期动态（微信公众号 / 官网，点条目看原文）')+
@@ -2961,20 +2987,24 @@ function renderPartners(){
   el('partnerGrid').innerHTML=h||'<div class="empty">没有符合筛选条件的单位</div>';
 }
 function partCard(x){
-    return '<div class="ccard"><div class="cc-h"><b>'+esc(x.name)+'</b>'+
-      /* 2026-10-22 补：伙伴卡原来没有「深度档案」，可它和竞争对手是同一批单位，
-         用户在对手栏能点开、在伙伴栏点不开，会以为伙伴的档案没做。
-         伙伴里有一部分确实没有业绩记录（rv 会退化成空档案），那种情况档案页里
-         会明说「本库暂无」，也不算骗人。 */
-      '<button class="rival-dw" onclick="gPick(\'rival\',\''+esc((x.name||'').replace(/'/g,''))+'\')" title="打开深度档案（与业主/供应商同一套版式）">深度档案</button>'+
+    var nm=(x.name||'').replace(/'/g,'');
+    return '<div class="ccard ec-click" onclick="cardOpen(event,\''+esc(nm)+'\')" title="点开深度档案">'+
+      '<div class="cc-h"><b class="ec-name">'+esc(x.name)+'</b>'+
+      /* 2026-10-30：撤掉「深度档案」按钮，整卡可点。
+         伙伴卡还有个「查资质」外链，也一并撤了 —— 它挪进档案最后一节，
+         卡片上留两个都往外跳的按钮，反而让人不知道点哪儿才算「打开」。 */
       catTag(x.cat)+
       '<span class="cc-tag" style="background:'+(x.type&&x.type.indexOf('施工')>=0?'#fff2e0;color:#a85c10':'#e8f4ff;color:#1053c9')+'">'+esc(x.type||'')+'</span>'+
       (x.city?'<span class="cc-tag none">'+esc(x.city)+'</span>':'')+
-      mineTag(x)+'</div>'+
+      mineTag(x)+
+      '<span class="ec-more">点开看全档 ›</span></div>'+
       trackBlock(x)+
       '<div class="cc-body">'+
-        (x.role?'<p><b style="color:#14713a">联合体定位：</b>'+esc(x.role)+'</p>':'')+
-        (x.strength?'<p>'+esc(x.strength)+'</p>':'')+
+        /* 「联合体定位」那段 60~100 字的长文不再铺在卡片上（用户：
+           「这种信息放在详情里面说」），整段搬进档案的「联合体定位」一节。
+           卡片上只保留一句最短的结论，让人扫一眼知道它能不能配。 */
+        (x.role?'<p class="clamp2"><b style="color:#14713a">联合体：</b>'+esc(roleShort(x.role))+'</p>':'')+
+        (x.strength?'<p class="clamp3">'+esc(x.strength)+'</p>':'')+
       '</div>'+
       recentBlock(x,'近期动态（点条目看原文）')+
       '<div class="pj-act">'+
@@ -2982,6 +3012,16 @@ function partCard(x){
         '<a href="javascript:searchFor(\''+esc((x.name||'').slice(0,6))+'\')">库内记录 ↗</a>'+
       '</div>'+
       '</div>';
+}
+/* 把「联合体定位：联合体中承担XX、YY、ZZ的设计与EPC」压成一句短语。
+   卡片上只要「它干哪一段」，全套分工进档案。 */
+function roleShort(role){
+  var s=String(role||'').replace(/^联合体(中|体)?/,'').replace(/^(承担|负责)/,'').trim();
+  /* 取第一个顿号/逗号前的动作段，最多 26 字，够看出「它主包工艺」还是「它只做施工」 */
+  var m=s.split(/[、，,；;]/)[0]||s;
+  m=m.replace(/^(在联合体中)?(主要)?(承担|负责|作为)?/,'').trim();
+  if(m.length>26) m=m.slice(0,26)+'…';
+  return m||'参与联合体';
 }
 /* ==================== 实时行情（浏览器直连，每 5 分钟自动刷新） ==================== */
 var LIVE_CODES=['CU','AL','ZN','PB','NI','SN','AO','SS','LC','RB','HC','I','JM'];
@@ -3358,11 +3398,19 @@ function _epFind(name){
   var I=_epIndex(), k=_epNorm(name);
   if(!k) return null;
   if(I[k]) return I[k];
+  /* 2026-10-30：同一家公司在名录里常登记两个名字 ——
+       「江苏丹阳龙江钢铁有限公司」和「丹阳龙江钢铁有限公司」都在 buyers/domestic 里，
+     而 entprobe 里只存了不带省名的那个。按全称查「江苏丹阳…」就一条都取不到，
+     从另一张名单点进去却是 1 条，用户会觉得「同一家公司两个样」。
+     所以全称查不到时，剥掉省市前缀再查一次。 */
+  var k2=k.replace(PF_PROV,'');
+  if(k2 && k2!==k && I[k2]) return I[k2];
   /* 全称对不上时按前缀收：雷达里常写简称（「江苏院」「中机一院」），
      entprobe 存全称，两边取公共前缀且长度都 >=6 才认，避免误配。 */
   var best=null, bl=0;
   for(var q in I){
-    if(q.length>=6 && k.length>=6 && (q.indexOf(k)===0 || k.indexOf(q)===0)){
+    if(q.length>=6 && k.length>=6 && (q.indexOf(k)===0 || k.indexOf(q)===0 ||
+       (k2&&k2.length>=6 && (q.indexOf(k2)===0 || k2.indexOf(q)===0)))){
       if(q.length>bl){ best=I[q]; bl=q.length; }
     }
   }
@@ -4376,18 +4424,167 @@ var PF_ORDER = ['lib','prov','probe','eval','news'];
 function pfClean(t){
   return String(t||'')
     /* 省平台标题常整体套一层方括号：「[XX项目]招标公告」——
-       剥掉包裹，只留里面的项目名 */
+       剥掉包裹，只留里面的项目名。
+       ⚠ 2026-10-30 补：「[招标文件]杭州萧山…项目监理[A330…]」这种是**纯前缀**，
+         原来只有 `^\[(招标文件|…)[^\]]*\]` 这条，`[^\]]*` 指到右方括号为止，
+         能剥掉「[招标文件]」—— 但**只剥不换行**，剥完前后粘在一起会不会出问题？
+         实测出问题的是后面那条 `^[\[［]([^\]］]{4,})[\]］]`：
+         它先把「[招标文件]杭州萧山…」的方括号当包裹，取到「招标文件」当项目名，
+         于是键变成「招标文件杭州萧山…」，跟不带前缀的那条分成两行。
+         所以这条必须**排在包裹剥离之前**。 */
+    .replace(/^[\[［]\s*(招标文件|资格后审|重新招标|重发|招标公告|采购公告|更正公告|澄清公告)[^\]］]*[\]］]\s*/,'')
     .replace(/^[\[［]([^\]］]{4,})[\]］]\s*/,'$1')
-    .replace(/^\[(招标文件|资格后审|重新招标|重发)[^\]]*\]/,'')
     .replace(/[（(]\s*(重发|重新招标|二次|三次)[^）)]*[）)]/g,'')
-    /* 交易平台的内部编号（[A3306030730002659001002]）不是项目名的一部分 */
-    .replace(/[[［][A-Za-z0-9\-_]{6,}[\]］]\s*$/,'')
-    .replace(/(中标结果公告|中标候选人公示|中标公告|成交公告|招标公告|招标计划|合同公告|变更公告|更正公告|见证书|中标通知书|资格预审公告|评标结果公示|开标记录|评标公示|开标公示).*$/,'')
+    /* 交易平台的内部编号（[A3306030730002659001002]）不是项目名的一部分。
+       ⚠ 要**全局**替换，不能只认行尾：省平台同一条公告标题里，编号会出现在
+         中间（「…项目[A3301…]EPC总承包」），只在行尾匹配就会留下半截
+         「…方案设计、初步设计[A3301300180526427]」跟另一条「…[A330…001221]」分家。 */
+    .replace(/[[［][A-Za-z0-9\-_]{6,}[\]］]/g,'')
+    /* ⚠ 2026-10-30：省平台有一部分标题是「**关于**XXX工程**的**开标记录」，
+       另一半是「XXX工程的中标结果公告」。剥掉公告尾巴后，一边留「关于…的」、
+       一边留「…」，同一个项目的两条就分成两行。
+       这个「关于…的」是招标代理写标题的套话，不是项目名 —— 首尾一起剥。 */
+    .replace(/^关于\s*/,'')
+    /* 省平台的「工程--工程名」「施工总承包-项目名」这种前后缀混排：
+       同一项目，一个来源写成「A工程--A工程车间施工」，另一个写成「施工总承包-A工程-A工程车间」。
+       把中间的连接符统一成空，再用下面「重复片段折叠」收口。 */
+    .replace(/-{2,}|—{2,}|－{2,}/g,'')
+    /* ⚠ 必须写成一行：JS 正则字面量不允许跨行。
+       ⚠ 词表必须**长词在前**：「公开招标公告」若排在「招标公告」后面，
+         正则从左到右匹配会先吃掉「招标公告」，剩一个「公开」挂在尾巴上 ——
+         同一项目就分成「…平战转换」和「…平战转换的公开」两条。 */
+    /* ⚠ 先把「中标(成交)」这种全角/半角混排的括注抹平。
+       省平台原题是「…的**中标(成交)结果公告**」，如果放进词表按字面匹配，
+       「(」不是词表字符，「中标」后面接不上「结果公告」，整条不命中。
+       抹成「中标结果公告」后，后面那条长词表就能吃掉它。 */
+    .replace(/[（(]\s*成交\s*[)）]/g,'')
+    .replace(/(公开招标公告|公开比选公告|公开竞价公告|公开谈判公告|公开磋商公告|公开挂牌公告|公开租赁公告|公开转让公告|竞争性磋商公告|竞争性谈判公告|详见公告|评标结果公示|评标结果公告|评标结果|开标结果记录|定标结果公示|定标结果公告|定标公示|中标成交结果公告|中标成交结果公示|中标成交公告|中标结果公示|中标结果公告|中标候选人公示|中标候选人|中标公告|中标通知书|成交结果公告|成交结果公示|成交公告|结果公告|结果公示|候选人公示|重发公告|重新招标公告|招标公告|招标计划|采购公告|资格预审公告|资格后审公告|最高限价公示|评标公示|开标记录|开标公示|见证书|合同公示|合同公告|合同备案|变更公告|更正公告|澄清公告|答疑公告|流标公告|废标公告|终止公告|补充公告|投标邀请书|比选公告|询价公告).*$/,'')
+    /* 2026-10-30 全量扫出来的第二批漏网（854 对残留里 206 对是这些造成的）。
+       省平台的标题后缀比想象中杂得多，上面那条管「公告性质」，这条管「序号/包号」+
+       前面漏掉的几种：答疑澄清公告第1次 / 补疑3 / 澄清文件 / 评分公示 / 预公示 /
+       租赁公告 / 转让公告 / 第N次 / 第N包 / 第N批。 */
+    .replace(/[（(]\s*成交\s*[)）]/g,'')
+    .replace(/(答疑澄清公告|答疑澄清|答疑公告|澄清补遗|澄清文件|评分公示|预公示|需求公示|论证公示|单一来源公示|单一来源采购公示|单一来源采购|单一来源|租赁公告|转让公告|处置公告|挂牌公告|成交结果|异常公告|失败公告).*$/,'')
+    .replace(/(第[一二三四五六七八九十\d]+次|第[一二三四五六七八九十\d]+包|第[一二三四五六七八九十\d]+批).*$/,'')
+    /* 「…项目的公开招标公告」剥完剩「…项目的」。这个「的」必须在这一层剥掉 ——
+       原来只剥全角「的$」，像「单一来源成交公告」剥完是「…投放的单一来源」，
+       结尾不是「的」，于是跟「…投放项目的单一来源采购公示」分成两条键。 */
+    .replace(/(的|的公开|的公开招标|的公开比选|公开|的单一来源|单一来源|的采购|采购)$/,'')
     .replace(/[\s　]+$/,'');
 }
 /* 项目归并键：清洗后去空白取前 18 字 */
 function pfKey(t){
   return pfClean(t).replace(/[\s　]/g,'').slice(0,18);
+}
+/* ══ 二次归并键（2026-10-30）══
+   ── 用户原话：「这两个是不是一个项目」「这个也是重复的，你这个重复率有点高」。
+   ── 截图里的两组重复，pfKey 都没兜住：
+      ① 南通美亚：…技改项目（一期）工程总承包**项目**
+                vs …技改项目（一期）工程总承包
+         → 前 18 字完全一样，但真正的坑在后面：一条多打了「项目」两字，
+           评审/招标两个来源各写各的，如果前 18 字恰好卡在差异点就分家了。
+      ② 丹阳龙江：**江苏**丹阳龙江钢铁有限公司40**兆瓦**煤气…
+                vs 丹阳龙江钢铁有限公司40**MW级**煤气…
+         → 公司名前多了「江苏」、单位写法一个中文一个英文，
+           键一个落在「…有限公司40兆瓦」，一个落在「…有限公司40MW级」。
+   ── 所以再算一个「狠归一」的键：剥省市前缀、统一单位写法、剥流程泛词、
+      去标点。只有归一后长度 >=10 才敢用（太短容易把不相干的项目并一起），
+      不够长就退回 pfKey。
+   ── 期号（一期/二期）**不进这个键**：它由 pfPhase 单独兜，
+      否则「A项目」和「A项目二期」会被硬拆成两条。 */
+/* 省市前缀（2026-10-30 收紧）。
+   ⚠ 原来写成 `上海市?`，会把「**上海电气**」「**上海梅山钢铁**」的「上海」当行政前缀剥掉 ——
+     上海电气是公司名的一部分，剥完剩「电气温岭年产10GWh储能电池建设项目」，
+     跟原始标题算出来的键对不上，反而制造新分叉。
+     只有「江苏省/浙江省/安徽省/上海市」这种带「省/市」的才是行政前缀；
+     不带省市的「江苏丹阳龙江」那种，靠下面「剥完还够长才剥」兜。 */
+var PF_PROV=/^(江苏省|浙江省|安徽省|上海市|江苏|浙江|安徽)/;
+function pfKey2(t){
+  var s=pfClean(t)
+    /* 剥「不含数字」的括注（2026-10-30）。
+       `(建安开工)`、`(节能报告审查意见)` 这种括注是**事项说明**，不是项目名的一部分，
+       留着会让同一项目分成两行（丹阳龙江就是这么重复的）。
+       ⚠ 只要括注里出现数字/中文数字就**一律保留**，因为那多半是真期号或子项：
+         · 「（一期）」「（三期）」—— 两个真项目，剥了就误并（江山污水那个坑）
+         · 「（工程建设项目审批管理系统3.0）」vs「（"淮上关爱一件事"4.0）」
+           —— 两个完全不同的平台项目，第一版按「不含期号」剥，结果并成一条
+       「包含数字就不碰」比「不包含期号就剥」稳得多。 */
+    .replace(/[（(](?![^（）()]*[0-9一二三四五六七八九十])[^（）()]{0,20}[)）]/g,'')
+    /* 「二期工程」和「二期」是同一边 */
+    .replace(/([一二三四五六七八九十\d]+期)工程/g,'$1')
+    /* ⚠ 2026-10-30 实测踩到的真根因：同一个南通美亚项目，
+       省平台写「（**第一期**）工程总承包项目」，本库写「(**一期**)工程总承包」——
+       多一个「第」字，前 18 字一样但全串不同，于是被当两个项目挂在表里并排显示。
+       用户就是这么发现「重复率有点高」的。所以先把「第X期/第X标段」压成「X期」。 */
+    .replace(/第\s*([一二三四五六七八九十\d]+)\s*(期|标段|阶段|号机组)/g,'$1$2')
+    .replace(/(\d+)\s*(兆瓦|MW|Mw|mw)\s*级?/g,'$1MW')
+    .replace(/(\d+)\s*(千瓦|KW|Kw|kw)\s*级?/g,'$1KW')
+    .replace(/(\d+)\s*(吨\/?小时|t\/h|T\/H)\s*级?/gi,'$1TH')
+    /* 面积/体积单位：同一个项目，省平台写「450m2」、环评写「450㎡」、
+       招标公告写「450平方米」，三种写法得归一到一处 */
+    .replace(/(\d+)\s*(平方米|m2|m²|㎡)/gi,'$1m2')
+    .replace(/(\d+)\s*(立方米|m3|m³)/gi,'$1m3')
+    .replace(/[\s　·、,，.。\-—_/\\'"“”]/g,'')
+    .replace(/[（()）]/g,'');
+  /* 省市前缀只在剥完还剩足够长度时才剥（别把「上海电气」剥成「电气」） */
+  var s2=s.replace(PF_PROV,'');
+  if(s2.length>=10) s=s2;
+  /* 流程泛词整串删掉，而不是从尾巴一层层剥 ——
+     「…技改项目（一期）工程总承包项目」和「…技改项目（一期）工程总承包」
+     都该落到「…技改项目一期」。 */
+  s=s.replace(/(工程总承包|EPC总承包|设计施工总承包|总承包|EPC)/gi,'')
+     .replace(/(项目)+/g,'项目');
+  /* 重复片段折叠（2026-10-30）：省平台有些标题把项目名写了两遍 ——
+       「A公司年产100万千米特种线缆新建项目年产100万千米特种线缆项目--特种线缆车间施工总承包」
+     前段和后段是同一个项目名的重复。只保留第一段。 */
+  (function(){
+    var half=Math.floor(s.length/2);
+    for(var cut=8; cut<=half; cut++){
+      if(s.slice(0,cut)===s.slice(cut,cut*2)){ s=s.slice(0,cut)+s.slice(cut*2); break; }
+    }
+  })();
+  /* 「…的」这类残留：剥完公告尾巴常剩一个孤零零的「的」挂在中段 */
+  s=s.replace(/的(?=[^的]*$)/,'');
+  /* ⚠ 2026-10-30 这里原来摘过「业务后缀」，后来撤了：
+     挂在键尾（…一期#监理）会导致「…扩建工程施工」和「…扩建工程」这种
+     只差一个公告来源的**同一条**分成两行 —— 业务后缀是一边有一边没有。
+     改成在 pfMerge 里**按组判断**：一组内出现两种以上业务后缀才拆（见 pfBiz）。 */
+  /* ⚠ 2026-10-30：原来这里就是 `.replace(/(项目|工程)$/,'')`，
+     可「…形象广告投放项目」和「…形象广告投放」是同一个项目（一个来自成交公告、
+     一个来自采购公示），剥掉结尾「项目」后一个变「…投放」一个还是「…投放项目」，
+     反而造出新分叉。所以结尾的「项目/工程」**必须先挪到后面统一剥**：
+     先用「项目」做占位把整个串归到同一处，最后再一次性剥。
+     现在这一步只做「总承包」类泛词清除。 */
+  /* 事项尾巴（2026-10-30）：不带括号、直接挂在项目名后面的一串，
+     例如「…热电联产项目节能报告审查意见」「…项目核准」「…项目环评公示」。
+     这些是公告的**性质**，不是项目名的一部分 —— 留着会让同一项目分成两行
+     （丹阳龙江就是「…项目(建安开工)」和「…项目节能报告审查意见」各占一行）。
+     ⚠ 只在归并键里剥，显示用 pfClean 的标题不动，用户要看得出这是核准还是中标。 */
+  var _prev;
+  do{
+    _prev=s;
+    s=s.replace(/(节能报告审查意见|节能审查意见|节能报告|审查意见|核准批复|环评公示|环境影响评价|立项公示|规划许可|用地审批|施工许可|开工报告|建安开工|竣工验收|环保验收|安全验收|备案|批复|公示|通知书|核准|意见|项目)$/,'');
+    /* 2026-10-30 全量扫（854 对残留）补的第三批。
+       pfClean 的词表是从**尾巴往前**匹配的，可像
+       「…三期扩容改造项目EPC总承包答疑澄清公告第2次」这种，
+       剥掉「答疑澄清公告第2次」后还留着「项目EPC总承包」，
+       而归并键里「项目的」又已经先被删成「项目」，于是尾巴剩一个光秃秃的「项目」。
+       原来的循环只认「项目$」，剥成「项目EPC」就停住了 —— 所以这里要连着剥。 */
+    s=s.replace(/(EPC|EPC总承包|总承包|工程总承包)$/i,'');
+    s=s.replace(/(答疑|澄清|补疑|补充|更正|变更|评分|预公示|公开|公告|公示|中标|成交|结果|的)$/,'');
+    s=s.replace(/(招标文件|招标|采购文件|采购)$/,'');
+    /* 业务后缀也要在这里剥，否则「…扩建工程**施工**」跟「…扩建工程」分家。
+       剥掉不等于丢失 —— 组内要不要按业务拆，由 pfMerge 的 pfBiz 重新判定。 */
+    s=s.replace(/(工程总承包|EPC总承包|工程监理|工程施工|工程设计|工程勘察|工程咨询|全过程工程咨询|EPC|监理|设计|施工|勘察|咨询)$/i,'');
+    /* 「…招标文件补疑8」「…补疑（二）」—— 补疑带序号，`补疑$` 匹配不到，
+       得先把尾巴上的序号剥掉再让上一轮去剥「补疑」 */
+    s=s.replace(/(补疑|答疑|澄清|补充|更正|第)?[（(]?[一二三四五六七八九十\d]+[)）]?$/,'');
+    /* 「…规划环评项目的合同」——「的合同」是流程后缀，不是项目名 */
+    s=s.replace(/(工程|项目)?的?(合同|协议|见证书|中标通知书)$/,'');
+  }while(s!==_prev && s.length>8);
+  /* 最后统一剥一次结尾的「项目/工程」（见上面那段说明） */
+  s=s.replace(/(项目|工程)$/,'');
+  return s;
 }
 /* 防误并：项目名很长时，前 18 字可能一样而期号/标段不同，
    「一期」和「二期」是两个真项目，不能并成一行。 */
@@ -4419,10 +4616,33 @@ function pfStage(tit, st){
 function pfNames(name){
   var n=String(name||'');
   var out=[];
-  var inner=(n.match(/[（(]([^（）()]*)[)）]/g)||[])
-    .map(function(x){ return x.replace(/^[（(]|[)）]$/g,'').trim(); })
-    .filter(function(x){ return x.length>=6 && /公司|院|集团|厂/.test(x) });
-  var main=n.replace(/[（(]([^（）()]*)[)）]/g,'').trim();
+  /* 2026-10-30 修：真实数据里有**嵌套括号**——
+       「无锡华光环保能源集团股份有限公司（含华光环保能源（西安）设计研究院有限公司）」
+     原来的 `[（(]([^（）()]*)[)）]` 匹配不到任何括号（内层括号把字符类断了），
+     于是华光的候选名只剩「无锡华光环保能源集团股份有限公司」一个，
+     省平台里挂在「华光环保能源（西安）设计研究院有限公司」名下的 6 条一条都取不到，
+     业绩表从 10 行掉到 5 行。用户会直接说「业绩又少了」。
+     改成：先按字符逐个配对，把**最外层**括号内容整段取出来，再在里面深挖一层。 */
+  var depths=[], stack=[];
+  for(var i=0;i<n.length;i++){
+    var c=n[i];
+    if(c==='（'||c==='('){ stack.push(i); }
+    else if(c==='）'||c===')'){
+      if(stack.length===1) depths.push(n.slice(stack[0]+1, i));
+      if(stack.length) stack.pop();
+    }
+  }
+  var cands=[];
+  depths.forEach(function(seg){
+    cands.push(seg);
+    /* 「含XXX」是「这家公司还包括 XXX」的口语前缀，去掉再试一次 */
+    cands.push(seg.replace(/^(含|包括|即|简称)[\s:：]*/,''));
+  });
+  var inner=cands
+    .map(function(x){ return String(x).replace(/[（()）]/g,'').trim(); })
+    .filter(function(x){ return x.length>=6 && /公司|院|集团|厂|中心/.test(x) });
+  /* 主名：把最外层括号整段删掉 */
+  var main=n.replace(/[（(][^（()）]*(?:[（(][^（()）]*[)）][^（()）]*)*[)）]/g,'').trim();
   if(inner.length) out=inner.slice();          // 有括注时，括注里的才是真公司名
   if(main && out.indexOf(main)<0) out.unshift(main);
   return out.filter(Boolean);
@@ -4559,7 +4779,10 @@ var PF_STAGE_RANK = [
   [/中标候选人|拟中标|候选人公示/, 6],
   [/中标结果|中标公告|中标\(|成交|结果公告|结果公示|已招完/, 7],
   [/合同|签约/, 8],
-  [/开工|在建|投产/, 9]
+  /* 2026-10-30：补「建成/验收/试生产/运行」——
+     定向检索里历史项目常标「已建成」「已验收」，原来一个都不匹配，
+     阶段列显示成「—」，看着像没阶段。这类都归到最后一档。 */
+  [/开工|在建|投产|建成|验收|试生产|投运|运行/, 9]
 ];
 function pfStageRank(t, st){
   var s=String(st||'')+' '+String(t||'');
@@ -4571,7 +4794,7 @@ function pfStageRank(t, st){
 /* 显示用阶段名：取整组里**最靠后**那一步 */
 function pfStageName(rank, t){
   var map={0:'终止/废标',1:'可研立项',2:'招标计划',3:'招标文件',4:'招标中',
-           5:'开标评标',6:'中标候选人',7:'中标',8:'合同',9:'在建/投产'};
+           5:'开标评标',6:'中标候选人',7:'中标',8:'合同',9:'建成/投产'};
   if(rank>=0) return map[rank]||'';
   return pfStage(t,'')||'—';
 }
@@ -4624,17 +4847,43 @@ function pfPack(list){
 function pfMerge(rows){
   var byK={}, out=[];
   rows.forEach(function(r){
-    var k=pfKey(r.t)||('#'+r.t);
+    /* 2026-10-30：优先用二次归并键（pfKey2），够长才用；不够长退回老键。
+       两种键加前缀区分，避免短键撞上长键。 */
+    var k2=pfKey2(r.t);
+    var k = (k2.length>=10) ? ('2|'+k2) : ('1|'+(pfKey(r.t)||('#'+r.t)));
     (byK[k]=byK[k]||[]).push(r);
   });
+  /* 组内拆分：先用期号拆，再看**业务后缀**。
+     ── 为什么要按组判断业务后缀（2026-10-30）：
+        「…技改项目（第一期）工程总承包」和「…技改项目（第一期）工程监理」
+        去掉「工程总承包/工程监理」后都叫「…一期」，会被并成一条 —— 但这是两个标的。
+        可如果无脑按业务后缀拆，「…扩建工程施工」和「…扩建工程」（一条公告没写业务词）
+        又会被拆成两行，那是同一条。
+        所以**只在组里同时出现两种以上业务后缀时才拆**：
+        组里既有「总承包」又有「监理」→ 拆；组里只有「施工」一种 → 不动。 */
+  function pfBiz(t){
+    var m=String(t||'').match(/(全过程工程咨询|工程总承包|EPC总承包|工程监理|工程施工|工程设计|工程勘察|工程咨询|监理|设计|施工|勘察|咨询)(?![^（(]{0,8}[)）])/);
+    if(!m) return '';
+    var w=m[1].replace(/^工程/,'');
+    if(/总承包|EPC|监理/.test(w)) return w;
+    if(/设计|勘察|咨询/.test(w)) return '设计咨询';
+    if(/施工/.test(w))      return '施工';
+    return w;
+  }
   Object.keys(byK).forEach(function(k){
     var g=byK[k];
     /* 组里出现两个以上不同期号才拆，「一期/二期」不能并成一行 */
     var ph={};
     g.forEach(function(r){ var p=pfPhase(r.t); if(p) ph[p]=1; });
-    if(Object.keys(ph).length>1){
+    var biz={};
+    g.forEach(function(r){ var p=pfBiz(r.t); if(p) biz[p]=1; });
+    var splitPhase=Object.keys(ph).length>1, splitBiz=Object.keys(biz).length>1;
+    if(splitPhase || splitBiz){
       var sub={};
-      g.forEach(function(r){ var p=pfPhase(r.t)||'_'; (sub[p]=sub[p]||[]).push(r); });
+      g.forEach(function(r){
+        var p=pfPhase(r.t)||'_', b=(splitBiz?(pfBiz(r.t)||'_'):'_');
+        var kk=p+'|'+b; (sub[kk]=sub[kk]||[]).push(r);
+      });
       Object.keys(sub).forEach(function(p){ out.push(pfPack(sub[p])); });
     } else {
       out.push(pfPack(g));
@@ -5555,6 +5804,23 @@ function profPage(kind, o){
      近期动态（无论是字符串还是数组）统一列出来。哪怕本库零业绩，
      这一页也能让人看出「这家是谁、多大、擅长什么、最近在干什么」。 */
   var aboutHtml='';
+  /* ②.4 联合体定位（2026-10-30）
+     ── 用户原话：「这种信息放在详情里面说，联合体这个也需要加上」。
+     ── partners 52 家每家都有一句「联合体中承担XX、YY、ZZ的设计与EPC」，
+        原来整段铺在卡片上，卡片一半高度都给了它。现在卡片只留一句短语
+        （roleShort 压缩），全文搬到这里展开 —— 这句话决定「能不能跟它组队」，
+        值得单独一节，而不是挤在卡片里当装饰。 */
+  var roleHtml='';
+  if(o.role || o.dual){
+    roleHtml='<div class="prof-sec prof-role"><h4><i></i>'+(o.role?'联合体定位':'竞合双身份')+
+      '<small>'+(o.role?'这家在联合体里干哪一段':'既在伙伴池里，也会跟我们撞单')+'</small></h4>'+
+      (o.role?'<div class="role-tx">'+esc(o.role)+'</div>':'')+
+      (o.dual?'<div class="prof-note">竞合双身份：它同时在「合作生态」的联合体候选池里，'+
+        '也会跟我们正面撞单 —— 投标前先确认它这次是队友还是对手。</div>':'')+
+      '<div class="prof-act">'+
+        '<a href="javascript:searchFor(\''+esc((o.name||'').slice(0,6))+'\')">库内搜它的中标/联合体记录 ↗</a>'+
+      '</div></div>';
+  }
   (function(){
     var _s=(o.strength||o.about||'').trim();
     /* 动态有两个来源，两处都要收：
@@ -5735,7 +6001,7 @@ function profPage(kind, o){
               :'<span class="pm-i">本库暂无它的中标公告，下面的企业档案来自公开资料</span>'))+
       (o.latest?'<span class="pm-i">最近动态 '+esc(o.latest)+'</span>':'')+
       '</div></div></div>'+
-    kpiHtml+idHtml+aboutHtml+ctcHtml+pfHtml+distHtml+relHtml+insHtml+act+'</div>';
+    kpiHtml+idHtml+roleHtml+aboutHtml+ctcHtml+pfHtml+distHtml+relHtml+insHtml+act+'</div>';
 }
 
 /* 对手：从 rivals 数据转成通用档案结构
@@ -5804,6 +6070,10 @@ function rivalAsProfile(r){
              （资质等级、装机业绩、专长）全都渲染不出来 —— 三家省级电力设计院
              「深度档案为空」就是这个原因之一。原样透传，不许再丢。 */
           strength:r.strength||'', type:r.type||'',
+          /* 2026-10-30：联合体定位（partners 专有）。
+             gPick 已把它挂到 rv 上，这里若不透传，proPage 拿到的重建对象里就没有，
+             「联合体定位」那一节永远空着 —— 跟当年丢 strength / recent 是同一个坑。 */
+          role:r.role||'', dual:r.dual||0,
           /* recent 必须一起带出来。纯字符串形态的档案（手工补的批次）整份内容
              就存在 recent 里，丢了它等于整个「近期动态」消失——浙江院/安徽院
              就是这样变成一片空白的。 */
@@ -5953,7 +6223,13 @@ function gPick(mode,name){
        原来优先拿 competitors 当主体，结果档案里业绩表只有几条新闻、
        「擅长方向」全是"未分类"——数据源拿反了。 */
     var rv=pickFrom(arr(D.rivals));
-    var src=pickFrom(arr(D.competitors)) || pickFrom(arr(D.partners));
+    /* 2026-10-30：competitors 和 partners 是两张不同的名单，同一家单位可能
+       两边都在（比如煤炭工业合肥设计院既是对手、又是联合体伙伴）。
+       原来 `competitors || partners` 短路取第一个，只要对手表里有它，
+       伙伴表里那句「联合体定位」就永远取不到。
+       所以两张表都查一遍，字段谁有值用谁的。 */
+    var srcC=pickFrom(arr(D.competitors)), srcP=pickFrom(arr(D.partners));
+    var src=srcC||srcP;
     if(!rv && src){
       /* 没有业绩记录，但有人工档案：也能出一页，只是业绩表会是空的 */
       rv={name:nm0, n:0, amt:0, items:[], main:src.cat, rg:src.city};
@@ -5975,6 +6251,13 @@ function gPick(mode,name){
          recent 没搬，于是档案页里那一块永远不出现 —— 三家设计院「深度档案为空」
          的第二层原因就在这里（第一层是 strength 在 rivalAsProfile 里被丢）。 */
       if(src.recent!=null) rv.recent=src.recent;
+      /* 2026-10-30：partners 每家都有一句「联合体定位」（联合体里承担哪一段）。
+         用户要求「联合体这个也需要加上」——原来卡片上铺着，现在卡片收成一句，
+         全文搬到档案里，所以这里必须透传，否则那段话就彻底丢了。
+         ⚠ role 只有 partners 有；两边都是同一家时，要从伙伴表里取。 */
+      var _role=(srcP&&srcP.role)||(srcC&&srcC.role)||'';
+      if(_role) rv.role=_role;
+      if((srcP&&srcP.dual)||(srcC&&srcC.dual)) rv.dual=1;
     }
     /* 业绩为空时，才退而用近期动态充数（并且明确标成「动态」，不当业绩） */
     if(src && !(rv.items||[]).length && Array.isArray(src.recent)){
