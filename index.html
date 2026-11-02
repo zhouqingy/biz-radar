@@ -1499,8 +1499,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202611021150"></script>
-<script src="data.items.js?v=202611021150"></script>
+<script src="data.core.js?v=202611021415"></script>
+<script src="data.items.js?v=202611021415"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1567,7 +1567,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611021150';
+var VER='?v=202611021415';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -1962,11 +1962,23 @@ function goTab(i){
   location.hash='t'+F.tab;
   /* 按需拉数据：第一次点进来才下载，加载完重渲染该面板 */
   var m=TAB_MOD[i];
-  if(m&&!window['DATA_'+m.toUpperCase()]&&!window.DATA){
+  /* ⚠ 2026-11-02 修：原来条件是 `!window['DATA_'+m]&&!window.DATA`。
+     线上 `window.DATA` 是**整包兜底 data.js**，首屏就加载了，恒为真 ——
+     于是这个「正在加载」提示永远不会出现。表现：点「规划前瞻」后有 20-30 秒
+     面板全空白（GitHub Pages 上 data.plan.js 首拉实测 27 秒），
+     用户以为功能坏了。提示该不该显示，只看**这一个模块**到没到，别管兜底包。 */
+  if(m&&!window['DATA_'+m.toUpperCase()]){
     el(TABS[i][0]).insertAdjacentHTML('afterbegin',
       '<div class="hint" id="modLoading" style="padding:8px 0">正在加载数据…</div>');
   }
   if(m) need(m,function(){ mergeMod(m); refreshTabCounts(); renderPanel(i); });
+  /* 规划页签立刻画一次「加载中」骨架：need 的回调要等数据到了才执行，
+     这段时间里面板只有顶上一行提示、下面一大片空白，看着像坏了。
+     renderPlan 自己带轮询，数据一到就自动重绘，不依赖 need 的回调。 */
+  if(i===8) renderPlan();
+  /* 规划模块体积小（81KB）但首拉慢，首屏空闲时预取一次，用户真点的时候基本是秒开。
+     放 setTimeout 里，绝不抢首屏带宽 —— 首屏那几个文件才是关键路径。 */
+  if(i!==8) prefetchPlan();
 }
 /* 渲染指定 tab 的内容（模块加载完成后调用） */
 function renderPanel(i){
@@ -2241,9 +2253,49 @@ function plExport() {
   setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
 }
 
+/* 规划模块预取（2026-11-02）。
+   为什么单独给 plan 开这个口子：它只有 81KB，比 news(480KB) / rivalperf(1MB) 小得多，
+   却在 GitHub Pages 上首拉实测 27 秒 —— 因为首屏那几个大文件把浏览器的连接占满了。
+   等首屏跑完、连接空出来再拉，用户点「规划前瞻」时基本已经有数据了。
+   延迟 4 秒 + requestIdleCallback 双保险：宁可晚一点拉，也绝不跟首屏抢带宽。 */
+var _pfDone = false;
+function prefetchPlan(){
+  if(_pfDone || window.DATA_PLAN) { _pfDone = true; return; }
+  _pfDone = true;
+  var _go = function(){ try{ need('plan', function(){}); }catch(e){} };
+  setTimeout(function(){
+    if(window.requestIdleCallback) requestIdleCallback(_go, {timeout: 8000});
+    else _go();
+  }, 4000);
+}
+
 function renderPlan() {
   if (!plLoad()) {
-    el('plGrid').innerHTML = '<div class="empty">数据加载失败，请强制刷新（Ctrl+F5）</div>';
+    /* 数据还没到（首拉慢）。这里原来写的是「数据加载失败，请强制刷新」——
+       但绝大多数情况只是**还没加载完**，让用户去 Ctrl+F5 等于把人赶走。
+       现在分两种：等一会儿（自动重试），真失败了才提示刷新。 */
+    var _box = el('plGrid');
+    if (_box) {
+      _box.innerHTML = '<div class="empty">正在加载规划数据…（首次打开需要几秒，数据到来自动显示）</div>';
+    }
+    var _try = 0;
+    (function waitPlan(){
+      if (plLoad()) { renderPlan(); return; }
+      /* need() 的 onerror 分支有个坑：线上 window.DATA 恒存在，
+         所以任何模块加载失败都会被 `_mods[mod]=1` **永久**标记成「已加载」，
+         之后再 need 就直接回调、根本不发请求。规划页一旦首拉失败，
+         光靠轮询永远等不回来。所以每 15 秒清一次标记重新拉。 */
+      if (_try && _try % 15 === 0) {
+        try { delete _mods['plan']; need('plan', function(){}); } catch(e){}
+      }
+      if (++_try > 60) {                       // 60 × 1 秒 = 1 分钟还没到才算失败
+        if (el('plGrid')) el('plGrid').innerHTML =
+          '<div class="empty">规划数据没加载出来。检查网络后刷新页面（Ctrl+F5）；' +
+          '若仍不行，可能是 data.plan.js 没发布上去。</div>';
+        return;
+      }
+      setTimeout(waitPlan, 1000);
+    })();
     return;
   }
   if (!el('pl-rg').dataset.built) {
@@ -7565,6 +7617,9 @@ function boot_main(){
   /* 全网业绩速查（274KB）也后台预载：画像弹层是同步拼字符串的，
      数据没到就只能等加载完再补画，用户会先看到一段空白，观感差。 */
   setTimeout(function(){ need('entprobe', function(){}); }, 3000);
+  /* 规划前瞻（81KB）预取。排在 rivalperf / entprobe 之后，让前两个先抢到连接 ——
+     规划页是「有空才看」的前瞻数据，不是首屏刚需。 */
+  prefetchPlan();
 }
 /* 地址栏带 #t2 这类深链时再补渲对应面板 */
 (function(){
@@ -7580,4 +7635,4 @@ function boot_main(){
 <div id="encyProfBox" onclick="if(event.target===this)encyProfClose()"></div>
 <div id="uniProfBox" onclick="if(event.target===this)closeUniProf()"></div>
 <div id="mhBox" onclick="if(event.target===this)mhClose()"></div>
-<script src="boot.js?v=202611021150"></script>
+<script src="boot.js?v=202611021415"></script>
