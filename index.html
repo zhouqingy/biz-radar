@@ -206,6 +206,38 @@ button{font-family:inherit}
 .gbadge.B{background:linear-gradient(135deg,#fa8c16,#ffb02e)}
 .gbadge.C{background:linear-gradient(135deg,#2f84ff,#5aa2ff)}
 .gbadge.D{background:#c3c9d4}
+/* 规划前瞻页专用：X = 已关闭（总包已定/已开工/已完成招标）。
+   这批不能派销售，但也不能删——它证明"这个业主这个片区刚上完一套机组"，
+   下一轮技改还找他。所以标红留在表里，沉底。 */
+.gbadge.X{background:linear-gradient(135deg,#8c1d18,#c0392b)}
+.pj.gX{background:#fff7f6;border-color:#f0cdc8}
+.pj.gX .pj-t{color:#8a5650}
+/* 热网/管网类：公司短板是施工总包资质，用户口径「不入商机库，只挂画像」。
+   在模块里仍然列出来（不然看不全规划全貌），但打灰色标签压住视觉。 */
+.pl-pipe{display:inline-block;font-size:10.5px;font-weight:700;color:#5d6b7a;
+  background:#eef1f5;border:1px solid #dbe1e8;border-radius:6px;padding:1px 6px;margin-left:6px}
+/* 规划项目挂画像（2026-11-02）：.pln-dot 是名单上的小标，.pln-sec 是画像里那段表 */
+/* 左栏只有 ~230px，业主全名 + 「规划 2」+ 右侧条数三样挤一行必换行，
+   截图里「规划 2」被挤到第二行像是掉了。改成：名字单行省略、标记不换行、条数右浮动。 */
+.gli .row{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pln-dot{display:inline-block;font-size:9.5px;font-weight:700;color:#9a5b00;background:#fff4e0;
+  border:1px solid #f2d9b0;border-radius:4px;padding:0 3px;margin-left:4px;line-height:14px;
+  vertical-align:1px;white-space:nowrap;flex:none}
+.gli .row.wp{display:flex;align-items:center;white-space:normal}
+.gli .row .pn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:0 1 auto}
+.gli .row.wp em{white-space:nowrap;flex:none;margin-left:auto}
+.pln-own{color:#1053c9;font-weight:700;text-decoration:none;border-bottom:1px dashed #9db9e8}
+.pln-own:hover{color:#d4380d;border-bottom-color:#f0a58c}
+.pln-sec{border-top:2px solid #f2d9b0;margin-top:14px;padding-top:10px}
+.pln-note{font-size:12px;color:#7a6a55;line-height:1.75;background:#fffaf3;
+  border-left:3px solid #f0d5b0;padding:7px 10px;margin:6px 0 8px;border-radius:0 5px 5px 0}
+.pln-sum{font-size:12.5px;color:#5d6b7a;margin:0 0 6px}
+.pln-tb{width:100%;border-collapse:collapse;font-size:12px}
+.pln-tb th{background:#faf6ef;color:#7a6a55;font-weight:700;text-align:left;
+  padding:5px 7px;border-bottom:1px solid #ecdfc9;white-space:nowrap}
+.pln-tb td{padding:6px 7px;border-bottom:1px solid #f2f4f7;vertical-align:top;line-height:1.6}
+.pln-tb tr:hover td{background:#fdfcf9}
+.pln-ct{font-size:11px;color:#8a9099;margin-top:3px;line-height:1.6}
 .gscore{font-size:11px;color:var(--tx3);font-weight:700;padding-top:3px;white-space:nowrap}
 .newdot{font-size:10px;font-weight:800;color:#c0202a;background:#ffecec;border:1px solid #ffc9c9;padding:1px 7px;border-radius:8px;white-space:nowrap}
 .pj-money{margin-left:auto;text-align:right;font-size:19px;font-weight:800;color:var(--red);font-variant-numeric:tabular-nums;line-height:1.15}
@@ -1095,6 +1127,37 @@ window.addEventListener('error',function(e){
     </div>
   </div>
 
+  <!-- 规划前瞻（2026-11-02 新增）=====================================
+       数据：data.plan.js（window.DATA_PLAN），不进每日招投标管线
+       口径：江浙沪皖 2026-2030 热电联产/供热规划正文 + 省发改委规划批复点名项目
+       为什么单独一页：这些还没挂网，和「找商机」里有招标文件、有开标时间的标的
+       不是一回事。混在一起，销售分不清哪个现在能动手。 -->
+  <div class="panel" id="p-plan">
+    <div class="sect">供热规划前瞻
+      <small>规划批下来那天，后面 3-5 年要建什么就定了。这些项目还没挂网，是现在就能去谈的依据</small>
+    </div>
+    <div class="wares" id="plWares"></div>
+    <div class="fbar">
+      <div class="frow"><label>地区</label><div class="chips" id="pl-rg"></div></div>
+      <div class="frow"><label>阶段</label><div class="chips" id="pl-st"></div></div>
+      <div class="frow"><label>项目类型</label><div class="chips" id="pl-k"></div></div>
+      <div class="frow"><label>切入方式</label><div class="chips" id="pl-e"></div></div>
+      <div class="frow"><label>档位</label><div class="chips" id="pl-g"></div></div>
+      <div class="srow">
+        <input class="srch" id="pl-q" placeholder="搜项目名 / 业主 / 建设内容 / 城市…">
+        <select class="sel" id="pl-sort">
+          <option value="sc">排序：综合优先级</option>
+          <option value="amt">排序：投资额从高到低</option>
+          <option value="stage">排序：阶段（越靠前越早）</option>
+        </select>
+        <button class="btn" id="pl-reset">清空筛选</button>
+        <button class="btn pri" id="pl-csv">导出当前结果 CSV</button>
+      </div>
+    </div>
+    <div class="rbar" id="plBar"></div>
+    <div class="grid" id="plGrid"></div>
+  </div>
+
   <!-- 3 竞争对手 -->
   <!-- 同业与伙伴（原「竞争对手」+「合作生态」合并，2026-10-21） -->
   <div class="panel" id="p-rival">
@@ -1235,6 +1298,15 @@ window.addEventListener('error',function(e){
             名字像我们的客户，但本库历史上<b>没发过</b>我们主场的标（只发过污水/土壤这类分公司业务，或者一条都没有）。仅作备查，<b>不参与排序、不给深度画像</b>。
           </div>
           <div class="gli" id="grLatent"></div>
+          <!-- 规划期业主（2026-11-02 新增）：只在热电联产/供热规划里出现、
+               本库一条标都没发过的业主。这是营销最该抢先接触的一批 —— 活还没挂网。
+               单列一块，不混进上面两个名单，因为「判定依据」完全不同：
+               上面按发过什么标分层，这里按规划里写了什么项目分层。 -->
+          <div class="gs-h" id="grPlanH" style="margin-top:14px">规划期业主 <b id="grPlanN" style="font-weight:600;color:#8a9099"></b></div>
+          <div class="hint" style="font-size:11.5px;color:#8a9099;background:#fffaf3;border-left:2px solid #f0d5b0;padding:5px 8px;margin:0 0 6px;border-radius:0 5px 5px 0;line-height:1.6">
+            本库<b>一条标都没发过</b>，但已写进热电联产 / 供热规划 —— <b>活还没挂网</b>。点一家看它的规划期项目。
+          </div>
+          <div class="gli" id="grPlan"></div>
         </div>
         <div class="gmain" id="grMain"></div>
       </div>
@@ -1427,8 +1499,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202611020257"></script>
-<script src="data.items.js?v=202611020257"></script>
+<script src="data.core.js?v=202611021150"></script>
+<script src="data.items.js?v=202611021150"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1493,7 +1565,9 @@ function packItems(o){
   return out;
 }
 
-var VER='?v=202611020257';
+/* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
+   否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
+var VER='?v=202611021150';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -1526,7 +1600,14 @@ var TABS = [
   ['p-trend',   '行业动态',   0, '', '', 'sub'],
   ['p-wechat',  '情报精选',   0, '', '', 'sub'],
   ['p-plat',    '招标平台',   0, '', '', 'sub'],
-  ['p-help',    '口径说明',   0, '', '', 'sub']
+  ['p-help',    '口径说明',   0, '', '', 'sub'],
+  /* 2026-11-02 新增：供热规划前瞻（独立一级页签，索引 8）。
+     为什么放最后而不是插在「找商机」后面：TAB_MOD / renderPanel / goTab(2)
+     全是按索引硬编码的（见 1866 行的坑注释），插中间会把客户页、海外页、
+     动态页全部错位。放末尾只加一条映射，零风险。
+     数据来自 data.plan.js（独立文件，不进每日招投标管线），
+     生成脚本 biz-radar-tools/build_plan_forecast.py，可持续增量更新。 */
+  ['p-plan',    '规划前瞻',   0, '◇', '热电联产规划 · 规划批复 · 还没招标', 'mv']
 ];
 /* 2026-10-21：biz/sub 换成 sg（业务分层短码）；新增 side=是否显示兼营（三级分公司业务） */
 var F = {rg:new Set(),sg:new Set(),ind:new Set(),g:new Set(),mode:new Set(),p:new Set(),
@@ -1822,13 +1903,18 @@ function refreshTabCounts(){
   _setTab('p-trend',   arr(D.trends).length);
   _setTab('p-wechat',  (((D.digest||{}).items||[]).length+((D.wechat||{}).items||[]).length));
   _setTab('p-plat',    arr(D.platforms).length);
-  var bs=document.querySelectorAll('.tab');
-  /* 计数为 0 的模块（还没点开过、按需加载的数据还没到）显示「·」不显示 0。
-     原来 0 挂在那里，用户第一眼看到「海外信号 0」「行业动态 0」，
-     会以为这些板块是空的——其实只是没点开、数据还没拉。 */
+  /* 规划前瞻：数据没拉过就是 0（页签不显示数字，见下面的 0 处理），
+     点进去 need('plan') 到位后会再调一次本函数。 */
+  _setTab('p-plan',    (window.DATA_PLAN && window.DATA_PLAN.n) || 0);
+  /* 2026-11-02：原来这里是 `bs=querySelectorAll('.tab')` 然后 `bs[i]` 按 DOM 下标取。
+     加「规划前瞻」（TABS 索引 8）之后 DOM 顺序变成 [0,1,2,3,8,4,5,6,7] ——
+     一级页签都在前面、二级页签在后，索引 8 排到了第 5 个位置。
+     继续按 DOM 下标取，规划前瞻的条数会写到「行业动态」上，后面全部错一位。
+     改成按 data-t 定位（goTab 里早就是这么写的，这里当时漏了）。 */
   TABS.forEach(function(t,i){
-    if(!bs[i]) return;
-    var ib=bs[i].querySelector('i'); if(!ib) return;
+    var bsEl=document.querySelector('#tabs > [data-t="'+i+'"]');
+    if(!bsEl) return;
+    var ib=bsEl.querySelector('i'); if(!ib) return;
     ib.textContent = t[2] ? t[2] : '';
     ib.style.display = t[2] ? '' : 'none';
   });
@@ -1863,7 +1949,7 @@ el('tabs').innerHTML=(function(){
      结果点「客户与业主」去拉了 news，DATA_ORG 永远是 undefined，
      国内客户 0 张卡、海外客户 0 家——数据没坏，是模块拉错了。
      以后动页签顺序，第一件事就是回来核这张表。 */
-var TAB_MOD={1:'org',2:'org',3:'news',4:'news',5:'news'};
+var TAB_MOD={1:'org',2:'org',3:'news',4:'news',5:'news',8:'plan'};
 function goTab(i){
   F.tab=i;
   /* 用 [data-t] 定位，不用 querySelectorAll('.tab') 的下标——
@@ -1899,12 +1985,274 @@ function renderPanel(i){
     else if(i===5){ renderWechat(); renderDigest(); bindDigest();
       var n=((D.wechat||{}).items||[]).length,f=el('wxFold'),s2=el('wxFoldN');
       if(s2)s2.textContent=n; if(f&&!n)f.style.display='none'; }
+    else if(i===8){ renderPlan(); }
   }catch(e){ console.error('[renderPanel]',i,e); }
 }
 el('tabs').onclick=function(e){
   var b=e.target.closest('.tab'); if(!b)return;
   goTab(+b.dataset.t); window.scrollTo(0,0);
 };
+
+/* ==================== 规划前瞻（独立模块，2026-11-02） ====================
+   数据来自 data.plan.js，与每日招投标管线完全解耦 —— 规划半年才更一次，
+   跟着日报重跑没意义，而且要防止 build_data.py 每天重写 chunk 时把它冲掉。
+
+   口径要点（和「找商机」不一样，别混）：
+     · 这些项目还没挂网，st 一律按「立项公示」参与算分，没有开标时间
+     · 档位 X = 已关闭（总包已定/已开工/已完成招标），沉底、标红，仍保留
+     · 热网/管网（pp=1）按用户口径「不入商机库只挂画像」，本页仍列但单独打标
+   ========================================================================= */
+var PGC = {A:'gA', B:'gB', C:'gC', D:'gD', X:'gX'};
+var PGT = {A:'A 战略必争', B:'B 重点跟进', C:'C 可关注', D:'D 暂不跟进', X:'✕ 已关闭'};
+var PL_STAGE_ORDER = ['已核准/备案', '报批/公示中', '规划已批复', '前期论证', '已开工/总包已定'];
+
+var PL = {
+  rows: null,
+  f: {rg: new Set(), st: new Set(), k: new Set(), e: new Set(), g: new Set(), q: '', sort: 'sc'}
+};
+
+/* 类型/切入方式原值有 17 种和 9 种，直接做 chip 会挤成两行、点起来没有意义。
+   归并成销售真正会用来筛的粗类；卡片上仍显示原值。 */
+function plKind(k) {
+  if (!k) return '其他';
+  if (k.indexOf('热网') >= 0) return '热网';
+  if (k.indexOf('分布式') >= 0) return '分布式能源站';
+  if (k.indexOf('扩建') >= 0) return '扩建';
+  if (k.indexOf('技改') >= 0 || k.indexOf('改造') >= 0) return '技改';
+  if (k.indexOf('搬迁') >= 0) return '搬迁技改';
+  if (k.indexOf('新建') >= 0) return '新建';
+  if (k.indexOf('关停') >= 0) return '关停替代';
+  return '其他';
+}
+function plEntry(e) {
+  if (!e) return '未标注';
+  if (e.indexOf('已关闭') >= 0) return '已关闭';
+  if (e.indexOf('EPC') >= 0) return 'EPC总包';
+  if (e.indexOf('设计咨询') >= 0) return '设计咨询';
+  return '其他';
+}
+
+function plLoad() {
+  if (PL.rows) return true;
+  var d = window.DATA_PLAN;
+  if (!d || !d.cols) return false;
+  var c = d.cols, out = [];
+  for (var i = 0; i < c.id.length; i++) {
+    out.push({
+      id: c.id[i], p: c.p[i], city: c.c[i], dist: c.d[i], t: c.n[i], b: c.b[i],
+      ct: c.ct[i], k: c.k[i], e: c.e[i], amt: c.a[i], st: c.st[i],
+      src: c.src[i], doc: c.doc[i], u: c.u[i], lk: c.lk[i], ea: c.ea[i],
+      g: c.g[i], sc: c.sc[i], pp: c.pp[i], cl: c.cl[i],
+      kk: plKind(c.k[i]), ee: plEntry(c.e[i])
+    });
+  }
+  PL.rows = out;
+  PLN.list = out;          // 画像挂载用（见 plnBuild / plnOf）
+  return true;
+}
+
+function plUniq(key) {
+  var m = {}, out = [];
+  PL.rows.forEach(function (r) {
+    var v = r[key];
+    if (v == null || v === '') return;
+    if (!m[v]) { m[v] = 1; out.push(v); }
+  });
+  return out;
+}
+
+function plChips(boxId, key, vals, labelMap) {
+  var box = el(boxId); if (!box) return;
+  var sel = PL.f[key];
+  box.innerHTML = '<span class="chip' + (sel.size ? '' : ' on') + '" data-v="">全部</span>' +
+    vals.map(function (v) {
+      return '<span class="chip' + (sel.has(v) ? ' on' : '') + '" data-v="' + esc(v) + '">' +
+        esc((labelMap && labelMap[v]) || v) + '</span>';
+    }).join('');
+  box.onclick = function (ev) {
+    var c = ev.target.closest('.chip'); if (!c) return;
+    var v = c.getAttribute('data-v');
+    if (!v) { sel.clear(); }
+    else if (sel.has(v)) { sel.delete(v); }
+    else { sel.add(v); }
+    plChips(boxId, key, vals, labelMap);
+    plApply();
+  };
+}
+
+function plMatch(r) {
+  var f = PL.f;
+  if (f.rg.size && !f.rg.has(r.p)) return false;
+  if (f.st.size && !f.st.has(r.st)) return false;
+  if (f.k.size && !f.k.has(r.kk)) return false;
+  if (f.e.size && !f.e.has(r.ee)) return false;
+  if (f.g.size && !f.g.has(r.g)) return false;
+  if (f.q) {
+    var q = f.q.toLowerCase();
+    var hay = (r.t + ' ' + r.b + ' ' + r.ct + ' ' + r.p + r.city + ' ' + (r.dist || '')).toLowerCase();
+    if (hay.indexOf(q) < 0) return false;
+  }
+  return true;
+}
+
+function plCard(r) {
+  var amt = (r.amt != null && r.amt !== '') ? (Number(r.amt).toFixed(r.amt >= 10 ? 0 : 1) + ' 亿元') : '';
+  var tags = '<span class="tg tg-early">提前量 · ' + esc(r.ea || '供热规划') + '</span>' +
+    '<span class="tg">' + esc(r.k || '—') + '</span>' +
+    (r.pp ? '<span class="pl-pipe">供热管网 · 仅画像</span>' : '');
+  /* 业主名做成可点 —— 点开就是这家的画像，画像里带它的全部规划期项目。
+     用户口径「不入商机库，只挂画像」，那总得有个入口能走到画像上去。
+     没指定业主的（热网/站类项目常见）不给链，避免点开一个空画像。 */
+  var bCell = (!r.b || r.b === '未指定')
+    ? '<b>' + esc(r.b || '未指定') + '</b>'
+    : '<a class="pln-own" href="javascript:void(0)" onclick="domOwnerProf(\'' +
+      esc(String(r.b).replace(/\\/g, '\\\\').replace(/'/g, "\\'")) +
+      '\')" title="打开这家业主的画像：已有招采记录 + 规划期项目">' + esc(r.b) + ' ↗</a>';
+  var meta = '<span class="mi"><i>业主</i>' + bCell + '</span>' +
+    '<span class="mi"><i>地区</i><b>' + esc(r.p + r.city + (r.dist ? '·' + r.dist : '')) + '</b></span>' +
+    '<span class="mi"><i>阶段</i><b>' + esc(r.st) + '</b></span>' +
+    '<span class="mi"><i>切入</i><b>' + esc(r.e || '—') + '</b></span>' +
+    /* 2026-11-02：批文原来整串塞进卡片（形如「苏发改能源发〔2026〕783号\n2026-08-10 省发改委批复」），
+       带换行的长串会把 meta 行撑乱。这里只取文号末段做短标签，完整批复依据挪到展开区。 */
+    (r.doc && r.doc !== '—' ? '<span class="mi" title="' + esc(r.doc.replace(/\n/g, ' ')) + '">' +
+      '<i>规划批复</i><b>' + esc(r.doc.split('\n')[0].replace(/^.*〔\d{4}〕/, '〔') || r.doc.split('\n')[0]) + '</b></span>' : '');
+  var head = r.u
+    ? '<a class="pj-t" href="' + esc(r.u) + '" target="_blank" rel="noopener" title="打开这条项目的规划/批复原文">' +
+      esc(r.t) + ' <span class="go">原文 ↗</span></a>'
+    : '<span class="pj-t">' + esc(r.t) + '</span>';
+  var more = '<div class="pl-more" style="display:none">' +
+    (r.ct ? '<p><b>建设内容</b>' + esc(r.ct) + '</p>' : '') +
+    (r.src ? '<p><b>原文依据</b>' + esc(r.src) + '</p>' : '') +
+    (r.doc && r.doc !== '—' ? '<p><b>省级规划批复</b>' + esc(r.doc.replace(/\n/g, ' ')) + '</p>' : '') +
+    (r.lk ? '<p><b>能进不能进</b>' + esc(r.lk) + '</p>' : '') + '</div>';
+  return '<div class="pj ' + (PGC[r.g] || 'gC') + '" data-plid="' + esc(r.id) + '">' +
+    '<div class="pj-top"><span class="gbadge ' + esc(r.g) + '">' + esc(PGT[r.g] || r.g) + '</span>' +
+    '<span class="gscore">' + r.sc + '分</span>' +
+    (amt ? '<div class="pj-money">' + esc(amt) + '</div>' : '') + '</div>' +
+    head + '<div class="tags">' + tags + '</div>' +
+    '<div class="pj-meta">' + meta + '</div>' +
+    '<div class="pj-snip">' + esc(r.ct || '（规划原文只列了项目名，没写建设规模）') + '</div>' +
+    more + '</div>';
+}
+
+function plRenderKpi() {
+  var box = el('plWares'); if (!box) return;
+  var all = PL.rows, open = 0, amt = 0, a = 0, pipe = 0;
+  all.forEach(function (r) {
+    if (r.g !== 'X') open++;
+    if (r.amt) amt += Number(r.amt);
+    if (r.g === 'A') a++;
+    if (r.pp) pipe++;
+  });
+  var items = [
+    ['全部', all.length, ''],
+    ['可打（未关闭）', open, ''],
+    ['A 战略必争', a, 'A'],
+    ['供热管网·仅画像', pipe, ''],
+    ['投资合计', amt.toFixed(0) + ' 亿', '']
+  ];
+  box.innerHTML = items.map(function (x) {
+    return '<button class="btn ware" data-g="' + x[2] + '">' + x[0] + ' <b>' + x[1] + '</b></button>';
+  }).join('');
+  box.onclick = function (ev) {
+    var b = ev.target.closest('.ware'); if (!b) return;
+    var g = b.getAttribute('data-g');
+    PL.f.g.clear(); PL.f.k.clear(); PL.f.q = ''; PL.f.rg.clear(); PL.f.st.clear(); PL.f.e.clear();
+    if (g) PL.f.g.add(g);
+    var s = el('pl-q'); if (s) s.value = '';
+    plBuild(); plApply();
+  };
+}
+
+function plApply() {
+  var rows = PL.rows.filter(plMatch);
+  var sort = PL.f.sort;
+  rows.sort(function (a, b) {
+    if (a.cl !== b.cl) return a.cl - b.cl;              // 已关闭永远沉底
+    if (sort === 'amt') return (b.amt || 0) - (a.amt || 0);
+    if (sort === 'stage') {
+      var ia = PL_STAGE_ORDER.indexOf(a.st), ib = PL_STAGE_ORDER.indexOf(b.st);
+      return (ia < 0 ? 9 : ia) - (ib < 0 ? 9 : ib) || b.sc - a.sc;
+    }
+    return b.sc - a.sc;
+  });
+  var grid = el('plGrid');
+  grid.innerHTML = rows.length
+    ? rows.map(plCard).join('')
+    : '<div class="empty">没有符合条件的项目。规划类信息更新慢，试试点「清空筛选」看全部 ' + PL.rows.length + ' 条。</div>';
+
+  // 点卡片展开明细（不动标题链接）
+  grid.onclick = function (ev) {
+    if (ev.target.closest('a')) return;
+    var card = ev.target.closest('.pj'); if (!card) return;
+    var m = card.querySelector('.pl-more'); if (!m) return;
+    m.style.display = m.style.display === 'none' ? 'block' : 'none';
+  };
+
+  var bar = el('plBar');
+  var totAmt = rows.reduce(function (s, r) { return s + (Number(r.amt) || 0); }, 0);
+  bar.innerHTML = '筛出 <b>' + rows.length + '</b> 条 · 有投资额 ' +
+    rows.filter(function (r) { return r.amt; }).length + ' 条 · 合计 <b>' + totAmt.toFixed(1) + '</b> 亿元' +
+    '<span class="rhint"><a class="btn" href="javascript:goTab(0)">← 回找商机</a></span>';
+}
+
+function plBuild() {
+  var stVals = PL_STAGE_ORDER.filter(function (s) {
+    return PL.rows.some(function (r) { return r.st === s; });
+  });
+  // 只在有数据的阶段里出 chip，避免出现一堆点了没结果的空按钮
+  plChips('pl-rg', 'rg', ['江苏', '浙江', '安徽', '上海'].filter(function (p) {
+    return PL.rows.some(function (r) { return r.p === p; });
+  }));
+  plChips('pl-st', 'st', stVals);
+  plChips('pl-k', 'k', plUniq('kk'));
+  plChips('pl-e', 'e', plUniq('ee'));
+  plChips('pl-g', 'g', ['A', 'B', 'C', 'D', 'X'], PGT);
+
+  var q = el('pl-q');
+  q.oninput = function () { PL.f.q = q.value.trim(); plApply(); };
+  var s = el('pl-sort');
+  s.onchange = function () { PL.f.sort = s.value; plApply(); };
+  el('pl-reset').onclick = function () {
+    ['rg', 'st', 'k', 'e', 'g'].forEach(function (k) { PL.f[k].clear(); });
+    PL.f.q = ''; q.value = '';
+    plBuild(); plApply();
+  };
+  el('pl-csv').onclick = plExport;
+}
+
+function plExport() {
+  var rows = PL.rows.filter(plMatch);
+  var head = ['省', '市', '片区', '项目名称', '业主', '建设内容', '类型', '切入方式',
+    '投资(亿元)', '阶段', '档位', '分数', '提前量', '批文', '原文依据', '能进不能进', '链接'];
+  var lines = [head.join(',')];
+  rows.forEach(function (r) {
+    lines.push([r.p, r.city, r.dist, r.t, r.b, r.ct, r.k, r.e, r.amt, r.st,
+      r.g, r.sc, r.ea, r.doc, r.src, r.lk, r.u].map(function (v) {
+        var s = (v == null ? '' : String(v)).replace(/"/g, '""');
+        return '"' + s + '"';
+      }).join(','));
+  });
+  var blob = new Blob(['\ufeff' + lines.join('\r\n')], {type: 'text/csv;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '供热规划前瞻_' + rows.length + '条.csv';
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); }, 3000);
+}
+
+function renderPlan() {
+  if (!plLoad()) {
+    el('plGrid').innerHTML = '<div class="empty">数据加载失败，请强制刷新（Ctrl+F5）</div>';
+    return;
+  }
+  if (!el('pl-rg').dataset.built) {
+    plBuild();
+    el('pl-rg').dataset.built = '1';
+  }
+  plRenderKpi();
+  plApply();
+}
 
 /* ==================== 筛选器构建 ==================== */
 function chipsBox(id,vals,cntMap,key){
@@ -5409,10 +5757,115 @@ document.addEventListener('click', function(ev){
 /* 评标出场记录已在 rperfTable 里并进主表（2026-10-24），这里不再单独成段。
    保留空壳是因为外部还有调用点，删了会报 undefined。 */
 function rperfEvalSec(){ return ''; }
+
+/* ── 规划项目挂业主画像（2026-11-02）────────────────────────────────
+   用户口径：「热网类不入商机库，只挂画像」「这些已提取的项目，可以根据公司情况放到平台里面」。
+
+   为什么**不给** data.org.js 写入这些项目：
+     ① data.org.js 每天由 build_web.py 从 merged.json 重算，谁写进去早上就被冲掉；
+     ② 更重要的是口径 —— 规划项目还没挂网，没有招标文件、没有开标时间，
+        塞进 buyers.items 会让「本库 N 个项目」把规划期项目算成招采记录，
+        销售看一眼会以为这家业主发过标。
+   所以建一张**只存在于前端内存**的索引 PLN.byOwner：
+     · 画像弹层多一段「规划期项目（还没招标）」，跟业绩总表物理分开，一眼能看出性质不同；
+     · 图谱左栏业主名后面挂一个规划数，点了才展开 —— 不占「有效业主」的排序位；
+     · 「规划前瞻」页签的卡片，业主名变成可点，直接开这家业主的画像。
+
+   名字对齐是难点：规划清单里是「江苏华电吴江热电有限公司」，
+   业主库里可能是「华电吴江热电」「江苏华电吴江热电」两种写法。
+   用三层：全名 → 剥掉省市前缀 → 词根前 4 字。宁可漏挂，不可乱挂。 */
+var PLN = {byOwner: null, list: []};
+
+function plnStem(s){
+  return String(s || '').replace(/[（(][^）)]*[）)]/g, '').replace(/[\s　]/g, '')
+    .replace(/^(?:中国|江苏|浙江|上海|安徽|江苏省|浙江省|上海市|安徽省)/, '');
+}
+function plnKey(s){
+  /* 取词根前 4 字做粗索引键。为什么是 4：
+     少于 4 会把「华电吴江」和「华电戚墅堰」撞到一起；多于 4 会把「大唐苏州热电有限责任公司」
+     和「大唐苏州热电有限公司」拆开。4 字是这批 107 家业主里最少撞车的长度（实测）。 */
+  var t = plnStem(s).replace(/(?:股份)?(?:有限)?(?:责任)?公司$/, '');
+  return t.slice(0, 4);
+}
+function plnBuild(){
+  if (PLN.byOwner) return true;
+  if (!plLoad()) return false;          // plLoad 会按需确保 DATA_PLAN 已就位
+  var byExact = {}, byKey = {};
+  PLN.list.forEach(function (r) {
+    if (!r.b) return;
+    (byExact[r.b] = byExact[r.b] || []).push(r);
+    var k = plnKey(r.b);
+    if (k.length >= 3) (byKey[k] = byKey[k] || []).push(r);
+  });
+  PLN.byOwner = {exact: byExact, key: byKey};
+  return true;
+}
+/* 按业主名取它的规划项目。返回 [] 表示这家没有规划期的活。 */
+function plnOf(name) {
+  if (!name) return [];
+  if (!plnBuild()) return [];
+  var m = PLN.byOwner;
+  if (m.exact[name]) return m.exact[name];
+  var k = plnKey(name);
+  var cand = m.key[k] || [];
+  /* 键相同还不够，还得词根确实对得上 —— 「华电吴江」的键是「华电吴江」，
+     「华电吴江热电有限公司」剥完也是「华电吴江」，这才算同一家。
+     只比键会说「江苏华电吴江」和「浙江华电吴江」是一家，那不行。 */
+  var stem = plnStem(name).replace(/(?:股份)?(?:有限)?(?:责任)?公司$/, '');
+  return cand.filter(function (r) {
+    var rs = plnStem(r.b).replace(/(?:股份)?(?:有限)?(?:责任)?公司$/, '');
+    return rs === stem || rs.indexOf(stem) === 0 || stem.indexOf(rs) === 0;
+  });
+}
+/* 画像弹层里的「规划期项目」段。放在业绩总表**后面**，因为业绩是已发生的、
+   规划是还没发生的，销售先看业绩再看前瞻。 */
+function plnSec(name) {
+  var L = plnOf(name);
+  if (!L.length) return '';
+  L = L.slice().sort(function (a, b) { return (a.cl || 0) - (b.cl || 0) || b.sc - a.sc; });
+  var amt = 0;
+  L.forEach(function (r) { if (r.amt) amt += Number(r.amt); });
+  var h = '<div class="ep-sec pln-sec"><b>◇ 规划期项目（还没招标）</b>' +
+    '<p class="pln-note">下面这些来自' + esc((window.DATA_PLAN && window.DATA_PLAN.meta && window.DATA_PLAN.meta.src) || '热电联产/供热规划正文') +
+    '，是这家业主在 2026-2030 规划期里<b>要建</b>的东西。现在还查不到招标公告 —— ' +
+    '挂在这里就是为了让你比对手早知道 3-6 个月，提前打招呼、提前做方案。</p>' +
+    '<p class="pln-sum">共 <b>' + L.length + '</b> 项' + (amt > 0 ? ' · 匡算投资合计 <b>' + amt.toFixed(1) + ' 亿元</b>' : '') + '</p>' +
+    '<table class="pln-tb"><thead><tr><th>项目</th><th>地区</th><th style="text-align:right">投资</th>' +
+    '<th>阶段</th><th>切入</th><th>档</th><th>原文</th></tr></thead><tbody>';
+  L.forEach(function (r) {
+    h += '<tr>' +
+      '<td><b>' + esc(r.t) + '</b>' + (r.pp ? '<span class="pl-pipe">供热管网·仅画像</span>' : '') +
+        (r.ct ? '<div class="pln-ct">' + esc(r.ct) + '</div>' : '') + '</td>' +
+      '<td>' + esc(r.p + r.city + (r.dist ? '·' + r.dist : '')) + '</td>' +
+      '<td style="text-align:right">' + (r.amt ? Number(r.amt).toFixed(1) + ' 亿' : '—') + '</td>' +
+      '<td>' + esc(r.st) + '</td>' +
+      '<td>' + esc(r.e || '—') + '</td>' +
+      '<td><span class="gbadge ' + esc(r.g) + '">' + esc(r.g) + '</span></td>' +
+      '<td>' + (r.u ? '<a href="' + esc(r.u) + '" target="_blank" rel="noopener">原文 ↗</a>' : '—') + '</td>' +
+      '</tr>';
+  });
+  h += '</tbody></table></div>';
+  return h;
+}
 function domOwnerProf(name){
   var x=null;
   arr(D.domestic).forEach(function(o){ if(o.name===name) x=o; });
   if(!x){
+    /* 这家在 domestic 里没有档案（没发过我们的标，所以没进重点客户）。
+       但如果它有**规划期项目**，就不能只回一句「暂无」——那恰恰是最该提前接触的对象。
+       给一张薄版画像：一句说明 + 规划项目段 + 检索出口。 */
+    var _pl=plnOf(name);
+    if(_pl.length){
+      var _h='<div class="ep-sec"><b>① 客户概览</b><p>本库<b>还没有</b>这家业主发过我们主场标的记录'+
+        '（所以没进「国内重点客户」排序）。但它出现在<b>热电联产/供热规划</b>里 —— '+
+        '规划期的活还没挂网，现在正是提前接触的时候。</p></div>';
+      _h+=plnSec(name);
+      _h+='<div class="ep-sec"><b>② 下一步</b><p>'+
+        '<a href="javascript:searchFor(\''+esc(String(name).slice(0,8)).replace(/'/g,"\\'")+'\')">在商机库搜它发过的全部记录 ↗</a>'+
+        '　<a href="https://www.qcc.com/web/search?key='+encodeURIComponent(name)+'" target="_blank" rel="noopener nofollow">企查查看工商信息 ↗</a></p></div>';
+      openUniProf(name,'规划期业主 · 本库暂无招采记录',_h);
+      return;
+    }
     openUniProf(name,'','<div class="ep-sec"><p>本库暂无该业主的档案数据。</p></div>');
     return;
   }
@@ -5448,9 +5901,12 @@ function domOwnerProf(name){
       return {t:it.t||'', d:it.d||'', amt:it.amt||0, url:it.url||'',
               owner:'', win:it.win||'', seg:'', st:it.st||''};
     }), news:[]});
-  /* ④ 常中标单位：营销最想看的一段 */
+  /* ④ 规划期项目（2026-11-02 新增）：还没招标、但已写进规划的东西。
+     放在业绩之后 —— 先看它买过什么，再看它接下来要买什么。 */
+  h+=plnSec(x.name);
+  /* ⑤ 常中标单位：营销最想看的一段 */
   if((x.wins||[]).length){
-    h+='<div class="ep-sec"><b>④ 常中标单位</b><div class="en-tags">'+
+    h+='<div class="ep-sec"><b>⑤ 常中标单位</b><div class="en-tags">'+
        x.wins.map(function(w){
          return '<span>'+esc(w.n)+(w.c>1?' ×'+w.c:'')+'</span>';
        }).join('')+'</div></div>';
@@ -6448,14 +6904,24 @@ function renderGraph(){
   el('grList').innerHTML=list.map(function(x){
     var sel=x.name===gSt.sel;
     var rgs=x.rgs?x.rgs.map(function(r){return r.k}):(x.rgAll?Object.keys(x.rgAll):[]);
-    return '<div class="row'+(sel?' on':'')+'" data-n="'+esc(x.name)+'">'+esc(x.name)+
+    /* 规划期项目数（2026-11-02）：这家业主在规划里还有几项没招标的活。
+       有了这个标记，名单上就能一眼分出「只买过、但没后续」和「还有一堆要买」的两类业主。 */
+    var _np=plnOf(x.name).length;
+    return '<div class="row'+(sel?' on':'')+(_np?' wp':'')+'" data-n="'+esc(x.name)+'">'+
+      (_np?'<span class="pn">'+esc(x.name)+'</span>'+
+        '<span class="pln-dot" title="规划期还有 '+_np+' 项没招标">规划 '+_np+'</span>'
+        :esc(x.name))+
       '<em>'+(x.n)+' 条'+(rgs.length?' · '+esc(rgs.slice(0,2).join('/')):'')+'</em></div>'}).join('')||
       '<div class="gempty">没有匹配的名称</div>';
   var cur=pool.filter(function(x){return x.name===gSt.sel})[0];
   if(!cur)cur=list[0];
-  if(!cur){el('grMain').innerHTML='<div class="gempty">暂无数据，请先运行 build_owner_graph.py</div>';return}
+  if(!cur){el('grMain').innerHTML='<div class="gempty">暂无数据，请先运行 build_owner_graph.py</div>';
+    /* ⚠ 这里不能直接 return：图谱数据（data.graph.js）没拉到 / 空的时候，
+       「规划期业主」这块是**独立数据源**（data.plan.js），不该跟着一起消失。 */
+    renderLatent(); renderPlanOwners(); return}
   el('grMain').innerHTML = gSt.m==='owner' ? renderGraphOwner(cur) : renderGraphSup(cur);
   renderLatent();
+  renderPlanOwners();
 }
 /* 潜在业主（2026-10-21）：用户要求「保留一个潜在业主标签，放在二级位置简单展示项目」。
    只列名字 + 地区 + 发过什么赛道 + 1 条样例，点不进深度画像，也不参与排序。
@@ -6474,6 +6940,70 @@ function renderLatent(){
     return '<div class="row latent" data-latent="1" title="本库只在三级业务（分公司业务）发过标，未发过我们主场的标">'+
       esc(x.name)+'<em>'+x.n+' 条'+(segs?' · '+esc(segs):'')+'</em></div>';
   }).join('')||'<div class="gempty">没有匹配的潜在业主</div>';
+}
+/* 规划期业主名单（2026-11-02）。
+   「本库有档案的」走上面的有效业主名单（带规划 N 标记），
+   这里只放**本库一条标都没有**的 —— 107 家里的大头。
+   判定「本库有没有」用三处合并查：domestic（重点客户）、buyers、latent，
+   因为一家业主可能还在 latent 里躺着（发过标但不够格进重点客户）。 */
+function plnKnownNames(){
+  var s={};
+  ['domestic','buyers','latent'].forEach(function(k){
+    (D[k]||[]).forEach(function(o){ if(o&&o.name) s[o.name]=1; });
+  });
+  return s;
+}
+function renderPlanOwners(){
+  var box=el('grPlan'); if(!box) return;
+  var hdr=el('grPlanH'), nEl=el('grPlanN');
+  /* 只在「按业主看」时出，供应商视图看不到这个 */
+  var show = gSt.m==='owner';
+  if(hdr) hdr.style.display = show ? '' : 'none';
+  box.style.display = show ? '' : 'none';
+  if(!show) return;
+  /* 数据还没到（头一次点这个页签时 DATA_PLAN 在按需拉）→ 拉一次再画 */
+  if(!plLoad()){
+    need('plan', function(){ if(el('grPlan')) renderPlanOwners(); });
+    box.innerHTML='<div class="gempty">正在加载规划数据…</div>';
+    return;
+  }
+  plnBuild();
+  var known=plnKnownNames(), agg={};
+  PLN.list.forEach(function(r){
+    /* 业主字段在这个清单里有三种不是「一家公司」的写法，全剔掉：
+         「未指定」「未指定（各区块）」「未指定（原义乌厚昌实业 50t/h+36t/h 两台锅炉迁建）」
+         「大唐金华清洁能源 + 地方国资组建的平台公司」（联合体/待组建平台）
+         「浙能兰溪电厂 / 兰溪协鑫环保」（二选一，没定）
+       这些拿去「挂画像」是挂不上去的，硬挂只会让人点开一个不存在的单位。 */
+    if(!r.b) return;
+    if(r.b.indexOf('未指定')===0 || r.b.indexOf('未明确')===0) return;
+    if(/[+\/／]|组建|平台公司|待定/.test(r.b)) return;
+    if(plnOf(r.b).length && known[r.b]) return;      // 上面名单里已经有了
+    var a=agg[r.b]=agg[r.b]||{n:0,amt:0,rg:'',cl:0,top:null};
+    a.n++;
+    if(r.amt) a.amt+=Number(r.amt);
+    a.rg=a.rg||r.p;
+    if(r.cl) a.cl++;                                  // 已关闭的条数
+    if(!a.top || r.sc>a.top.sc) a.top=r;
+  });
+  var list=Object.keys(agg).map(function(k){return {name:k,v:agg[k]}});
+  /* 排序：先把还有活没关闭的排前面，再看投资体量 —— 一个 40 亿的项目比 20 个 0.5 亿的值得先打 */
+  list.sort(function(a,b){
+    var ao=a.v.n-a.v.cl, bo=b.v.n-b.v.cl;
+    if(ao!==bo) return bo-ao;
+    return b.v.amt-a.v.amt;
+  });
+  var q=(gSt.q||'').toLowerCase();
+  if(q) list=list.filter(function(x){return x.name.toLowerCase().indexOf(q)>=0});
+  if(nEl) nEl.textContent = list.length ? '· '+list.length+' 家' : '';
+  box.innerHTML=list.slice(0,80).map(function(x){
+    var v=x.v;
+    return '<div class="row planown'+(x.name===gSt.sel?' on':'')+'" data-planown="'+esc(x.name)+'" title="'+esc(x.name)+'">'+
+      '<span class="pn">'+esc(x.name)+'</span>'+
+      '<span class="pln-dot" title="规划期项目数">规划 '+v.n+'</span>'+
+      '<em>'+esc(v.rg)+(v.amt>0?' · '+v.amt.toFixed(1)+'亿':'')+
+      (v.cl?' · '+v.cl+' 项已关闭':'')+'</em></div>';
+  }).join('')||'<div class="gempty">没有匹配的规划期业主</div>';
 }
 /* 图谱数据三处来源（合并后的 D.graph / 未合并的 DATA_GRAPH.graph / DATA_GRAPH 本体），
    按需加载下任何一个都可能还没到。统一在这里取，别在各处各写一套判断。 */
@@ -6615,6 +7145,12 @@ function gPick(mode,name){
 el('grSeg').onclick=function(e){var s=e.target.closest('span');if(!s)return;gSt.m=s.dataset.m;gSt.sel='';renderGraph()};
 el('grQ').oninput=function(){gSt.q=this.value.trim();renderGraph()};
 el('grList').onclick=function(e){var r=e.target.closest('.row');if(!r)return;gSt.sel=r.dataset.n;renderGraph()};
+el('grPlan').onclick=function(e){
+  var r=e.target.closest('[data-planown]'); if(!r) return;
+  /* 直接开画像 —— 这批业主本来就没有深度画像，但规划期项目段是有内容的，
+     正好是「还没招标、赶紧去接触」的那批，不能像潜在业主那样只给一句说明。 */
+  domOwnerProf(r.getAttribute('data-planown'));
+};
 el('grLatent').onclick=function(e){
   var r=e.target.closest('.row'); if(!r)return;
   /* 潜在业主没有深度画像（它没发过我们的标，画像里全是空的，给出来反而误导）。
@@ -7044,4 +7580,4 @@ function boot_main(){
 <div id="encyProfBox" onclick="if(event.target===this)encyProfClose()"></div>
 <div id="uniProfBox" onclick="if(event.target===this)closeUniProf()"></div>
 <div id="mhBox" onclick="if(event.target===this)mhClose()"></div>
-<script src="boot.js?v=202610231627"></script>
+<script src="boot.js?v=202611021150"></script>
