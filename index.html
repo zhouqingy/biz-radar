@@ -297,6 +297,8 @@ button{font-family:inherit}
 .cpfnew-i .kd{display:inline-block;margin-left:6px;font-size:10px;font-weight:700;
   color:#5c7590;background:#eef4fa;border:1px solid #dde8f2;border-radius:4px;
   padding:0 5px;line-height:15px;vertical-align:1px}
+/* 跨省投标标记：江苏+安徽都投过的，抢标半径比只在家门口的更大，值得区别对待 */
+.cpfnew-i .kd.pv{margin-left:3px;color:#8a5a12;background:#fff6e6;border-color:#f0dcb4}
 .gscore{font-size:11px;color:var(--tx3);font-weight:700;padding-top:3px;white-space:nowrap}
 .newdot{font-size:10px;font-weight:800;color:#c0202a;background:#ffecec;border:1px solid #ffc9c9;padding:1px 7px;border-radius:8px;white-space:nowrap}
 .pj-money{margin-left:auto;text-align:right;font-size:19px;font-weight:800;color:var(--red);font-variant-numeric:tabular-nums;line-height:1.15}
@@ -1564,8 +1566,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202611030419"></script>
-<script src="data.items.js?v=202611030419"></script>
+<script src="data.core.js?v=202611021415"></script>
+<script src="data.items.js?v=202611021415"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1632,7 +1634,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611030419';
+var VER='?v=202611031445';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3420,7 +3422,12 @@ function renderCpfNew(){
        按条数排能排到前列。但那是给项目做配套服务的，不抢我们的单，
        摆在同业页等于告诉业务「盯住这家监理」。构建脚本已判好型（v.show）。 */
     if(v.show===false) return;
-    arr.push({name:k, n:v.n, items:v.items||[], kind:v.kind||'other'});
+    /* 省份：同一家单位可能在江苏、安徽都投过标。标出来才知道它是跨省打、
+       还是只在自己家门口抢标 —— 前者威胁大得多。 */
+    var pv={};
+    (v.items||[]).forEach(function(it){ if(it.pv) pv[it.pv]=1 });
+    arr.push({name:k, n:v.n, items:v.items||[], kind:v.kind||'other',
+              pv:Object.keys(pv).sort().join('·')});
   });
   if(!arr.length){ box.innerHTML=''; return; }
   /* 排序：设计院/总包在前（这两类才是真实对手），再按业绩条数 */
@@ -3432,9 +3439,13 @@ function renderCpfNew(){
   });
   var amt=0; arr.forEach(function(x){ x.items.forEach(function(it){ if(it.m>0) amt+=it.m }) });
   var hid=(window.DATA_CANDPERF||{}).nhidden||0;
+  var nprov={};
+  arr.forEach(function(x){ String(x.pv||'').split('·').forEach(function(p){ if(p) nprov[p]=1 }) });
+  var provTxt=Object.keys(nprov).sort().join(' / ');
   var h='<div class="cpfnew">'+
     '<div class="cpfnew-hd">评标公示里露面的其他投标单位 <b>'+arr.length+'</b> 家'+
-      '<small>本库还没建档 · 业绩来自评标公示原文 · 点名字看业绩</small></div>'+
+      '<small>'+(provTxt?provTxt+' 中标候选人公示':'评标公示')+
+      ' · 本库还没建档 · 点名字看业绩</small></div>'+
     '<div class="cpfnew-sum">这批单位不在「竞争对手档案」里，但确实在投同类标，'+
       '合计 '+arr.reduce(function(s,x){return s+x.n},0)+' 条已建成业绩'+
       (amt>0?'、合同额合计 '+(amt>=10000?(amt/10000).toFixed(2)+' 亿':Math.round(amt)+' 万'):'')+
@@ -3444,7 +3455,8 @@ function renderCpfNew(){
     '<div class="cpfnew-grid">'+arr.map(function(x){
       var top=x.items.slice().sort(function(a,b){ return (b.m||0)-(a.m||0) })[0]||{};
       return '<div class="cpfnew-i" data-cpfname="'+esc(x.name)+'">'+
-        '<div class="nm">'+esc(x.name)+'<span class="kd">'+esc(KINDNAME[x.kind]||'其他')+'</span></div>'+
+        '<div class="nm">'+esc(x.name)+'<span class="kd">'+esc(KINDNAME[x.kind]||'其他')+'</span>'+
+          (x.pv&&x.pv.indexOf('·')>0?'<span class="kd pv">'+esc(x.pv)+'</span>':'')+'</div>'+
         '<div class="ct">'+x.n+' 条业绩'+(top.p?' · '+esc(String(top.p).slice(0,22)):'')+'</div>'+
       '</div>';
     }).join('')+'</div></div>';
@@ -6732,8 +6744,15 @@ function cpfSection(name, kind){
     if(r.m>0){ amt+=r.m; nAmt++; }
   });
   var np=Object.keys(pages).length;
+  /* 按省份分一下。2026-11-03 接入安徽后，同一家单位可能既在江苏投过标、
+     也在安徽投过标 —— 这两省的业绩写法、项目类型差别很大（江苏热电 EPC 多、
+     安徽供热管网土建多），混在一张表里看不出「它在哪个省有落地」。 */
+  var pv={};
+  rows.forEach(function(r){ if(r.pv) pv[r.pv]=(pv[r.pv]||0)+1; });
+  var pvTxt=Object.keys(pv).sort().map(function(k){ return k+' '+pv[k]; }).join(' · ');
   var sum='<div class="cpf-sum">评标公示里申报了 <b>'+rows.length+'</b> 条已建成业绩'+
     '，出自 <b>'+np+'</b> 次投标'+
+    (pvTxt?'（'+pvTxt+'）':'')+
     (nAmt?'，其中 '+nAmt+' 条带合同额、合计 <b>'+(amt>=10000?(amt/10000).toFixed(2)+' 亿':Math.round(amt)+' 万')+'</b>':'')+
     '。<br>这是它投标时向评标委员会申报、并经评委认可的历史项目 —— 不是自我介绍，可以当投标依据。'+
     '注意「时间」列分两种：<b>竣工</b>=已建成验收，<b>中标</b>=只是签了合同，不代表已完工。</div>';
