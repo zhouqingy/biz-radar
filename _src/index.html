@@ -1804,7 +1804,7 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202611041807"></script>
+<script src="data.core.js?v=202611041835"></script>
 <script src="data.items.js?v=202611041807"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
@@ -4721,8 +4721,45 @@ function ovData() {
 }
 
 /* ── 主入口：按当前视图分发 ────────────────────────────────────────── */
+var _ovPoll = null;
 function renderOverseas() {
   var d = ovData();
+  /* 数据没到就先画「加载中」，不要画四个空视图。
+     实测（线上 GitHub Pages）：data.news.js 494KB，弱网要 6~10 秒才到。
+     这段时间 if(i===3) renderOverseas() 已经跑过了，四个视图容器是空的、
+     页签上的数字也是空的，用户看到的就是「海外这块坏了」。
+     这里自己轮询，数据一到立刻重绘，不依赖 need() 的回调时机。 */
+  var _ready = (d.flash.length + d.clue.length + d.odi.length) > 0;
+  if (!_ready && !window.DATA_NEWS) {
+    ['ovNFlash', 'ovNClue', 'ovNOdi', 'ovNEnv'].forEach(function (id) {
+      var e = el(id); if (e) e.textContent = '';
+    });
+    ['ovBoxClue', 'ovBoxOdi', 'ovBoxEnv'].forEach(function (id) {
+      var e = el(id); if (e) e.style.display = 'none';
+    });
+    var fb = el('ovBoxFlash');
+    if (fb) fb.innerHTML = '<div class="empty" id="ovLoading">正在加载海外数据…' +
+      '<br><span style="font-size:12px;color:var(--tx3)">这个模块 494KB，网络慢的时候要几秒，不用刷新</span></div>';
+    if (!_ovPoll) {
+      var _t0 = Date.now();
+      _ovPoll = setInterval(function () {
+        var sec = Math.round((Date.now() - _t0) / 1000);
+        if (window.DATA_NEWS) {
+          clearInterval(_ovPoll); _ovPoll = null;
+          try { mergeMod('news'); } catch (e) { }
+          try { refreshTabCounts(); } catch (e) { }
+          renderOverseas();
+          return;
+        }
+        var lx = el('ovLoading');
+        if (lx && sec >= 8) lx.innerHTML = '正在加载海外数据… 已经 ' + sec + ' 秒了' +
+          '<br><span style="font-size:12px;color:var(--tx3)">网络不太顺，<b>不用刷新</b>，加载完会自动显示</span>';
+        if (sec > 60) { clearInterval(_ovPoll); _ovPoll = null; }
+      }, 800);
+    }
+    return;
+  }
+  if (_ovPoll) { clearInterval(_ovPoll); _ovPoll = null; }
   var nf = el('ovNFlash'), nc = el('ovNClue'), no = el('ovNOdi'), ne = el('ovNEnv');
   if (nf) nf.textContent = d.flash.length || '';
   if (nc) nc.textContent = d.clue.length || '';
