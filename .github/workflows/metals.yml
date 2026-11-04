@@ -68,6 +68,17 @@ jobs:
         run: |
           # build_web.py 会顺带重建全部数据文件。它的输入（raw/*.json）都在仓库里，
           # 不跑采集也能确定性重放，所以这一步是安全的。
+          #
+          # ⚠ merged.json 不在仓库里（4MB、由 build_data.py 从 raw 生成，长期当构建产物看）。
+          #   仓库根目录放一份快照，构建前拷进 tools/ 供 build_web.py 读。
+          #   没有这行时，2026-11-04 首次手动运行就挂在
+          #   FileNotFoundError: tools/merged.json。
+          if [ -f ../merged.snapshot.json ]; then
+            cp ../merged.snapshot.json merged.json
+            echo "已用仓库快照 merged.snapshot.json ($(du -h merged.json | cut -f1))"
+          else
+            echo "❌ 仓库缺 merged.snapshot.json，build_web.py 无输入"; exit 1
+          fi
           python build_web.py
 
       - name: 3) 自检
