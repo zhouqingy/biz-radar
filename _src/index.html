@@ -2189,6 +2189,25 @@ function goTab(i){
   if(m&&!window['DATA_'+m.toUpperCase()]){
     el(TABS[i][0]).insertAdjacentHTML('afterbegin',
       '<div class="hint" id="modLoading" style="padding:8px 0">正在加载数据…</div>');
+    /* 2026-11-04：这个提示原来是一句死文案，网络慢的时候能挂 60 秒，
+       用户看着就以为「页面坏了 / 数据没更新」。改成会走的计时：
+       超过 3 秒就告诉他慢在哪、大概还要多久，超过 15 秒给出可操作的建议。 */
+    (function(){
+      var _t0=Date.now(), _sz={org:'1.1MB',news:'478KB',plan:'81KB'}[m]||'';
+      var _iv=setInterval(function(){
+        var elx=document.getElementById('modLoading');
+        if(!elx){ clearInterval(_iv); return; }
+        var sec=Math.round((Date.now()-_t0)/1000);
+        if(sec>=15){
+          elx.innerHTML='正在加载数据… 已经 '+sec+' 秒了'+(_sz?'（这个模块 '+_sz+'）':'')+
+            '。网络慢的时候会这样，<b>不用刷新</b>，加载完会自动显示；'+
+            '着急的话可以先用「找商机」页，那边是首屏就带好的。';
+        }else if(sec>=3){
+          elx.innerHTML='正在加载数据… '+sec+' 秒'+(_sz?'（'+_sz+'）':'')+
+            (sec<10?'，稍等一下':'，比平时慢，网络不太顺');
+        }
+      }, 1000);
+    })();
   }
   if(m) need(m,function(){ mergeMod(m); refreshTabCounts(); renderPanel(i); });
   /* 规划页签立刻画一次「加载中」骨架：need 的回调要等数据到了才执行，
