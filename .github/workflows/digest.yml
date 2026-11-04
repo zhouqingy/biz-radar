@@ -21,6 +21,14 @@ on:
   schedule:
     - cron: '30 2 * * 1'      # 每周一 10:30 北京 = 02:30 UTC
   workflow_dispatch:
+  # 2026-11-04：加 push 触发。原因很实际 —— 无 workflow scope 的 token 不能
+  # dispatch，只能在网页上点；而「Re-run all jobs」用的是**当时那次运行的旧 commit**，
+  # 所以修完代码再点重跑，跑的仍是坏的那版，看起来像「改了还是失败」。
+  # 改脚本或改这个工作流本身时会自动在新 commit 上跑一次，省掉这一步人工。
+  push:
+    paths:
+      - 'tools/merge_digest.py'
+      - 'tools/mine_rival_news.py'
 
 permissions:
   contents: write
