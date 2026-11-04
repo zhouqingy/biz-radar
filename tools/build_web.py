@@ -1129,16 +1129,42 @@ print('海外动态 %d 条，切口分布：%s' % (len(overseas), ' · '.join('%
 # 现在改为：updated = 真实构建时刻（用户关心的是“今天有没有跑”），
 #          dataAsOf = 源文件里的最新日期（溯源用，不影响展示）。
 _build_day = time.strftime('%Y-%m-%d')
-_latest_weekly = time.strftime('%Y-%m-%d')
-_dates = []
-for _sub in ('weekly', 'early'):
-    _d = os.path.join(ROOT, 'raw', _sub)
-    if not os.path.isdir(_d): continue
-    for f in os.listdir(_d):
-        # 从任意文件名（含前缀、含渠道名）中提取日期，不再要求裸文件名
-        _dates.extend(re.findall(r'\d{4}-\d{2}-\d{2}', f))
-if _dates:
-    _latest_weekly = max(_dates)
+
+# ── dataAsOf 的取值来源（2026-11-04 再修一次）────────────────────────────
+# 上一版只看 raw/weekly、raw/early 两个目录的文件名日期。问题出在 metals/digest
+# 这条链路：它只把 merged.snapshot.json 拷过来重建页面，根本不刷这两个目录，
+# 于是线上 dataAsOf 从 11-03 退回 10-27，页面直接亮「⚠ 4 天没有新公告」的假红灯。
+# 现在按「谁更可信」分三级取，取到即止：
+#   ① merged.json / D（真正进了库的公告）里 max(d) —— 最可信，直接反映"最后一条公告是哪天"
+#   ② raw/weekly、raw/early 文件名里的日期 —— merged 为空时的兜底
+#   ③ 构建日 —— 都没有的情况下别显示 1970
+_latest_weekly = ''
+_asof_from = 'none'
+
+
+def _max_day(rows):
+    ds = [(r.get('d') or r.get('date') or '')[:10] for r in (rows or [])]
+    ds = [d for d in ds if re.match(r'^\d{4}-\d{2}-\d{2}$', d or '')]
+    return max(ds) if ds else ''
+
+
+_d0 = _max_day(D)
+if _d0:
+    _latest_weekly, _asof_from = _d0, 'merged(公告日期)'
+else:
+    _dates = []
+    for _sub in ('weekly', 'early'):
+        _dd = os.path.join(ROOT, 'raw', _sub)
+        if not os.path.isdir(_dd):
+            continue
+        for f in os.listdir(_dd):
+            # 从任意文件名（含前缀、含渠道名）中提取日期，不再要求裸文件名
+            _dates.extend(re.findall(r'\d{4}-\d{2}-\d{2}', f))
+    if _dates:
+        _latest_weekly, _asof_from = max(_dates), 'raw/weekly|early(文件名)'
+    else:
+        _latest_weekly, _asof_from = _build_day, '构建日(兜底)'
+print('dataAsOf=%s  来源=%s' % (_latest_weekly, _asof_from))
 
 # 行业动态先算出来，供「重点客户打通」复用（2026-10-20）
 TRENDS = ([t for t in IND.get('trends', [])
