@@ -1198,6 +1198,134 @@ details.sub li{padding:2px 0}
   .ep-title{font-size:16.5px}
   .en-pj{flex-wrap:wrap}
 }
+
+/* ==================== 视觉统一（2026-11-04） ====================
+   用户：「这个页面整体的版式也不好看，有没有可以调整的将其搞好看点」
+        「这个样式不太统一你再统一一下」
+
+   做法不是推翻重来，而是把散在十几处的差异收成一套：
+     · 卡片：统一 12px 圆角、同一条描边、同一档阴影，hover 轻微抬起
+     · 标题：卡片头 13.5px/800，区块标题 12.5px/800，副标题 11.5px 灰
+     · 标签：统一 10.5px、6px 圆角、同色系，不再有的圆有的方
+     · 表格：统一斑马纹 + 悬停高亮，行距 1.6，数字右对齐用等宽数字
+     · 链接：统一 --brand 蓝，hover 加下划线，末尾统一 ↗
+   —— 全部写在文件末尾，靠后覆盖，避免动到上面老规则引发连锁。 */
+:root{
+  --r-card:12px; --r-ctl:8px;
+  --sh-card:0 1px 2px rgba(16,24,40,.04), 0 10px 26px -14px rgba(16,24,40,.18);
+  --sh-hover:0 2px 4px rgba(16,24,40,.05), 0 14px 30px -14px rgba(20,50,100,.24);
+}
+.ccard{border-radius:var(--r-card);box-shadow:var(--sh-card);transition:box-shadow .16s ease,border-color .16s ease,transform .16s ease}
+.cc-click{cursor:pointer}
+.cc-click:hover{border-color:#c3d4ea;box-shadow:var(--sh-hover);transform:translateY(-1px)}
+.cc-click:active{transform:translateY(0)}
+.cc-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:2px}
+.cc-h b{font-size:13.5px;font-weight:800;letter-spacing:-.2px;color:var(--tx)}
+.cc-open{margin-left:auto;font-size:11px;font-weight:700;color:var(--brand);opacity:0;
+  transition:opacity .15s ease;white-space:nowrap}
+.cc-click:hover .cc-open{opacity:1}
+.cc-tag{font-size:10.5px;line-height:1.7;border-radius:6px;padding:0 7px;border:1px solid transparent}
+.cc-m{font-size:12.5px;color:var(--tx2)}
+.cc-m b{color:var(--tx);font-weight:800}
+.cc-i ul{margin:6px 0 0;padding-left:16px}
+.cc-i li{margin:2px 0;line-height:1.65}
+.ccard a{color:var(--brand);text-decoration:none}
+.ccard a:hover{text-decoration:underline}
+
+/* 表格：斑马纹 + 悬停；数字列等宽 */
+.pf-table{border-collapse:separate;border-spacing:0;width:100%}
+.pf-table thead th{background:#f6f8fb;font-size:11px;font-weight:800;color:var(--tx2);
+  border-bottom:1px solid var(--line);padding:7px 9px;white-space:nowrap;position:sticky;top:0;z-index:1}
+.pf-table td{padding:8px 9px;border-bottom:1px solid #f0f2f6;font-size:12px;vertical-align:top;line-height:1.62}
+.pf-table tbody tr:nth-child(even){background:#fbfcfe}
+.pf-table tbody tr:hover{background:#f4f9ff}
+.pf-table td.a,.pf-table td.d{white-space:nowrap;font-variant-numeric:tabular-nums}
+.pf-table td.a{text-align:right;font-weight:700;color:#0f6236}
+.pf-table td.p b{font-weight:700;color:var(--tx)}
+.pf-row-link{cursor:pointer}
+.pf-row-link:hover td.p b{color:var(--brand);text-decoration:underline}
+img,table{max-width:100%}
+
+/* 弹层里的统一区块 */
+.ep-sec{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+.ep-sec:first-child{border-top:none;margin-top:0;padding-top:0}
+.ep-sec>b{display:block;font-size:12.5px;font-weight:800;color:var(--tx);margin-bottom:8px}
+.ep-sec>b small{font-weight:400;color:var(--tx3);font-size:11px;margin-left:6px}
+.pf-kv{width:100%;border-collapse:separate;border-spacing:0;font-size:12px}
+.pf-kv th{width:96px;text-align:left;font-weight:600;color:var(--tx3);padding:5px 8px;
+  background:#fafbfd;border-bottom:1px solid #f0f2f6;white-space:nowrap}
+.pf-kv td{padding:5px 10px;border-bottom:1px solid #f0f2f6;color:var(--tx)}
+.cli-ep{border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:#fbfcfe}
+.cli-ep.missing{background:#fffdf6;border-color:#f0e2c2;color:#7a6320;font-size:12px;line-height:1.75}
+.cli-ep-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px}
+.cli-ep-h b{font-size:13px;font-weight:800}
+.cli-ep-sm{margin:0;font-size:12px;line-height:1.78;color:var(--tx2)}
+.cli-ul{list-style:none;margin:0;padding:0}
+.cli-ul>li{padding:7px 0;border-bottom:1px dashed #eef0f5;font-size:12px;line-height:1.7}
+.cli-ul>li:last-child{border-bottom:none}
+.cli-desc{margin-top:4px;color:var(--tx3);font-size:11.5px;line-height:1.7}
+.cli-actions{display:flex;flex-wrap:wrap;gap:8px}
+.cli-actions a{display:inline-block;font-size:12px;font-weight:700;color:var(--brand);
+  background:#f1f7ff;border:1px solid #d7e6f8;border-radius:8px;padding:6px 12px;text-decoration:none}
+.cli-actions a:hover{background:#e6f1ff;border-color:#bcd6f5}
+.pf-more{font-size:11.5px;color:var(--tx3);margin-top:6px}
+.lk{display:inline-block;min-width:20px;text-align:center;font-weight:700;color:var(--brand);
+  background:#f1f7ff;border-radius:6px;padding:0 5px;line-height:18px;text-decoration:none;font-size:11.5px}
+.lk:hover{background:#e2efff;text-decoration:none}
+@media (max-width:760px){
+  .pf-kv th{width:auto}
+  .cc-open{opacity:1}
+}
+
+.tab .ts,.tab small{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.stale-badge{display:inline-block;margin-left:8px;background:#fdecec;color:#b02a1e;border:1px solid #f6c9c4;
+  border-radius:6px;padding:1px 8px;font-size:11.5px;font-weight:800}
+
+/* ==================== 版式统一 · 第二轮（2026-11-04） ====================
+   上一轮把卡片/表格/弹层收成一套；这一轮处理「字号乱、列不齐、挤」三件事：
+     · 正文 14.5px 但卡片 12px、标签 11.5px、说明 10.5px —— 四套字号并存，
+       一眼看过去像拼起来的。正文收到 13.5px，卡片 12.5px，说明不低于 11px。
+     · 业绩表最后一列（原文）只有 3 个字宽，①②③ 竖着堆；固定列宽 + 不换行。
+     · 筛选条 chip 高矮不一、行距过密，统一 26px 高、行距 8px。
+   只做覆盖，不改上面老规则，避免连锁。 */
+body{font-size:13.5px}
+.wrap{max-width:1460px}
+.kpis{gap:9px;margin-top:13px}
+.kpi{min-width:92px;padding:9px 14px;border-radius:10px}
+.kpi b{font-size:20px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:11.5px}
+
+/* 筛选条：等高、留白 */
+.chip{padding:4px 10px;font-size:12px;line-height:1.45;border-radius:15px}
+.chip em{font-size:10.5px}
+.fbar,.filters{gap:7px 8px !important;line-height:1.9}
+
+/* 卡片网格：间距一致 */
+.cgrid{gap:14px}
+
+/* 业绩表：固定列宽，原文列不换行 */
+.pf-table{table-layout:fixed}
+.pf-table th:nth-child(1),.pf-table td:nth-child(1){width:86px}
+.pf-table th:nth-child(3),.pf-table td:nth-child(3){width:23%}
+.pf-table th:nth-child(4),.pf-table td:nth-child(4){width:78px}
+.pf-table th:nth-child(5),.pf-table td:nth-child(5){width:80px}
+.pf-table th:nth-child(6),.pf-table td:nth-child(6){width:104px}
+.pf-table th:nth-child(7),.pf-table td:nth-child(7){width:70px;white-space:nowrap;text-align:center}
+.pf-table td:nth-child(3){word-break:break-word}
+.lk{margin:0 1px}
+
+/* 弹层区块标题：统一左侧竖条，跟卡片标题同一套语言 */
+.prof-sec h4,.ep-sec>b{position:relative;padding-left:9px}
+.prof-sec h4::before,.ep-sec>b::before{content:'';position:absolute;left:0;top:.28em;bottom:.28em;
+  width:3px;border-radius:2px;background:var(--brand)}
+.ep-sec>b{padding-left:9px}
+
+/* 详情弹层：宽度更从容 */
+.ep-wrap{max-width:1080px}
+@media (max-width:860px){
+  .pf-table{table-layout:auto}
+  .pf-table th:nth-child(7),.pf-table td:nth-child(7){width:48px}
+}
 </style>
 <script>
 /* 顶层报错兜底：写到 <html data-err> 便于定位 */
@@ -1528,8 +1656,8 @@ window.addEventListener('error',function(e){
       <h4>四、数据更新机制（三种方式，可任选）</h4>
       <ul>
         <li><b>① 自动（默认）</b>：已配置三个定时任务，由系统按计划自动执行，<b>不需要人工发命令、也不需要开着电脑或客户端</b>——
-          <br>· 每周一 09:00：检索四地新项目 + <b>提前量信号</b>（发改委核准/备案、招标计划预公告、环评公示、技改备案、重大项目清单、上市公告、<b>地方热电联产规划批复</b>）+ 客户海外动态 + 行业政策，增量入库后<b>挖掘 A/B 级项目的新单位</b>、合并新增单位、<b>补厚档案过薄的单位</b>，全量重建并发布
-          <br>· 每周一、周四 10:30：微信线索采集（竞对喜报 + 行业动态），严格校验后并入竞对档案与「微信线索」池（<b>不再塞进本页行业动态</b>，避免两处重复）
+          <br>· 每天 16:10：检索四地新项目 + <b>提前量信号</b>（发改委核准/备案、招标计划预公告、环评公示、技改备案、重大项目清单、上市公告、<b>地方热电联产规划批复</b>）+ 客户海外动态 + 行业政策，增量入库后<b>挖掘 A/B 级项目的新单位</b>、合并新增单位、<b>补厚档案过薄的单位</b>，全量重建并发布
+          <br>· 每天 16:40：微信线索采集（竞对喜报 + 行业动态），严格校验后并入竞对档案与「微信线索」池（<b>不再塞进本页行业动态</b>，避免两处重复）
           <br>· 工作日 16:05：刷新 13 个金属期货收盘价并发布（项目数据不变）
         </li>
         <li><b>② 人工触发</b>：随时说一句「更新商机数据」即可，我会立即跑一遍完整流程</li>
@@ -1583,8 +1711,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202611041432"></script>
-<script src="data.items.js?v=202611041432"></script>
+<script src="data.core.js?v=202611041448"></script>
+<script src="data.items.js?v=202611041448"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1651,7 +1779,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611041432';
+var VER='?v=202611041448';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -6067,7 +6195,7 @@ function pfDraw(box, st){
         return '<a class="lk" href="'+esc(o.u)+'" target="_blank" rel="noopener nofollow" title="'+
           esc(o.s)+'公告原文">'+(p.urls.length>1?('①②③'.charAt(i)):'↗')+'</a>';
       }).join('');
-    } else links='<span class="pm-na">—</span>';
+    } else links='<span class="pm-na" title="这条来自概述/媒体报道，没有可点的公告原文">无原文</span>';
 
     var ctrlTxt = p.ctrl>0 ? '<br><span class="pf-ctrl" title="招标控制价">控 '+money(p.ctrl)+'</span>' : '';
     /* 申报业绩在项目名下挂一行出处，让人知道「这条是谁说的」——
@@ -6076,7 +6204,11 @@ function pfDraw(box, st){
       ? '<div class="pf-cpsrc">'+CPF_CIRC.charAt(p._ci)+' '+esc(p.cpid)+' 那次投标'+
         (p.cpv?'<span class="pf-cpv">'+esc(p.cpv)+'</span>':'')+'</div>' : '';
 
-    h+='<tr>'+
+    /* 整行可点（2026-11-04 用户：「写业绩没有原文吗？怎么跳转不了」）。
+       原来只有最右边那个 ①②↗ 是链接，0.5 个字宽，点不中就当没链接。
+       现在整行都是链接，最右边的 ↗ 只是提示。 */
+    var _rowU=(p.urls[0]||{}).u||'';
+    h+='<tr'+(_rowU?' class="pf-row-link" data-u="'+esc(_rowU)+'" title="点开看公告原文"':'')+'>'+
       '<td class="d">'+esc(p.d||'—')+ctrlTxt+'</td>'+
       '<td class="p"><i class="rp-t rp-'+tp[1]+'">'+tp[0]+'</i><b title="'+esc(p.t)+'">'+
         esc(pfClean(p.t))+'</b>'+
@@ -6398,11 +6530,14 @@ function renderDomestic(){
   el('domGrid').innerHTML=L.map(function(x){
     var open=cEx.has('d:'+x.name);
     var its=open?x.items:x.items.slice(0,3);
-    return '<div class="ccard"><div class="cc-h"><b>'+esc(x.name)+'</b>'+
+    /* 2026-11-04：用户要求「这个也不需要单位画像了，同步下也是点击跳转」——
+       按钮去掉，整张卡就是入口，鼠标移上去抬起 + 右上角出现「看画像 ›」。 */
+    return '<div class="ccard cc-click" data-owner="'+esc(x.name)+'" title="点击查看业主画像：采购习惯 + 业绩总表 + 常中标单位">'+
+      '<div class="cc-h"><b>'+esc(x.name)+'</b>'+
       '<span class="cc-tag" style="background:'+TIER_BG[x.tier]+';color:'+TIER_FG[x.tier]+';font-weight:700">'+x.tier+' '+TIER_TXT[x.tier]+'</span>'+
       (x.rg?'<span class="cc-tag">'+esc(x.rg)+'</span>':'')+
       (x.main?'<span class="cc-tag" style="background:#e8f4ff;color:#1053c9">'+esc(x.main)+'</span>':'')+
-      '<button class="rival-dw" onclick="domOwnerProf(\''+esc(String(x.name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'"))+'\')" title="打开业主画像：采购习惯 + 本库项目 + 常中标单位">单位画像</button>'+
+      '<span class="cc-open">看画像 ›</span>'+
       '</div>'+
       '<div class="cc-m">本库 <b>'+x.n+'</b> 个项目'+(x.amt>0?' · 涉及金额 <b>'+money(x.amt)+'</b>':'')+
         (x.latest?' · 最新 '+esc(x.latest):'')+'</div>'+
@@ -6569,15 +6704,149 @@ function renderClients(){
       (x.items.length>IT_SHOW?ccMore('it:'+x.name,x.items.length-(open?x.items.length:IT_SHOW),open):'')+'</div>'
       :'<div class="cc-m" style="color:#8a9099">本库（国内公开渠道）暂无该客户记录——不代表没机会，'+
         '海外建厂信息通常先在集团官网/行业媒体发布，不在国内招标平台。</div>';
-    return '<div class="ccard ab-card"><div class="cc-h"><b>'+esc(x.name)+'</b>'+
+    return '<div class="ccard ab-card cc-click" data-client="'+esc(x.name)+'" title="点击查看这家出海企业的详情：为什么跟、海外基地、企业档案、动态与本库记录">'+
+      '<div class="cc-h"><b>'+esc(x.name)+'</b>'+
       '<span class="cc-tag" style="background:'+(GTAG[abGrp(x.grp)]||'#f1f3f6')+';color:'+(GCOL[abGrp(x.grp)]||'#5a6270')+'">'+esc(abGrp(x.grp))+'</span>'+
       priTag+
       (hit?'<span class="cc-tag" style="background:#fff2e0;color:#a85c10">'+x.n+' 条库内记录</span>':"")+
-      (nw.length?'<span class="cc-tag" style="background:#e8f1ff;color:#1053c9">'+nw.length+' 条相关情报</span>':'')+'</div>'+
+      (nw.length?'<span class="cc-tag" style="background:#e8f1ff;color:#1053c9">'+nw.length+' 条相关情报</span>':'')+
+      '<span class="cc-open">看详情 ›</span></div>'+
       whyHtml+projHtml+nwHtml+abHtml+hitHtml+
       '<div class="cc-i"><a href="javascript:searchFor(\''+esc(x.kw)+'\')">在商机库中搜索该客户国内记录 ↗</a></div>'+
       '</div>'}).join('')||'<div class="empty">没有匹配的客户，换个筛选条件试试</div>';
 }
+/* ==================== 客户 / 业主卡片 → 详情（2026-11-04） ====================
+   用户要求：「这个也不需要单位画像了，同步下也是点击跳转」「海外中资出海也是做成
+   点击看详情的，你抓没抓取这个企业的情况」。
+
+   所以两张卡片统一成一个动作：整卡点开 → 同一个详情弹层（openUniProf）。
+   海外客户的详情里，除了名单自带的一句话和基地，还拼上 data.entprobe.js 里
+   我们真抓到的企业档案（所在城市 / 企业类型 / 一句话概括 / 近期中标业绩带原文），
+   抓不到的如实写「尚未抓取」，不拿名单里的字段冒充企业档案。 */
+function _liLink(u, txt, tail){
+  return '<li>'+(u?'<a href="'+esc(u)+'" target="_blank" rel="noopener nofollow">':'')+
+    esc(txt)+(u?'</a>':'')+(tail?' <span class="sub-i">'+tail+'</span>':'')+'</li>';
+}
+function openClientProf(name){
+  var x=(D.clients||[]).filter(function(c){return c.name===name})[0];
+  if(!x) return;
+  var fs=(window.DATA_ENTPROBE&&window.DATA_ENTPROBE.firms)||[];
+  var ep=null, i;
+  for(i=0;i<fs.length;i++){ if(fs[i].n===name){ep=fs[i];break;} }
+  /* entprobe 是按需加载的 274KB：没到货先画其余部分，到货后整块重画一次，
+     别「先画一半再追加」，那样两截版式不一样，看着像两套数据。 */
+  if(!window.DATA_ENTPROBE){
+    need('entprobe', function(){ if(document.getElementById('uniProfBox').style.display!=='none') openClientProf(name); });
+  }
+  var pri=x.pri||2;
+  var priTxt = pri===1?'江浙沪皖 · 优先':(pri===2?'外地大厂':'自动发现 · 待确认');
+  var h='';
+  /* ① 一句话：这是整页最该先看的 */
+  h+='<div class="ep-sec">'+
+     '<div class="ab-why"><span class="ab-why-t">为什么要跟</span>'+esc(x.why||'（名单里还没写理由，按行业与基地判断）')+'</div>'+
+     (x.proj?'<div class="ab-proj" style="margin-top:8px"><span class="ab-proj-t">海外基地</span>'+esc(x.proj)+'</div>':'')+
+     '</div>';
+  /* ② 关键信息 */
+  var amt=x.amt||0;
+  h+='<div class="ep-sec"><b>关键信息</b><table class="pf-kv">'+
+     '<tr><th>集团所在地</th><td>'+(x.rg?esc(x.rg):'<span class="pm-na">未标注</span>')+'</td>'+
+         '<th>行业</th><td>'+esc(abGrp(x.grp))+'</td></tr>'+
+     '<tr><th>名单级别</th><td>'+priTxt+'</td>'+
+         '<th>本库国内记录</th><td>'+(x.n?('<b>'+x.n+'</b> 条'+(amt>0?' · 涉及 '+money(amt):' · 金额未公示')):'<span class="pm-na">暂无</span>')+'</td></tr>'+
+     '<tr><th>海外动态</th><td>'+((x.abroad||[]).length?('<b>'+(x.abroad||[]).length+'</b> 条'):'<span class="pm-na">暂无</span>')+'</td>'+
+         '<th>相关情报</th><td>'+((x.news||[]).length?('<b>'+(x.news||[]).length+'</b> 条'):'<span class="pm-na">暂无</span>')+'</td></tr>'+
+     '</table></div>';
+  /* ③ 企业档案：真抓到才写 */
+  h+='<div class="ep-sec"><b>企业档案 <small>（来自公开中标公告 / 企业公示，非名单字段）</small></b>';
+  if(ep){
+    h+='<div class="cli-ep"><div class="cli-ep-h">'+
+       '<b>'+esc(ep.n)+'</b>'+
+       (ep.city?'<span class="cc-tag">'+esc(ep.city)+'</span>':'')+
+       (ep.ty?'<span class="cc-tag" style="background:#eef4ff;color:#2456a6">'+esc(ep.ty)+'</span>':'')+
+       (ep.cat?'<span class="cc-tag">'+esc(ep.cat)+'</span>':'')+'</div>'+
+       (ep.sm?'<p class="cli-ep-sm">'+esc(ep.sm)+'</p>':'')+'</div>';
+    var hits=(ep.h||[]);
+    if(hits.length){
+      h+='<div class="pf-tablewrap" style="margin-top:8px"><table class="pf-table"><thead><tr>'+
+         '<th>日期</th><th>项目</th><th>金额</th><th>业主</th><th>原文</th></tr></thead><tbody>'+
+         hits.slice(0,10).map(function(r){
+           return '<tr><td class="d">'+esc(r.d||'—')+'</td>'+
+             '<td class="p"><b>'+esc(r.p||'')+'</b>'+(r.s?'<div class="pf-tags"><span class="pf-s">'+esc(r.s)+'</span></div>':'')+'</td>'+
+             '<td class="a">'+(r.a?esc(r.a):'<span class="pm-na">—</span>')+'</td>'+
+             '<td class="w">'+esc(r.who||'—')+'</td>'+
+             '<td>'+(r.u?'<a class="lk" href="'+esc(r.u)+'" target="_blank" rel="noopener nofollow">↗</a>':'<span class="pm-na">—</span>')+'</td></tr>';
+         }).join('')+'</tbody></table></div>';
+      if(hits.length>10) h+='<div class="pf-more">另有 '+(hits.length-10)+' 条，点「在商机库搜它的全部记录」看全量</div>';
+    }
+  }else{
+    h+='<div class="cli-ep missing">这家还没有企业档案。本库对它的公开中标记录为 '+
+       (x.n||0)+' 条'+(x.n?'（下面已列出）':'')+' —— 海外建厂信息多数先在集团官网、'+
+       '行业媒体披露，不进国内招标平台，所以企业档案暂时是空的，不是它没实力。</div>';
+  }
+  h+='</div>';
+  /* ④ 海外动态（全量，可跳原文） */
+  var ab=x.abroad||[];
+  h+='<div class="ep-sec"><b>海外建厂 / 扩张动态 <small>'+ab.length+' 条</small></b>';
+  h+= ab.length ? '<ul class="cli-ul">'+ab.map(function(a){
+        var tail=esc(a.date||'')+(a.src?' · '+esc(a.src):'');
+        return '<li'+(a.desc?' title="'+esc(a.desc)+'"':'')+'>'+
+          '<span class="cc-tag" style="background:#fff2e0;color:#a85c10">'+esc(a.tag||'动态')+'</span> '+
+          (a.url?'<a href="'+esc(a.url)+'" target="_blank" rel="noopener nofollow">'+esc(a.title)+'</a>':esc(a.title))+
+          ' <span class="sub-i">'+tail+'</span>'+
+          (a.desc?'<div class="cli-desc">'+esc(a.desc)+'</div>':'')+'</li>';
+      }).join('')+'</ul>' : '<div class="pm-na">暂无海外建厂动态。</div>';
+  h+='</div>';
+  /* ⑤ 相关情报 */
+  var nw=x.news||[];
+  if(nw.length){
+    h+='<div class="ep-sec"><b>相关情报 / 行业动态 <small>'+nw.length+' 条</small></b><ul class="cli-ul">'+
+       nw.map(function(n){
+         return '<li>'+(n.lvl?'<span class="lv '+esc(n.lvl)+'">'+esc(n.lvl)+'</span> ':'')+
+           (n.url?'<a href="'+esc(n.url)+'" target="_blank" rel="noopener nofollow">'+esc(n.t)+'</a>':esc(n.t))+
+           ' <span class="sub-i">'+esc(n.d||'')+(n.src?' · '+esc(n.src):'')+'</span></li>';
+       }).join('')+'</ul></div>';
+  }
+  /* ⑥ 本库国内记录（全量） */
+  var its=x.items||[];
+  if(its.length){
+    h+='<div class="ep-sec"><b>本库国内记录 <small>'+its.length+' 条 · 点项目名跳公告原文</small></b>'+
+       '<div class="pf-tablewrap"><table class="pf-table"><thead><tr><th>日期</th><th>项目</th><th>金额</th><th>阶段</th><th>原文</th></tr></thead><tbody>'+
+       its.map(function(it){
+         return '<tr><td class="d">'+esc(it.d||'—')+'</td>'+
+           '<td class="p">'+(it.url?'<a class="rj" href="'+esc(it.url)+'" target="_blank" rel="noopener nofollow"><b>'+esc(it.t||'')+'</b></a>':'<b>'+esc(it.t||'')+'</b>')+
+           (it.win?'<div class="pf-tags"><span class="pf-s">中：'+esc(it.win)+'</span></div>':'')+'</td>'+
+           '<td class="a">'+(it.amt?money(it.amt):'<span class="pm-na">—</span>')+'</td>'+
+           '<td class="st">'+esc(it.st||'—')+'</td>'+
+           '<td>'+(it.url?'<a class="lk" href="'+esc(it.url)+'" target="_blank" rel="noopener nofollow">↗</a>':'<span class="pm-na">—</span>')+'</td></tr>';
+       }).join('')+'</tbody></table></div></div>';
+  }
+  h+='<div class="ep-sec"><div class="cli-actions">'+
+     '<a href="javascript:searchFor(\''+esc(String(x.kw||x.name).slice(0,10)).replace(/'/g,"\\'")+'\')">在商机库搜它的全部记录 ↗</a>'+
+     '<a href="https://www.baidu.com/s?wd='+encodeURIComponent(x.name+' 海外 建厂 电力')+'" target="_blank" rel="noopener nofollow">搜它最近的海外新闻 ↗</a>'+
+     '</div></div>';
+  openUniProf(x.name, abGrp(x.grp)+' · '+(x.rg||'')+(x.rg?' · ':'')+priTxt, h);
+}
+
+/* 业绩总表整行点击：只有带 data-u 的行才是链接，点里面的 a 不重复触发。 */
+document.addEventListener('click', function(e){
+  if(!e.target || !e.target.closest) return;
+  if(e.target.closest('a,button,input,select')) return;
+  var tr=e.target.closest('tr.pf-row-link[data-u]');
+  if(!tr) return;
+  window.open(tr.dataset.u, '_blank', 'noopener');
+});
+
+/* 卡片点击（事件委托）。卡片里有链接（常中标单位、公告原文），
+   点链接时不能顺带把详情也打开 —— 先判断 target 是不是交互元素。 */
+document.addEventListener('click', function(e){
+  if(!e.target || !e.target.closest) return;
+  if(e.target.closest('a,button,input,select,.cc-more,.chip')) return;
+  var card=e.target.closest('.cc-click[data-owner],.cc-click[data-client]');
+  if(!card) return;
+  if(card.dataset.client) openClientProf(card.dataset.client);
+  else if(card.dataset.owner) domOwnerProf(card.dataset.owner);
+});
+
 el('cliGrid').onclick=function(e){
   var m=e.target.closest('.cc-more'); if(!m)return;
   var k=m.dataset.ck.slice(3); // 去掉 'ab:' / 'it:' 前缀，保留客户名
@@ -7421,8 +7690,11 @@ function profPage(kind, o){
      ⚠ 别把它加回来 —— 那会让同一个「这家干过什么」又分裂成两张表。 */
   var cpfHtml='';
 
+  /* 2026-11-04：弹层顶部已经有一行大标题（openUniProf 的 .ep-title，带全称+简称），
+     这里再写一遍 <h3>nm</h3>，同一个名字上下叠两行 —— 用户说「版式不好看」有一份是它。
+     内层只留身份徽章那一条。 */
   return '<div class="prof">'+
-    '<div class="prof-hd"><div><h3>'+nm+'</h3>'+
+    '<div class="prof-hd"><div>'+
       '<div class="prof-sub"><span class="kbadge '+K.cls+'">'+K.label+'</span>'+
       (kind==='owner'?'<span class="pm-i">共 '+A.n+' 条发包记录</span>'
         /* 「本库 0 条」不等于「没数据」：业绩总表还有省平台 / 定向检索等来源。
@@ -8207,21 +8479,39 @@ if(LIVE_ENABLED){
 function boot_main(){
   /* ---- 头部文案 + KPI：必须等数据挂载后才能算 ---- */
   var _stamp = meta.updated + (meta.at ? ' '+meta.at : '');
+  /* 数据截止日期与「最后一次公告」的距离。2026-10-24 ~ 11-04 江苏站 http 被墙、
+     浙江站被劫持页顶掉，采集静默失败了 11 天，而页面顶部一直写着「数据更新 今天」——
+     用户只能靠「怎么感觉没更新」猜。现在只要滞后 > 1 天就在副标题后面挂一个红标。 */
+  var _lag=0;
+  if(meta.dataAsOf){
+    var _d0=new Date(meta.dataAsOf+'T00:00:00');
+    if(!isNaN(_d0)) _lag=Math.max(0, Math.floor((Date.now()-_d0.getTime())/86400000));
+  }
   el('subTitle').innerHTML='都市环保（中冶南方）EPC 商机监测 · 江浙沪皖四地 · 数据更新 '+
-    _stamp+' · 入库 '+meta.total+' 条（原始抓取 '+meta.rawTotal+' 条，剔纯噪声 '+(meta.dropped||0)+' 条） · '+D.platforms.length+' 个平台来源';
-  var canBid = items.filter(function(x){return x.st==='招标公告'||x.st==='招标计划'}).length;
-  // 立项早期的判定口径必须与泳道「立项早期·拟招标」完全一致，否则页面上同一个概念
-  // 会出现两个不同的数字（KPI 625 vs 泳道 734）——这是 2026-10-10 修掉的老 bug。
+    _stamp+' · 入库 '+meta.total+' 条（原始抓取 '+meta.rawTotal+' 条，剔纯噪声 '+(meta.dropped||0)+' 条） · '+D.platforms.length+' 个平台来源'+
+    (meta.dataAsOf?' · 公告截止 '+meta.dataAsOf:'')+
+    (_lag>1?'<b class="stale-badge" title="最新一条公告已经是 '+_lag+' 天前，说明采集没跑通">⚠ '+_lag+' 天没有新公告</b>':'');
+  /* ⚠ 2026-11-04：这几格原来都用 items 现算，而首屏 items 只是第一页切片（24~42 条）。
+     于是出现「有色冶炼供能 0」「立项早期 9」——不是全库的数，用户一眼就看出来不对，
+     「这些数据是不是瞎写的」有一半是这里来的。改成读 meta，后端按全库算好。
+     _isEarly 仍然保留：筛选器要用同一个判据，KPI 和泳道不能分家。 */
   var _isEarly=function(x){return !!x.early || x.st==='立项公示' || x.st==='招标计划'};
-  var _earlyN=items.filter(_isEarly).length;
+  var _st={}; (meta.stTop||[]).forEach(function(x){_st[x[0]]=x[1]});
+  var _gr={}; (meta.gradeTop||[]).forEach(function(x){_gr[x[0]]=x[1]});
+  var _bz={}; (meta.bizTop||[]).forEach(function(x){_bz[x[0]]=x[1]});
+  var canBid = (meta.nBid!=null?meta.nBid:((_st['招标公告']||0)+(_st['招标计划']||0)));
+  var _earlyN = (meta.nEarly!=null?meta.nEarly:((_st['立项公示']||0)+(_st['招标计划']||0)));
+  var _nHM = (meta.nHM!=null?meta.nHM:null);
   // 第 4 项是点击动作：sw:xxx = 跳商机库并选中该泳道；g:A = 选中等级筛选
   /* 「已公示金额 380 亿」的副标题要写清分母（2026-10-23）：
      用户拿这个数和列表底下的「合计 6.8 亿」对比，以为统计出错。
      其实一个是全库 441 条带金额项目的总和，一个是当前筛选结果的合计，
      根本不是同一个东西，所以直接在卡片上把分母标出来。 */
   var kpi=[
-   ['cursor',meta.total,'入库项目','sw:'],['hot2',canBid,'当前在招','sw:bid'],
-   ['',meta.new,'本轮更新',''],['',meta.withWin,'已出中标结果',''],
+   ['cursor',meta.total,'入库项目','sw:'],['hot2',canBid,'在招 / 待投','sw:bid'],
+   /* 「本轮更新」为 0 时不摆一个 0 在顶上（看着像坏了）。有新增才出现。 */
+   (meta.new?['',meta.new,'本轮新增','']:null),
+   ['',meta.withWin,'已出中标结果',''],
    ['',meta.amtSum.toFixed(0)+'亿','中标额·'+(meta.withAmtWin||meta.withAmt)+'条',''],
    /* 2026-11-04 新增：项目总投资单独一格。它是业主打算投多少，不是我们能拿到的合同额，
       两者能差 3~10 倍，混在一起算「已公示金额」等于两个口径相加。
@@ -8229,8 +8519,8 @@ function boot_main(){
    (meta.invSum?['',meta.invSum.toFixed(0)+'亿','总投资·'+meta.withInv+'条','']:null),
    ['',items.filter(function(x){return x.g==='A'}).length,'A 战略必争','g:A'],
    ['',_earlyN,'立项早期·拟招标','sw:early'],
-   ['',items.filter(function(x){return x.hm}).length,'主场业务',''],
-   ['',items.filter(function(x){return x.sg==='youse'}).length,'有色冶炼供能','sg:youse']
+   (_nHM?['',_nHM,'主场业务','']:null),
+   ((meta.nYouse||_bz['有色冶炼供能'])?['',(meta.nYouse||_bz['有色冶炼供能']),'有色冶炼供能','sg:youse']:null)
   ].filter(Boolean);
   el('kpis').innerHTML=kpi.map(function(k,i){
     return '<div class="kpi'+(i<2?' hot':'')+'"'+(k[3]?' style="cursor:pointer" onclick="kpiGo(\''+k[3]+'\')"':'')+
