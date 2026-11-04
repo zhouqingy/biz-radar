@@ -1430,12 +1430,58 @@ if _all_orgs:
             _ws['joint'] = 1
             _o['wStat'] = _ws
 
+# ── 海外：速览 + 备案（2026-11-04 新增，海外页签改成四视图）───────────────
+# 为什么分成两坨而不是塞进 overseas：
+#   用户原话「备案 23 条要不要跟新闻 80 条混在一起？那肯定不是啊，那都不是一个东西」。
+#   overseas（新闻）是「听说谁要去哪建厂」，可能黄；
+#   odi（备案）是「发改委已经登记了」，确定但晚一点。两者的可信度和用途不一样，
+#   混在一个数组里就再也分不开了。所以这里保持物理分开，前端用视图分开呈现。
+def _load_oversea_extra():
+    import html as _html
+    flash, odi = [], []
+    p1 = os.path.join(ROOT, 'raw', 'oversea_flash.json')
+    if os.path.exists(p1):
+        try:
+            d = json.load(open(p1, encoding='utf-8'))
+            for x in (d.get('items') or []):
+                # 搜狗跳转链接里的 &amp; 是采集时原样带出来的，浏览器不会二次解码，
+                # 直接拼进 href 会点开 404。这里统一反转义一遍。
+                u = _html.unescape(x.get('url') or '')
+                flash.append({'t': x.get('title') or '', 'u': u,
+                              's': x.get('src') or '', 'd': x.get('date') or '',
+                              'm': (x.get('summary') or '')[:120],
+                              'sc': x.get('sc') or 0})
+            flash.sort(key=lambda y: (y['d'], y['sc']), reverse=True)
+        except Exception as e:
+            print('  ⚠ 速览读取失败：%s' % e)
+    p2 = os.path.join(ROOT, 'raw', 'invest_odi_pick.json')
+    if os.path.exists(p2):
+        try:
+            d = json.load(open(p2, encoding='utf-8'))
+            for x in (d.get('items') or []):
+                odi.append({'own': x.get('owner') or '', 'geo': x.get('geo') or '',
+                            'nm': x.get('name') or '', 'act': x.get('act') or '',
+                            'tier': x.get('tier') or '', 'why': x.get('why') or '',
+                            'd': x.get('date') or '', 'usd': x.get('usd'),
+                            'mt': x.get('moneyTxt') or '', 'deal': x.get('deal') or '',
+                            'code': x.get('code') or ''})
+            odi.sort(key=lambda y: y['d'], reverse=True)
+        except Exception as e:
+            print('  ⚠ 备案读取失败：%s' % e)
+    print('  海外速览 %d 条 / 出海备案 %d 条' % (len(flash), len(odi)))
+    return flash, odi
+
+
+_OVS_FLASH, _OVS_ODI = _load_oversea_extra()
+
 data = {
     'metals': {'updated': METALS[0]['date'] if METALS else '',
                'at': time.strftime('%H:%M') if METALS else '',
                'items': METALS},
     'partners': PARTNERS,
     'overseas': overseas,
+    'overseaFlash': _OVS_FLASH,
+    'overseaOdi': _OVS_ODI,
     'wechat': wechat,
     'digest': digest,
     'meta': {
@@ -1803,7 +1849,10 @@ if os.path.exists(_ency_path):
     except Exception as _e:
         print('⚠ raw/units_encyclopedia.json 读失败，跳过：', _e)
 _graph_mod = {'graph': data['graph']} if 'graph' in data else {}
-_news = {k: data[k] for k in ('trends', 'digest', 'wechat', 'overseas') if k in data}
+# 2026-11-04：overseaFlash / overseaOdi 必须进这个白名单，否则文件写得再对，
+# 前端也永远读不到（本文件的 dump 只输出白名单里的键）。
+_news = {k: data[k] for k in ('trends', 'digest', 'wechat', 'overseas',
+                              'overseaFlash', 'overseaOdi') if k in data}
 _chunk_total, _chunk_meta = dump_item_chunks()
 _extra = {'chunks': _chunk_meta}
 # 四库一平台信用代码（2026-10-22）：只有进「深度档案」才用得上，
