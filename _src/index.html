@@ -1948,7 +1948,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611041931';
+var VER='?v=202611041941';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3617,9 +3617,17 @@ function buildWeekly(){
     br('     '+(x.amt?money(x.amt)+' · ':'')+(x.buyer||'业主未公示')+' · '+(x.rg||'')+(x.city?'/'+x.city:''));
     br('     '+x.url)});
   // 二、新增商机
+  /* ⚠ 2026-11-04：items 是分块加载的，首屏只有切片（线上实测 826 条，全库 2796）。
+     用户如果一打开就点「生成周报」，这里只能看到切片里的 6 条新增，
+     而全库其实有 78 条 —— 数字小了十倍，且没有任何提示，比报错更误导。
+     所以：① 先看分块是否加载完；② 没加载完就写明「按已加载部分统计」。 */
+  var _splitDone = !window.__itemsSplit ||
+    ((_chunkState['lead']==='done'||_chunkState['lead']==='err') &&
+     (_chunkState['rest']==='done'||_chunkState['rest']==='err'));
   var nw=items.filter(function(x){return x.nw}).sort(function(a,b){return b.sc-a.sc});
   br('');
   br('二、本轮新增商机 '+nw.length+' 条（A '+(nw.filter(function(x){return x.g==='A'}).length)+' / B '+(nw.filter(function(x){return x.g==='B'}).length)+' / C '+(nw.filter(function(x){return x.g==='C'}).length)+' / D '+(nw.filter(function(x){return x.g==='D'}).length)+'）');
+  if(!_splitDone) br('  ⚠ 全库数据还在载入（当前只统计到 '+items.length+' / '+(meta.total||'?')+' 条），这个数字偏小。关掉本窗口、等页面右下角「载入中」消失后再生成一次。');
   ['A','B'].forEach(function(g){
     var lst=nw.filter(function(x){return x.g===g});
     if(!lst.length)return;
