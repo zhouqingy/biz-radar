@@ -42,8 +42,16 @@ def main():
     chk('total', m['total'], n)
     chk('withAmt', m['withAmt'], sum(1 for i in range(n) if C['amt'][i]))
     chk('withWin', m['withWin'], sum(1 for i in range(n) if C['win'][i]))
-    s_list = round(sum(x for x in C['amt'] if x), 1)
-    chk('amtSum(亿)', m['amtSum'], s_list)
+    # 金额分两个口径（2026-11-04 用户确认）：
+    #   amtK='win' 中标/成交/合同价  → meta.amtSum
+    #   amtK='inv' 项目总投资/估算   → meta.invSum，单独计
+    # 拿合计去比 amtSum 必然对不上，必须分开比。
+    _wk = [i for i in range(n) if C['amt'][i] and (C['amtK'][i] or 'win') == 'win']
+    _iv = [i for i in range(n) if C['amt'][i] and C['amtK'][i] == 'inv']
+    chk('amtSum(亿)', m.get('amtSum'), round(sum(C['amt'][i] for i in _wk), 1))
+    chk('invSum(亿)', m.get('invSum'), round(sum(C['amt'][i] for i in _iv), 1))
+    chk('withAmtWin', m.get('withAmtWin'), len(_wk))
+    chk('withInv', m.get('withInv'), len(_iv))
 
     # 地区/状态分布也对一下
     from collections import Counter
