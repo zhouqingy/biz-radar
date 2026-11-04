@@ -124,16 +124,35 @@ jobs:
             exit 0
           fi
           git commit -m "金属行情 $(date -u '+%Y-%m-%d') 收盘更新"
+
+          # ⚠ 2026-11-04 修（run #4 失败根因，见该次日志 380-394 行）：
+          #   build_web.py 会顺带重建全部数据文件（data.js / index.html / 分块…），
+          #   本工作流只提交上面两个，其余留在工作区 => 未暂存改动。
+          #   push 撞上并发更新 main 时报
+          #     "cannot lock ref 'refs/heads/main': is at ... but expected ..."
+          #   随后重试里的裸 `git pull --rebase` 又报
+          #     "cannot pull with rebase: You have unstaged changes"
+          #   两次重试全部作废 —— 数据其实算好了，只是没推上去。
+          #   交付：先把无关产物收进 stash，工作区干净，rebase 才能正常兜底；
+          #   再提前同步一次远端，最后 5 次重试。
+          #   runner 结束即销毁，stash 无需额外清理。
+          git stash push --include-untracked -m "build_web 其它产物（本工作流不提交）" || true
+
           git -c rebase.autoStash=true pull --rebase --strategy-option=ours origin main || {
             git rebase --abort 2>/dev/null || true
-            git pull --no-rebase --strategy-option=ours origin main
+            git pull --no-rebase --strategy-option=ours origin main || true
           }
-          for i in 1 2; do
+
+          for i in 1 2 3 4 5; do
             if git push; then echo "推送成功（第 $i 次）"; exit 0; fi
-            git pull --rebase --strategy-option=ours origin main || true
-            sleep 5
+            echo "第 $i 次推送失败，同步远端后重试…"
+            git -c rebase.autoStash=true pull --rebase --strategy-option=ours origin main || {
+              git rebase --abort 2>/dev/null || true
+              git pull --no-rebase --strategy-option=ours origin main || true
+            }
+            sleep 4
           done
-          echo "两次推送均失败"; exit 1
+          echo "推送重试 5 次仍失败"; exit 1
 
       - name: 5) 结果摘要
         if: always()
