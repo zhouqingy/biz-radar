@@ -1,0 +1,126 @@
+name: 金属行情刷新（交易日）
+
+# 2026-11-04 新增
+# ── 为什么搬进 Action ────────────────────────────────────────
+# 原来靠 WorkBuddy 定时任务「商机雷达 · 每日收盘行情刷新」（每交易日 16:05）跑，
+# 那个任务依赖沙箱在线，且推送时会 pull 网盘快照，历史上把 index.html 推回过老版
+# （见 guard-index.yml 头部注释）。搬进来后行情完全在仓库内闭环，不碰页面。
+#
+# ── 两个产出，缺一不可 ──────────────────────────────────────
+#   data.metalhist.js  历史曲线（新浪期货日K，20 年全历史）
+#   data.core.js       当日行情 + 涨跌幅（build_web.py 里 fetch_metals 每次构建现抓，
+#                      带 6 次重试 + 失败回退 raw/metals_cache.json）
+# 只跑前者的话，页面「今日行情」那排数字会一直停在旧日期。
+#
+# ── 时间 ────────────────────────────────────────────────────
+# 16:05 北京 = 08:05 UTC。国内商品期货 15:00 收盘，夜盘 21:00 才开，
+# 所以 16:05 拿到的是当日收盘结算价，不受夜盘干扰。
+# 周末不跑（周六只有凌晨 2:30 的结算，没有意义）。
+
+on:
+  schedule:
+    - cron: '5 8 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: metal-daily
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # 下面要 pull --rebase，浅克隆会失败
+
+      - name: 装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 lxml
+
+      - name: 1) 抓历史日 K → data.metalhist.js
+        id: hist
+        working-directory: tools
+        timeout-minutes: 12
+        run: |
+          # 脚本内部：逐品种 curl 新浪接口，全部失败时不覆盖线上文件、返回码 1。
+          # 这里不 continue-on-error —— 历史文件是纯附加产物，抓不到就没必要继续，
+          # 但要先把失败原因留在日志里，所以用 || 兜一下再 fail。
+          python gen_metal_hist.py
+
+      - name: 2) 重建当日行情 → data.core.js
+        id: core
+        working-directory: tools
+        env:
+          BIZ_OUT: ${{ github.workspace }}
+        timeout-minutes: 12
+        run: |
+          # build_web.py 会顺带重建全部数据文件。它的输入（raw/*.json）都在仓库里，
+          # 不跑采集也能确定性重放，所以这一步是安全的。
+          python build_web.py
+
+      - name: 3) 自检
+        run: |
+          python - <<'PY'
+          import json, re, sys, os
+
+          # ① 历史文件：updated 必须是今天，否则说明抓取用的是缓存/失败
+          s = open('data.metalhist.js', encoding='utf-8').read()
+          j = json.loads(s[s.index('{'):s.rindex('}') + 1])
+          print('行情历史 updated=%s  品种=%d' % (j.get('updated'), len(j.get('s', {}))))
+          if len(j.get('s', {})) < 10:
+              print('❌ 品种不足 10 个，疑似抓取失败，本次不提交'); sys.exit(1)
+
+          # ② 当日行情：data.core.js 里 metals 非空且日期是今天
+          c = open('data.core.js', encoding='utf-8').read()
+          m = json.loads(c[c.index('=') + 1:].strip().rstrip(';'))
+          metals = m.get('metals') or {}
+          items = metals.get('items') or (metals if isinstance(metals, list) else [])
+          print('当日行情 %d 个品种，日期=%s'
+                % (len(items), metals.get('updated') if isinstance(metals, dict) else '?'))
+          if not items:
+              print('❌ 当日行情为空，本次不提交'); sys.exit(1)
+          print('✅ 自检通过')
+          PY
+
+      - name: 4) 提交并推送
+        run: |
+          git config user.name  "biz-radar-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data.metalhist.js data.core.js
+          if git diff --staged --quiet; then
+            echo "没有变化，跳过提交"
+            exit 0
+          fi
+          git commit -m "金属行情 $(date -u '+%Y-%m-%d') 收盘更新"
+          git -c rebase.autoStash=true pull --rebase --strategy-option=ours origin main || {
+            git rebase --abort 2>/dev/null || true
+            git pull --no-rebase --strategy-option=ours origin main
+          }
+          for i in 1 2; do
+            if git push; then echo "推送成功（第 $i 次）"; exit 0; fi
+            git pull --rebase --strategy-option=ours origin main || true
+            sleep 5
+          done
+          echo "两次推送均失败"; exit 1
+
+      - name: 5) 结果摘要
+        if: always()
+        run: |
+          echo "### 金属行情刷新" >> $GITHUB_STEP_SUMMARY
+          echo "| 项 | 值 |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| 历史日K | ${{ steps.hist.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 当日行情 | ${{ steps.core.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 日期 | $(date -u '+%Y-%m-%d') |" >> $GITHUB_STEP_SUMMARY
