@@ -1,0 +1,126 @@
+name: 情报精选刷新（每周一）
+
+# 2026-11-04 新增
+# ── 搬的是什么 ──────────────────────────────────────────────
+# WorkBuddy 任务「商机雷达 · 情报精选刷新」（每周一 10:30）里的**自动部分**：
+#   竞对官网新闻抓取 → 与人工投喂的微信深度稿合并去重 → raw/digest.json → 重建页面
+#
+# ── 微信稿为什么不在这里抓 ───────────────────────────────────
+# 搜狗微信源 2026-10-15 实测全线失效（antispider 全拦），mine_wechat.py 依赖的
+# node 脚本也不在仓库里。所以微信这条保留「人工投喂」：
+#   本地跑 tools/wechat_digest.py "<链接1>" "<链接2>" → 写 raw/wechat_digest.json
+#   → 提交进仓库 → 本流程每周一自动把它和新抓到的竞对新闻合并。
+# 好处是：人只负责挑链接，合并去重和发布全自动，不用每次都动 WorkBuddy。
+#
+# ── 为什么必须跑 build_web.py ───────────────────────────────
+# digest.json 只是中间产物，页面读的是 build_web 生成的 data.js / data.news.js。
+# 少了这一步，raw 里更新了、线上页面不动 —— 这是最容易静默失败的地方，
+# 所以第 3 步自检里专门核对 data.js 的 digest.updated 是不是今天。
+
+on:
+  schedule:
+    - cron: '30 2 * * 1'      # 每周一 10:30 北京 = 02:30 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: digest-weekly
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 lxml
+
+      - name: 1) 抓竞对官网新闻
+        id: rival
+        working-directory: tools
+        timeout-minutes: 30
+        continue-on-error: true     # 抓不到就沿用上一版 raw/rival_news.json，不要整个 job 挂掉
+        run: |
+          # 读 data.js 里的 competitors 列表，逐家抓官网新闻页，按事件词/主业词/海外词分级
+          python mine_rival_news.py
+
+      - name: 2) 合并去重（竞对官网 + 微信深度稿）
+        working-directory: tools
+        run: |
+          # 读 raw/rival_news.json + raw/wechat_digest.json
+          # 相似度 0.72 去重 → 写 raw/digest.json
+          python merge_digest.py
+
+      - name: 3) 重建页面
+        working-directory: tools
+        env:
+          BIZ_OUT: ${{ github.workspace }}
+        run: |
+          # merge_digest.py 直接写 data.js，但 build_web 会按 raw/digest.json 重算
+          # data.js + data.news.js，两处口径一致（build_web 里 ELG 那段注释专门说过这个坑）。
+          # 再跑一次 build_web 保证 index.html 与数据同步。
+          python build_web.py
+
+      - name: 4) 自检
+        run: |
+          python - <<'PY'
+          import json, sys, time
+          today = time.strftime('%Y-%m-%d')
+          raw = json.load(open('tools/raw/digest.json', encoding='utf-8'))
+          items = raw.get('items') or []
+          print('raw/digest.json  %d 条  更新于 %s' % (len(items), raw.get('updated')))
+          if not items:
+              print('❌ digest 为空，本次不提交'); sys.exit(1)
+
+          s = open('data.js', encoding='utf-8').read()
+          d = json.loads(s[s.index('{'):s.rindex('}') + 1])
+          dg = d.get('digest') or {}
+          print('data.js digest   %d 条  更新于 %s' % (len(dg.get('items') or []), dg.get('updated')))
+          if len(dg.get('items') or []) < 20:
+              print('❌ 页面 digest 少于 20 条，疑似被清空，本次不提交'); sys.exit(1)
+          print('✅ 自检通过')
+          PY
+
+      - name: 5) 提交并推送
+        run: |
+          git config user.name  "biz-radar-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data.js data.news.js index.html tools/raw/digest.json tools/raw/rival_news.json
+          if git diff --staged --quiet; then
+            echo "没有变化，跳过提交"
+            exit 0
+          fi
+          git commit -m "情报精选 $(date -u '+%Y-%m-%d') 刷新"
+          git -c rebase.autoStash=true pull --rebase --strategy-option=ours origin main || {
+            git rebase --abort 2>/dev/null || true
+            git pull --no-rebase --strategy-option=ours origin main
+          }
+          for i in 1 2; do
+            if git push; then echo "推送成功（第 $i 次）"; exit 0; fi
+            git pull --rebase --strategy-option=ours origin main || true
+            sleep 5
+          done
+          echo "两次推送均失败"; exit 1
+
+      - name: 6) 结果摘要
+        if: always()
+        run: |
+          echo "### 情报精选刷新" >> $GITHUB_STEP_SUMMARY
+          echo "| 项 | 值 |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| 竞对官网抓取 | ${{ steps.rival.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 合并 / 重建 / 自检 | 见上方各步 |" >> $GITHUB_STEP_SUMMARY
