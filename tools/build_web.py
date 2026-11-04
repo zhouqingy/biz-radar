@@ -353,6 +353,9 @@ for r in D:
         'biz': r.get('biz') or '', 'sub': r.get('sub') or '',
         'buyer': r['buyer'], 'win': _clean_unit(r['win']),
         'amt': r['amtY'], 'amtTxt': r['amtTxt'][:40], 'd': r['d'], 'dl': r['dl'], 'p': r['p'],
+        # amtK：金额口径。win=中标/成交/合同价，inv=项目总投资/投资估算。
+        # 这两个数不能相加（能差 3~10 倍），前端分开显示、分开统计。
+        'amtK': r.get('amtKind') or 'win',
         'url': _u, 'mode': r['mode'], 'snip': (r['snip'] or '')[:180],
         'sc': round(r['score']), 'nw': 1 if r.get('_new') else 0,
         'ind': infer_ind(r),
@@ -434,14 +437,36 @@ def split_lead(w):
         tail = re.sub(r'[）)]', '|', tail)
         s = head + '|' + tail.replace('\x00', '')
     parts = [p for p in re.split(r'[、,，/;；+＋|]', s) if p.strip()]
+    # 2026-11-04：中标榜放开门槛后，一批**不是单位名**的脏值浮了出来
+    # （之前被 is_watch 的 0.3 亿门槛挡着，现在 387 条全进来了）。
+    # 实测最脏的几类：
+    #   「合同价款」                       ← 表格列名被当成中标单位（19 次）
+    #   「原则上为中标人。当排名第一…」     ← 公告正文句子（资格后审公告里常见）
+    #   「详见评标报告」「若干」「/」「无」  ← 占位值
+    # 这类值不在这里挡住，就会在榜单上排到前几名，看着非常荒唐。
+    _NOT_UNIT = ('合同价款', '中标价', '中标金额', '投标报价', '详见', '原则上', '当排名',
+                 '招标人', '采购人', '评标委员会', '若干', '无', '暂无', '/', '-', '—',
+                 '元', '万元', '费率', '下浮', '优惠', '折扣',
+                 # 公告正文里的法律条款片段（资格后审公告的通用条款，被切出来当过中标单位）
+                 '因不可抗力', '不能履行合同', '放弃中标', '履约保证金', '被查实', '按照',
+                 '可以按照', '招标文件', '投标文件', '评标报告', '中标候选人放弃')
     for p in parts:
         # 去掉「（第一中标候选人）」这类**尾部**注释；
         # 注意只剥位于末尾的括号，不要剥名称中间的（西安）（华东）这种
         p = re.sub(r'[（(](?:第[一二三]中标候选人|中标候选人|中标人|成交供应商|联合体|投标报价[^）)]*)[）)]\s*$', '', p)
         p = re.sub(r'^(第[一二三]中标候选人|中标人|成交供应商)\s*[:：]?\s*', '', p)
         p = p.strip()
-        if len(p) >= 4:
-            return p
+        if len(p) < 4:
+            continue
+        if any(k == p or p.startswith(k) for k in _NOT_UNIT):
+            continue
+        # 单位名不该出现句号/分号/冒号；一旦出现说明抓到的是正文句子
+        if re.search(r'[。；;：:]', p):
+            continue
+        # 单位名不该超过 40 字（最长的是「中国能源建设集团江苏省电力建设第三工程有限公司」24 字）
+        if len(p) > 40:
+            continue
+        return p
     return ''
 
 
@@ -449,7 +474,17 @@ for r in D:
     w = (r['win'] or '').strip()
     if not w or len(w) < 4: continue
     if pure_pipe(r): continue        # 纯管网/管道施工不计入对手战绩
-    if not is_watch(r): continue     # 几百万的小标不计入战绩，否则对手榜全是噪音
+    # 2026-11-04 修：原来这里用 is_watch（跟单门槛 0.3 亿起）过滤，
+    # 结果 394 条有中标单位的记录只剩 30 条进榜 —— 榜单只有 28 家，
+    # 「中标情报」这个核心模块基本是空的。
+    # 两个口径本来就不该共用：is_watch 回答「值不值得派人跟」（几百万的检修标当然不值），
+    # 战绩榜回答「谁在拿标、拿了多少」（几百万的标恰恰能看出谁在渗透这个市场）。
+    # 现在只排除明显不是工程标的两类：① 纯管网施工；② 金额有值但 < 100 万
+    # （几十万的备件、耗材、印刷、物业服务，这类拿再多也说明不了竞争力）。
+    # 金额未知的保留 —— 公告常不披露金额，一刀切会把大标也切掉。
+    _amt = r.get('amt') or 0
+    if _amt and _amt < 1e6:
+        continue
     lead = split_lead(w)
     if len(lead) < 4: continue
     # 聚合键：全角括号统一成半角、去掉多余空格。
@@ -469,9 +504,19 @@ for r in D:
     if len(v['items']) < 6:
         v['items'].append({'t': r['t'][:60], 'amt': r['amtY'], 'd': r['d'], 'rg': r['rg'], 'url': r['url']})
 
+# 2026-11-04：放开门槛后 315 家里 260 多家只中过 1 次，榜单读起来全是陌生名字，
+# 真正的对手反而被淹没。与「合作生态」那边同一套思路：
+#   ≥2 次 或 单笔 ≥1 亿  → 进榜（有复购/大体量，说明是这行的常客）
+#   其余 1 次的小单      → 不单独成行，但也不丢：并入下面的长尾统计，供「按规模筛」时看
+MIN_TIMES, MIN_AMT = 2, 1.0
+
 rivals = []
+_long_tail = 0
 for nkey, v in win_rank.items():
     name = v.get('name') or nkey
+    if v['n'] < MIN_TIMES and v['amt'] / 1e8 < MIN_AMT:
+        _long_tail += 1
+        continue
     rivals.append({
         'name': name, 'kw': name[:6], 'n': v['n'], 'amt': round(v['amt'] / 1e8, 3),
         'main': v['seg'].most_common(1)[0][0] if v['seg'] else '',
@@ -584,7 +629,16 @@ _akey = defaultdict(set)
 for r in D:
     b = (r['buyer'] or '').strip()
     if not b or len(b) < 4: continue
-    if not is_watch(r): continue
+    # 2026-11-04：与中标榜同一个口径问题。业主聚合原来也套 is_watch（0.3 亿起），
+    # 于是「发过几个几百万标的中小业主」在业主库里完全不存在 —— 只有 67 家。
+    # 业主库的用途是「谁在发包」，不是「哪个标值得跟」，门槛应该宽得多。
+    # 这里只排除：① 金额有值但 < 100 万；② 纯管网施工（与中标榜口径一致）。
+    # 「发过哪类业务」的主客判断仍由下面的 hm/sd 完成，不受影响。
+    _bamt = r.get('amt') or 0
+    if _bamt and _bamt < 1e6:
+        continue
+    if pure_pipe(r):
+        continue
     _si3 = seg_of(r)
     _home3 = SM.is_home(_si3['seg'])
     v = buyer_rank[b]
@@ -1357,16 +1411,35 @@ data = {
         'total': len(brief),          # 入库项目（过完业务规则，纯噪声不进）
         'rawTotal': len(D),           # 原始抓取公告数（过滤前）
         'dropped': _nDrop[0],         # 判为纯噪声剔除的条数
-        'new': sum(1 for r in D if r.get('_new')),
-        'withAmt': sum(1 for r in D if r['amt']),
-        'withWin': sum(1 for r in D if r['win']),
-        'amtSum': round(sum(r['amt'] for r in D if r['amt']) / 1e8, 1),
-        'bizTop': Counter(r['biz'] for r in D).most_common(),
-        'gradeTop': Counter(r['g'] for r in D).most_common(),
-        'rgTop': Counter(r['rg'] for r in D).most_common(),
-        'stTop': Counter(r['st'] for r in D).most_common(),
-        'subTop': Counter(r['sub'] for r in D).most_common(40),
-        'platTop': Counter(r['p'] for r in D if r['p']).most_common(20),
+        # ⚠ 下面 these 必须按 brief（过完业务规则、真正入库的）口径统计，不能用 D。
+        #   原来写的是 D：2629 条入库、meta.total=2712 却报 483 条带金额，
+        #   而列表里只有 460 条有金额 —— 差 23 条正是被 judge 判成纯噪声剔除、
+        #   却带着金额的（22 条小额分布式光伏/设备采购 + 1 条光伏 EPC）。
+        #   用户点「已公示金额 483 条」去筛，只能筛出 460 条，对不上账。
+        'new': sum(1 for r in brief if r.get('_new')),
+        'withAmt': sum(1 for r in brief if r.get('amt')),
+        'withAmtWin': sum(1 for r in brief
+                          if r.get('amt') and (r.get('amtK') or 'win') == 'win'),
+        'withWin': sum(1 for r in brief if r.get('win')),
+        # brief 里的 amt 已经是「亿元」（amtY），直接求和，别再 /1e8。
+        # 这里原来写的是 sum(D)/1e8（D 的 amt 是元），换成 brief 时必须同步改单位，
+        # 否则 611 亿会变成 0.0 亿。
+        #
+        # 2026-11-04 用户确认「金额需要」且要分口径：
+        #   amtSum  = 中标/成交/合同价合计（这才是「已公示金额」该有的口径）
+        #   invSum  = 项目总投资/投资估算合计（业主打算投多少，不是我们能拿的合同额）
+        # 原来把两者混成一个数，611.7 亿里掺了 42.6 亿总投资。
+        'amtSum': round(sum(r.get('amt') or 0 for r in brief
+                            if (r.get('amtK') or 'win') == 'win'), 1),
+        'invSum': round(sum(r.get('amt') or 0 for r in brief
+                            if (r.get('amtK') or '') == 'inv'), 1),
+        'withInv': sum(1 for r in brief if (r.get('amtK') or '') == 'inv'),
+        'bizTop': Counter(r['biz'] for r in brief).most_common(),
+        'gradeTop': Counter(r['g'] for r in brief).most_common(),
+        'rgTop': Counter(r['rg'] for r in brief).most_common(),
+        'stTop': Counter(r['st'] for r in brief).most_common(),
+        'subTop': Counter(r['sub'] for r in brief).most_common(40),
+        'platTop': Counter(r['p'] for r in brief if r['p']).most_common(20),
     },
     'items': brief,
     'rivals': rivals,
@@ -1436,7 +1509,7 @@ def dump(name, obj):
 # 漏加进白名单的直接后果是「业务分层筛选器为空、卡片全被过滤掉」——
 # 白名单是列式打包的唯一入口，加了 brief 字段必须同步加这里。
 ITEM_COLS = ['id', 't', 'st', 'g', 'sg', 'sG', 'sR', 'hm', 'ind', 'rg', 'city', 'buyer', 'win',
-             'amt', 'amtTxt', 'd', 'dl', 'p', 'url', 'mode', 'snip', 'sc', 'nw',
+             'amt', 'amtK', 'amtTxt', 'd', 'dl', 'p', 'url', 'mode', 'snip', 'sc', 'nw',
              'early', 'expect', 'bk', 'w', 'linkbad', 'iv', 'dp']
 _its = data['items']
 _cols = {k: [] for k in ITEM_COLS}
@@ -1716,7 +1789,7 @@ if os.path.exists(html_path):
     print('index.html 版本参数 → v=%s' % _ver)
 
 print(f"data.js  {len(js)/1024:.0f} KB")
-print(f"明细 {len(brief)} · 竞争对手 {len(rivals)} · 业主 {len(buyers)} · 客户 {len(clients)}")
+print(f"明细 {len(brief)} · 竞争对手 {len(rivals)}（另有 {_long_tail} 家仅 1 次小单未入榜） · 业主 {len(buyers)} · 客户 {len(clients)}")
 print(f"行业动态 {len(data['trends'])} · 竞企档案 {len(data['competitors'])} · 平台 {len(data['platforms'])}")
 print('\n== 竞争对手 TOP12（按中标次数）==')
 for x in rivals[:12]:
