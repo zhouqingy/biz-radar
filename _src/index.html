@@ -659,14 +659,57 @@ details.sub li{padding:2px 0}
 .kbadge.riv{background:#f3eaff;color:#6b3fa0}
 .pm-i{font-size:12px;color:var(--tx3)}
 
-.prof-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:9px;margin-bottom:16px}
-.prof-kpi .k{background:#fbfcfe;border:1px solid var(--line);border-radius:10px;padding:9px 12px}
-.prof-kpi .n{font-size:21px;font-weight:800;letter-spacing:-.6px;line-height:1.2;color:var(--tx)}
-.prof-kpi .k.acc .n{color:#b45309}
-.prof-kpi .k.txt .n{font-size:14px;letter-spacing:0;font-weight:700;line-height:1.5}
-.prof-kpi .l{font-size:11px;color:var(--tx3);margin-top:2px;line-height:1.35}
+/* 2026-11-04 卡片调节：KPI 与身份信息并成一条「头部」，整体压到原来 4 成高，
+   把第一屏让给业绩总表。数值仍然醒目（业绩类用橙色强调），只是不再各占一宫格 */
+.prof-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:14px;
+  align-items:start;background:#fbfcfe;border:1px solid var(--line);border-radius:10px;
+  padding:11px 14px;margin-bottom:14px}
+@media(max-width:820px){.prof-head{grid-template-columns:1fr;gap:10px}}
+.prof-head.solo{grid-template-columns:1fr}
+.prof-head.solo .prof-idbox{border-left:none;padding-left:0}
+/* 每个指标压成「数值 + 标签」同一行：5 个指标最多占 2 行，不再一指标两行 */
+.prof-kpi{display:flex;flex-wrap:wrap;gap:3px 16px;min-width:0;align-content:flex-start}
+.prof-kpi .k{padding:0;background:none;border:none;border-radius:0;min-width:0;
+  display:flex;align-items:baseline;gap:5px;white-space:nowrap}
+.prof-kpi .n{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.5;color:var(--tx)}
+.prof-kpi .k.acc .n{color:#b45309;font-size:17px}
+.prof-kpi .k.txt .n{font-size:11.5px;letter-spacing:0;font-weight:700}
+.prof-kpi .l{font-size:10.5px;color:var(--tx3);line-height:1.5;white-space:nowrap}
+.prof-kpi .k.none{white-space:normal}
+.prof-kpi .k.none .l{white-space:normal;line-height:1.6;font-size:11px}
+.prof-zero{font-size:10.5px;color:var(--tx3);margin-top:4px}
+.prof-idbox{display:flex;flex-direction:column}
+.prof-idbox{border-left:1px solid var(--line);padding-left:14px;min-width:0}
+@media(max-width:820px){.prof-idbox{border-left:none;padding-left:0;border-top:1px solid var(--line);padding-top:9px}}
+/* 身份字段横排：全称独占一行，其余两两一组挤在一行里 */
+.prof-idbox .prof-co{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:11.8px}
+.prof-idbox .prof-co dt{color:var(--tx3);text-align:left;line-height:1.6;flex:none}
+.prof-idbox .prof-co dd{margin:0 14px 0 0;color:var(--tx);line-height:1.6;word-break:break-word;max-width:100%}
+.prof-more{margin-top:5px}
+.prof-more summary{font-size:10.5px;color:var(--tx3);cursor:pointer;list-style:none;user-select:none}
+.prof-more summary::-webkit-details-marker{display:none}
+.prof-more summary:before{content:'▸ ';font-size:9px}
+.prof-more[open] summary:before{content:'▾ '}
+.prof-more summary:hover{color:var(--brand)}
+.prof-note2{font-size:11px;color:var(--tx3);line-height:1.7;margin-top:5px}
+/* 折叠块（联合体定位 / 长档案）：收起时只占一行 */
+.prof-fold{margin-bottom:12px;background:#fbfcfe;border:1px solid var(--line);border-radius:9px}
+.prof-fold>summary{display:flex;align-items:baseline;gap:8px;padding:8px 12px;cursor:pointer;
+  list-style:none;font-size:12px;color:var(--tx2);line-height:1.5;user-select:none}
+.prof-fold>summary::-webkit-details-marker{display:none}
+.prof-fold>summary:before{content:'▸';font-size:10px;color:var(--tx3);flex:none}
+.prof-fold[open]>summary:before{content:'▾'}
+.prof-fold>summary:hover{background:#f4f7fc;border-radius:9px 9px 0 0}
+.prof-fold>summary b{color:var(--tx);font-weight:700;flex:none}
+.prof-fold .fold-sum{color:var(--tx3);font-size:11.3px;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;min-width:0}
+.prof-fold[open] .fold-sum{display:none}
+.prof-fold .fold-body{padding:0 12px 11px}
+.prof-fold .fold-ab{color:var(--tx2);font-size:12.2px;line-height:1.85;display:block}
+.prof-fold .fold-body .prof-note{margin-top:8px}
+.prof-fold .prof-act{padding-top:9px;margin-top:9px}
 
-.prof-sec{margin-bottom:16px}
+.prof-sec{margin-bottom:14px}
 .prof-sec h4{font-size:13px;font-weight:800;color:var(--tx);margin:0 0 9px;
   display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .prof-sec h4 i{width:3px;height:13px;background:var(--brand);border-radius:2px;flex:none}
@@ -691,6 +734,7 @@ details.sub li{padding:2px 0}
 .pbar .v{flex:none;width:52px;color:var(--tx2);font-variant-numeric:tabular-nums;font-size:11.5px}
 
 .prof-tbwrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+/* 业绩总表是这一页的主角（2026-11-04）：卡片全部让位后，它紧跟头部出现 */
 .prof-tb{width:100%;border-collapse:collapse;font-size:12.5px;min-width:560px}
 .prof-tb th{background:#f8fafc;text-align:left;padding:7px 9px;font-size:11.5px;
   color:var(--tx3);font-weight:700;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -7102,12 +7146,26 @@ function profPage(kind, o){
     kpi.push(['', Object.keys(_rgSet).length||A.rg.length, '覆盖地区', '']);
     kpi.push(['', esc(o.last||o.latest||'—'), '最近中标', 'txt']);
   }
-  var kpiHtml='<div class="prof-kpi">'+kpi.map(function(x){
-    return '<div class="k '+(x[3]||'')+'"><div class="n">'+x[1]+'</div><div class="l">'+x[2]+'</div></div>'}).join('')+'</div>';
+  /* 2026-11-04：全是 0 的指标不占位置。
+     江苏院这类「本库零中标」的单位，头上一排 0 既没用又把业绩表往下顶，
+     用户早就说过「全是 0 就没有必要放了」。
+     规则：数值为 0 或「—」的指标直接丢掉；一旦有指标被丢，
+     就在右边补一句「哪些指标为 0」，免得读者以为这些指标压根不存在。 */
+  var _zero=[];
+  kpi=kpi.filter(function(x){
+    var v=String(x[1]==null?'':x[1]).replace(/<[^>]+>/g,'').trim();
+    var isZero = (v==='0' || v==='' || v==='—' || v==='0.00亿' || v==='未公示');
+    if(isZero){ _zero.push(x[2]); return false; }
+    return true;
+  });
+  var kpiHtml=kpi.map(function(x){
+    return '<div class="k '+(x[3]||'')+'"><div class="n">'+x[1]+'</div><div class="l">'+x[2]+'</div></div>'}).join('');
+  /* 一个指标都不剩时，左栏不留空格子：直接一句话说清楚本库没有它的业绩，
+     把高度让给业绩总表（江苏院这类单位就是这种情况）。 */
+  if(!kpiHtml) kpiHtml='<div class="k none"><div class="l">本库暂无它的中标业绩 —— 以下业绩表来自省平台、定向检索等其它来源</div></div>';
 
   /* ② 身份卡（工商信息 · 本库暂无 → 明说） */
   var idRows=[];
-  idRows.push(['全称', nm]);
   if(o.rg) idRows.push(['地区', esc(Array.isArray(o.rg)?o.rg.join(' / '):o.rg)]);
   if(kind==='rival' && o.main) idRows.push(['主攻赛道', esc(o.main)]);
   /* 「集团成员」只在真的是集团合并行时显示（o.subs 里是 {name,...}）。
@@ -7123,11 +7181,23 @@ function profPage(kind, o){
   var _subs=(o.subs||[]).filter(function(x){return x&&x.name}).map(function(x){return x.name});
   var skuLine=skuHtml(nm, K, _subs);
   var skuText=skuNote(nm, _subs);
-  var idHtml='<div class="prof-sec"><h4><i></i>身份信息</h4><dl class="prof-co">'+
-    idRows.map(function(r){return '<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>'}).join('')+
-    skuLine+
+  /* 2026-11-04：KPI 条和身份信息原来各占一屏，用户截图说「其他地方可以小点，
+     不然点开都看不见业绩总表」。现在并成一条：左边 KPI 紧凑排、右边身份用
+     inline 的 dt/dd 横排，整条高度压到原来 KPI 条的一半左右。
+     「身份信息」的标题也去掉——字段本身自解释，标题纯占高度。 */
+  /* 左栏没有任何指标时，让身份区独占整条（grid-template-columns 在 CSS 里按 .solo 切） */
+  var headHtml='<div class="prof-head'+(kpi.length?'':' solo')+'">'+
+    (kpi.length?'<div class="prof-kpi">'+kpiHtml+'</div>':'')+
+    '<div class="prof-idbox"><dl class="prof-co">'+
+      idRows.map(function(r){return '<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>'}).join('')+
+      skuLine+
     '</dl>'+
-    '<div class="prof-note">'+skuText+'</div></div>';
+    (_zero.length?'<div class="prof-zero">'+
+       (kpi.length?'无数据的指标：':'本库暂无它的中标业绩（以下业绩表来自省平台 / 定向检索等其它来源）。无数据的指标：')+
+       esc(_zero.join(' · '))+'</div>':'')+
+    '<details class="prof-more"><summary>工商 / 资质口径说明</summary>'+
+      '<div class="prof-note2">'+skuText+'</div></details>'+
+    '</div></div>';
 
   /* ②.5 企业档案（2026-10-23 新增）
      用户的质问很直接：「这几家单位深度档案里面居然是空的，这都是每年项目比较多的
@@ -7147,16 +7217,21 @@ function profPage(kind, o){
         原来整段铺在卡片上，卡片一半高度都给了它。现在卡片只留一句短语
         （roleShort 压缩），全文搬到这里展开 —— 这句话决定「能不能跟它组队」，
         值得单独一节，而不是挤在卡片里当装饰。 */
+  /* 2026-11-04：默认折叠，只留一行摘要。这段决定「能不能组队」，值得给一屏，
+     但放在业绩表前面挡路就不值了 —— 想看的人点开，不想看的一眼略过。 */
   var roleHtml='';
   if(o.role || o.dual){
-    roleHtml='<div class="prof-sec prof-role"><h4><i></i>'+(o.role?'联合体定位':'竞合双身份')+
-      '<small>'+(o.role?'这家在联合体里干哪一段':'既在伙伴池里，也会跟我们撞单')+'</small></h4>'+
+    var _rs=String(o.role||'');
+    var _rsum=_rs.length>52 ? _rs.slice(0,52)+'…' : (_rs||'既在伙伴池里，也会跟我们撞单');
+    roleHtml='<details class="prof-fold prof-role"><summary>'+
+      '<b>'+(o.role?'联合体定位':'竞合双身份')+'</b><span class="fold-sum">'+esc(_rsum)+'</span></summary>'+
+      '<div class="fold-body">'+
       (o.role?'<div class="role-tx">'+esc(o.role)+'</div>':'')+
       (o.dual?'<div class="prof-note">竞合双身份：它同时在「合作生态」的联合体候选池里，'+
         '也会跟我们正面撞单 —— 投标前先确认它这次是队友还是对手。</div>':'')+
       '<div class="prof-act">'+
         '<a href="javascript:searchFor(\''+esc((o.name||'').slice(0,6))+'\')">库内搜它的中标/联合体记录 ↗</a>'+
-      '</div></div>';
+      '</div></div></details>';
   }
   (function(){
     var _s=(o.strength||o.about||'').trim();
@@ -7215,9 +7290,14 @@ function profPage(kind, o){
     /* 日期新→旧，没日期的沉底 */
     _list.sort(function(a,b){ return String(b.d||'').localeCompare(String(a.d||'')) });
     if(!_s && !_list.length) return;
+    /* 2026-11-04：档案长则折三行，够看清是干什么的，又不至于把业绩表顶到第三屏。 */
+    var _long=_s.length>90;
     aboutHtml='<div class="prof-sec"><h4><i></i>企业档案'+
       (o.type?' <small>'+esc(o.type)+(o.cat?' · '+esc(o.cat):'')+'</small>':'')+'</h4>'+
-      (_s?'<div class="about-tx">'+esc(_s)+'</div>':'')+
+      (_s?( _long
+        ? '<details class="prof-fold"><summary class="fold-ab">'+esc(_s.slice(0,90))+'…</summary>'+
+          '<div class="fold-body"><div class="about-tx">'+esc(_s)+'</div></div></details>'
+        : '<div class="about-tx">'+esc(_s)+'</div>' ):'')+
       /* 2026-10-24：近期动态不再在这里单列 —— 用户要求「近期动态和中标业绩
          放在一个表里面」。动态条目已经由 _rperfNewsFromItems 传进 rperfTable，
          在那里统一排在业绩表末尾并标注「无原文、仅参考」。
@@ -7339,11 +7419,14 @@ function profPage(kind, o){
     '<div class="prof-hd"><div><h3>'+nm+'</h3>'+
       '<div class="prof-sub"><span class="kbadge '+K.cls+'">'+K.label+'</span>'+
       (kind==='owner'?'<span class="pm-i">共 '+A.n+' 条发包记录</span>'
-        :(A.n?'<span class="pm-i">共 '+A.n+' 条中标记录</span>'
-              :'<span class="pm-i">本库暂无它的中标公告，下面的企业档案来自公开资料</span>'))+
+        /* 「本库 0 条」不等于「没数据」：业绩总表还有省平台 / 定向检索等来源。
+           原来这里写「本库暂无它的中标公告，下面来自公开资料」，而下面明明列着
+           14 个项目 —— 自相矛盾。现在只陈述本库条数，不替表格下结论。 */
+        :(A.n?'<span class="pm-i">本库 '+A.n+' 条中标记录</span>'
+              :'<span class="pm-i">本库未收录它的中标公告 · 下方业绩取自省平台 / 定向检索</span>'))+
       (o.latest?'<span class="pm-i">最近动态 '+esc(o.latest)+'</span>':'')+
       '</div></div></div>'+
-    kpiHtml+idHtml+roleHtml+aboutHtml+ctcHtml+pfHtml+cpfHtml+distHtml+relHtml+insHtml+act+'</div>';
+    headHtml+pfHtml+cpfHtml+aboutHtml+distHtml+relHtml+ctcHtml+insHtml+act+'</div>';
 }
 
 /* 对手：从 rivals 数据转成通用档案结构
