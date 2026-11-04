@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232b6cb0'/%3E%3Ccircle cx='50' cy='50' r='26' fill='none' stroke='%23fff' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='8' fill='%23fff'/%3E%3C/svg%3E">
-<title>江浙沪皖商机雷达 · 都市环保（中冶南方）</title>
+<title>商机雷达 · 都市环保</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -1491,7 +1491,7 @@ window.addEventListener('error',function(e){
 <body>
 
 <div class="hd"><div class="wrap">
-  <h1>江浙沪皖 商机雷达 <span class="ver">v2.0</span></h1>
+  <h1>商机雷达 <span class="ver">V3.0</span></h1>
   <div class="sub" id="subTitle">加载中…</div>
   <div class="kpis" id="kpis"></div>
   <div class="mstrip" id="mstrip"></div>
@@ -1948,7 +1948,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611041902';
+var VER='?v=202611041931';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3629,18 +3629,30 @@ function buildWeekly(){
       br('     '+(x.amt?money(x.amt)+' · ':'')+(x.buyer||'业主未公示')+' · '+x.st+' · '+(x.rg||'')+(x.city?'/'+x.city:'')+' · '+x.d);
       br('     '+x.url)});
   });
-  // 三、重点客户
-  var cs=D.clients.filter(function(c){return c.n>0}).sort(function(a,b){return (b.latest||'')<(a.latest||'')?-1:1}).slice(0,6);
+  /* 三、重点客户
+     ⚠ 2026-11-04 修：原来写的是 D.clients.filter(...)，但 clients 属于 data.org.js
+     那个 1.1MB 的模块，首屏根本不加载 —— D.clients 是 undefined，
+     点「生成周报」直接抛 TypeError，整个弹窗一片空白，用户以为按钮坏了。
+     实测确认：点按钮后 #wkBody 长度 = 0，控制台报 Cannot read properties of undefined。
+     这里改成容错取值：模块没到就写一行说明并自动去拉，不让整篇周报崩掉。 */
+  var _cl = D.clients;
+  if (!_cl) { try { mergeMod('clients'); } catch (e) { } _cl = D.clients; }
+  var cs = (_cl || []).filter(function(c){return c.n>0})
+    .sort(function(a,b){return (b.latest||'')<(a.latest||'')?-1:1}).slice(0,6);
   br('');
   br('三、重点客户近况（库内最新命中 TOP6）');
+  if(!cs.length) br('  （客户档案模块未加载，本节暂无内容，可在网页「客户与业主」页查看）');
   cs.forEach(function(c){
     var it=c.items&&c.items[0];
     br('  · '+c.name+'（'+c.grp+'）本库 '+c.n+' 条'+(c.amt>0?'、累计 '+money(c.amt):'')+(it?'：'+it.t+(it.amt?'（'+money(it.amt)+'）':'')+' · '+(it.st||'')+' '+(it.d||''):''));
     if(it&&it.url)br('    '+it.url)});
-  // 四、海外
+  // 四、海外（数据在 data.news.js，弱网下可能还没到）
+  var _ov = D.overseas;
+  if (!_ov) { try { mergeMod('news'); } catch (e) { } _ov = D.overseas; }
   br('');
   br('四、海外信号 TOP5（有色客户出海 = 我司出海机会）');
-  (D.overseas||[]).slice(0,5).forEach(function(o){
+  if(!(_ov||[]).length) br('  （海外信号模块未加载，可在网页「海外」页查看）');
+  (_ov||[]).slice(0,5).forEach(function(o){
     br('  · ['+o.name+' · '+(o.tag||'动态')+' · '+(o.date||'')+'] '+o.title);
     if(o.desc)br('    '+o.desc.slice(0,120)+(o.desc.length>120?'…':''));
     if(o.url)br('    '+o.url)});
@@ -3661,9 +3673,10 @@ function buildWeekly(){
     if(mf.length)br('  [有色] '+mline(mf));
     if(mb.length)br('  [黑色系] '+mline(mb));
   }
-  // 七、政策
+  // 七、政策（同样在 data.news.js）
   br('');
   br('七、行业政策与动向 TOP5');
+  if(!(D.trends||[]).length) br('  （行业动态模块未加载，可在网页「行业动态」页查看）');
   (D.trends||[]).slice().sort(function(a,b){return (b.date||'')<(a.date||'')?-1:1}).slice(0,5).forEach(function(t){
     br('  · ['+(t.tag||'')+'] '+t.title+'（'+(t.date||'')+'）');
     if(t.desc)br('    '+t.desc.slice(0,130)+(t.desc.length>130?'…':''));
@@ -3675,7 +3688,20 @@ function buildWeekly(){
   WK=L.join('\n');
   el('wkBody').innerHTML=esc(WK).replace(/^【.*$/m,function(m){return '<b>'+m+'</b>'}).replace(/^(一|二|三|四|五|六|七)、.*$/gm,function(m){return '<b>'+m+'</b>'});
 }
-el('btnWeek').onclick=function(){buildWeekly();el('wkMask').style.display='flex'};
+el('btnWeek').onclick=function(){
+  /* 兜底：buildWeekly 里任何一个章节取值失败，都要让用户看到「哪一节出问题」，
+     而不是弹出一个空白的黑框（2026-11-04 之前的实际表现）。 */
+  try {
+    buildWeekly();
+  } catch (e) {
+    WK = '【周报生成失败】\n\n' + (e && e.message ? e.message : String(e)) +
+      '\n\n这一节的数据模块可能还没加载完（弱网下常见）。\n' +
+      '请等页面右下角的「加载中」提示消失后再点一次。\n' +
+      '如果反复失败，把这条信息发给维护人。';
+    el('wkBody').innerHTML = esc(WK);
+  }
+  el('wkMask').style.display='flex';
+};
 el('wkClose').onclick=function(){el('wkMask').style.display='none'};
 el('wkMask').onclick=function(e){if(e.target===this)this.style.display='none'};
 el('wkCopy').onclick=function(){
@@ -9057,7 +9083,9 @@ function boot_main(){
     var _d0=new Date(meta.dataAsOf+'T00:00:00');
     if(!isNaN(_d0)) _lag=Math.max(0, Math.floor((Date.now()-_d0.getTime())/86400000));
   }
-  el('subTitle').innerHTML='都市环保（中冶南方）EPC 商机监测 · 江浙沪皖四地 · 数据更新 '+
+  /* 2026-11-04 用户：「商机雷达下的都市环保，中冶南方那个给删了」。
+     括号里的中冶南方是集团名，对外看板没必要带，去掉。 */
+  el('subTitle').innerHTML='都市环保 EPC 商机监测 · 江浙沪皖四地 · 数据更新 '+
     _stamp+' · 入库 '+meta.total+' 条（原始抓取 '+meta.rawTotal+' 条，剔纯噪声 '+(meta.dropped||0)+' 条） · '+D.platforms.length+' 个平台来源'+
     (meta.dataAsOf?' · 公告截止 '+meta.dataAsOf:'')+
     (_lag>1?'<b class="stale-badge" title="最新一条公告已经是 '+_lag+' 天前，说明采集没跑通">⚠ '+_lag+' 天没有新公告</b>':'');
