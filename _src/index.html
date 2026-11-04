@@ -205,10 +205,19 @@ button{font-family:inherit}
 .rb-main{font-size:12.5px}
 .rb-main b{color:var(--tx);font-weight:800;font-variant-numeric:tabular-nums}
 .rb-main b:first-of-type{color:var(--brand);font-size:15px}
-.rbar .rhint{margin-left:auto;display:flex;gap:10px;align-items:center;position:relative}
-.rb-kj{font-size:11.5px;color:var(--tx3);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+/* ⚠ 必须写成 .rbar .rhint 且显式 margin-left:0：
+   上面 165 行那条老规则是 `.rbar .rhint{margin-left:auto}`，把整个说明块推到行尾。
+   改成 static 后 .rb-kjbox 的定位包含块也随之回到 .rbar，弹层从左边展开不出界。 */
+.rbar .rhint{margin-left:0;display:flex;gap:10px;align-items:center;position:static}
+/* 贴住结论右侧，不要被空白拉开 —— 它是「补充说明」，不是独立功能按钮。
+   原来放在 .rhint 里，而 .rb-kjbox 用了 position:absolute 且宽度 420px，
+   把整个 rhint 撑成了满行，链接就被推到最右边。这里把弹层的包含块改回 .rbar，
+   链接自然紧跟在结论后面。 */
+.rb-kj{font-size:11.5px;color:var(--tx3);text-decoration:underline;text-underline-offset:3px;
+  cursor:pointer;margin-left:2px;white-space:nowrap}
+.rbar{position:relative}
 .rb-kj:hover{color:var(--brand)}
-.rb-kjbox{display:none;position:absolute;right:0;top:22px;z-index:30;width:420px;max-width:74vw;
+.rb-kjbox{display:none;position:absolute;left:0;top:26px;z-index:30;width:440px;max-width:80vw;
   background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 13px;
   font-size:12px;line-height:1.78;color:var(--tx2);box-shadow:0 12px 30px -10px rgba(16,24,40,.28)}
 .rb-kjbox.on{display:block}
@@ -1939,7 +1948,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611041851';
+var VER='?v=202611041902';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3516,13 +3525,13 @@ function render(){
       (nAmt ? ' · <b>' + nAmt + '</b> 条有金额 · 合计 <b>' + sum.toFixed(1) + ' 亿</b>' : '') +
     '</span>' + _loadTip + _sideTip +
     '<span class="rhint">' +
-      '<a href="javascript:void(0)" class="rb-kj" id="rbKj">口径说明</a>' +
       '<span class="rb-kjbox" id="rbKjBox">' +
         (nNo ? '另 ' + nNo + ' 条原文未披露金额（多为立项公示/招标计划，不写投资额）。' : '') +
         '顶部「中标/合同额 ' + meta.amtSum.toFixed(0) + ' 亿」是全库 ' + (meta.withAmtWin || meta.withAmt) +
         ' 条中标口径金额的总和，与本页筛选无关' +
         (meta.invSum ? '；另有项目总投资 ' + meta.invSum.toFixed(0) + ' 亿，口径不同、单独计。' : '。') +
       '</span>' +
+      '<a href="javascript:void(0)" class="rb-kj" id="rbKj">口径说明 ⌄</a>' +
     '</span>';
   var tot=Math.ceil(a.length/PS)||1;
   if(F.page>tot)F.page=tot;
