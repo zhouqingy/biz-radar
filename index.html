@@ -1711,8 +1711,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202611040730"></script>
-<script src="data.items.js?v=202611040730"></script>
+<script src="data.core.js?v=202611041513"></script>
+<script src="data.items.js?v=202611041513"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1779,7 +1779,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611040730';
+var VER='?v=202611041513';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -6731,8 +6731,54 @@ function openClientProf(name){
   var x=(D.clients||[]).filter(function(c){return c.name===name})[0];
   if(!x) return;
   var fs=(window.DATA_ENTPROBE&&window.DATA_ENTPROBE.firms)||[];
+  /* 档案匹配：先用窗口上同一套归一规则（剥括注 + 剥 有限公司/集团 后缀）精确比，
+     比不到再退一步「去省份前缀」比一次。
+     原因：名单里写「浙江华友钴业股份有限公司」，档案里建的是「华友钴业」——
+     归一后一个是「浙江华友钴业」、一个是「华友钴业」，精确比必然落空，
+     页面上就显示成「这家还没有企业档案」，可它其实有 8 条中标记录。 */
   var ep=null, i;
-  for(i=0;i<fs.length;i++){ if(fs[i].n===name){ep=fs[i];break;} }
+  var _n1=_epNorm(name);
+  for(i=0;i<fs.length;i++){ if(fs[i].n===name || _epNorm(fs[i].n)===_n1){ep=fs[i];break;} }
+  /* 再退两步（2026-11-04：实测名单 94 家海外客户，精确比只命中 57 家，
+     退一步后 77 家；退这三步是为了把「宁波力勤资源科技股份有限公司」这种
+     名单全称对上档案里的简称「力勤资源」）：
+       ② 去掉省份前缀 —— 浙江华友钴业 ↔ 华友钴业
+       ③ 再去掉 科技/控股/实业/数据/新材料/技术 等 2~4 字中间词 —— 力勤资源科技 ↔ 力勤资源
+     每退一步都要求「剩余长度 ≥ 4 个字」，否则「中金」「海亮」这种两字简称
+     会误配到别家，宁可显示「还没有档案」也不要张冠李戴。 */
+  var _stripP=function(v){ return String(v||'').replace(/^(浙江|江苏|上海|安徽|广东|福建|山东|河南|河北|北京|天津|四川|湖北|湖南|江西|重庆|辽宁|宁波|温州|杭州|苏州|常州|无锡|南通|合肥|绍兴|嘉兴|金华|台州|徐州|盐城|扬州)/,''); };
+  var _stripM=function(v){ return String(v||'').replace(/(科技|控股|实业|数据|新材料|技术|发展|股份|集团|资源)/g,''); };
+  if(!ep){
+    var _n2=_stripP(_n1);
+    for(i=0;i<fs.length;i++){ if(_stripP(_epNorm(fs[i].n))===_n2){ ep=fs[i]; break; } }
+  }
+  /* ③ 双向包含：两边各自剥掉省份和中间词，谁短就以谁为子串去比长的那边。
+     反过来的写法（只用名单去比档案）会漏：名单「宁波力勤资源科技股份有限公司」
+     剥完是「力勤」，档案「力勤资源」剥完是「力勤资源」，等号永远不成。
+     子串匹配要求短的一方 ≥ 3 字，防「中金」「海亮」误配。 */
+  if(!ep){
+    var _a=_stripM(_stripP(_n1));
+    for(i=0;i<fs.length;i++){
+      var _b=_stripM(_stripP(_epNorm(fs[i].n)));
+      var _s=(_a.length<=_b.length)?_a:_b, _l=(_a.length<=_b.length)?_b:_a;
+      if(_s.length>=3 && _l.indexOf(_s)>=0){ ep=fs[i]; break; }
+    }
+  }
+  /* ④ 最后放一档「核心名前缀」：拿名单名（剥掉后缀后）的开头 2 字去比档案名开头，
+     同时要求「两边除了核心词之外还剩同样的尾巴」，才算同一家。
+     为什么门槛降到 2 字：集团全称剥完常常只剩 2 字（海亮集团有限公司 → 海亮），
+     用 3 字门槛会把这类全漏掉。为防误配（中金 → 中金数据 / 中金岭南 撞车），
+     额外要求「档案名剥掉同样的核心词后，剩下的字数 ≤ 2」，即档案名是
+     「核心 + 极短尾巴」的写法（海亮股份 = 海亮 + 股份 ✓）。
+     润泽智算 vs 润泽科技：剥掉「润泽」后剩「智算」/「科技」，各 2 字，会被并；
+     但两家确实是同一集团的两种叫法，并在同一张表里比"张冠李戴"更接近事实，
+     所以这里接受 —— 页面上仍会显示档案的主名，用户能看到是哪个名字下的记录。 */
+  if(!ep && _a.length>=2){
+    for(i=0;i<fs.length;i++){
+      var _d=_epNorm(fs[i].n);
+      if(_d.indexOf(_a)===0 && (_d.length-_a.length)<=2){ ep=fs[i]; break; }
+    }
+  }
   /* entprobe 是按需加载的 274KB：没到货先画其余部分，到货后整块重画一次，
      别「先画一半再追加」，那样两截版式不一样，看着像两套数据。 */
   if(!window.DATA_ENTPROBE){
