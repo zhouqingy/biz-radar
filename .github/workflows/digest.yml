@@ -73,6 +73,14 @@ jobs:
           # merge_digest.py 直接写 data.js，但 build_web 会按 raw/digest.json 重算
           # data.js + data.news.js，两处口径一致（build_web 里 ELG 那段注释专门说过这个坑）。
           # 再跑一次 build_web 保证 index.html 与数据同步。
+          #
+          # merged.json 是 build_web.py 的必需输入且不进仓库，用根目录快照补齐。
+          if [ -f ../merged.snapshot.json ]; then
+            cp ../merged.snapshot.json merged.json
+            echo "已用仓库快照 merged.snapshot.json ($(du -h merged.json | cut -f1))"
+          else
+            echo "❌ 仓库缺 merged.snapshot.json，build_web.py 无输入"; exit 1
+          fi
           python build_web.py
 
       - name: 4) 自检
