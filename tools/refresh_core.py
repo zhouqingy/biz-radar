@@ -110,18 +110,22 @@ def main():
     print('旧 meta: total=%s updated=%s withAmt=%s amtSum=%s'
           % (old.get('total'), old.get('updated'), old.get('withAmt'), old.get('amtSum')))
     print('新 meta: total=%s updated=%s withAmt=%s amtSum=%s'
-          % (new['total'], new['updated'], new['withAmt'], new['amtSum']))
+          % (new['total'], new['updated'], new['withAmt'], new.get('amtSum', 0)))
     print('  地区:', new['rgTop'])
     print('  状态:', new['stTop'])
     print('  业务:', new['bizTop'])
-    print('  金额: %d 条带金额，合计 %.1f 亿' % (new['withAmt'], new['amtSum']))
+    # 金额分口径由 build_web 产出，这里只在下面原样带回，别在这里读 new['amtSum']
+    print('  金额: %d 条带金额（口径合计见 build_web 日志）' % new['withAmt'])
 
     # ⚠ 分口径金额（amtSum / withAmtWin / withInv / invSum）不在这里维护。
     #   它们只有 build_web 算得出来（要读 amtK 口径列），而 refresh_core 的
     #   cols 里没有这一列 —— 一旦在这里「继承旧值」，就会把 build_web 刚算好的
     #   450.7 亿覆盖回上一次的 725.7 亿（2026-11-04 实际踩过这个坑）。
     #   做法改成：本脚本完全不产出这几个键，J['meta'] 更新时把旧值原样带回。
-    _KEEP_AMT = ('withAmtWin', 'withInv', 'invSum')
+    _KEEP_AMT = ('withAmtWin', 'withInv', 'invSum',
+                 # 全库口径的 KPI 计数也由 build_web 产出（要按 brief 全量算），
+                 # 这里不产、只带回，否则一跑 refresh 就变回 None
+                 'nBid', 'nEarly', 'nHM', 'nYouse')
     # 分口径金额一律从旧值带回（不产、不覆盖）
     for k in _KEEP_AMT + ('amtSum',):
         if k in old:
