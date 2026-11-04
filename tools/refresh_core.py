@@ -93,7 +93,7 @@ def main():
         'new': sum(1 for x in C.get('nw', []) if x),
         'withAmt': len(amt),
         'withWin': len(win),
-        'amtSum': round(amt_sum, 1),
+        # 'amtSum' 见下方 _KEEP_AMT 说明：由 build_web 产出，这里不写。
         'bizTop': top(Counter(C['sg']), 6, SEG_CN),
         'gradeTop': top(Counter(C['g']), 4),
         'rgTop': top(Counter(C['rg']), 4),
@@ -116,6 +116,16 @@ def main():
     print('  业务:', new['bizTop'])
     print('  金额: %d 条带金额，合计 %.1f 亿' % (new['withAmt'], new['amtSum']))
 
+    # ⚠ 分口径金额（amtSum / withAmtWin / withInv / invSum）不在这里维护。
+    #   它们只有 build_web 算得出来（要读 amtK 口径列），而 refresh_core 的
+    #   cols 里没有这一列 —— 一旦在这里「继承旧值」，就会把 build_web 刚算好的
+    #   450.7 亿覆盖回上一次的 725.7 亿（2026-11-04 实际踩过这个坑）。
+    #   做法改成：本脚本完全不产出这几个键，J['meta'] 更新时把旧值原样带回。
+    _KEEP_AMT = ('withAmtWin', 'withInv', 'invSum')
+    # 分口径金额一律从旧值带回（不产、不覆盖）
+    for k in _KEEP_AMT + ('amtSum',):
+        if k in old:
+            new[k] = old[k]
     if MERGE:
         keep = ('updated', 'at', 'new', 'rawTotal', 'dropped')
         for k in keep:
