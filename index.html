@@ -47,6 +47,8 @@ button{font-family:inherit}
 .hd .wrap{max-width:1440px;margin:0 auto;padding:0 16px}
 .hd h1{font-size:21px;font-weight:800;letter-spacing:.5px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .hd h1 .ver{font-size:11px;font-weight:600;background:rgba(255,255,255,.22);padding:2px 8px;border-radius:10px}
+.hd h1 .v3link{font-size:11px;font-weight:700;color:#fff;text-decoration:none;letter-spacing:0;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.38);padding:3px 10px;border-radius:10px}
+.hd h1 .v3link:hover{background:rgba(255,255,255,.30)}
 .hd .sub{opacity:.94;margin-top:5px;font-size:12.5px}
 .kpis{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 /* KPI 分主次（2026-11-04）：原来 10 格 flex:1 等宽，一眼看过去 10 个数字同样大，
@@ -1491,7 +1493,7 @@ window.addEventListener('error',function(e){
 <body>
 
 <div class="hd"><div class="wrap">
-  <h1>商机雷达 <span class="ver">V3.0</span></h1>
+  <h1>商机雷达 <span class="ver">V3.0</span><a class="v3link" href="v3.html">新版界面 →</a></h1>
   <div class="sub" id="subTitle">加载中…</div>
   <div class="kpis" id="kpis"></div>
   <div class="mstrip" id="mstrip"></div>
