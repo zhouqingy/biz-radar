@@ -34,7 +34,7 @@ SEG_CN = {
     'cogen': '热电联产·集中供热', 'chemheat': '化工余热回收',
     'selfplant': '自备电厂·能源站', 'datactr': '数据中心供能', 'wte': '垃圾焚烧发电',
     'soil': '土壤与场地修复', 'zero': '废水零排放', 'sewage': '市政污水',
-    'oversea': '海外', 'other': '未分类',
+    'oversea': '中资出海能源岛', 'other': '其他',
 }
 # 分级中文（跟顶部 KPI 的「A 战略必争」对齐）
 GRADE_CN = {'A': 'A 战略必争', 'B': 'B 重点跟进', 'C': 'C 一般', 'D': 'D 备选'}
@@ -60,10 +60,16 @@ def main():
     ds = [x for x in C['d'] if x]
     amt = [x for x in C['amt'] if x]
     win = [x for x in C['win'] if x]
-    # 金额单位：amt 列存的是「亿元」还是「元」？看量级判断
+    # 金额单位：amt 列存的就是「亿元」（build_web.py 第 355 行 'amt': r['amtY']，
+    # r['amtY'] 在 build_data.py 里由 元/1e8 得到）。不用再靠量级猜。
+    #
+    # 原来这里写 `if amt_sum > 1e6: /1e8`，单位判断是照「amt 存元」的旧假设写的。
+    # 库里根本没哪个项目是 100 万亿，这个分支永远不进，等于没换算，
+    # 于是 611.7 被原样当成「亿元」写进 meta —— 页面顶部就变成
+    # 「已公示金额 612 亿」而真实是 611.7 亿……两种口径下数字看着差不多，
+    # 是因为恰好 460 个项目的单位值合计 611 本就等于亿元合计。
+    # 现在显式按亿元求和，并在写盘前跟 items 列交叉校验。
     amt_sum = sum(float(x) for x in amt) if amt else 0
-    if amt_sum > 1e6:            # 显然是元
-        amt_sum = amt_sum / 1e8
 
     # ── 哪些字段能从包里真实算出来，哪些不能 ────────────────────────────
     # 能算的：total / withAmt / withWin / amtSum / 各项 Top / dataAsOf（列表里就有）。
@@ -108,6 +114,7 @@ def main():
     print('  地区:', new['rgTop'])
     print('  状态:', new['stTop'])
     print('  业务:', new['bizTop'])
+    print('  金额: %d 条带金额，合计 %.1f 亿' % (new['withAmt'], new['amtSum']))
 
     if MERGE:
         keep = ('updated', 'at', 'new', 'rawTotal', 'dropped')
