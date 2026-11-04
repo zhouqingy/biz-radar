@@ -64,7 +64,7 @@ NOISE = ['获评', '荣获', '获评', '考核', '出席', '参加', '召开', '
 SCALE = re.compile(r'(\d+(\.\d+)?)\s*(兆瓦|MW|mw|万千瓦|千瓦|kW|kw|吨/日|吨\/日|万立方米|亿元|万元|MW时|MWh|兆瓦时)')
 
 
-def fetch(u, t=25, retry=1):
+def fetch(u, t=12, retry=1):
     last = None
     for _ in range(retry + 1):
         try:
@@ -177,7 +177,7 @@ def harvest(name, home, deep=True, log=print):
     pages = find_cols(home, h) if deep else [home]
     for pu in pages:
         try:
-            ph = fetch(pu, t=15) if pu != home else h
+            ph = fetch(pu, t=10) if pu != home else h
         except Exception:
             continue
         # <a> 文本标题 + <li>/<td> 内嵌链接两种形态都收
@@ -211,6 +211,15 @@ def main():
         comps = comps[:limit]
     print('开始抓 %d 家竞对官网' % len(comps))
     allitems, okc = [], 0
+
+    # ⚠ 2026-11-04：原来是 for 循环一家一家串行抓，单家最多 8 个页面，
+    #   首页 timeout=25s、子页 15s，71 家最坏 30 分钟往上 —— 正好卡在
+    #   digest.yml 第 5 步的 timeout-minutes: 30 上，实测跑满 20 分钟还在第 5 步，
+    #   最后多半被 timeout 掐掉。改成 6 路并发，整体压到 5 分钟内。
+    #   并发数不敢再高：官网多是政府/国企站点，10 路以上容易被 WAF 判成扫描。
+    from concurrent.futures import ThreadPoolExecutor
+
+    targets = []
     for i, c in enumerate(comps):
         name, home = c.get('name', ''), (c.get('url') or '')
         if not home.startswith('http'):
@@ -219,12 +228,25 @@ def main():
         # url 指向具体文章页时，退回域名根（否则只能抓到一篇）
         if pu.path.count('/') >= 2 or re.search(r'/[a-z]?\d{8,}', pu.path):
             home = '%s://%s/' % (pu.scheme, pu.netloc)
-        got = harvest(name, home)
-        if got:
-            okc += 1
-            print('  [%2d/%d] %s → %d 条' % (i + 1, len(comps), name[:22], len(got)))
-        allitems.extend(got)
-        time.sleep(0.3)
+        targets.append((i, name, home))
+
+    def _one(t):
+        i, name, home = t
+        try:
+            got = harvest(name, home, log=lambda *a: None)
+        except Exception:
+            got = []
+        return i, name, got
+
+    n_worker = 6
+    print('并发 %d 路抓取（%d 个站点）' % (n_worker, len(targets)))
+    with ThreadPoolExecutor(max_workers=n_worker) as ex:
+        for i, name, got in ex.map(_one, targets):
+            if got:
+                okc += 1
+                print('  [%2d/%d] %s → %d 条' % (i + 1, len(comps), name[:22], len(got)))
+            allitems.extend(got)
+    print('抓取完成：%d/%d 家拿到内容，合计 %d 条原始链接' % (okc, len(targets), len(allitems)))
 
     # 去重：同标题 + 同事件指纹（同一项目被多家号/多栏目重复报道时只留最早一条）
     def fp(t):
