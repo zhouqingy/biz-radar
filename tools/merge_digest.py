@@ -10,7 +10,24 @@ import os, re, json, difflib, time
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(ROOT, 'raw')
-DATA = os.path.join(os.path.dirname(ROOT), 'biz-radar', 'data.js')
+
+# data.js 位置。三种环境：
+#   · 本地沙箱        tools/ 的同级有 biz-radar/ → tools/../biz-radar/data.js
+#   · GitHub Actions  tools/ 直接躺在仓库根下   → tools/../data.js
+# 原来写死第一种，Actions 上就变成 <repo>/biz-radar/data.js（多套一层），
+# 2026-11-04 首次跑 digest.yml 报 FileNotFoundError 就是这个原因。
+# 和 build_web.py 保持一致：优先认 BIZ_OUT。
+def _data_js():
+    out = os.environ.get('BIZ_OUT')
+    if out:
+        return os.path.join(out, 'data.js')
+    a = os.path.join(os.path.dirname(ROOT), 'biz-radar', 'data.js')
+    if os.path.exists(a):
+        return a
+    return os.path.join(os.path.dirname(ROOT), 'data.js')
+
+
+DATA = _data_js()
 RIVAL = os.path.join(RAW, 'rival_news.json')
 WX = os.path.join(RAW, 'wechat_digest.json')
 SIM = 0.72
