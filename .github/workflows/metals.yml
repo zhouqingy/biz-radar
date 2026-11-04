@@ -27,6 +27,7 @@ on:
   # 改脚本或改这个工作流本身时会自动在新 commit 上跑一次，省掉这一步人工。
   push:
     paths:
+      - '.github/workflows/metals.yml'   # 改工作流本身也要跑一次，否则「修完重跑还是失败」
       - 'tools/gen_metal_hist.py'
       - 'tools/build_web.py'
 
