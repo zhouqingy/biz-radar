@@ -82,6 +82,19 @@ jobs:
         run: |
           python fill_missing.py --limit 80 --sleep 0.1 --workers 8
 
+      # ★ 2026-11-04 新增：专补金额。为什么单开一步而不用 fill_missing：
+      #   fill_missing 按「最缺的优先」排队，缺中标单位的永远排在缺金额的前面，
+      #   金额覆盖率就一直卡在 17%。单开一步只补金额，一轮能补四百多条。
+      #   命中率靠 detail_fields 的两条新规则：浙江站中标候选人页的**表格型报价**
+      #   （单位名\n7,289,582.00元）和政府采购页的「定标/成交结果: XX（1041459.00元）」。
+      #   补上来的口径是 win（中标价），和项目总投资分开存。
+      - name: 3.5) 专补金额
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 15
+        run: |
+          python fill_amount.py --all --workers 12
+
       # ★ 2026-10-27 新增：省发改委对各地市「十五五」热电联产 / 资源综合利用发电
       #   规划的**批复**。正文是 HTML 纯文本（不用解 PDF），且直接点名企业和项目方向，
       #   比核准更早、比招标公告早 1~3 年，是立项线索层最稀缺的提前量。
@@ -241,7 +254,12 @@ jobs:
           # 自动更新覆盖掉（否则我这边改一次就被冲一次）。
           # merged.snapshot.json 是两个「不采集」工作流（metals / digest）的构建输入，
           # 必须跟数据一起刷新，否则它们永远拿旧快照重建、把数据回滚。
-          git add -A '*.js' '*.html' 'merged.snapshot.json' ':!tools'
+          # tools/raw 里只提补采改过的省份文件：fill_amount.py / fill_missing.py 把
+          # 金额、中标单位直接写回 raw/<省>.json，不提交就等于每轮白抓。
+          # 只点名 4 个文件，避免把 tools/raw 下的缓存、日志、验证码图（很杂）一起带上去。
+          git add -A '*.js' '*.html' 'merged.snapshot.json' \
+                  'tools/raw/jiangsu.json' 'tools/raw/zhejiang.json' \
+                  'tools/raw/anhui.json' 'tools/raw/shanghai.json' ':!tools/*.py'
 
           if git diff --staged --quiet; then
             echo "没有变化，跳过提交"
