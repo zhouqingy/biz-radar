@@ -146,9 +146,62 @@ jobs:
           BIZ_OUT: ${{ github.workspace }}
         run: python build_web.py
 
+      # ★ 2026-11-02 新增：规划前瞻模块（一级页签「规划前瞻」）。
+      #   为什么单独一步、为什么放最后：
+      #     ① 它的输入不是采集来的**公告**，是人工整理好的《江浙沪皖供热规划可做项目清单.xlsx》
+      #        （规划正文 PDF 自动提取 → 人工校核后落成这张表）。这张表在仓库根目录下
+      #        规划资料-2026-2030/ 里，跟着仓库走，所以 CI 里读得到。
+      #     ② 它**不走** build_web.py：那套是招投标流的口径（有招标文件才算），
+      #        规划期项目塞进去会把「本库 N 个项目」算成招采记录。
+      #     ③ 必须放在 4.6 之后 —— 4.6 会重写 core/org/news 等所有 data.*.js，
+      #        虽然它不碰 data.plan.js，但先构建再生成，顺序上更安全，出问题一眼能定位。
+      #   ⚠ 允许失败（continue-on-error）：xlsx 没更新 / 格式变动时，
+      #     宁可让规划页停在上一次的版本，也不能拖垮整个每日更新。
+      - name: 4.7) 生成规划前瞻（独立模块，不进商机库）
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          BIZ_OUT: ${{ github.workspace }}
+          BIZ_SITE: ${{ github.workspace }}
+        run: python build_plan_forecast.py
+
       - name: 5) 检查产物
         run: |
           ls -lh --time-style=+%H:%M data*.js index.html 2>/dev/null | awk '{print $5, $6, $7}'
+          # ── 速查快照体检（2026-10-29）────────────────────────────────
+          # data.entprobe.js 是「按企业名定向检索」的人工产物，不在采集链里，
+          # 也不由 build_web.py 生成 —— 它只在发布清单里被手推。
+          # 缺了它页面不报错、不白屏，只是企业画像底部的「全网业绩速查」静默消失。
+          # 所以这里必须打一行明确日志，否则出了问题谁都看不出来。
+          if [ -f data.entprobe.js ]; then
+            echo "速查快照: $(du -h data.entprobe.js | cut -f1) · $(grep -o '"updated":"[^"]*"' data.entprobe.js | head -1)"
+          else
+            echo "⚠ 速查快照 data.entprobe.js 不在仓库里 —— 线上企业画像会缺「全网业绩速查」这一段"
+          fi
+          # ── 规划前瞻体检（2026-11-02）────────────────────────────────
+          # data.plan.js 由 4.7 生成，那一步是 continue-on-error 的：
+          # 生成失败不会中断 job，但会**静默**留下上一次的文件（或者干脆没有）。
+          # 这里必须查条数，否则线上「规划前瞻」页签空了都没人知道。
+          if [ -f data.plan.js ]; then
+            echo "规划前瞻: $(du -h data.plan.js | cut -f1)"
+          else
+            echo "⚠ 规划前瞻 data.plan.js 不在仓库里 —— 线上「规划前瞻」页签会是空面板"
+          fi
+          python - <<'PY'
+          import json
+          try:
+              s = open('data.plan.js', encoding='utf-8').read()
+              j = json.loads(s[s.index('=') + 1:].strip().rstrip(';'))
+              n = j.get('n', 0)
+              m = j.get('meta', {})
+              print('规划前瞻: %s 条 | 热网类 %s | 主业类 %s | 投资 %s 亿'
+                    % (n, m.get('pipe'), m.get('core'), m.get('amt')))
+              if n < 100:
+                  print('⚠ 规划前瞻条数异常（应 >= 100），检查规划资料-2026-2030/ 下的 xlsx')
+          except FileNotFoundError:
+              print('data.plan.js 不存在，跳过规划校验')
+          PY
           python - <<'PY'
           import json, sys
           s = open('data.core.js', encoding='utf-8').read()
@@ -182,7 +235,9 @@ jobs:
 
           # 只提交站点产物。:!tools 排除工具目录——脚本不该被机器人的
           # 自动更新覆盖掉（否则我这边改一次就被冲一次）。
-          git add -A '*.js' '*.html' ':!tools'
+          # merged.snapshot.json 是两个「不采集」工作流（metals / digest）的构建输入，
+          # 必须跟数据一起刷新，否则它们永远拿旧快照重建、把数据回滚。
+          git add -A '*.js' '*.html' 'merged.snapshot.json' ':!tools'
 
           if git diff --staged --quiet; then
             echo "没有变化，跳过提交"
