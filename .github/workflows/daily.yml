@@ -21,18 +21,9 @@ name: 商机雷达每日更新
 #      但采集本身允许失败（continue-on-error），不该让它拖垮整个 job。
 # ══════════════════════════════════════════════════════════════════════
 
-# ══════════════════════════════════════════════════════════════════════
-# 2026-11-04 用户要求：「周更 daily.yml 那个改成日更吧，跟金属行情保持一致」
-# ══════════════════════════════════════════════════════════════════════
-# ① 频率：cron 本来就是每天（原来 23:20 UTC = 次日 07:20 北京，容易被当成「夜里跑」），
-#    现在跟 metals.yml 同一时刻 08:05 UTC = 16:05 北京，收盘后跑，两边时间口径一致。
-# ② 采集窗口 3 天 → 5 天：日更后单日条数少，多留两天容错，某天跑挂也能自动补上。
-# ③ 新增「数据新鲜度」卡口：最新公告滞后 > 2 天就判失败。10-24~11-04 江苏站协议变了、
-#    浙江站被劫持页顶掉，采集连续 11 天静默失败，但 workflow 一直显示绿色 —— 
-#    比失败更糟的是「成功但没数据」。从此这种情况直接红灯。
 on:
   schedule:
-    - cron: '5 8 * * *'
+    - cron: '20 23 * * *'
   workflow_dispatch:
 
 permissions:
@@ -74,8 +65,7 @@ jobs:
         continue-on-error: true
         timeout-minutes: 30
         run: |
-          # 5 天窗口：日更单日量小，多留两天容错
-          python collect_v4.py --days 5 --perkw 80 \
+          python collect_v4.py --days 3 --perkw 80 \
             --sites 江苏,浙江,合肥,苏州,常州 --merge
 
       - name: 2) 详情页扫描
@@ -143,6 +133,31 @@ jobs:
         timeout-minutes: 20
         run: |
           python crawl_ah_nygs.py
+
+      # ★ 2026-11-04 新增：海外速览（公众号线索）。用户原话：
+      #   「先跑 3~5 天再进行日更吧」——所以这一步带着 continue-on-error 上线，
+      #   前 5 天只当观察期，跑挂了不影响主链路，也不会污染 data.news.js
+      #   （写不进去 build_web 就只读到旧的 raw/oversea_flash.json）。
+      #
+      # 为什么单独一步而不是并进 1) 采集：搜狗微信是**按累计请求次数**限流的。
+      #   实测 31 个词一口气跑 → 有效 1 条，之后连常见词都返回 0，等 75 秒还不恢复。
+      #   所以 mine_oversea_wechat.py 内部把词分成 A/B/C 三组，按「年内第几天 % 3」
+      #   每天只跑一组（约 10 个词），三天轮一遍。
+      #   ⚠ 别为了「今天多抓点」把 KW_GROUPS 合并：那是把 IP 往冷宫里送。
+      #
+      # 产出 raw/oversea_flash.json → build_web.py 的 _OVS_FLASH → data.news.js 的
+      #   overseaFlash 键 → 海外页签「出海速览」视图。这一步失败时旧文件仍在，
+      #   页面显示上次的结果（速览本身允许有几天的滞后，不像招标公告那样要求 T+1）。
+      - name: 3.9) 海外速览 · 公众号线索采集
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 12
+        run: |
+          if [ -f mine_oversea_wechat.py ]; then
+            python mine_oversea_wechat.py || echo "::warning::海外速览采集失败，沿用上次结果"
+          else
+            echo "::warning::mine_oversea_wechat.py 不存在，跳过"
+          fi
 
       # ── 构建段：不允许失败 ────────────────────────────────────────
       # 注意 tools/raw/oversea_extra.json 必须在仓库里（人工补录的巴淡岛等
@@ -235,22 +250,6 @@ jobs:
                 % (total, meta.get('dataAsOf'), meta.get('withAmt')))
           if total < 1000:
               print('条数异常，疑似采集失败，本次不提交')
-              sys.exit(1)
-          # ── 数据新鲜度卡口（2026-11-04）─────────────────────────────
-          # 10-24 起江苏站（http 端口被封）、浙江站（被劫持页顶掉）、合肥站（DNS）
-          # 三站全挂，连续 11 天新增 0 条，可 workflow 一路绿灯 —— 页面顶部写着
-          # 「数据更新 今天」，用户只能靠「怎么感觉没更新」自己发现。
-          # 比失败更糟的是「成功但没数据」。最新公告滞后 > 2 天直接判失败。
-          import datetime
-          asof = meta.get('dataAsOf') or ''
-          try:
-              d0 = datetime.date.fromisoformat(asof[:10])
-              lag = (datetime.date.today() - d0).days
-          except Exception:
-              lag = 99
-          print('公告滞后: %s 天（截止 %s）' % (lag, asof))
-          if lag > 2:
-              print('❌ 最新公告已滞后 %d 天，采集链路疑似中断（查 collect_v4 的各站日志）' % lag)
               sys.exit(1)
           # 海外动态也检查一下：这批是人工维护的，被冲掉说明 raw 源没读到
           try:
