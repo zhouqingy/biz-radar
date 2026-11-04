@@ -412,6 +412,94 @@ details.sub li{padding:2px 0}
 .cswitch span.on{background:#fff;color:var(--brand-d);box-shadow:0 1px 4px rgba(20,40,80,.12)}
 .cswitch b{font-size:11px;font-weight:700;color:#8a9099;margin-left:3px}
 .cswitch span.on b{color:var(--brand)}
+
+/* ---------- 海外四视图（2026-11-04 重做） ----------
+   四个视图共用一套零件：说明条 .ovnote、合计 .ovsum、表格 .ovtbl、
+   行列表 .ovfl、卡片 .ovcards。用具名类而不用行内样式，
+   是因为原来那一版大量写死 style="..."，同一张页面里出现了 7 种行高和 4 种字色，
+   用户说「样式不太统一」，根子就在这儿。 */
+.ovnote{background:#f0f7ff;border:1px solid #cfe4ff;border-radius:9px;
+  padding:9px 13px;margin-bottom:12px;color:#1a4f8a;font-size:12.5px;line-height:1.72}
+.ovnote b{color:#0b3c73;font-weight:700}
+
+.ovsum{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+/* 两行结构：上面「数字 + 档位名」，下面一句解释。
+   原来挤在一行，19px 的数字、12px 的档位名、11.5px 的说明全在同一个基线上，
+   截图里看着像一串连读的字。 */
+.ovsum span{background:#fff;border:1px solid var(--line);border-radius:10px;
+  padding:8px 16px;display:flex;flex-direction:column;gap:2px}
+.ovsum i{display:flex;align-items:baseline;gap:6px;font-style:normal;
+  font-size:12px;color:var(--tx2);font-weight:600}
+.ovsum b{font-size:20px;font-weight:800;color:var(--tx);letter-spacing:-.5px;line-height:1.1}
+.ovsum em{font-style:normal;color:var(--tx3);font-size:11.5px;line-height:1.5}
+
+/* 关键词区块 */
+.ovkw{background:#fff;border:1px solid var(--line);border-radius:10px;
+  padding:10px 14px;margin-bottom:12px}
+.ovkw-h{font-size:12.5px;font-weight:700;color:var(--tx);cursor:pointer;
+  display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;user-select:none}
+.ovkw-h span{font-weight:400;font-size:11.5px;color:var(--tx3)}
+.ovkw-h i{margin-left:auto;font-style:normal;color:var(--brand);font-size:12px}
+.ovkw-g{display:grid;gap:6px;margin-top:9px;padding-top:9px;border-top:1px solid var(--line);
+  font-size:12px;color:var(--tx2);line-height:1.72}
+.ovkw-g b{display:inline-block;min-width:100px;color:var(--tx);font-weight:600}
+
+/* 速览行列表：一行一条，不占卡片的垂直空间 */
+.ovfl{list-style:none;margin:0;padding:0;border:1px solid var(--line);
+  border-radius:10px;overflow:hidden;background:#fff}
+.ovf{display:flex;gap:10px;align-items:flex-start;padding:9px 14px;
+  border-bottom:1px solid #f2f4f8;line-height:1.65}
+.ovf:last-child{border-bottom:none}
+.ovf:hover{background:#f7fbff}
+.ovf-d{flex:0 0 40px;font-size:11.5px;color:var(--tx3);font-variant-numeric:tabular-nums;padding-top:1px}
+.ovf-b{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ovf-t{font-size:13px;font-weight:600;color:var(--tx);text-decoration:none}
+a.ovf-t:hover{color:var(--brand);text-decoration:underline}
+.ovf-m{font-size:11.5px;color:var(--tx3);line-height:1.6;
+  display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.ovf-s{flex:0 0 auto;max-width:130px;font-size:11px;color:var(--tx3);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-top:2px}
+
+/* 筛选条：一行放完，不占两行 */
+.ovfbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.ovfb-l{font-size:12px;color:var(--tx3);flex:0 0 auto}
+.ovfbar .chips{margin:0;flex:1 1 auto}
+.ovfb-n{font-size:11.5px;color:var(--tx3);margin-left:auto;white-space:nowrap}
+.ovsel{height:30px;border:1px solid var(--el-bd1);border-radius:var(--el-r);
+  padding:0 8px;font-size:12.5px;color:var(--tx);background:#fff;outline:none;
+  font-family:inherit;cursor:pointer;max-width:210px}
+.ovsel:focus{border-color:var(--el-blue)}
+.ovinput{flex:0 0 210px;height:30px;border:1px solid var(--el-bd1);border-radius:var(--el-r);
+  padding:0 10px;font-size:12.5px;color:var(--tx);outline:none;font-family:inherit}
+.ovinput:focus{border-color:var(--el-blue)}
+
+/* 表格：底座复用 .pf-table，这里只补海外特有的三列 */
+.ovtbl{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ovtbl td{padding:9px 10px}
+.ovt-own{font-size:12px;color:var(--tx);font-weight:600;line-height:1.55}
+.ovt-geo{font-size:12px;color:var(--tx2);white-space:nowrap}
+.ovt-act{font-size:12px;color:var(--tx2);white-space:nowrap}
+.ovt-desc{font-size:11.5px;color:var(--tx3);margin-top:3px;line-height:1.55}
+/* 相关性那列的补充说明只允许一行，否则「垃圾焚烧/焚烧发电」会把 14% 宽的列撑成三行 */
+.ovt-one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+/* 项目说明最多两行：原来一条 120 字全铺开，一行表格能有 5 行高，看不到第三条 */
+.ovt-clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden}
+.ovdim{font-size:11.5px;color:var(--tx3)}
+
+/* 环境卡：每条长短不一，用卡片比表格合适。
+   340px 在 1560 宽下会挤成 4 列，一屏塞太满；380px 稳定 3 列，读起来松一点。 */
+.ovcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px;align-items:stretch}
+.ovc{background:#fff;border:1px solid var(--line);border-radius:11px;
+  padding:13px 16px;display:flex;flex-direction:column;gap:7px}
+.ovc-t{font-size:13.5px;font-weight:700;color:var(--tx);line-height:1.6}
+.ovc-t a{color:var(--tx);text-decoration:none}
+.ovc-t a:hover{color:var(--brand);text-decoration:underline}
+.ovc-m{font-size:12px;color:var(--tx2);line-height:1.72}
+.ovc-f{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding-top:7px;border-top:1px solid var(--el-bd3);margin-top:auto}
+
+.ovfoot{font-size:11.5px;color:var(--tx3);margin-top:10px;line-height:1.7}
 .pnote{font-size:11.5px;color:#8a6100;background:#fffbf0;border-left:2px solid #f0d9a8;padding:5px 8px;margin-top:6px;border-radius:0 5px 5px 0;line-height:1.6}
 .kpirow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 .kpirow .kpi{background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 14px;min-width:130px;flex:1 1 130px;display:flex;flex-direction:column;gap:2px}
@@ -1470,16 +1558,21 @@ window.addEventListener('error',function(e){
   </div>
 
   <!-- 3c 海外信号 -->
+  <!-- 3c 海外（2026-11-04 重做：一个页签、四个视图） -->
   <div class="panel" id="p-overseas">
-    <div class="sect">海外用能信号 <small>客户出海 = 我司出海 · 按「与我司业务关联度」排序</small></div>
-    <div class="hint" style="margin-bottom:10px">跟踪 44 家重点客户的海外矿山 / 园区 / 建厂动向。海外园区落地必然要配套<b>自备电厂、余热发电、海水淡化</b>——这正是我司海外业务方向（有色企业用热用电 + 配套海水淡化）。关联度由标题与解读中的「发电/自备电厂/氧化铝/镍/园区/海水淡化」等业务关键词计算。</div>
-    <div id="ovHot"></div>
-    <div class="sect" style="margin-top:18px">全部海外动态 <small id="ovCnt"></small></div>
-    <div class="frow" style="padding:0 0 6px"><label>切口</label><div class="chips" id="f-ocut"></div></div>
-    <div class="hint" style="margin:0 0 8px;font-size:12px;color:var(--tx3)">切口 = 这条线索我们能切进去做哪段活。点一下只看这一类；「看不出」是公告里没提到我们相关工艺，不代表没机会。</div>
-    <div class="frow" style="padding:0 0 10px"><label>行业</label><div class="chips" id="f-ogrp"></div></div>
-    <div class="hint" id="ovSectorTip" style="margin:0 0 10px;background:#f0f7ff;border:1px solid #cfe4ff;border-radius:9px;padding:8px 12px;color:#1053c9;font-size:12.5px;line-height:1.7"></div>
-    <div class="cgrid" id="ovGrid"></div>
+    <div class="sect">海外 <small>中资出海 · 用能配套 · 备案登记</small></div>
+    <div class="cswitch" id="ovTabs">
+      <span data-v="flash" class="on">出海速览 <b id="ovNFlash"></b></span>
+      <span data-v="clue">项目线索 <b id="ovNClue"></b></span>
+      <span data-v="odi">已备案 <b id="ovNOdi"></b></span>
+      <span data-v="env">市场与政策 <b id="ovNEnv"></b></span>
+    </div>
+    <!-- 四个视图的容器常驻，切换只改 display，不重建 DOM。
+         重建的话每次切回来都从 0 开始，筛选状态丢了、滚动位置也丢。 -->
+    <div id="ovBoxFlash"></div>
+    <div id="ovBoxClue" style="display:none"></div>
+    <div id="ovBoxOdi" style="display:none"></div>
+    <div id="ovBoxEnv" style="display:none"></div>
   </div>
 
   <!-- 4 客户与业主（原「重点客户」+「业主图谱」合并，2026-10-21） -->
@@ -1711,8 +1804,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202611041513"></script>
-<script src="data.items.js?v=202611041513"></script>
+<script src="data.core.js?v=202611041807"></script>
+<script src="data.items.js?v=202611041807"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1779,7 +1872,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611041513';
+var VER='?v=202611041807';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -1808,7 +1901,7 @@ var TABS = [
   ['p-items',   '找商机',    0, '◆', '能投的标 · 已出结果 · 立项线索', 'mv'],
   ['p-rival',   '同业与伙伴', 0, '◈', '谁在拿单 · 对手档案 · 联合体',   'mv'],
   ['p-client',  '客户与业主', 0, '▣', '业主买什么 · 找过谁 · 海外建厂', 'mv'],
-  ['p-overseas', '海外机会',  0, '◎', '中资出海配套能源岛',            'mv'],
+  ['p-overseas', '海外',      0, '◎', '中资出海·用能配套',              'mv'],
   ['p-trend',   '行业动态',   0, '', '', 'sub'],
   ['p-wechat',  '情报精选',   0, '', '', 'sub'],
   ['p-plat',    '招标平台',   0, '', '', 'sub'],
@@ -2115,7 +2208,9 @@ function refreshTabCounts(){
      取不到 all 就退回三档相加（老口径），别显示 0。 */
   _setTab('p-items',   (_W.all||0) || ((_W.tenderAll||0)+(_W.winAll||0)+(_W.lead||0)));
   _setTab('p-rival',   arr(D.competitors).length+arr(D.partners).length);
-  _setTab('p-overseas',arr(D.overseas).length);          /* 海外机会 = 海外动态条数 */
+  /* 海外页签的数字 = 线索 + 备案。原来只算 D.overseas（94 条新闻），
+     但现在页签里还装着 23 条备案，只报新闻条数会让人以为备案没进来。 */
+  _setTab('p-overseas', arr(D.overseas).length + arr(D.overseaOdi).length);
   /* 2026-11-03：业主画像图谱子段下线，页签数不再叠加 650 家图谱业主 ——
      那个数字点进去已经看不到了，挂着只会让人以为还有一栏没找到。 */
   _setTab('p-client',  ((D.domStat&&D.domStat.total)||0)+arr(D.clients).length);
@@ -3865,111 +3960,6 @@ chipsBox('f-pcat',CAT_ORDER,null,'pcat');
 el('f-pcat').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
   toggle(pCat,c.dataset.v);c.classList.toggle('on');renderPartners()};
 
-/* ---------------- 切口标签 ----------------
-   数据侧（build_web.py）给每条海外动态打了 cut（key）和 cutWhy（人话，20 字内）。
-   cut 负责筛选和上色，cutWhy 负责说清「这条具体能切什么活」——
-   只给 6 个粗标签没用，用户要的是「这家能让我做什么」。
-   cutWhy 写不出就退回显示标签名，不硬凑。 */
-var CUT_META={
-  water:{t:'海水淡化',c:'#0b6fa4',bg:'#e3f4fb'},
-  power:{t:'自备电站·动力岛',c:'#a8451a',bg:'#fdece3'},
-  waste:{t:'余热回收',c:'#7a5b00',bg:'#fdf4dc'},
-  cogen:{t:'热电联产·供热',c:'#8a2f6b',bg:'#fbe8f4'},
-  grid:{t:'供配电·孤网',c:'#215c3a',bg:'#e4f4ea'},
-  opp:{t:'机会池',c:'#4a5568',bg:'#eef1f6'},
-  '':{t:'',c:'',bg:''}
-};
-function cutMeta(o){
-  var m=CUT_META[(o&&o.cut)||'']||CUT_META[''];
-  /* cutWhy 可能带括号补充，先在第一个括号/破折号处断开，再限长，否则标签被截成半句 */
-  var w=((o&&o.cutWhy)||'').split(/[（(——]/)[0].trim();
-  return {t:(w||'').slice(0,20)||m.t, c:m.c, bg:m.bg, tip:(o&&o.cutWhy)||m.t};
-}
-function cutTag(o){
-  var m=cutMeta(o); if(!m.t) return '';
-  return '<span class="ovcut tip" style="background:'+m.bg+';color:'+m.c+'" title="'+esc(m.tip)+'">'+esc(m.t)+'</span>';
-}
-
-/* ==================== 海外信号 ==================== */
-var oGrp=new Set(), oCut=new Set();
-function ovCard(o,big){
-  var h='<div class="'+(big?'ovhot':'ccard')+'"><h3>'+(o.url?'<a href="'+esc(o.url)+'" target="_blank" rel="noopener"'+(big?' style="color:#ffe08a"':'')+'>'+esc(o.title)+(o.url?' ↗':'')+'</a>':esc(o.title))+'</h3>';
-  if(big){
-    h+='<div class="oht">'+esc(o.desc||'')+'</div>';
-    h+='<div class="ohm">'+(function(){var m=cutMeta(o);
-         return m.t?'<span class="badge" style="background:'+m.bg+';color:'+m.c+';border-color:transparent" title="'+esc(m.tip)+'">'+esc(m.t)+'</span>':'';
-       })()+'<span class="badge">'+esc(o.name)+'</span><span class="badge">'+esc(o.grp)+'</span>'+
-       (o.tag?'<span class="badge">'+esc(o.tag)+'</span>':'')+'<span>'+esc(o.date||'')+'</span></div>';
-  }else{
-    h+='<div class="cc-m">'+esc(o.desc||'')+'</div>';
-    h+='<div class="ns" style="font-size:11.5px;color:var(--tx3);margin-top:6px">'+cutTag(o)+'<span class="ntag 行业">'+esc(o.tag||'动态')+'</span><span>'+esc(o.name)+'</span><span>'+esc(o.date||'')+'</span></div>';
-  }
-  return h+'</div>';
-}
-/* 行业名归一（2026-10-23）：数据侧的行业名跟页面写死的那套对不上——
-   数据是「有色冶炼 / 水泥 / 化工化纤」，筛选条写的是「有色 / 水泥建材 / 化肥」，
-   点下去出来 0 条，筛选器等于坏的。统一映射，再按数据里真实有哪些行业动态生成。 */
-var OV_GRP_ALIAS={'有色':'有色冶炼','水泥建材':'水泥','化肥':'化工化纤','其他制造':'化工化纤'};
-function ovGrp(g){ g=g||''; return OV_GRP_ALIAS[g]||g; }
-function renderOverseas(){
-  var list=D.overseas||[];
-  /* 海外数据在 news 模块里：D.overseas 只有在 mergeMod('news') 之后才有值。
-     原来这里直接读 D.overseas，tab3 首次进来时模块还没合并，于是显示 0 条、
-     切口筛选条只剩「看不出」一个格子。这里先兜底合并一次。 */
-  if(!(D.overseas&&D.overseas.length) && window.DATA_NEWS){ try{ mergeMod('news'); }catch(e){} }
-  var list0=D.overseas||[];
-  var list=list0;
-  var hot=list.slice(0,4);
-  el('ovHot').innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-bottom:16px">'+
-    hot.map(function(o){return ovCard(o,true)}).join('')+'</div>';
-  var rest=list.filter(function(o){
-    if(oGrp.size && !oGrp.has(ovGrp(o.grp))) return false;
-    /* 切口筛选：空串代表「看不出」，也必须能单独筛——
-       用户最常问的两个问题就是「哪些能接」和「哪些根本没信息」。 */
-    if(oCut.size && !oCut.has(o.cut||'')) return false;
-    return true;
-  });
-  var nCut={}; list.forEach(function(o){var k=o.cut||''; nCut[k]=(nCut[k]||0)+1});
-  var nClear=list.filter(function(o){return o.cut&&o.cut!=='opp'}).length;
-  el('ovCnt').textContent='共 '+list.length+' 条 · 切口明确 '+nClear+' 条 · 海水淡化 '+(nCut.water||0)+' 条';
-  el('ovGrid').innerHTML=rest.map(function(o){return ovCard(o,false)}).join('')||'<div class="empty">没有匹配的动态，换个筛选条件试试</div>';
-  /* 切口筛选条：只显示有数据的切口 */
-  var cb=el('f-ocut');
-  if(cb){
-    cb.innerHTML=['water','power','waste','cogen','grid','opp',''].filter(function(k){return nCut[k]})
-      .map(function(k){
-        var m=CUT_META[k]||{t:'看不出'};
-        return '<span class="chip'+(oCut.has(k)?' on':'')+'" data-v="'+k+'">'+esc(k?m.t:'看不出')+
-          '<em>'+nCut[k]+'</em></span>';
-      }).join('');
-  }
-  /* 行业筛选条同理，动态生成 */
-  var gb=el('f-ogrp');
-  if(gb){
-    var nGrp={}; list.forEach(function(o){var g=ovGrp(o.grp); nGrp[g]=(nGrp[g]||0)+1});
-    var order=['有色冶炼','水泥','数据中心','电力配套','钢铁','化工化纤','造纸','玻璃']
-      .filter(function(g){return nGrp[g]});
-    Object.keys(nGrp).forEach(function(g){if(order.indexOf(g)<0)order.push(g)});
-    gb.innerHTML=order.map(function(g){
-      return '<span class="chip'+(oGrp.has(g)?' on':'')+'" data-v="'+esc(g)+'">'+esc(g)+'<em>'+nGrp[g]+'</em></span>';
-    }).join('');
-  }
-}
-el('f-ocut').onclick=function(e){
-  var c=e.target.closest('.chip'); if(!c)return;
-  var v=c.dataset.v;
-  if(oCut.has(v))oCut.delete(v);else oCut.add(v);
-  renderOverseas();
-};
-
-/* f-ogrp 的选项改由 renderOverseas() 按数据动态生成，这里不再写死 */
-(function(){var box=el('ovSectorTip');if(!box)return;
-  box.innerHTML='<b>三行业出海 · 为什么与我司有关</b>：'+
-   '<b>水泥</b>——水泥窑余热发电是我司成熟市场，出海项目还需自备电厂、脱硝除尘；'+
-   '<b>数据中心</b>——高载能，供电方案多元：<b>天然气发电</b>（燃气轮机/分布式能源，东南亚、中东天然气产区尤常见）、'+'市电+柴油发电机备电、光伏+储能绿电；还有<b>冷热电三联供</b>（燃气发电余热用吸收式制冷给机房降温）——'+'正对「能源清洁高效利用+热电联产」的老本行；冷却系统带来水处理，海岛项目还需海水淡化；'+
-   '<b>化肥</b>——合成氨/磷化工高耗能，必配自备热电站、余热回收、脱硫脱硝与废水零排放。';})();
-el('f-ogrp').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
-  toggle(oGrp,c.dataset.v);c.classList.toggle('on');renderOverseas()};
 
 /* ==================== 重点客户 ==================== */
 /* cRg / cPri / cEx 在下面的「海外中资出海客户」段落里统一定义（2026-10-21 合并，
@@ -4612,7 +4602,8 @@ el('f-pcat').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
    数据侧（build_web.py）给每条海外动态打了 cut（key）和 cutWhy（人话，20 字内）。
    cut 负责筛选和上色，cutWhy 负责说清「这条具体能切什么活」——
    只给 6 个粗标签没用，用户要的是「这家能让我做什么」。
-   cutWhy 写不出就退回显示标签名，不硬凑。 */
+   cutWhy 写不出就退回显示标签名，不硬凑。
+   注：这段原本在文件里存在两份（重复定义），2026-11-04 重做海外页签时只留这一份。 */
 var CUT_META={
   water:{t:'海水淡化',c:'#0b6fa4',bg:'#e3f4fb'},
   power:{t:'自备电站·动力岛',c:'#a8451a',bg:'#fdece3'},
@@ -4633,86 +4624,396 @@ function cutTag(o){
   return '<span class="ovcut tip" style="background:'+m.bg+';color:'+m.c+'" title="'+esc(m.tip)+'">'+esc(m.t)+'</span>';
 }
 
-/* ==================== 海外信号 ==================== */
-var oGrp=new Set(), oCut=new Set();
-function ovCard(o,big){
-  var h='<div class="'+(big?'ovhot':'ccard')+'"><h3>'+(o.url?'<a href="'+esc(o.url)+'" target="_blank" rel="noopener"'+(big?' style="color:#ffe08a"':'')+'>'+esc(o.title)+(o.url?' ↗':'')+'</a>':esc(o.title))+'</h3>';
-  if(big){
-    h+='<div class="oht">'+esc(o.desc||'')+'</div>';
-    h+='<div class="ohm">'+(function(){var m=cutMeta(o);
-         return m.t?'<span class="badge" style="background:'+m.bg+';color:'+m.c+';border-color:transparent" title="'+esc(m.tip)+'">'+esc(m.t)+'</span>':'';
-       })()+'<span class="badge">'+esc(o.name)+'</span><span class="badge">'+esc(o.grp)+'</span>'+
-       (o.tag?'<span class="badge">'+esc(o.tag)+'</span>':'')+'<span>'+esc(o.date||'')+'</span></div>';
-  }else{
-    h+='<div class="cc-m">'+esc(o.desc||'')+'</div>';
-    h+='<div class="ns" style="font-size:11.5px;color:var(--tx3);margin-top:6px">'+cutTag(o)+'<span class="ntag 行业">'+esc(o.tag||'动态')+'</span><span>'+esc(o.name)+'</span><span>'+esc(o.date||'')+'</span></div>';
+/* ==================== 海外：一页签四视图（2026-11-04 重做）====================
+   为什么改成「视图」而不是「多开页签」：用户原话是「这个页面整体就感觉还是偏臃肿
+   一点」。主菜单刚减到 8 个，再开「出海备案」就是第 9 个。而这四类内容本来就同属
+   一件事（中资出海，我们跟着做用能配套），只是**确定性不同、来源不同**：
+
+     · 速览 —— 公众号新闻，每天自动抓。只回答「发生了什么」，不挂客户、不做切口分析
+     · 线索 —— 新闻里能落到具体业主和项目的，人工确认过，标「待证」
+     · 备案 —— 发改委境外投资备案登记，确定，但比新闻晚
+     · 环境 —— 缺电、缺水、政策门槛。不是项目，是判断项目可不可行的背景
+
+   备案和线索**不混排**：用户明确说过「那肯定不是啊，那都不是一个东西」。
+   两者的差别不是格式，是可信度：新闻可能黄，备案是政府登记。
+
+   旧的单列表渲染（ovCard 大卡 + 切口/行业两条筛选）整段下线。 */
+
+var ovView = 'flash';
+var ovClueGeo = '';      // 线索视图的国家筛选，'' = 全部
+var ovClueKw = '';       // 线索视图的搜索词
+var ovKwOpen = false;    // 「当前盯的方向」是否展开
+
+/* ── 国别识别 ─────────────────────────────────────────────────────────
+   新闻标题里的地名大多具体到园区/城市（巴淡、莫罗瓦利、柔佛），不写国名。
+   直接匹配国家名会漏掉一大半，所以先过一遍「属地 → 国家」映射。 */
+var OV_SUB = {
+  '巴淡': '印尼', '莫罗瓦利': '印尼', '雅加达': '印尼', '韦达湾': '印尼', 'IMIP': '印尼',
+  '苏拉威西': '印尼', '加里曼丹': '印尼', '西爪哇': '印尼', '北马鲁古': '印尼', '青山园区': '印尼',
+  '柔佛': '马来西亚', '民都鲁': '马来西亚', '沙捞越': '马来西亚', '关丹': '马来西亚',
+  '西哈努克': '柬埔寨', '金边': '柬埔寨', '万象': '老挝', '仰光': '缅甸',
+  '胡志明': '越南', '河内': '越南', '海防': '越南', '北江': '越南',
+  '罗勇': '泰国', '春武里': '泰国', '林查班': '泰国',
+  '哈拉雷': '津巴布韦', '拉各斯': '尼日利亚', '达累斯萨拉姆': '坦桑尼亚',
+  '卢阿拉巴': '刚果（金）', '加丹加': '刚果（金）', '科卢韦齐': '刚果（金）',
+  '比绍': '几内亚比绍', '博凯': '几内亚', '桑加雷迪': '几内亚'
+};
+/* 顺序有讲究：长的放前面，否则「印度尼西亚」会被「印度」先吃掉，
+   「巴布亚新几内亚」会被「几内亚」吃掉 —— 这两个坑都踩过。 */
+var OV_GEO = [
+  ['印度尼西亚', '印尼'], ['巴布亚新几内亚', '巴新'], ['赤道几内亚', '赤道几内亚'],
+  ['几内亚比绍', '几内亚比绍'], ['捷克', '捷克'], ['印度', '印度'],
+  ['印尼', '印尼'], ['越南', '越南'], ['泰国', '泰国'], ['马来西亚', '马来西亚'],
+  ['柬埔寨', '柬埔寨'], ['老挝', '老挝'], ['缅甸', '缅甸'], ['菲律宾', '菲律宾'],
+  ['新加坡', '新加坡'], ['文莱', '文莱'], ['孟加拉', '孟加拉'], ['巴基斯坦', '巴基斯坦'],
+  ['斯里兰卡', '斯里兰卡'], ['沙特', '沙特'], ['阿联酋', '阿联酋'], ['迪拜', '阿联酋'],
+  ['卡塔尔', '卡塔尔'], ['阿曼', '阿曼'], ['科威特', '科威特'], ['土耳其', '土耳其'],
+  ['埃及', '埃及'], ['摩洛哥', '摩洛哥'], ['阿尔及利亚', '阿尔及利亚'], ['突尼斯', '突尼斯'],
+  ['尼日利亚', '尼日利亚'], ['几内亚', '几内亚'], ['赞比亚', '赞比亚'],
+  ['刚果（金）', '刚果（金）'], ['刚果金', '刚果（金）'], ['刚果', '刚果'],
+  ['坦桑尼亚', '坦桑尼亚'], ['南非', '南非'], ['加纳', '加纳'], ['肯尼亚', '肯尼亚'],
+  ['埃塞俄比亚', '埃塞俄比亚'], ['津巴布韦', '津巴布韦'], ['马里', '马里'],
+  ['塞内加尔', '塞内加尔'], ['莫桑比克', '莫桑比克'], ['安哥拉', '安哥拉'],
+  ['哈萨克斯坦', '哈萨克斯坦'], ['哈萨克', '哈萨克斯坦'], ['乌兹别克斯坦', '乌兹别克斯坦'],
+  ['乌兹别克', '乌兹别克斯坦'], ['塔吉克斯坦', '塔吉克斯坦'], ['吉尔吉斯斯坦', '吉尔吉斯斯坦'],
+  ['蒙古', '蒙古'], ['俄罗斯', '俄罗斯'], ['塞尔维亚', '塞尔维亚'], ['匈牙利', '匈牙利'],
+  ['波兰', '波兰'], ['德国', '德国'], ['法国', '法国'], ['意大利', '意大利'],
+  ['西班牙', '西班牙'], ['荷兰', '荷兰'], ['巴西', '巴西'], ['秘鲁', '秘鲁'],
+  ['智利', '智利'], ['墨西哥', '墨西哥'], ['阿根廷', '阿根廷'], ['澳大利亚', '澳大利亚'],
+  ['加拿大', '加拿大'], ['美国', '美国'], ['日本', '日本'], ['韩国', '韩国']
+];
+function ovGeo(txt) {
+  var t = txt || '';
+  /* 「韩国强」「马来西亚籍」这类是人名/形容词，不是投资目的地 */
+  var i, k;
+  for (k in OV_SUB) {
+    if (OV_SUB.hasOwnProperty(k) && t.indexOf(k) >= 0) return OV_SUB[k];
   }
-  return h+'</div>';
+  for (i = 0; i < OV_GEO.length; i++) {
+    if (t.indexOf(OV_GEO[i][0]) >= 0) return OV_GEO[i][1];
+  }
+  return '';
 }
-/* 行业名归一（2026-10-23）：数据侧的行业名跟页面写死的那套对不上——
-   数据是「有色冶炼 / 水泥 / 化工化纤」，筛选条写的是「有色 / 水泥建材 / 化肥」，
-   点下去出来 0 条，筛选器等于坏的。统一映射，再按数据里真实有哪些行业动态生成。 */
-var OV_GRP_ALIAS={'有色':'有色冶炼','水泥建材':'水泥','化肥':'化工化纤','其他制造':'化工化纤'};
-function ovGrp(g){ g=g||''; return OV_GRP_ALIAS[g]||g; }
-function renderOverseas(){
-  var list=D.overseas||[];
-  /* 海外数据在 news 模块里：D.overseas 只有在 mergeMod('news') 之后才有值。
-     原来这里直接读 D.overseas，tab3 首次进来时模块还没合并，于是显示 0 条、
-     切口筛选条只剩「看不出」一个格子。这里先兜底合并一次。 */
-  if(!(D.overseas&&D.overseas.length) && window.DATA_NEWS){ try{ mergeMod('news'); }catch(e){} }
-  var list0=D.overseas||[];
-  var list=list0;
-  var hot=list.slice(0,4);
-  el('ovHot').innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-bottom:16px">'+
-    hot.map(function(o){return ovCard(o,true)}).join('')+'</div>';
-  var rest=list.filter(function(o){
-    if(oGrp.size && !oGrp.has(ovGrp(o.grp))) return false;
-    /* 切口筛选：空串代表「看不出」，也必须能单独筛——
-       用户最常问的两个问题就是「哪些能接」和「哪些根本没信息」。 */
-    if(oCut.size && !oCut.has(o.cut||'')) return false;
+
+/* ── 数据分桶 ──────────────────────────────────────────────────────── */
+/* 海外新闻在 news 模块里，第一次进这个页签时模块可能还没合并，
+   这里兜底合并一次 —— 否则四个视图全 0 条，看着像坏了。 */
+function ovData() {
+  if (!(D.overseas && D.overseas.length) && window.DATA_NEWS) {
+    try { mergeMod('news'); } catch (e) { }
+  }
+  var all = arr(D.overseas);
+  var CLUE = { '海外建厂': 1, '海外投资': 1, '海外矿山': 1 };
+  var ENV = { '电力缺口': 1, '政策门槛': 1 };
+  var clue = [], env = [], other = [];
+  all.forEach(function (o) {
+    var tg = o.tag || '';
+    if (CLUE[tg]) clue.push(o);
+    else if (ENV[tg]) env.push(o);
+    else other.push(o);
+  });
+  clue.sort(function (a, b) { return (b.date || '') > (a.date || '') ? 1 : -1; });
+  env.sort(function (a, b) { return (b.date || '') > (a.date || '') ? 1 : -1; });
+  return {
+    clue: clue, env: env, other: other,
+    flash: arr(D.overseaFlash), odi: arr(D.overseaOdi)
+  };
+}
+
+/* ── 主入口：按当前视图分发 ────────────────────────────────────────── */
+function renderOverseas() {
+  var d = ovData();
+  var nf = el('ovNFlash'), nc = el('ovNClue'), no = el('ovNOdi'), ne = el('ovNEnv');
+  if (nf) nf.textContent = d.flash.length || '';
+  if (nc) nc.textContent = d.clue.length || '';
+  if (no) no.textContent = d.odi.length || '';
+  if (ne) ne.textContent = d.env.length || '';
+
+  var box = { flash: 'ovBoxFlash', clue: 'ovBoxClue', odi: 'ovBoxOdi', env: 'ovBoxEnv' };
+  for (var k in box) {
+    var b = el(box[k]);
+    if (b) b.style.display = (k === ovView ? 'block' : 'none');
+  }
+  var tabs = el('ovTabs');
+  if (tabs) Array.prototype.forEach.call(tabs.querySelectorAll('span[data-v]'), function (s) {
+    s.classList.toggle('on', s.dataset.v === ovView);
+  });
+
+  try {
+    if (ovView === 'flash') ovRenderFlash(d);
+    else if (ovView === 'clue') ovRenderClue(d);
+    else if (ovView === 'odi') ovRenderOdi(d);
+    else ovRenderEnv(d);
+  } catch (e) {
+    console.error('[renderOverseas]', ovView, e);
+    var cur = el(box[ovView]);
+    if (cur) cur.innerHTML = '<div class="empty">这块渲染出错了：' + esc(e.message) + '</div>';
+  }
+}
+
+/* ── 视图 1：出海速览 ────────────────────────────────────────────── */
+function ovRenderFlash(d) {
+  var b = el('ovBoxFlash'); if (!b) return;
+  var L = d.flash;
+  var h = '';
+  if (!L.length) {
+    h += '<div class="empty">还没有速览数据。这个模块每天自动抓公众号，<br>' +
+      '抓不到的原因通常是搜狗反爬（同一批关键词连跑会被限流），隔天会恢复。</div>';
+    b.innerHTML = h; return;
+  }
+  h += '<div class="ovnote">每天自动抓公众号，只写「发生了什么」，不挂客户、不做切口分析。' +
+    '要跟进的，看「项目线索」和「已备案」。<b>60 天后自动清理</b>，转成线索的除外。</div>';
+
+  /* 「当前盯的方向」：不只是给人看，也是让用户能判断覆盖面够不够、缺哪块好补。
+     默认收起 —— 31 个词铺开占两屏，会把真正要看的新闻挤下去。 */
+  h += '<div class="ovkw">' +
+    '<div class="ovkw-h" onclick="ovToggleKw()">当前盯的方向' +
+    '<span>10 个关键词 · 每天跑一组，三天轮一遍（搜狗按请求次数限流，硬跑会被封）</span>' +
+    '<i>' + (ovKwOpen ? '收起' : '展开') + '</i></div>';
+  if (ovKwOpen) {
+    h += '<div class="ovkw-g">' +
+      '<div><b>东南亚用电用热</b>数据中心 巴淡 · 印尼 数据中心 · 印尼 电厂 · 越南 电厂 · 马来 电厂 · 自备电厂 印尼 · 印尼 用电 · 电解铝 印尼 · 印尼 镍矿 · 印尼 冶炼</div>' +
+      '<div><b>固废与水</b>垃圾焚烧 出海 · 垃圾焚烧 印尼 · 垃圾焚烧 非洲 · 海水淡化 印尼 · 工业污水 海外</div>' +
+      '<div><b>非洲 / 中东 / 中亚</b>非洲 电厂 · 非洲 建厂 · 非洲 冶炼 · 几内亚 铝土 · 沙特 建厂 · 沙特 电站 · 哈萨克 建厂 · 乌兹别克 建厂</div>' +
+      '<div><b>其余地区</b>马来 建厂 · 越南 建厂 · 水泥 海外 · 钢铁 海外 · 海外 电站 · 中资出海 建厂 · 中资 印尼 · 出海 园区</div>' +
+      '</div>';
+  }
+  h += '</div>';
+
+  h += '<ul class="ovfl">';
+  L.forEach(function (x) {
+    var ti = esc(x.t || '');
+    h += '<li class="ovf">' +
+      '<span class="ovf-d">' + esc((x.d || '').slice(5)) + '</span>' +
+      '<span class="ovf-b">' +
+      (x.u ? '<a href="' + esc(x.u) + '" target="_blank" rel="noopener" class="ovf-t">' + ti + '</a>'
+        : '<span class="ovf-t">' + ti + '</span>') +
+      (x.m ? '<span class="ovf-m">' + esc(x.m) + '</span>' : '') +
+      '</span>' +
+      '<span class="ovf-s">' + esc(x.s || '') + '</span>' +
+      '</li>';
+  });
+  h += '</ul>';
+  h += '<div class="ovfoot">速览每日累积，这里显示最近抓到的 ' + L.length + ' 条。' +
+    '月报/季报这类回顾文章也收，但会把日期标成原文发布日期。</div>';
+  b.innerHTML = h;
+}
+function ovToggleKw() { ovKwOpen = !ovKwOpen; renderOverseas(); }
+
+/* ── 视图 2：项目线索（新闻来源，人工确认过）────────────────────── */
+function ovRenderClue(d) {
+  var b = el('ovBoxClue'); if (!b) return;
+  var L = d.clue;
+  /* 国别先算好，筛选条和表格都要用 */
+  L.forEach(function (o) {
+    if (!o._geo) o._geo = ovGeo((o.title || '') + ' ' + (o.desc || '').slice(0, 120)) || '未标';
+  });
+  var geoN = {};
+  L.forEach(function (o) { geoN[o._geo] = (geoN[o._geo] || 0) + 1; });
+  var geos = Object.keys(geoN).sort(function (a, c) { return geoN[c] - geoN[a]; });
+
+  var h = '<div class="ovnote">来自新闻、公告的早期信号，<b>每条都对应到具体业主</b>。' +
+    '确定性低于「已备案」——签约阶段的项目可能黄，跟进前先核实。</div>';
+
+  var rest = L.filter(function (o) {
+    if (ovClueGeo && o._geo !== ovClueGeo) return false;
+    if (ovClueKw) {
+      var s = (o.name || '') + (o.title || '') + (o.desc || '');
+      if (s.indexOf(ovClueKw) < 0) return false;
+    }
     return true;
   });
-  var nCut={}; list.forEach(function(o){var k=o.cut||''; nCut[k]=(nCut[k]||0)+1});
-  var nClear=list.filter(function(o){return o.cut&&o.cut!=='opp'}).length;
-  el('ovCnt').textContent='共 '+list.length+' 条 · 切口明确 '+nClear+' 条 · 海水淡化 '+(nCut.water||0)+' 条';
-  el('ovGrid').innerHTML=rest.map(function(o){return ovCard(o,false)}).join('')||'<div class="empty">没有匹配的动态，换个筛选条件试试</div>';
-  /* 切口筛选条：只显示有数据的切口 */
-  var cb=el('f-ocut');
-  if(cb){
-    cb.innerHTML=['water','power','waste','cogen','grid','opp',''].filter(function(k){return nCut[k]})
-      .map(function(k){
-        var m=CUT_META[k]||{t:'看不出'};
-        return '<span class="chip'+(oCut.has(k)?' on':'')+'" data-v="'+k+'">'+esc(k?m.t:'看不出')+
-          '<em>'+nCut[k]+'</em></span>';
-      }).join('');
-  }
-  /* 行业筛选条同理，动态生成 */
-  var gb=el('f-ogrp');
-  if(gb){
-    var nGrp={}; list.forEach(function(o){var g=ovGrp(o.grp); nGrp[g]=(nGrp[g]||0)+1});
-    var order=['有色冶炼','水泥','数据中心','电力配套','钢铁','化工化纤','造纸','玻璃']
-      .filter(function(g){return nGrp[g]});
-    Object.keys(nGrp).forEach(function(g){if(order.indexOf(g)<0)order.push(g)});
-    gb.innerHTML=order.map(function(g){
-      return '<span class="chip'+(oGrp.has(g)?' on':'')+'" data-v="'+esc(g)+'">'+esc(g)+'<em>'+nGrp[g]+'</em></span>';
-    }).join('');
-  }
-}
-el('f-ocut').onclick=function(e){
-  var c=e.target.closest('.chip'); if(!c)return;
-  var v=c.dataset.v;
-  if(oCut.has(v))oCut.delete(v);else oCut.add(v);
-  renderOverseas();
-};
 
-/* f-ogrp 的选项改由 renderOverseas() 按数据动态生成，这里不再写死 */
-(function(){var box=el('ovSectorTip');if(!box)return;
-  box.innerHTML='<b>三行业出海 · 为什么与我司有关</b>：'+
-   '<b>水泥</b>——水泥窑余热发电是我司成熟市场，出海项目还需自备电厂、脱硝除尘；'+
-   '<b>数据中心</b>——高载能，供电方案多元：<b>天然气发电</b>（燃气轮机/分布式能源，东南亚、中东天然气产区尤常见）、'+'市电+柴油发电机备电、光伏+储能绿电；还有<b>冷热电三联供</b>（燃气发电余热用吸收式制冷给机房降温）——'+'正对「能源清洁高效利用+热电联产」的老本行；冷却系统带来水处理，海岛项目还需海水淡化；'+
-   '<b>化肥</b>——合成氨/磷化工高耗能，必配自备热电站、余热回收、脱硫脱硝与废水零排放。';})();
-el('f-ogrp').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
-  toggle(oGrp,c.dataset.v);c.classList.toggle('on');renderOverseas()};
+  /* 筛选条压成一行：国家用下拉，不用 chips。
+     原来 chips 铺 16 个国家会折成两行，搜索框再被挤到第三行 ——
+     一个筛选条吃掉 90px，正是用户说的「臃肿」。 */
+  h += '<div class="ovfbar">';
+  h += '<select id="ovFGeo" class="ovsel">' +
+    '<option value="">全部国家（' + L.length + '）</option>' +
+    geos.map(function (g) {
+      return '<option value="' + esc(g) + '"' + (ovClueGeo === g ? ' selected' : '') + '>' +
+        esc(g) + '（' + geoN[g] + '）</option>';
+    }).join('') + '</select>';
+  h += '<input id="ovKw" class="ovinput" placeholder="搜业主 / 项目关键词" value="' + esc(ovClueKw) + '">';
+  h += '<span class="ovfb-n">当前 ' + rest.length + ' 条</span>';
+  h += '</div>';
+
+  if (!rest.length) {
+    h += '<div class="empty">没有匹配的线索，换个国家或关键词试试。</div>';
+    b.innerHTML = h; ovBindClue(); return;
+  }
+
+  h += '<table class="pf-table ovtbl"><colgroup>' +
+    '<col style="width:16%"><col style="width:8%"><col style="width:40%">' +
+    '<col style="width:9%"><col style="width:10%"><col style="width:9%">' +
+    '</colgroup><thead><tr>' +
+    '<th>业主</th><th>国家</th><th>项目 / 动态</th><th>类型</th><th>切口</th>' +
+    '<th style="text-align:right">日期</th></tr></thead><tbody>';
+
+  rest.forEach(function (o) {
+    /* 表格里只放短标签（海水淡化 / 自备电站·动力岛 / 余热回收），
+       完整的 cutWhy 塞进 title 悬停看。
+       cutMeta 会优先返回 cutWhy 的前 20 字，那是给卡片用的长句（「360MW 燃机自备电站
+       已在项目本体里。」），放进 10% 宽的列里会把整行撑成两行高。 */
+    var m = cutMeta(o);
+    /* opp（机会池）和 ''（看不出）都不是真正的切口 —— 旧版把「看不出」也当成一个
+       可筛选项，结果详情里一半的标签是「机会池」，等于没说。表格里这类一律留空，
+       只保留能落到具体工艺的那五种。 */
+    var mt = (o.cut && o.cut !== 'opp') ? ((CUT_META[o.cut] || {}).t || '') : '';
+    var tg = (o.tag || '').replace(/^海外/, '') || '动态';
+    var ds = String(o.desc || '');
+    h += '<tr' + (o.url ? ' class="pf-row-link" data-u="' + esc(o.url) + '" title="点开看新闻原文"' : '') + '>' +
+      '<td class="ovt-own">' + esc(o.name || '—') + '</td>' +
+      '<td class="ovt-geo">' + esc(o._geo) + '</td>' +
+      '<td class="p"><b>' + esc(o.title || '') + '</b>' +
+      (ds ? '<div class="ovt-desc ovt-clamp">' + esc(ds.slice(0, 120)) + (ds.length > 120 ? '…' : '') + '</div>' : '') + '</td>' +
+      '<td>' + esc(tg) + '</td>' +
+      '<td>' + (mt ? '<span class="ovcut" style="background:' + m.bg + ';color:' + m.c + '" title="' + esc(m.tip) + '">' + esc(mt) + '</span>' : '<span class="ovdim">—</span>') + '</td>' +
+      '<td class="d" style="text-align:right">' + esc(o.date || '') + '</td>' +
+      '</tr>';
+  });
+  h += '</tbody></table>';
+  h += '<div class="ovfoot">共 ' + L.length + ' 条线索，当前筛选出 ' + rest.length + ' 条。' +
+    '点任意一行可打开原文。</div>';
+  b.innerHTML = h;
+  ovBindClue();
+}
+function ovBindClue() {
+  var g = el('ovFGeo');
+  if (g) g.onchange = function () {
+    ovClueGeo = g.value; renderOverseas();
+  };
+  var kw = el('ovKw');
+  if (kw) {
+    var t = null;
+    kw.oninput = function () {
+      clearTimeout(t);
+      t = setTimeout(function () {
+        ovClueKw = kw.value.trim();
+        renderOverseas();
+        var n2 = el('ovKw');
+        if (n2) { n2.focus(); n2.setSelectionRange(n2.value.length, n2.value.length); }
+      }, 280);
+    };
+  }
+  var box = el('ovBoxClue');
+  if (box) box.onclick = function (e) {
+    var tr = e.target.closest('tr.pf-row-link');
+    if (tr && tr.dataset.u) window.open(tr.dataset.u, '_blank', 'noopener');
+  };
+}
+
+/* ── 视图 3：已备案（政府登记）──────────────────────────────────── */
+function ovRenderOdi(d) {
+  var b = el('ovBoxOdi'); if (!b) return;
+  var L = d.odi;
+  if (!L.length) {
+    b.innerHTML = '<div class="empty">还没有备案数据。采集脚本 crawl_odi.py 跑通后会把结果写进 raw/invest_odi_pick.json。</div>';
+    return;
+  }
+  var h = '<div class="ovnote">来自<b>浙江省发改委境外投资项目备案</b>（49 号文后所有境外投资都要登记）。' +
+    '确定性高于新闻：金额、产能、目的地都是申报过的。<b>只收与本业相关的</b>——' +
+    '一条一条按「这里面有没有我们的活」判过，贸易公司、持股平台、设备制造、户用光伏全部剔除。</div>';
+
+  var S = L.filter(function (x) { return x.tier === 'S'; });
+  var A = L.filter(function (x) { return x.tier === 'A'; });
+  h += '<div class="ovsum">' +
+    '<span><i><b>' + S.length + '</b>直接相关</i><em>工程本体就是我们的活</em></span>' +
+    '<span><i><b>' + A.length + '</b>潜在客户</i><em>客户行业在海外建厂，厂里必配电水热</em></span>' +
+    '<span><i><b>' + L.length + '</b>合计</i><em>筛后入库，不是备案总量</em></span>' +
+    '</div>';
+
+  h += '<table class="pf-table ovtbl"><colgroup>' +
+    '<col style="width:21%"><col style="width:9%"><col style="width:38%">' +
+    '<col style="width:9%"><col style="width:14%"><col style="width:9%">' +
+    '</colgroup><thead><tr>' +
+    '<th>投资主体</th><th>国家</th><th>备案内容</th><th>方式</th><th>相关性</th>' +
+    '<th style="text-align:right">备案日</th></tr></thead><tbody>';
+
+  L.forEach(function (x) {
+    /* 备案名的固定句式是「XX公司（+联合/和YY公司）在ZZ国新建…项目」。
+       开头的公司名已经在「投资主体」列里，这里要连**第二家联合体**一起剥掉，
+       只留「去了哪、干什么、多大」。不剥的话两列内容几乎一样 ——
+       原型第一版就是这个毛病，截图一眼看出来。
+       为什么用循环剥而不是一条正则：一条 `^联合[^在]{2,40}?(集团|公司)` 是非贪婪的，
+       遇到「联合杭州热联集团股份有限公司」会在「集团」处就停，剩下的
+       「股份有限公司在坦桑尼亚…」留在开头 —— 实测截图里正好露出来这一条。 */
+    var nm = x.nm || '';
+    var own = x.own || '';
+    if (own && nm.indexOf(own) === 0) nm = nm.slice(own.length).replace(/^[，,、和与及\s]+/, '');
+    for (var _g = 0; _g < 3; _g++) {
+      /* 后缀要长的在前，且「集团」必须排除「集团有限公司」的情况 ——
+         不加 (?!有限公司) 的话，非贪婪会在「集团」处就停，
+         剩下「有限公司在印尼…」留在开头（伟明环保那两条实测就是这样）。 */
+      var _m2 = nm.match(/^(?:联合|和|与|及)?[^在向对]{2,40}?(?:股份有限公司|有限责任公司|有限公司|集团(?!有限公司))/);
+      if (!_m2) break;
+      nm = nm.slice(_m2[0].length).replace(/^[，,、和与及\s]+/, '');
+    }
+    if (nm.length < 5) nm = x.nm || '';
+    if ('在向对与和'.indexOf(nm.charAt(0)) < 0) nm = '…' + nm;
+
+    var badge = x.tier === 'S'
+      ? '<span class="ovcut" style="background:#e4f4ea;color:#215c3a">直接相关</span>'
+      : '<span class="ovcut" style="background:#fdece3;color:#a8451a">潜在客户</span>';
+    /* 「投资方式」数据侧写的是「新设子公司/机构」「绿地建厂」「增资扩股」，
+       放进 9% 宽的列里会折成两行。这里只在前端做短标签，不改数据。 */
+    var actTxt = ({ '新设子公司/机构': '新设', '绿地建厂': '绿地建厂',
+                    '增资扩股': '增资', '并购': '并购' })[x.act] || x.act || '—';
+    h += '<tr>' +
+      '<td class="ovt-own">' + esc(own || '—') + '</td>' +
+      '<td class="ovt-geo">' + esc(x.geo || '—') + '</td>' +
+      '<td class="p"><b>' + esc(nm) + '</b>' +
+      (x.mt ? '<div class="ovt-desc">申报金额 ' + esc(x.mt) + '</div>' : '') + '</td>' +
+      '<td class="ovt-act">' + esc(actTxt) + '</td>' +
+      '<td>' + badge + (x.why ? '<div class="ovt-desc ovt-one">' + esc(x.why.replace(/^[^：]*：/, '')) + '</div>' : '') + '</td>' +
+      '<td class="d" style="text-align:right">' + esc(x.d || '') + '</td>' +
+      '</tr>';
+  });
+  h += '</tbody></table>';
+  h += '<div class="ovfoot">备案号可在浙江政务服务网核验（项目代码在数据里）。' +
+    '金额只有' + L.filter(function (x) { return x.mt; }).length + '条写在项目名里——' +
+    '详情页接口返回 500，拿不到，所以大部分显示为空，不做假数据填充。</div>';
+  b.innerHTML = h;
+}
+
+/* ── 视图 4：市场与政策 ─────────────────────────────────────────── */
+function ovRenderEnv(d) {
+  var b = el('ovBoxEnv'); if (!b) return;
+  var L = d.env;
+  var h = '<div class="ovnote">不是项目，是<b>判断项目可不可行的背景</b>：当地缺多少电、缺水到什么程度、' +
+    '外资准入有什么门槛。看到「某国强制要求」这类，往往意味着一块新增配套市场。</div>';
+  if (!L.length) {
+    h += '<div class="empty">暂时没有新的市场/政策条目。</div>';
+    b.innerHTML = h; return;
+  }
+  h += '<div class="ovcards">';
+  L.forEach(function (o) {
+    var m = cutMeta(o);
+    h += '<div class="ovc">' +
+      '<div class="ovc-t">' + (o.url
+        ? '<a href="' + esc(o.url) + '" target="_blank" rel="noopener">' + esc(o.title || '') + ' ↗</a>'
+        : esc(o.title || '')) + '</div>' +
+      (o.desc ? '<div class="ovc-m">' + esc(o.desc) + '</div>' : '') +
+      '<div class="ovc-f">' +
+      (m.t ? '<span class="ovcut" style="background:' + m.bg + ';color:' + m.c + '">' + esc(m.t) + '</span>' : '') +
+      '<span class="ovdim">' + esc(o.name || '') + '</span>' +
+      '<span class="ovdim">' + esc(o.tag || '') + '</span>' +
+      '<span class="ovdim" style="margin-left:auto">' + esc(o.date || '') + '</span>' +
+      '</div></div>';
+  });
+  h += '</div>';
+  b.innerHTML = h;
+}
+
+/* ── 绑定 ──────────────────────────────────────────────────────── */
+(function () {
+  var tabs = el('ovTabs');
+  if (tabs) tabs.onclick = function (e) {
+    var s = e.target.closest('span[data-v]'); if (!s) return;
+    ovView = s.dataset.v;
+    renderOverseas();
+  };
+})();
 
 /* ==================== 金属仪表盘 ==================== */
 var MBLACK={RB:1,HC:1,'I':1,JM:1};
