@@ -27,6 +27,7 @@ on:
   # 改脚本或改这个工作流本身时会自动在新 commit 上跑一次，省掉这一步人工。
   push:
     paths:
+      - '.github/workflows/digest.yml'   # 改工作流本身也要跑一次，否则「修完重跑还是失败」
       - 'tools/merge_digest.py'
       - 'tools/mine_rival_news.py'
 
