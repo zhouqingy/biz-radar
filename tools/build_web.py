@@ -1427,6 +1427,13 @@ data = {
         #   却带着金额的（22 条小额分布式光伏/设备采购 + 1 条光伏 EPC）。
         #   用户点「已公示金额 483 条」去筛，只能筛出 460 条，对不上账。
         'new': sum(1 for r in brief if r.get('_new')),
+        # 顶部 KPI 里那几格（在招 / 立项早期 / 主场 / 有色）原来由前端拿「第一页切片」
+        # 现算，首屏 items 只有 24~42 条 —— 于是「有色冶炼供能 0」「立项早期 9」这种
+        # 数字根本不是全库的，用户一眼看出不对。这里后端按全库算好，前端直接读。
+        'nBid': sum(1 for r in brief if r['st'] in ('招标公告', '招标计划')),
+        'nEarly': sum(1 for r in brief if r.get('early') or r['st'] in ('立项公示', '招标计划')),
+        'nHM': sum(1 for r in brief if r.get('hm')),
+        'nYouse': sum(1 for r in brief if r['sg'] == 'youse'),
         'withAmt': sum(1 for r in brief if r.get('amt')),
         'withAmtWin': sum(1 for r in brief
                           if r.get('amt') and (r.get('amtK') or 'win') == 'win'),
