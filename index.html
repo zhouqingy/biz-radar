@@ -261,6 +261,8 @@ button{font-family:inherit}
 .cpf-rk.r1{background:#ffe9e6;color:#c0392b;border:1px solid #f6c8c2}
 .cpf-rk.r2{background:#fff3e0;color:#a8620a;border:1px solid #f2ddb8}
 .cpf-rk.r3{background:#eef2f7;color:#5a6270;border:1px solid #dde4ec}
+/* 「项目经理」徽标：跟 r3 同色太糊，单独压成细边框无底色，一眼能跟排名区分开 */
+.cpf-rk.rp{background:#fff;color:#8a7a63;border:1px dashed #d8cbb8}
 .cpf-a{color:#1053c9;text-decoration:none;font-weight:700;font-size:11px}
 .cpf-a:hover{color:#d4380d}
 .cpf-dt{white-space:nowrap;font-variant-numeric:tabular-nums;color:#3f5b70;font-size:11.5px;padding-right:12px}
@@ -1056,7 +1058,7 @@ details.sub li{padding:2px 0}
 .epq .epq-chips a.on i{color:var(--brand-d)}
 .epq-tb{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
 .epq-tb col.c1{width:70px}.epq-tb col.c2{width:23%}.epq-tb col.c3{width:22%}
-.epq-tb col.c4{width:86px}.epq-tb col.c5{width:96px}.epq-tb col.c6{width:16%}.epq-tb col.c7{width:40px}
+.epq-tb col.c4{width:98px}.epq-tb col.c5{width:92px}.epq-tb col.c6{width:15%}.epq-tb col.c7{width:78px}
 .epq-tb th{text-align:left;font-weight:500;color:var(--tx3);padding:5px 7px;border-bottom:1px solid var(--line);white-space:nowrap}
 .epq-tb td{padding:7px;border-bottom:1px solid #f0f2f6;vertical-align:top;line-height:1.6}
 .epq-tb tr:last-child td{border-bottom:none}
@@ -1068,6 +1070,19 @@ details.sub li{padding:2px 0}
 .epq-tb td.w{color:var(--tx3);font-size:11.5px;word-break:break-word}
 .epq .epq-mt{display:inline-block;font-size:10px;color:#a8620a;background:#fdf3e3;border-radius:3px;
   padding:0 4px;margin-left:5px;vertical-align:1px;font-weight:400}
+/* 2026-11-04：性质标签 + 海外标记 + 金额口径前缀 */
+.epq .epq-tags{display:block;margin-top:3px;line-height:1.5}
+.epq .epq-k{display:inline-block;font-size:10px;border-radius:3px;padding:0 4px;margin-right:4px;
+  font-weight:400;border:1px solid transparent}
+.epq .epq-k.kA{color:#166534;background:#e8f5ec;border-color:#cfe9d8}
+.epq .epq-k.kB{color:#1e6091;background:#e7f2fa;border-color:#cfe4f2}
+.epq .epq-k.kC{color:#6b7280;background:#f1f2f4;border-color:#e3e5e9}
+.epq .epq-k.kD{color:#9a3412;background:#fdeee7;border-color:#f6d7c8}
+.epq .epq-ov{display:inline-block;font-size:10px;color:#0f766e;background:#e6f6f4;
+  border:1px solid #cbeae6;border-radius:3px;padding:0 4px;margin-right:4px;font-weight:400}
+.epq .epq-ak{font-size:9.5px;color:var(--tx3);font-weight:400;margin-right:2px}
+.epq .epq-sd{font-size:10px;color:#8b94a3;word-break:break-all;line-height:1.35}
+.epq .epq-by{display:block;font-size:10px;color:#8b94a3;margin-top:2px}
 .epq .epq-sm{font-size:12px;color:var(--tx2);background:#fafbfd;border-left:3px solid var(--brand);
   padding:8px 11px;border-radius:0 4px 4px 0;margin:10px 0 0;line-height:1.7}
 .epq .epq-sm b{color:var(--tx3);font-weight:500;margin-right:4px}
@@ -1093,7 +1108,24 @@ details.sub li{padding:2px 0}
 .pf-s-prov{color:#1053c9;background:#eef4ff;border-color:#cddcf7}
 .pf-s-probe{color:#8a5a00;background:#fff8e8;border-color:#f0dfb8}
 .pf-s-eval{color:#6b3fa0;background:#f5f0ff;border-color:#ded0f5}
+/* 申报：评标公示里向评委申报的已建成业绩（2026-11-03 并入总表）。
+   配色刻意跟 eval（紫）区分开 —— 两者都来自候选人公示，但一个说「这次来投了」，
+   一个说「过去建成过什么」，颜色一样就分不清了。 */
+.pf-s-cand{color:#0d6b6b;background:#e8f7f7;border-color:#b8e2e2}
 .pf-s-news{color:#666;background:#f5f6f8;border-color:#e0e3e9}
+/* 按项目名搜索（2026-11-03） */
+.pf-qbar{display:flex;align-items:center;gap:8px;margin:0 0 8px}
+.pf-q{flex:0 0 240px;height:28px;padding:0 10px;border:1px solid var(--bd);
+  border-radius:14px;background:#fff;font-size:12px;color:var(--tx);outline:none;
+  font-family:inherit;transition:border-color .15s}
+.pf-q:focus{border-color:#9db8e8;box-shadow:0 0 0 3px rgba(16,83,201,.06)}
+.pf-q::placeholder{color:#a8a29a}
+.pf-qn{font-size:11px;color:var(--tx3)}
+.pf-qn b{color:#1053c9;cursor:pointer;font-weight:500;margin-left:4px}
+/* 申报业绩的出处行与省份小标 */
+.pf-cpsrc{font-size:10.5px;color:#9a8f80;margin-top:3px;line-height:1.5}
+.pf-cpv{display:inline-block;margin-left:5px;padding:0 4px;border-radius:3px;
+  background:#f2f4f7;color:#7a8493;font-size:9.5px}
 .pf-n{font-size:10px;color:var(--tx3);margin-left:2px}
 .pf-fs{margin:2px 0 8px}
 .pf-nofix{margin-left:6px}
@@ -1224,31 +1256,15 @@ window.addEventListener('error',function(e){
   <div class="panel" id="p-rival">
     <div class="sect">同业与伙伴 <small>同一批单位，既可能是对手，也可能是联合体伙伴</small></div>
     <div class="cswitch" id="rSwitch">
-      <span data-k="board" class="on">按战绩排序 <b id="rBn">—</b></span>
-      <span data-k="rival">竞争对手档案 <b id="rCn">—</b></span>
-      <span data-k="partner">联合体伙伴池 <b id="rPn">—</b></span>
-      <span data-k="ency">单位百科 <b id="rEn">—</b></span>
+      <span data-k="rival" class="on">竞争实力榜 <b id="rCn">—</b></span>
+      <span data-k="partner">联合体伙伴榜 <b id="rPn">—</b></span>
     </div>
-    <!-- 战绩榜（原「中标情报」页签，2026-10-22 并入） -->
-    <div id="rBoardBox">
-      <div class="hint" style="margin-bottom:10px">
-        这是<b>同一批单位换一种看法</b>：上面「竞争对手档案」看的是这家单位<b>是谁</b>（做什么、什么资质、优势短板），
-        这张榜看的是它<b>在本库拿了多少单、什么价位</b>。<br>
-        只统计<b>关注档项目</b>（金额 ≥3000 万，或综合分 A/B）——几百万的小标不进榜，
-        那种标要么是零散设备采购、要么是县级小工程，放进来只会把真正的对手淹掉。<br>
-        「中标次数」= 本库抓到的该单位中标/候选记录数（仅本库覆盖范围，非其全部业绩）。
-        想看某家在本库的<b>全部业绩明细</b>，点「深度档案」；想看它在我司业务范围外的底细，点「四库一平台」直接跳建设部库查资质。
-      </div>
-      <div class="frow" style="padding:0 0 10px"><label>赛道</label><div class="chips" id="f-rv"></div></div>
-      <div class="tbwrap"><table id="tbrv"></table></div>
-      <!-- 评标公示里露面的单位（2026-11-03）——
-           本库 68 家竞争对手是人工建档的，但评标公示里大量投标单位从来没进过名单，
-           它们照样在抢同一批标。挂在「中标战绩榜」下面而不是档案页：这一栏本来就按
-           「谁在拿标」排序，这批是「在投标、只是没被统计进战绩」的单位，语境对得上。
-           没有企业档案（档案每周人工补），但业绩直接摘自评标公示原文。 -->
-      <div id="cpfNewBox"></div>
-    </div>
-    <!-- 从「中标情报」点某家单位过来、但它还没有企业档案时，这里临时显示它的库内战绩 -->
+    <!-- 2026-11-03 用户口径：
+         ① 「按战绩排序这块不需要了」→ 整块下线（原 rBoardBox，统计的是本库覆盖范围内的中标次数，
+            本库只接了江浙沪皖五个平台，榜本身就是在小样本上排名，容易被当成整体实力）；
+         ② 「单位百科也可以删除了，里面的单位都是我们的同业与伙伴，可以直接放进去」
+            → 删掉独立页签，38 家单位按定位并入上面两个榜，班子成员保留在档案弹层里。
+            并入逻辑见 mergeEncyToOrg()，卡片点击走 encyProf()。 -->
     <div id="adhoc" style="display:none;margin-bottom:12px"></div>
 
     <!-- 同业深度档案（2026-10-22 新增）：就地方在原位展开，不再借「客户与业主」的容器。
@@ -1260,6 +1276,11 @@ window.addEventListener('error',function(e){
       <div class="frow" style="padding:0 0 10px"><label>业务类别</label><div class="chips" id="f-cat"></div></div>
       <div class="hint" style="margin-bottom:10px">按我司业务口径划分：<b style="color:#a85c10">能源类</b>=火电/煤气发电/余热发电/热电联产/储能等能源清洁高效利用主线；<b style="color:#14713a">环保类</b>=废水、废气（脱硫脱硝除尘）、固废与土壤修复主线；<b style="color:#1053c9">综合类</b>=两条线都做、都可能正面撞上。</div>
       <div class="cgrid" id="rivalGrid"></div>
+      <!-- 评标公示里露面的单位（2026-11-03）——
+           本库建档的竞争对手是人工整理的，但评标公示里大量投标单位从来没进过名单，
+           它们照样在抢同一批标。原来挂在「按战绩排序」那块下面，
+           2026-11-03 那块下线，挪到这里 —— 和「谁在抢我们的标」是同一个语境。 -->
+      <div id="cpfNewBox"></div>
     </div>
 
     <div id="rPartnerBox" style="display:none">
@@ -1268,25 +1289,7 @@ window.addEventListener('error',function(e){
       <div class="cgrid" id="partnerGrid"></div>
     </div>
 
-    <!-- 单位百科（2026-10-23 新增）
-         起因：用户说「海外除了找业主还要找合作伙伴，比如有色设计院中国恩菲、中国瑞林，
-         做铝的沈阳铝镁院；另外我刚开始搞营销，中冶系一冶二冶十三冶都是什么、怎么来的，
-         需要熟悉」。这一段的定位不是「竞对档案」——竞对档案看的是它在本库拿了多少单，
-         这一段看的是**这家单位到底是谁**：从哪来、归谁管、主营什么、海外做到哪、
-         现在谁当家（营销找对门用）。
-         人员信息全部来自各单位官网领导团队页 / 官方新闻 / 上市公告 / 行业协会公示，
-         不采集任何私人手机、邮箱、住址。 -->
-    <div id="rEncyBox" style="display:none">
-      <div class="hint" style="margin-bottom:10px">
-        <b>这一栏是「入门课 + 找人」。</b>① 海外有色/化工项目要联合，先得知道设计院是谁——他们拿矿冶主体，我们做动力岛/余热/供配电；
-        ② 中冶系带编号的「X冶」是原冶金部建设公司的军队式编号，一冶到二十三冶归属分散在十几个集团，<b>不是都姓中冶</b>，谈之前先看清归谁管；
-        ③ 每家列出公开披露的领导班子，营销知道该找哪个层级、哪个条线的人。<br>
-        <span style="color:var(--tx3)">人员信息边界：只收企业公开披露的姓名、职务、公开履历（官网领导团队页 / 年报 / 官方新闻 / 行业协会公示），不收私人手机号、私人邮箱、住址、社交账号。</span>
-      </div>
-      <div class="frow" style="padding:0 0 10px"><label>分组</label><div class="chips" id="f-eg"></div></div>
-      <div id="encyNote" style="display:none;background:#f0f7ff;border:1px solid #cfe4ff;border-radius:9px;padding:8px 12px;color:#1053c9;font-size:12.5px;line-height:1.7;margin-bottom:10px"></div>
-      <div id="encyGrid"></div>
-    </div>
+
   </div>
 
   <!-- 3c 海外信号 -->
@@ -1309,12 +1312,14 @@ window.addEventListener('error',function(e){
     <div class="cswitch" id="cTop">
       <span data-k="dom" class="on">国内重点客户 <b id="cDomN"></b></span>
       <span data-k="ab">海外中资出海 <b id="cAbN"></b></span>
-      <!-- 2026-10-22：初始值留空，不再写「—」。
-           线上 data.graph.js 是按需加载的，首屏拿不到图谱数据时，
-           写死「—」就会一直显示破折号，看着像数据没同步。
-           留空 + refreshClientCounts 里「拿不到就不覆盖」，
-           等图谱真正加载完再填数，宁可暂时空白也不要显示错的占位符。 -->
-      <span data-k="graph">业主画像图谱 <b id="cGrN"></b></span>
+      <!-- 2026-11-03：删掉「业主画像图谱」子段。
+           用户原话：「业主画像图谱这个也可以删了，因为你现在做的就是对每个企业建立画像，
+           因此并不需要单独一个环节去做个总结性质的东西了」。
+           删的是**这一层聚合视图**（650 业主 × 221 供应商的两栏对照），
+           不是业主数据本身 —— 单个业主的画像走 domOwnerProf() 弹层，一点不少。
+           潜在业主 / 规划期业主两块本来挂在图谱侧栏里，随它一起下线。
+           规划期项目本身没丢：①「规划前瞻」页按项目逐条列；② 每家业主的画像弹层里
+           有专门的「规划期项目（还没招标）」一段。丢的只是那张**按业主汇总的名单**。 -->
     </div>
 
     <!-- 国内 -->
@@ -1340,43 +1345,6 @@ window.addEventListener('error',function(e){
       <div class="frow" style="padding:0 0 10px"><label>优先级</label><div class="chips" id="f-cpri"></div>
         <label style="margin-left:16px">行业</label><div class="chips" id="f-cgrp"></div></div>
       <div class="cgrid" id="cliGrid"></div>
-    </div>
-    <!-- 第三段：业主画像图谱 -->
-    <div id="cGrBox" style="display:none">
-      <div class="hint" style="margin-bottom:10px">
-        <b>这一块回答</b>：这家业主<b>买什么</b>（细分赛道）、<b>最近找谁做的</b>（主要供应商 + 合作次数 + 金额）、<b>什么时候动</b>（最近动态）。
-        公告原文披露了<b>招标人联系人、电话、代理机构</b>的，直接列在档案下方。数据完全由本库公告反向聚合，未接第三方工商库。
-      </div>
-      <div class="hint" id="grMeta" style="margin-bottom:8px;font-size:12px"></div>
-      <div class="gkp" id="grTip"></div>
-      <div class="gseg" id="grSeg"><span data-m="owner" class="on">按业主看</span><span data-m="sup">按供应商看</span></div>
-      <div class="frow" style="padding:0 0 10px"><label>地区</label><div class="chips" id="f-grg"></div></div>
-      <div class="gwrap">
-        <div class="gside">
-          <input class="gsearch" id="grQ" placeholder="搜业主 / 供应商名称…">
-          <div class="gs-h" id="grListH">有效业主名单</div>
-          <div class="gli" id="grList"></div>
-          <!-- 潜在业主（2026-10-21 用户口径）：名字/行业像我们的客户，但本库历史上
-               从没发过我们的标（只在污水/土壤这类分公司业务发过标，或者压根没发过）。
-               按用户要求「保留一个潜在业主标签，放在二级位置简单展示项目」——
-               这里只列名字、地区、发过什么，点不进深度画像，也不参与排序。 -->
-          <div class="gs-h" id="grLatentH" style="margin-top:14px">潜在业主 <b id="grLatentN" style="font-weight:600;color:#8a9099"></b></div>
-          <div class="hint" style="font-size:11.5px;color:#8a9099;background:#fafbfc;border-left:2px solid #dde2e8;padding:5px 8px;margin:0 0 6px;border-radius:0 5px 5px 0;line-height:1.6">
-            名字像我们的客户，但本库历史上<b>没发过</b>我们主场的标（只发过污水/土壤这类分公司业务，或者一条都没有）。仅作备查，<b>不参与排序、不给深度画像</b>。
-          </div>
-          <div class="gli" id="grLatent"></div>
-          <!-- 规划期业主（2026-11-02 新增）：只在热电联产/供热规划里出现、
-               本库一条标都没发过的业主。这是营销最该抢先接触的一批 —— 活还没挂网。
-               单列一块，不混进上面两个名单，因为「判定依据」完全不同：
-               上面按发过什么标分层，这里按规划里写了什么项目分层。 -->
-          <div class="gs-h" id="grPlanH" style="margin-top:14px">规划期业主 <b id="grPlanN" style="font-weight:600;color:#8a9099"></b></div>
-          <div class="hint" style="font-size:11.5px;color:#8a9099;background:#fffaf3;border-left:2px solid #f0d5b0;padding:5px 8px;margin:0 0 6px;border-radius:0 5px 5px 0;line-height:1.6">
-            本库<b>一条标都没发过</b>，但已写进热电联产 / 供热规划 —— <b>活还没挂网</b>。点一家看它的规划期项目。
-          </div>
-          <div class="gli" id="grPlan"></div>
-        </div>
-        <div class="gmain" id="grMain"></div>
-      </div>
     </div>
   </div>
 
@@ -1566,8 +1534,8 @@ window.addEventListener('error',function(e){
   </div>
 </div>
 
-<script src="data.core.js?v=202611021415"></script>
-<script src="data.items.js?v=202611021415"></script>
+<script src="data.core.js?v=202611041038"></script>
+<script src="data.items.js?v=202611041038"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -1634,7 +1602,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611031445';
+var VER='?v=202611041038';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -1823,6 +1791,11 @@ function mergeMod(mod){
   if(!raw){return false;}
   for(var k in raw){ if(raw.hasOwnProperty(k)) D[k]=raw[k]; }
   if(mod==='items') items=packItems(raw);
+  /* 2026-11-03：单位百科并入同业与伙伴，必须在**这里**做一次。
+     不能只等 rApply 里做——goTab 的顺序是 need → mergeMod → refreshTabCounts → renderPanel，
+     页签上的数字在 renderPanel 之前就取好了，晚一步合并，页签会少算 29 家
+     （显示 126 而实际 149）。 */
+  if(mod==='org'){ try{ mergeEncyToOrg(); }catch(e){ console.warn('[ency merge]',e); } }
   return true;
 }
 
@@ -1966,7 +1939,9 @@ function refreshTabCounts(){
   _setTab('p-items',   (_W.all||0) || ((_W.tenderAll||0)+(_W.winAll||0)+(_W.lead||0)));
   _setTab('p-rival',   arr(D.competitors).length+arr(D.partners).length);
   _setTab('p-overseas',arr(D.overseas).length);          /* 海外机会 = 海外动态条数 */
-  _setTab('p-client',  ((D.domStat&&D.domStat.total)||0)+arr(D.clients).length+((D.graph||{}).owners||[]).length);
+  /* 2026-11-03：业主画像图谱子段下线，页签数不再叠加 650 家图谱业主 ——
+     那个数字点进去已经看不到了，挂着只会让人以为还有一栏没找到。 */
+  _setTab('p-client',  ((D.domStat&&D.domStat.total)||0)+arr(D.clients).length);
   _setTab('p-trend',   arr(D.trends).length);
   _setTab('p-wechat',  (((D.digest||{}).items||[]).length+((D.wechat||{}).items||[]).length));
   _setTab('p-plat',    arr(D.platforms).length);
@@ -2053,7 +2028,10 @@ function renderPanel(i){
   var ld=document.getElementById('modLoading'); if(ld) ld.remove();
   try{
     if(i===1){ rApply(); }
-    else if(i===2){ renderDomestic(); buildAbFilters(); renderClients(); renderGraph(); cApply(); refreshClientCounts();
+    else if(i===2){ renderDomestic(); buildAbFilters(); renderClients(); cApply(); refreshClientCounts();
+      /* 2026-11-03：原来这里还调 renderGraph()。业主画像图谱子段已下线，
+         再调会因为 grTip / grSeg / grList 这些节点不存在而抛错，
+         把后面的 setTimeout 补绘一起带走。改到「进档案时才拉」——见 boot_main 里的 siku 预取。 */
       /* org 模块可能分两次到位（core 里有 domStat、org 里有 domestic）：
          这里再补一次延时重绘，保证 KPI 和卡片说的是同一批数据。 */
       setTimeout(function(){
@@ -3135,9 +3113,15 @@ function resetF(){
   ['rg','sg','ind','g','mode','p'].forEach(function(k){F[k].clear()});
   F.st='';F.q='';F.page=1;
   document.querySelectorAll('.chip.on').forEach(function(x){x.classList.remove('on')});
-  var f=swimBox.firstElementChild;
-  [].forEach.call(swimBox.children,function(x){x.classList.remove('on')});
-  f.classList.add('on'); el('q').value=''; render();
+  /* 同 searchFor：泳道早已清空，firstElementChild 是 null。不判空的话
+     「重置」按钮会抛 TypeError —— 而且是在 render() 之前抛，
+     筛选条件清了、列表却不刷新，看着像重置失效。 */
+  if(swimBox && swimBox.firstElementChild){
+    var f=swimBox.firstElementChild;
+    [].forEach.call(swimBox.children,function(x){x.classList.remove('on')});
+    f.classList.add('on');
+  }
+  el('q').value=''; render();
 }
 el('btnCsv').onclick=function(){
   var head=['项目名称','地区','城市','阶段','优先级','业务分层','是否主场','命中词','业主','中标单位','金额(亿元)','金额原文','日期','截止','承包模式','来源平台','原始发布平台','附件数','附件清单','链接'];
@@ -3379,6 +3363,9 @@ function renderRivals(){
 }
 /* 竞对页的业务筛选同样依赖 meta，放进 buildFilters() 一起等数据到位后再建 */
 function buildRivalFilter(){
+  /* 2026-11-03：战绩榜下线，筛选条 #f-rv 已随 DOM 删除。这里留兜底，
+     节点不在就直接返回 —— 否则 el('f-rv').onclick 对 null 赋值会抛错。 */
+  if(!el('f-rv')) return;
   chipsBox('f-rv',(meta.bizTop||[]).map(function(x){return x[0]}),null,'rvbiz');
   el('f-rv').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
     toggle(rvBiz,c.dataset.v);c.classList.toggle('on');renderRivals()};
@@ -3389,15 +3376,26 @@ var cCat=new Set(), pCat=new Set();
 var CAT_ORDER=['能源类','综合类','环保类','海外赛道'];
 var CATDESC={'能源类':'与我司能源清洁高效利用主业正面撞单','综合类':'能源+环保多板块均可承接，常以联合体出现','环保类':'废水/废气/环境修复与我司辅业重叠','海外赛道':'海外有色/矿山园区总包方，我司可作能源动力岛分包，地域不受江浙沪皖限制'};
 var CATTAG={'能源类':'#fff2e0;#a85c10','环保类':'#e9f7ef;#14713a','综合类':'#e8f4ff;#1053c9','海外赛道':'#f3eaff;#6b3fa0'};
+/* ⚠ 2026-11-03 修一个一直在吞卡片的旧 bug：
+   data.org.js 里有 6 家竞争对手的 cat 写的是「水泥 / 数据中心 / 化肥」，
+   而 renderCompetitors 是按 CAT_ORDER 四类循环分组的 —— 不在四类里就永远画不出来。
+   表现：页签写 68 家，列表里只有 62 张卡，谁也没发现。
+   这里加一层归一化：这三类本质都是「有余热/有供热需求的工业客户兼对手」，归到能源类。 */
+var CAT_FIX={'水泥':'能源类','数据中心':'能源类','化肥':'能源类'};
+function catOf(x){
+  var c=(x&&x.cat)||'其他';
+  if(CAT_ORDER.indexOf(c)>=0) return c;
+  return CAT_FIX[c]||'综合类';
+}
 function catTag(c){
   var s=CATTAG[c]||'#f1f3f6;#5a6270', a=s.split(';');
   return '<span class="cc-tag" style="background:'+a[0]+';color:'+a[1]+'">'+esc(c||'未分类')+'</span>';
 }
 function renderCompetitors(){
-  var list=D.competitors.filter(function(x){return !cCat.size||cCat.has(x.cat||'其他')});
+  var list=D.competitors.filter(function(x){return !cCat.size||cCat.has(catOf(x))});
   var h='';
   CAT_ORDER.forEach(function(k){
-    var g=list.filter(function(x){return (x.cat||'其他')===k});
+    var g=list.filter(function(x){return catOf(x)===k});
     if(!g.length)return;
     h+='<div class="grpt">'+k+' · '+g.length+' 家<span class="grpd">'+esc(CATDESC[k]||'')+'</span></div>'+g.map(compCard).join('');
   });
@@ -3550,12 +3548,16 @@ function cardOpen(ev, name){
 }
 function compCard(x){
     var nm=(x.name||'').replace(/'/g,'');
-    return '<div class="ccard ec-click" onclick="cardOpen(event,\''+esc(nm)+'\')" title="点开深度档案">'+
+    /* 2026-11-03：从「单位百科」并进来的单位，档案在 encyProf() 那套弹层里
+       （有前身、归属、海外、班子、本库实证），比通用档案更全，所以点开走那边。 */
+    var _click=x._ency?'encyProf(\''+esc(nm)+'\')':'cardOpen(event,\''+esc(nm)+'\')';
+    return '<div class="ccard ec-click" onclick="'+_click+'" title="'+(x._ency?'点开企业画像':'点开深度档案')+'">'+
       '<div class="cc-h"><b class="ec-name">'+esc(x.name)+'</b>'+
-      catTag(x.cat)+
+      catTag(catOf(x))+
       '<span class="cc-tag">'+esc(x.type)+'</span>'+
       (x.city?'<span class="cc-tag none">'+esc(x.city)+'</span>':'')+
       mineTag(x)+
+      (x._ency?'<span class="cc-tag" style="background:#f3eaff;color:#6b3fa0">含班子</span>':'')+
       (x.dual?'<span class="cc-tag" style="background:#e8f4ff;color:#1053c9">竞合双身份</span>':'')+
       '<span class="ec-more">点开看全档 ›</span></div>'+
       trackBlock(x)+
@@ -3574,10 +3576,10 @@ function compCard(x){
 
 /* ==================== 合作生态 ==================== */
 function renderPartners(){
-  var list=(D.partners||[]).filter(function(x){return !pCat.size||pCat.has(x.cat||'其他')});
+  var list=(D.partners||[]).filter(function(x){return !pCat.size||pCat.has(catOf(x))});
   var h='';
   CAT_ORDER.forEach(function(k){
-    var g=list.filter(function(x){return (x.cat||'其他')===k});
+    var g=list.filter(function(x){return catOf(x)===k});
     if(!g.length)return;
     h+='<div class="grpt">'+k+' · '+g.length+' 家<span class="grpd">'+
        esc((k==='海外赛道'?'可作为联合体总包方带我司出海；地域不受江浙沪皖限制':CATDESC[k])||'')+'</span></div>'+g.map(partCard).join('');
@@ -3586,15 +3588,17 @@ function renderPartners(){
 }
 function partCard(x){
     var nm=(x.name||'').replace(/'/g,'');
-    return '<div class="ccard ec-click" onclick="cardOpen(event,\''+esc(nm)+'\')" title="点开深度档案">'+
+    var _click=x._ency?'encyProf(\''+esc(nm)+'\')':'cardOpen(event,\''+esc(nm)+'\')';
+    return '<div class="ccard ec-click" onclick="'+_click+'" title="'+(x._ency?'点开企业画像':'点开深度档案')+'">'+
       '<div class="cc-h"><b class="ec-name">'+esc(x.name)+'</b>'+
       /* 2026-10-30：撤掉「深度档案」按钮，整卡可点。
          伙伴卡还有个「查资质」外链，也一并撤了 —— 它挪进档案最后一节，
          卡片上留两个都往外跳的按钮，反而让人不知道点哪儿才算「打开」。 */
-      catTag(x.cat)+
+      catTag(catOf(x))+
       '<span class="cc-tag" style="background:'+(x.type&&x.type.indexOf('施工')>=0?'#fff2e0;color:#a85c10':'#e8f4ff;color:#1053c9')+'">'+esc(x.type||'')+'</span>'+
       (x.city?'<span class="cc-tag none">'+esc(x.city)+'</span>':'')+
       mineTag(x)+
+      (x._ency?'<span class="cc-tag" style="background:#f3eaff;color:#6b3fa0">含班子</span>':'')+
       '<span class="ec-more">点开看全档 ›</span></div>'+
       trackBlock(x)+
       '<div class="cc-body">'+
@@ -3773,45 +3777,43 @@ el('f-ogrp').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
 /* ==================== 重点客户 ==================== */
 /* cRg / cPri / cEx 在下面的「海外中资出海客户」段落里统一定义（2026-10-21 合并，
    原来这里声明过一份 cRg，重复声明会让海外页的筛选状态被前一份覆盖，坑过一次）。*/
-/* ---- 同业与伙伴：四段切页（战绩榜 / 竞争对手档案 / 联合体伙伴池 / 单位百科）----
-   2026-10-22：用户说「中标情况与同行伙伴是不是重复了」——确实重复，合并成同一页签切页。
-   默认段 board（战绩榜）：进来先看「谁在拿单」，想深挖再切档案/伙伴/百科。
-   ⚠ 2026-10-23 踩过的坑：这段注释和 rApply 曾在文件里存了两份，
-     后一份把前一份整体覆盖掉，改了前一份页面却没反应——删重复时要连注释一起删。 */
-var rTab='board';
+/* ---- 同业与伙伴：两段切页（竞争实力榜 / 联合体伙伴榜）----
+   2026-11-03 用户口径：撤掉「按战绩排序」和「单位百科」两个页签。
+   · 战绩榜下线：它统计的是本库（只接江浙沪皖五个平台）里的中标次数，
+     在一份不完整的样本上排名，容易被当成单位真实实力，反而误导。
+   · 单位百科下线：38 家全部是与我们同业的单位，本来就该在「同业与伙伴」里，
+     不该另开一栏。改成 mergeEncyToOrg() 按定位并入两个榜，班子成员留在档案弹层。 */
+var rTab='rival';
 function rApply(){
   var _ldg=el('segLoading'); if(_ldg) _ldg.remove();
-  var m={board:'rBoardBox', rival:'rRivalBox', partner:'rPartnerBox', ency:'rEncyBox'};
+  var m={rival:'rRivalBox', partner:'rPartnerBox'};
   Object.keys(m).forEach(function(k){
     var b=el(m[k]); if(b) b.style.display=(k===rTab?'block':'none');
   });
-  Array.prototype.forEach.call(el('rSwitch').querySelectorAll('span[data-k]'),
+  var sw=el('rSwitch');
+  if(sw) Array.prototype.forEach.call(sw.querySelectorAll('span[data-k]'),
     function(x){x.classList.toggle('on',x.dataset.k===rTab)});
-  /* 各段的数据是按需渲染的：切到哪段才画哪段，避免一进页面就把 59 张卡片全画出来。
-     ⚠ 2026-10-23 线上实测：org 模块 440KB 从 GitHub Pages 拉，用户点进来时
-       偶发还没到位，renderCompetitors 直接 .filter 一个 undefined 抛异常，
-       页面上四段全空。这里先探数据，没到就显示「正在载入」——
-       need() 的回调到达后会再调一次 rApply，数据那时才画。 */
-  var _need={board:'rivals',rival:'competitors',partner:'partners',ency:'ency'}[rTab];
-  if(_need && !(rTab==='ency' ? (D.ency&&D.ency.groups) : arr(D[_need]).length)){
-    /* ⚠ 别用 innerHTML 往段容器里写提示——rEncyBox 里面装着 #f-eg / #encyNote / #encyGrid，
-       一冲就没了，等数据到了 renderEncy 再去取 #encyNote 直接拿到 null，整段崩掉。
-       改成插一个带 id 的提示节点，下次进来先摘掉它。 */
-    var b2=el({board:'rBoardBox',rival:'rRivalBox',partner:'rPartnerBox',ency:'rEncyBox'}[rTab]);
+  /* 各段的数据是按需渲染的：切到哪段才画哪段。
+     org 模块 440KB 从 GitHub Pages 拉，偶发还没到位，
+     这里先探数据，没到就显示「正在载入」，need() 回调到达后会再调一次 rApply。 */
+  var _need={rival:'competitors',partner:'partners'}[rTab];
+  if(_need && !arr(D[_need]).length){
+    var b2=el(m[rTab]);
     if(b2 && !el('segLoading'))
       b2.insertAdjacentHTML('afterbegin','<div class="empty" id="segLoading">正在载入'+
-        ({board:'战绩榜',rival:'竞争对手档案',partner:'伙伴池',ency:'单位百科'})[rTab]+'数据…</div>');
+        ({rival:'竞争对手档案',partner:'伙伴池'})[rTab]+'数据…</div>');
     return;
   }
   try{
-    if(rTab==='board'){ buildRivalFilter(); renderRivals(); }
-    else if(rTab==='rival'){ renderCompetitors(); }
+    /* 百科那 38 家是并进来的，每次重画前先确保合并过（模块可能晚到） */
+    try{ mergeEncyToOrg(); }catch(e){ console.warn('[ency merge]',e); }
+    if(rTab==='rival'){ renderCompetitors(); }
     else if(rTab==='partner'){ renderPartners(); }
-    else if(rTab==='ency'){ renderEncy(); }
   }catch(e){ console.error('[rApply]',rTab,e); }
   refreshRivalCounts();
 }
-el('rSwitch').onclick=function(e){
+var _rSw=el('rSwitch');
+if(_rSw) _rSw.onclick=function(e){
   var sp=e.target.closest('span[data-k]'); if(!sp)return;
   rTab=sp.dataset.k;
   /* 换段就把档案收起来：档案是「某一家单位」的，跟着段切走会
@@ -3820,17 +3822,53 @@ el('rSwitch').onclick=function(e){
   if(_pb){ _pb.style.display='none'; _pb.innerHTML=''; }
   rApply();
 };
-/* 计数依赖 data.org.js（按需加载），不能在脚本顶层算——那时 D.competitors 还是 undefined。
-   改成函数，由 rApply() 在数据到位后调用。 */
+/* 计数依赖 data.org.js（按需加载），不能在脚本顶层算——那时 D.competitors 还是 undefined。 */
 function refreshRivalCounts(){
-  var a=el('rCn'),b=el('rPn'),c=el('rBn');
+  var a=el('rCn'),b=el('rPn');
   if(a)a.textContent=arr(D.competitors).length;
   if(b)b.textContent=arr(D.partners).length;
-  if(c)c.textContent=arr(D.rivals).length;
-  var e2=el('rEn'); if(e2&&D.ency){
-    var n=0; (D.ency.groups||[]).forEach(function(g){n+=(g.units||[]).length});
-    e2.textContent=n;
-  }
+}
+
+/* ---- 单位百科 → 并入同业与伙伴（2026-11-03）----
+   用户原话：「单位百科里面的单位都是我们的同业与伙伴，可以直接放进去」。
+   做法：不搬数据文件（data.org.js 每天由 build_web.py 从 merged.json 重算，
+   写进去早上就被冲掉，见 6132 行那条注释），而是**在浏览器里合并**：
+   · 以 _epNorm() 归一化后的名字去重，已经在 competitors/partners 里的不重复加；
+   · 归属按每家自己的 relation 判：
+       提到「直接对手 / 同类 / 盯防 / 竞争」→ 竞争实力榜
+       其余（伙伴优先 / 可联合 / 兄弟 / 施工联合）→ 联合体伙伴榜
+   · 标签 cat 统一给「综合类」（这批单位能源+环保都能干，不是单一赛道）；
+   · 挂 _ency:1，卡片点击走 encyProf()，班子、海外、业绩都在那个弹层里。 */
+function mergeEncyToOrg(){
+  var E=D.ency; if(!E||!E.groups) return 0;
+  if(D.__encyMerged) return 0;
+  var have={};
+  (D.competitors||[]).forEach(function(x){ have[_epNorm(x.name)]=1 });
+  (D.partners||[]).forEach(function(x){ have[_epNorm(x.name)]=1 });
+  var addC=0, addP=0;
+  (E.groups||[]).forEach(function(g){
+    (g.units||[]).forEach(function(u){
+      var k=_epNorm(u.name);
+      if(have[k]) return;
+      have[k]=1;
+      var rel=u.relation||'';
+      var isRival=/直接对手|同类|盯防|竞争|对手/.test(rel);
+      var city=String(u.city||'').replace(/[（(].*$/,'').trim();
+      var rec={
+        name:u.name,
+        type:u.type || (/施工|建设|冶建/.test(rel)?'施工':'设计院/工程公司'),
+        city:city,
+        cat:'综合类',
+        strength:u.strength||'',
+        _ency:1
+      };
+      if(isRival){ (D.competitors=D.competitors||[]).push(rec); addC++; }
+      else { rec.role=rel; (D.partners=D.partners||[]).push(rec); addP++; }
+    });
+  });
+  D.__encyMerged=1;
+  try{ console.log('[ency] 并入同业与伙伴：竞争 '+addC+' 家 / 伙伴 '+addP+' 家'); }catch(e){}
+  return addC+addP;
 }
 
 /* ---- 单位百科（2026-10-23，二版按用户反馈重构）----
@@ -3839,6 +3877,10 @@ function refreshRivalCounts(){
    ④ 内容少 → 持续补（v2 已补贵阳铝镁院，电解铝设计第一梯队）。 */
 var eGrp='youse';         // 当前分组，默认有色设计院（不再搞「全部」一屏 37 张）
 function renderEncy(){
+  /* 2026-11-03：单位百科页签已下线，38 家并入同业与伙伴（见 mergeEncyToOrg）。
+     这个函数和 encyCard 保留只为兜底，**容器不在就直接返回**——
+     否则 el('encyGrid') 是 null，赋 innerHTML 直接抛错。 */
+  if(!el('encyGrid')) return;
   var E=D.ency; if(!E||!E.groups){ el('encyGrid').innerHTML='<div class="empty">百科数据未加载</div>'; return; }
   var chips=el('f-eg');
   if(chips && !chips.dataset.done){
@@ -3973,6 +4015,8 @@ function _epFind(name){
   }
   return best;
 }
+var EPK={'A':'业主自建电厂','B':'余热发电新建改造','C':'已建成存量','D':'同业业绩'};
+function _epKName(k){return EPK[k]||k;}
 function _epAmt(a){
   if(!a) return '—';
   var s=String(a).replace(/[,，\s]/g,'');
@@ -3981,6 +4025,15 @@ function _epAmt(a){
     var v=parseFloat(m[1]);
     if(v>=1e8) return (v/1e8).toFixed(2)+' 亿';
     if(v>=1e4) return Math.round(v/1e4)+' 万';
+  }
+  /* 2026-11-04：新数据存的是「3.41亿元」「138900万元」这种带单位的字符串，
+     统一压成「3.41 亿」「13.89 亿」，同一列不再出现两种写法。 */
+  m=s.match(/^约?([\d.]+)(亿元|亿|万元|万)$/);
+  if(m){
+    var val=parseFloat(m[1]);
+    if(m[2].charAt(0)==='万') val=val/1e4;      // 统一到「亿」
+    if(val>=1) return (Math.round(val*100)/100)+' 亿';
+    if(val>0)  return Math.round(val*1e4)+' 万';  // 不足 1 亿退回万，别写 0.1 亿
   }
   return String(a);
 }
@@ -4042,7 +4095,7 @@ function _epRender(id, mode){
   h+='<div class="epq-hd"><b>全网业绩速查</b>'+
      '<span class="epq-cnt">'+all.length+' 条</span>'+
      (up?'<span class="epq-dt">数据截至 '+up+'</span>':'')+stale+
-     '<span class="epq-tip">按企业名定向检索 · 每条可点原文 · 与上表互补，已折叠重叠项</span></div>';
+     '<span class="epq-tip">按企业名定向检索　标：A自建电厂 B余热改造 C已建成 D同业业绩　金额：合同=可竞标额，投资=项目总盘子　与上表互补，已折叠重叠项</span></div>';
   /* 筛选 chips：默认「能源 + 去技改」，用户 2026-10-29 明确「技改单独不需要」 */
   var chips=[['clean','能源相关·去技改',rows.length],
              ['en','仅能源相关',nEn],
@@ -4059,15 +4112,28 @@ function _epRender(id, mode){
   h+='<table class="epq-tb"><colgroup><col class="c1"><col class="c2"><col class="c3">'+
      '<col class="c4"><col class="c5"><col class="c6"><col class="c7"></colgroup>'+
      '<thead><tr><th>日期</th><th>项目 / 事项</th><th>规模 / 内容</th>'+
-     '<th>金额</th><th>阶段</th><th>业主 / EPC</th><th>原文</th></tr></thead><tbody>';
+     '<th>金额</th><th>阶段</th><th>业主 / EPC</th><th>原文 / 来源</th></tr></thead><tbody>';
   rows.forEach(function(x){
+    /* 2026-11-04：新增 k（性质标签）/ ov（海外）/ a1 a2（投资额·合同额）/
+       by（承接方）/ sd（来源域名）。老记录没有这些字段，走同一条分支也不会坏。 */
+    var kb = x.k ? '<span class="epq-k k'+x.k+'">'+esc(EPK[x.k]||x.k)+'</span>' : '';
+    var ovb = x.ov ? '<span class="epq-ov">海外</span>' : '';
+    var mtb = x.m ? '<span class="epq-mt">技改</span>' : '';
+    var tags = (kb||ovb||mtb) ? '<span class="epq-tags">'+kb+ovb+mtb+'</span>' : '';
+    var amt = '—';
+    if(x.a2)      amt = '<span class="epq-ak">合同</span>'+esc(x.a2);
+    else if(x.a1) amt = '<span class="epq-ak">投资</span>'+esc(x.a1);
+    else if(x.a)  amt = esc(_epAmt(x.a));
+    var src = x.u
+      ? '<a class="lk" href="'+esc(x.u)+'" target="_blank" rel="noopener nofollow" title="打开原文">↗</a>'
+      : (x.sd ? '<span class="epq-sd">'+esc(x.sd)+'</span>' : '—');
     h+='<tr><td class="d">'+esc(x.d||'—')+'</td>'+
-      '<td class="p">'+esc(x.p||'')+(x.m?'<span class="epq-mt">技改</span>':'')+'</td>'+
-      '<td class="s">'+esc(x.s||'')+'</td>'+
-      '<td class="a" title="'+esc(x.a||'')+'">'+esc(_epAmt(x.a))+'</td>'+
+      '<td class="p">'+esc(x.p||'')+tags+'</td>'+
+      '<td class="s">'+esc(x.s||'')+(x.by?'<span class="epq-by">承接 '+esc(x.by)+'</span>':'')+'</td>'+
+      '<td class="a" title="'+esc(x.a0||x.a||'')+'">'+amt+'</td>'+
       '<td class="st">'+esc(x.st||'—')+'</td>'+
       '<td class="w">'+esc(x.who||'—')+'</td>'+
-      '<td>'+(x.u?'<a class="lk" href="'+esc(x.u)+'" target="_blank" rel="noopener nofollow" title="打开原文">↗</a>':'—')+'</td></tr>';
+      '<td>'+src+'</td></tr>';
   });
   h+='</tbody></table>';
   if(f.sm) h+='<p class="epq-sm"><b>这家在干什么</b> '+esc(f.sm)+'</p>';
@@ -4796,23 +4862,16 @@ function mhFacts(dates,px,idx,cur){
 /* ==================== 重点客户 ==================== */
 /* cRg / cPri / cEx 在下面的「海外中资出海客户」段落里统一定义（2026-10-21 合并，
    原来这里声明过一份 cRg，重复声明会让海外页的筛选状态被前一份覆盖，坑过一次）。*/
-/* ---- 客户与业主：三段切页（国内客户 / 海外客户 / 业主图谱）---- */
+/* 2026-11-03：只剩「国内 / 海外」两段。「业主画像图谱」子段已按用户要求下线，
+   原来这里的 cGrBox 显示、_gDrawn 懒加载、need('siku') 那一整块一起删了。
+   ⚠ data.graph.js 不再按需加载；gRgOf / profPage 这类函数还在用 GR，
+     取不到时按空数组走，别再假设它一定在。 */
 var cTab='dom';
-var _gDrawn=0;   // 图谱段是否已画过（原来挂在 DOM 节点的自定义属性上，某些浏览器内联后取不到，改全局变量）
 function cApply(){
   el('cDomBox').style.display=(cTab==='dom'?'block':'none');
   el('cAbBox').style.display =(cTab==='ab' ?'block':'none');
-  var g=el('cGrBox'); if(g)g.style.display=(cTab==='graph'?'block':'none');
   var bs=el('cTop').querySelectorAll('span[data-k]');
   Array.prototype.forEach.call(bs,function(x){x.classList.toggle('on',x.dataset.k===cTab)});
-  // 首次进图谱页时才渲染；图谱数据（665KB）也是这时候才拉
-  if(cTab==='graph' && !_gDrawn){
-    _gDrawn=1;
-    /* 四库信用代码（data.siku.js，约 300KB）也在这时候拉——它是档案里「身份信息」那一块用的，
-       不进图谱就等于永远不出现。拉不到也照样画，只是那几行降级成跳转链接。 */
-    if(!window.DATA_SIKU && !window.DATA_ALL){ need('siku', _gDraw); }
-    else { _sikuApply(); _gDraw(); }
-  }
 }
 function _gDraw(){
     if(window.DATA_GRAPH || (D.graph&&D.graph.owners&&D.graph.owners.length)){
@@ -5282,9 +5341,16 @@ var PF_SRC = {
   prov: ['省平台','省/市公共资源交易平台全量抓取 · 含不在我们业务范围内的项目'],
   probe:['定向',  '按企业名定向检索 · 官网 / 总包方采购 / 外地与海外，人工核对过原文'],
   eval: ['评标',  '候选人公示抽出的出场记录 · 排名、报价、招标控制价、几家竞标'],
+  /* 2026-11-03 新增：投标人向评标委员会**申报的历史项目**。
+     跟 eval（这次投标的出场记录）不是一回事：eval 说的是「这次它来投了，
+     排第几、报多少」，cand 说的是「它过去建成过什么厂、多大规模、什么时候验收」。
+     这是评标打分的硬性依据、评委认过的，比企业自我介绍可靠。
+     ── 用户 2026-11-03 原话：「还是需要做一个整体的业绩总表…你这样有分成
+        两个部分更不方便看了」—— 原来它单独一段，现在并进这张表。 */
+  cand: ['申报',  '评标公示里申报、经评委认可的已建成业绩 · 带规模参数与竣工验收时间'],
   news: ['动态',  '竞对官网 / 公众号报道 · 无公告原文，只能参考，不能当投标依据']
 };
-var PF_ORDER = ['lib','prov','probe','eval','news'];
+var PF_ORDER = ['lib','prov','probe','eval','cand','news'];
 
 /* 剥流程尾巴，只做清洗不截断 —— 表里显示的标题用它。
    三源标题写法不同的地方全在尾巴上（「…中标结果公告(重发公告第3次)」），
@@ -5568,7 +5634,45 @@ function pfCollect(st){
                own:h.who||'', win:'', seg:'', st:h.st||'', src:{probe:1}, pri:3,
                body:h.s||'', tech:h.m?1:0});
   });
-  /* ⑤ 官网/公众号动态（无原文） */
+  /* ⑤ 评标公示里申报的已建成业绩（2026-11-03 · 并入本表，不再单独一段）
+     ── 用户原话：「还是需要做一个整体的业绩总表…你这样有分成两个部分更不方便看了」。
+        原来它在业绩总表**下面**另起一张「已建成业绩」表，同一个「这家干过什么」
+        被拆成两处，看的时候要在两张表之间来回对。现在并进来当第 5 个来源。
+     ── 字段怎么落到本表的列上（几乎是一一对应的）：
+          it.p  业绩项目名        → t        「项目 / 标的」
+          it.d  竣工/中标时间      → d        「日期」
+          it.dk 竣工/中标/签约     → st       「阶段」（竣工会命中第 9 档「建成/投产」）
+          it.sc 规模参数           → body     「规模 · 内容」（这张表原来这列对定向检索才有值）
+          it.ow 建设单位           → own      「业主 / 中标方」
+          it.m  合同额（万元）      → amt/1e4  （本表金额统一按亿元）
+          it.url 公示原文          → url      「原文」
+     ── amt 单位：candperf 的 m 是**万元**，pf 全表按**亿元**，所以除 1e4。
+        ⚠ 不能套 rpAmtYi()，那个是「元→亿」且会把 <1e5 的裸数清零，
+          我们的 m 已经是万元了，套上去会全变成 0。 */
+  /* ⚠ 业主画像不加这一源：业主是发包方，「申报业绩」是投标人向评委申报的
+     历史项目，挂到业主名下语义就错了（而且业主基本不会出现在投标人名单里，
+     真撞上了反而是误配）。 */
+  if(st.kind!=='owner'){
+  var _cand=cpfOf(name);
+  _cand.forEach(function(it){
+    /* 阶段词要翻成 PF_STAGE_RANK 认得的写法。
+       ⚠ 直接把 '中标' 传进去是不行的：第 7 档正则是「中标结果|中标公告|中标\(|成交…」，
+         光秃秃一个「中标」匹配不上，阶段列会显示成「—」，看着像没阶段。
+         实测踩过：第一批 5 条申报业绩全变成破折号。 */
+    var _st = it.dk==='竣工' ? '建成竣工'
+            : (it.dk==='签约' ? '签约'
+            : (it.dk==='中标' ? '中标结果' : ''));
+    rows.push({t:it.p||'', d:pfDateNorm(it.d), amt:(it.m||0)/1e4, url:it.url||'',
+               own:it.ow||'', win:'', seg:'', st:_st,
+               src:{cand:1}, pri:5,
+               /* 规模参数：先用手工/解析出来的 sc，没有就从项目名里抽机组参数
+                  （「…3×350t/h+2×40MW热电联产项目…」这种写法很常见）。
+                  不抽的话这一列对申报业绩半列都是破折号，扫不出「这家干过多大的活」。 */
+               body:it.sc||cpfSpec(it.p)||'', rank:it.rk||0, won:(it.rk===1?1:0),
+               cpid:it.pid||'', cpd:it.pd||'', cpv:it.pv||'', ck:it.k||'企'});
+  });
+  }
+  /* ⑥ 官网/公众号动态（无原文） */
   (st.news||[]).forEach(function(x){
     /* 动态也要带阶段：否则「某某项目（4.4584亿元）已中标」这种动态会显示成交—，
        而且因为它的日期比公告更早，主行可能选中它，阶段就空了。 */
@@ -5623,6 +5727,10 @@ function pfSegHit(t, segs){
 }
 function pfKeepSearch(r, st){
   if(st.filt!=='seg') return true;          // 用户手动关了过滤，全看
+  /* 评标公示申报的业绩豁免（2026-11-03）：这批在入库前已按能源赛道筛过一遍
+     （build_cand_perf.py 的 ITEM_HOT），这里再筛一次只会把「XX厂区室外工程」
+     「XX管网改造」这种真业绩误杀 —— 它们是评委认过的落地实证。 */
+  if(r.src.cand) return true;
   if(pfIsEnergy(r.t) || pfSegHit(r.t, st.seg)) return true;
   return false;
 }
@@ -5650,7 +5758,7 @@ var PF_STAGE_RANK = [
   /* 2026-10-30：补「建成/验收/试生产/运行」——
      定向检索里历史项目常标「已建成」「已验收」，原来一个都不匹配，
      阶段列显示成「—」，看着像没阶段。这类都归到最后一档。 */
-  [/开工|在建|投产|建成|验收|试生产|投运|运行/, 9]
+  [/开工|在建|投产|建成|验收|试生产|投运|运行|竣工/, 9]
 ];
 function pfStageRank(t, st){
   var s=String(st||'')+' '+String(t||'');
@@ -5670,6 +5778,8 @@ function pfStageName(rank, t){
 function pfPack(list){
   var src={}, urls=[], body='', own='', win='', seg='', amt=0;
   var tech=0, rank=0, won=0, nc=0, quote=0, ctrl=0, n=0;
+  /* 评标公示申报业绩的出处（2026-11-03 并入）：哪篇公示、哪天、哪个省。 */
+  var cpid='', cpd='', cpv='', ck='';
   /* 两组信息分开记：
      - 主行（标题/原文/日期）：取**阶段最靠后**的那条，它的标题和链接最接近最终结果
      - 辅助（金额/业主/规模）：取**信息最全**的那条，可以把各条互补拼起来 */
@@ -5685,6 +5795,7 @@ function pfPack(list){
     if(r.url) urls.push({u:r.url, s:Object.keys(r.src).map(function(k){return PF_SRC[k][0]}).join('+'), r:pfStageRank(r.t,r.st)});
     if(!body && r.body) body=r.body;
     if(!own && r.own) own=r.own;
+    if(!cpid && r.cpid){ cpid=r.cpid; cpd=r.cpd||''; cpv=r.cpv||''; ck=r.ck||'企'; }
     if(!win && r.win) win=r.win;
     if(!seg && r.seg) seg=r.seg;
     if((r.amt||0)>amt) amt=r.amt;
@@ -5709,7 +5820,8 @@ function pfPack(list){
   return {t:mainR.t||'', d:mainR.d||'', amt:amt, own:own, win:win, seg:seg,
           st:pfStageName(bestStage, mainR.t), stageRank:bestStage,
           src:src, urls:urls, body:body, tech:tech, rank:rank, won:won, nc:nc,
-          quote:quote, ctrl:ctrl, n:n};
+          quote:quote, ctrl:ctrl, n:n,
+          cpid:cpid, cpd:cpd, cpv:cpv, ck:ck};
 }
 
 function pfMerge(rows){
@@ -5776,11 +5888,20 @@ function pfSection(name, opt){
                           主业，摆在这里会误导判断。
                           默认开启；页面给一个「含非能源业务」开关，想看全量随时能开。 */
                        seg:opt.seg||[],      // 这家单位的主攻赛道（来自 org 数据）
-                       filt:'seg'};           // 'seg'=按赛道相关 | ''=全看
+                       filt:'seg',            // 'seg'=按赛道相关 | ''=全看
+                       kw:''};                // 按项目名搜索的关键词
   /* entprobe 是按需加载的 274KB。没到货就先画前四个源，到了再**整块重画** ——
      ⚠ 不能「追加一块」，那样又变回两张表，正是这次要消灭的形状。 */
   if(!window.DATA_ENTPROBE){
     need('entprobe', function(){
+      var b=document.getElementById(id); if(b) pfPaint(b);
+    });
+  }
+  /* 评标申报业绩是 100KB 的 data.candperf.js，没到货同样整块重画。
+     ⚠ 别图省事写「没到就不显示这一源」——那样用户点开时表里少一截，
+       过两秒又自己长出来，比不显示更让人怀疑数据是假的。 */
+  if(!window.DATA_CANDPERF){
+    need('candperf', function(){
       var b=document.getElementById(id); if(b) pfPaint(b);
     });
   }
@@ -5797,19 +5918,36 @@ function pfPaint(box){
 
 function pfDraw(box, st){
   var all=st._projs||[], mode=st.mode||'', nofix=!!st.nofix;
-  var cnt={lib:0,prov:0,probe:0,eval:0,news:0};
+  var kw=String(st.kw||'').trim();
+  var cnt={lib:0,prov:0,probe:0,eval:0,cand:0,news:0};
   all.forEach(function(p){ for(var k in p.src) if(cnt[k]!=null) cnt[k]++; });
   var nTech=all.filter(function(p){return p.tech}).length;
 
   var list=all.filter(function(p){
     if(nofix && p.tech) return false;
     if(mode && !p.src[mode]) return false;
+    /* 按名搜索（2026-11-03）：用户要求「不行你也可以根据项目名称去搜索」。
+       搜「名 + 规模 + 业主」，因为业绩项目名常常只写「XX公司XX项目」，
+       真正的辨识信息（300t/h、某热电厂）在规模参数和建设单位里。 */
+    if(kw){
+      var hay=((p.t||'')+' '+(p.body||'')+' '+(p.own||'')+' '+(p.win||'')).toLowerCase();
+      if(hay.indexOf(kw.toLowerCase())<0) return false;
+    }
     return true;
   });
 
   var nFilt=st._dropped||0;
-  var h='<h4><i></i>'+(st.title||'业绩总表')+' <small>'+all.length+' 个项目 · 五个来源合成一张表，'+
+  var h='<h4><i></i>'+(st.title||'业绩总表')+' <small>'+all.length+' 个项目 · 六个来源合成一张表，'+
         '同一项目只出现一次（'+list.length+' 条在显示）</small></h4>';
+
+  /* 搜索框：放在 chips 上方，跟筛选条同宽。
+     ⚠ 中文输入法组合期间不能重画（见下方 input 事件里的 isComposing 判断），
+       否则拼音打到一半 DOM 被换掉，字就丢了 —— 这是中文界面的老坑。 */
+  h+='<div class="pf-qbar"><input class="pf-q" type="search" data-pfq="1" '+
+     'value="'+esc(kw)+'" placeholder="按项目名搜（业主、规模也能搜）" '+
+     'autocomplete="off">'+
+     (kw?'<span class="pf-qn">命中 '+list.length+' / '+all.length+
+         ' <b data-pfqclr="1">清空 ✕</b></span>':'')+'</div>';
 
   /* chips：来源维度 + 两个开关。
      数量按「含该来源的项目数」算，不是记录数 ——
@@ -5837,6 +5975,19 @@ function pfDraw(box, st){
         '本库和专项检索都还没抓到它在江浙沪皖的项目 —— 要么它确实不活跃，要么抓取还没覆盖到它的公告。')+
        '</td></tr>';
   }
+  /* 出处脚注：cand 行的业绩出自某篇候选人公示。跟「已建成业绩」老表一样编号化，
+     行内只占 ①②③，全名在表下统一列 —— 否则表里「XX供热管网工程中标候选人公示」
+     这种长句会重复几十遍，把真正的信息淹掉。 */
+  var CPF_CIRC='①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳';
+  var cpIdx={}, cpList=[];
+  list.forEach(function(p){
+    if(!p.cpid) return;
+    var k=p.cpid+'|'+(p.cpd||'');
+    /* ⚠ 必须写 `==null`：第一条下标是 0，而 !0===true，首条会被重复 push。 */
+    if(cpIdx[k]==null){ cpIdx[k]=cpList.length; cpList.push({pid:p.cpid, pd:p.cpd, url:(p.urls[0]||{}).u||''}); }
+    p._ci=cpIdx[k];
+  });
+
   list.forEach(function(p){
     var tp=rperfType(p.t||'');
     var tags='';
@@ -5845,6 +5996,14 @@ function pfDraw(box, st){
       if(p.src[k]) tags+='<span class="pf-s pf-s-'+k+'" title="'+esc(PF_SRC[k][1])+'">'+PF_SRC[k][0]+'</span>';
     });
     if(p.tech) tags+='<span class="epq-mt">技改</span>';
+    /* 申报业绩的「该次」：第 1/2/3 中标候选人，或项目经理业绩。
+       原来这是「已建成业绩」表单独的最后一列，并表后挤进标签行，
+       否则要为一小部分行多开一整列。 */
+    if(p.src.cand && p.rank){
+      var rt=p.rank===1?'第 1':(p.rank===2?'第 2':(p.rank===3?'第 3':'参与'));
+      tags+='<span class="cpf-rk r'+(p.rank||3)+'" title="这家在这篇公示里的排名">'+rt+'</span>';
+      if(p.ck==='项') tags+='<span class="cpf-rk rp" title="申报主体是这个项目的项目经理，不是企业业绩">项目经理</span>';
+    }
     if(p.n>1) tags+='<span class="pf-n" title="同一项目的 '+p.n+' 条过程记录已合并成这一行">全过程 '+p.n+' 条</span>';
 
     var who = st.kind==='owner' ? (p.win||'') : (p.own||'');
@@ -5861,12 +6020,17 @@ function pfDraw(box, st){
     } else links='<span class="pm-na">—</span>';
 
     var ctrlTxt = p.ctrl>0 ? '<br><span class="pf-ctrl" title="招标控制价">控 '+money(p.ctrl)+'</span>' : '';
+    /* 申报业绩在项目名下挂一行出处，让人知道「这条是谁说的」——
+       不是自我介绍，是它投标时向评标委员会申报、评委认过的。 */
+    var cpSrc = (p.cpid && p._ci!=null)
+      ? '<div class="pf-cpsrc">'+CPF_CIRC.charAt(p._ci)+' '+esc(p.cpid)+' 那次投标'+
+        (p.cpv?'<span class="pf-cpv">'+esc(p.cpv)+'</span>':'')+'</div>' : '';
 
     h+='<tr>'+
       '<td class="d">'+esc(p.d||'—')+ctrlTxt+'</td>'+
       '<td class="p"><i class="rp-t rp-'+tp[1]+'">'+tp[0]+'</i><b title="'+esc(p.t)+'">'+
         esc(pfClean(p.t))+'</b>'+
-        (tags?'<div class="pf-tags">'+tags+'</div>':'')+'</td>'+
+        (tags?'<div class="pf-tags">'+tags+'</div>':'')+cpSrc+'</td>'+
       '<td class="s">'+(p.body?esc(p.body.slice(0,90))+(p.body.length>90?'…':''):'—')+'</td>'+
       '<td class="a">'+amtCell+'</td>'+
       '<td class="st">'+esc(p.st||'—')+'</td>'+
@@ -5875,9 +6039,21 @@ function pfDraw(box, st){
   });
   h+='</tbody></table></div>';
 
+  /* 出处脚注（只有申报业绩才有） */
+  if(cpList.length){
+    h+='<div class="cpf-srcs"><b>出处</b>'+
+      cpList.map(function(x,i){
+        return '<div>'+CPF_CIRC.charAt(i)+' '+
+          (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">':'<span>')+
+          esc(x.pid)+(x.url?' ↗</a>':'</span>')+
+          (x.pd?' <span class="cpf-ct-in">'+esc(x.pd)+'</span>':'')+'</div>';
+      }).join('')+'</div>';
+  }
+
   h+='<div class="prof-note">一张表看完这家在江浙沪皖干过什么。'+
      '徽章说明：<b>本库</b>=我们抓的公告、口径最稳；<b>省平台</b>=省市交易平台全量；'+
      '<b>定向</b>=按企业名人工检索（含官网、总包采购、外地海外）；<b>评标</b>=带排名和报价；'+
+     '<b>申报</b>=评标公示里向评委申报、评委认可的已建成业绩，带规模参数和竣工时间；'+
      '<b>动态</b>=媒体报道、没有原文。<br>'+
      '同一项目在多个来源都出现时只列一行，徽章并列 —— 想看各自原文点右侧编号。</div>';
 
@@ -5886,6 +6062,13 @@ function pfDraw(box, st){
 
 /* 业绩总表 chips 交互 */
 document.addEventListener('click', function(ev){
+  /* 搜索框的「清空 ✕」 */
+  var clr=ev.target.closest?ev.target.closest('[data-pfqclr]'):null;
+  if(clr){
+    var b0=clr.closest('[data-pfbox]'), s0=b0&&(window._pfBoxes||{})[b0.id];
+    if(b0&&s0){ s0.kw=''; pfDraw(b0,s0); }
+    return;
+  }
   var a=ev.target.closest?ev.target.closest('[data-pff],[data-pfnofix],[data-pffilt]'):null;
   if(!a) return;
   var box=a.closest('[data-pfbox]'); if(!box) return;
@@ -5899,6 +6082,28 @@ document.addEventListener('click', function(ev){
   else { var v=a.getAttribute('data-pff'); st.mode=(st.mode===v?'':v); }
   pfDraw(box, st);
 });
+
+/* 业绩总表的搜索框（2026-11-03）。
+   ⚠ 两个坑：
+     ① 输入法组合期间（拼音还没上屏）不能重画 —— DOM 被换掉，候选词就丢了。
+        用 ev.isComposing 判断，compositionend 再补一次。
+     ② 重画后输入框是新的节点，焦点会掉，必须再 focus 并把光标移到末尾，
+        否则打完第一个字就得重新点一次输入框。 */
+function _pfSearchKey(ev){
+  var q=ev.target.closest?ev.target.closest('[data-pfq]'):null;
+  if(!q) return;
+  var box=q.closest('[data-pfbox]'); if(!box) return;
+  var st=(window._pfBoxes||{})[box.id]; if(!st) return;
+  st.kw=q.value;
+  pfDraw(box, st);
+  var nq=box.querySelector('[data-pfq]');
+  if(nq){ nq.focus(); try{ nq.setSelectionRange(nq.value.length,nq.value.length); }catch(e){} }
+}
+document.addEventListener('input', function(ev){
+  if(ev.isComposing) return;
+  _pfSearchKey(ev);
+});
+document.addEventListener('compositionend', _pfSearchKey);
 
 /* 兼容旧调用名：外部还有地方按老名字调，保留一层壳慢慢替换 */
 function rperfSec(name){ return rperfTable(name, window._profNews && window._profNews[name]); }
@@ -6688,20 +6893,36 @@ function skuNote(name, members){
 /* ── 已建成业绩（评标公示背书，2026-11-03）────────────────────────
    数据源：data.candperf.js（window.DATA_CANDPERF），由 build_cand_perf.py 生成。
 
-   跟「业绩总表」不是一回事，所以单独一段：
-     · 业绩总表 = 这家**投过什么标**（市场动作，说明它在抢哪些活）
-     · 这一段   = 这家**建成过什么厂**（能力实证，说明它干得了多大的活）
-   混在一张表里，销售分不清「有没有在抢」和「有没有本事干」。
-
-   为什么可信：这些是投标人为满足评分要求、主动向评标委员会申报的历史项目，
-   评标委员会认了才算数 —— 不是企业自我介绍、不是官网宣传稿。
-   每条都带规模参数（1×220t/h 锅炉 + 1×50MW 背压机组）和竣工验收时间，
-   拿它判断对手「能不能干 300t/h 以上」比看一句话画像硬得多。
-
-   为什么不进找商机库：它不是待跟进的机会，是「对手干过什么」的实证。
-   用户早就定过口径 ——「搜到的数据不能放在找商机那个里面，单独放着，不然会污染找商机库的数据」。
+   ⚠ 2026-11-03 起，画像页的业绩表已经**不再调这里** —— 这批数据并进了
+     「业绩总表」的第 5 个来源（申报），用户原话：「还是需要做一个整体的业绩总表…
+     你这样有分成两个部分更不方便看了」。
+   现在只剩一个调用点：同业页底部点「评标公示里露面的其他投标单位」卡片，
+   弹出来的库外单位速览。那里**没有**业绩总表（本库没给它建档、没有 lib/news），
+   所以只有这一张表，不存在「两个部分」的问题，保留轻量版本比塞一个六源空表更合适。
+   ⚠ 不要在有档案的画像里再调它，那会把一行拆回两张表。
 */
+/* 日期规范化（2026-11-03）：candperf 里的日期有五种写法在混着 ——
+   `2024-11-15`（ISO）、`2024年11月`、`2024年11月15日`、`2022 年 1 月 2 日`（带空格）、空。
+   同一列里混排中文和 ISO 很难扫，统一成 ISO；**保留原始精度**：
+   原文只到月就输出 `YYYY-MM`，不补成 `-01` 假装精确到日。 */
+function pfDateNorm(s){
+  s=String(s||'').trim();
+  if(!s) return '';
+  var m=s.match(/^(\d{4})\s*[年\-\/.]\s*(\d{1,2})\s*[月\-\/.]?\s*(\d{1,2})?/);
+  if(!m) return s;
+  var y=m[1], mo=m[2]?('0'+parseInt(m[2],10)).slice(-2):'',
+      dd=m[3]?('0'+parseInt(m[3],10)).slice(-2):'';
+  return mo ? (dd ? y+'-'+mo+'-'+dd : y+'-'+mo) : y;
+}
 function cpfDb(){ return (window.DATA_CANDPERF||{}).db||{}; }
+/* 从项目名里抽机组规模参数（2026-11-03 提成全局）：
+   「…3×350t/h+2×40MW热电联产项目…」→「3×350t/h+2×40MW」。
+   表格式模板没有独立的规模列，但项目名里通常自带参数；不抽出来的话
+   「规模 · 内容」这列对申报业绩半列都是破折号，横向扫不出「这家干过多大的活」。 */
+function cpfSpec(t){
+  var m=String(t||'').match(/\d+(?:\.\d+)?\s*[×xX*]\s*\d+(?:\.\d+)?\s*(?:t\/h|T\/H|th|MW|mw|万千瓦|万kW)(?:\s*[+＋]\s*\d+(?:\.\d+)?\s*(?:t\/h|T\/H|th|MW|mw|万千瓦|万kW))*/);
+  return m ? m[0].replace(/\s+/g,'') : '';
+}
 function cpfKey(s){ return String(s||'').replace(/[（）()\s·]/g,''); }
 /* 按单位名取业绩。三级匹配：精确 → 库内归一名（org 字段）→ 前缀包含。
    为什么要有第三级：评标公示里写的是「华光环保能源（西安）设计研究院有限公司」，
@@ -6769,9 +6990,7 @@ function cpfSection(name, kind){
      这一列才能横向扫「这家干过多大的机组」，否则半列都是破折号。 */
   function specOf(r){
     if(r.sc) return r.sc;
-    var m=String(r.p||'').match(/\d+(?:\.\d+)?\s*[×xX*]\s*\d+(?:\.\d+)?\s*(?:t\/h|T\/H|th|MW|mw|万千瓦|万kW)(?:\s*[+＋]\s*\d+(?:\.\d+)?\s*(?:t\/h|T\/H|th|MW|mw|万千瓦|万kW))*/);
-    if(m) return m[0].replace(/\s+/g,'');
-    return '';
+    return cpfSpec(r.p);
   }
   /* 出处用编号 + 脚注。为什么不全名写在行里：
      表格是按「信息完整度」排的，同一篇公示的业绩会被打散到不同位置，
@@ -7110,10 +7329,11 @@ function profPage(kind, o){
   else if(o.seg && typeof o.seg==='string') _pseg=[o.seg];
   else if(o.main) _pseg=[o.main];
   var pfHtml=pfSection(o.name, {kind:kind, lib:_realAll, news:_rperfNewsFromItems, seg:_pseg});
-  /* ③.5 已建成业绩（评标公示背书）—— 单独一段，跟在业绩总表后面。
-     数据没到就返空串，绝不能写成「暂无」：那是「这家没有业绩」的误导，
-     实际只是 50KB 的 candperf.js 还没拉完（首屏 2.5 秒预取，通常点开时已就绪）。 */
-  var cpfHtml=cpfSection(o.name, kind);
+  /* 2026-11-03：原来这里还有一段独立的 cpfSection（已建成业绩），用户看截图后说
+     「还是需要做一个整体的业绩总表…你这样有分成两个部分更不方便看了」。
+     那段数据已经并进 pfSection 的第 5 个来源（申报），这里不再单独输出。
+     ⚠ 别把它加回来 —— 那会让同一个「这家干过什么」又分裂成两张表。 */
+  var cpfHtml='';
 
   return '<div class="prof">'+
     '<div class="prof-hd"><div><h3>'+nm+'</h3>'+
@@ -7226,6 +7446,11 @@ function gRivalBack(){
 function renderGraphOwner(o){ return profPage('owner', o); }
 function renderGraphSup(s){ return profPage('sup', s); }
 function renderGraph(){
+  /* ⚠ 2026-11-03：业主画像图谱子段已下线，DOM 全没了。
+     这个函数留着兜底（档案里 gPick 找业主时还会用到 profPage 那套），
+     但**只要容器不在就直接返回**，别再去 el('grTip').innerHTML 硬写 ——
+     一写就是 TypeError，会把调用它的整段渲染连带打断。 */
+  if(!el('grMain')) return;
   /* 从同业深度档案「返回业主名单」时，把来源页签也切回去，
      否则用户看到的是业主档案、人还站在同业那一页，会以为点错了。 */
   /* 「返回业主名单」：从同业档案跳过来的，回同业页签。
@@ -7489,18 +7714,33 @@ function gPick(mode,name){
   }
   gSt.m=mode; gSt.sel=name; gSt.q='';
   if(el('grQ')) el('grQ').value='';
-  renderGraph();
+  /* ⚠ 2026-11-03：图谱子段下线后，这里原来直接 renderGraph() 会「点了没反应」。
+     改成：找到这家就直接弹档案（和同业那边同一套 openUniProf），找不到就明说。
+     业主画像本来就是「一家一家建」的，不需要先跳进一张大图谱再找它。 */
+  var _pool2=_graphUnits(mode), _hit=null;
+  for(var _k=0;_k<_pool2.length;_k++){ if(_pool2[_k] && _pool2[_k].name===name){_hit=_pool2[_k];break;} }
+  if(_hit){
+    openUniProf(name, (mode==='owner'?'业主':'供应商')+' · 深度档案',
+      mode==='owner'?renderGraphOwner(_hit):renderGraphSup(_hit));
+  }else{
+    renderGraph();
+  }
 }
-el('grSeg').onclick=function(e){var s=e.target.closest('span');if(!s)return;gSt.m=s.dataset.m;gSt.sel='';renderGraph()};
-el('grQ').oninput=function(){gSt.q=this.value.trim();renderGraph()};
-el('grList').onclick=function(e){var r=e.target.closest('.row');if(!r)return;gSt.sel=r.dataset.n;renderGraph()};
-el('grPlan').onclick=function(e){
+/* 2026-11-03：下面这 5 个绑定原来直接 el('grSeg').onclick=…。
+   图谱子段删除后节点不存在，`el('grSeg').onclick` 会对 null 赋值直接抛 TypeError，
+   **把脚本后面所有代码一起截断**（页签、弹层全挂）。逐个加存在性判断。 */
+(function(){
+  function on(id,ev,fn){ var n=el(id); if(n) n[ev]=fn; }
+  on('grSeg','onclick',function(e){var s=e.target.closest('span');if(!s)return;gSt.m=s.dataset.m;gSt.sel='';renderGraph()});
+  on('grQ','oninput',function(){gSt.q=this.value.trim();renderGraph()});
+  on('grList','onclick',function(e){var r=e.target.closest('.row');if(!r)return;gSt.sel=r.dataset.n;renderGraph()});
+  on('grPlan','onclick',function(e){
   var r=e.target.closest('[data-planown]'); if(!r) return;
   /* 直接开画像 —— 这批业主本来就没有深度画像，但规划期项目段是有内容的，
      正好是「还没招标、赶紧去接触」的那批，不能像潜在业主那样只给一句说明。 */
   domOwnerProf(r.getAttribute('data-planown'));
-};
-el('grLatent').onclick=function(e){
+});
+  on('grLatent','onclick',function(e){
   var r=e.target.closest('.row'); if(!r)return;
   /* 潜在业主没有深度画像（它没发过我们的标，画像里全是空的，给出来反而误导）。
      点了就在右侧给一句说明 + 直接搜库，看它到底发过什么。 */
@@ -7516,7 +7756,8 @@ el('grLatent').onclick=function(e){
       '<a href="javascript:searchFor(\''+esc(nm.slice(0,8)).replace(/'/g,"\\'")+'\')">在商机库搜它发过的全部记录 ↗</a>'+
       '<a href="https://www.qcc.com/web/search?key='+encodeURIComponent(nm)+'" target="_blank" rel="noopener nofollow">企查查看工商信息 ↗</a>'+
     '</div></div>';
-};
+});
+})();
 /* 地区筛选：江浙沪皖是主战场，领导要「我江浙沪皖业主」——先按地区圈定范围再看名单 */
 (function(){
   var box=el('f-grg'); if(!box)return;
@@ -7847,8 +8088,15 @@ function searchFor(kw){
   [].forEach.call(document.querySelectorAll('.panel'),function(x){x.classList.remove('on')});
   el('p-items').classList.add('on');
   el('q').value=kw; F.q=kw.trim(); F.st=''; F.page=1;
-  [].forEach.call(swimBox.children,function(x){x.classList.remove('on')});
-  swimBox.firstElementChild.classList.add('on');
+  /* ⚠ 2026-11-03 修：阶段泳道 2026-10-21 就被「三档关注库」取代并清空了
+     （swimBox.innerHTML=''，见 2611 行），但这里还在对 swimBox.firstElementChild
+     赋值 classList —— firstElementChild 是 null，于是**全站每一个「在商机库搜索」
+     链接点了都抛 TypeError**，render() 根本没执行，页面停在旧列表上，
+     用户看到的就是「点了没反应」。加空判断。 */
+  if(swimBox && swimBox.firstElementChild){
+    [].forEach.call(swimBox.children,function(x){x.classList.remove('on')});
+    swimBox.firstElementChild.classList.add('on');
+  }
   render(); window.scrollTo(0,0); location.hash='t0';
 }
 
@@ -7896,7 +8144,9 @@ function boot_main(){
       '><b>'+k[1]+'</b><span>'+k[2]+'</span></div>'}).join('');
 
   buildFilters();  // 筛选器 + 三档关注库
-  buildRivalFilter();
+  /* buildRivalFilter() 建的是「按战绩排序」那张榜的赛道筛选条（#f-rv）。
+     2026-11-03 战绩榜下线，节点不存在了，再调就是 el('f-rv').onclick 对 null 赋值 →
+     TypeError，把后面 render() 一起截断（首屏会整片空白）。这里撤掉。 */
   render();        // 商机库第一页
   /* 默认档是「全部」，可首屏只有 42 条切片——名义 1521、实际 42，又是数字对不上。
      这里在后台把 lead + rest 两块并行拉下来，拉完自动重渲，数字自然涨上去。
@@ -7914,6 +8164,10 @@ function boot_main(){
   /* 全网业绩速查（274KB）也后台预载：画像弹层是同步拼字符串的，
      数据没到就只能等加载完再补画，用户会先看到一段空白，观感差。 */
   setTimeout(function(){ need('entprobe', function(){}); }, 3000);
+  /* 四库信用代码（data.siku.js，约 300KB）：原来靠「点进业主画像图谱」触发。
+     2026-11-03 图谱子段下线，改到这里预取 —— 它只服务于档案弹层里的「身份信息」，
+     拉不到也不影响主流程（那几行会降级成跳转链接）。 */
+  setTimeout(function(){ need('siku', function(){ try{ _sikuApply(); }catch(e){} }); }, 4200);
   /* 已建成业绩（评标公示背书）。76KB，比 entprobe 小一个数量级，所以提前到 1.8 秒拉。
      回调里要重画一次「同业」页底部那块库外单位 —— 用户可能手快，
      首屏刚出来就切过去了，那时数据还没到，那块会是空的。 */
