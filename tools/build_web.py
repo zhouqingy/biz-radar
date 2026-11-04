@@ -26,6 +26,16 @@ D = json.load(open(os.path.join(ROOT, 'merged.json'), encoding='utf-8'))
 # 定义全在 seg_biz.py，判定全在 seg_match.py，这里只调用。
 # 关键变化：不再用 is_watch 的「A/B 级兜底」，改成三段式
 #   ≥1亿 → 进；0.3~1亿 必须「核心工艺词+总承包」双命中；<0.3亿 → 不进。
+# 业务分层短码 → 中文名。必须与 index.html 的 SEG_NAME 完全一致，
+# 否则 meta 里的分类标签在前端查不到名字（2026-11-04 踩过）。
+SEG_CN = {
+    'youse': '有色冶炼供能', 'steelgas': '钢铁煤气发电', 'wasteheat': '余热余压利用',
+    'cogen': '热电联产·集中供热', 'chemheat': '化工余热回收',
+    'selfplant': '自备电厂·能源站', 'datactr': '数据中心供能', 'wte': '垃圾焚烧发电',
+    'soil': '土壤与场地修复', 'zero': '废水零排放', 'sewage': '市政污水',
+    'oversea': '中资出海能源岛', 'other': '其他',
+}
+
 import seg_biz as SB
 import seg_match as SM
 import biz_rules as BR   # 2026-10-23：全链路唯一规则源，找商机严筛口径从这来
@@ -1433,8 +1443,16 @@ data = {
                             if (r.get('amtK') or 'win') == 'win'), 1),
         'invSum': round(sum(r.get('amt') or 0 for r in brief
                             if (r.get('amtK') or '') == 'inv'), 1),
-        'withInv': sum(1 for r in brief if (r.get('amtK') or '') == 'inv'),
-        'bizTop': Counter(r['biz'] for r in brief).most_common(),
+        # 必须同时要求 amt 真值：amtK 是按阶段推的，立项公示里有一两条金额为 0
+        # 的记录也会带上 amtK='inv'，只按 amtK 计数会比列表多 1 条。
+        'withInv': sum(1 for r in brief
+                       if r.get('amt') and (r.get('amtK') or '') == 'inv'),
+        # bizTop 用 sg（业务分层短码），不是 biz（来源站自己的分类名）。
+        # 用 biz 会产出「能源清洁高效利用 / 其他非主业」这类**前端词表里没有**的标签，
+        # 点 KPI 那格筛不出东西。refresh_core.py 早就是按 sg + SEG_CN 导出的，
+        # 这里对齐它，两边同一套词。
+        'bizTop': [[SEG_CN.get(k, k), v] for k, v in
+                   Counter(r['sg'] for r in brief).most_common(6)],
         'gradeTop': Counter(r['g'] for r in brief).most_common(),
         'rgTop': Counter(r['rg'] for r in brief).most_common(),
         'stTop': Counter(r['st'] for r in brief).most_common(),
