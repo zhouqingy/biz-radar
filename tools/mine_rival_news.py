@@ -14,7 +14,21 @@ import os, re, sys, json, time, gzip, ssl, urllib.request, urllib.error, urllib.
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(ROOT, 'raw')
-DATA = os.path.join(os.path.dirname(ROOT), 'biz-radar', 'data.js')
+
+
+# data.js 位置，规则同 merge_digest.py：
+# 本地 tools/ 同级有 biz-radar/；Actions 上 tools/ 直接属于仓库根。
+def _data_js():
+    out = os.environ.get('BIZ_OUT')
+    if out:
+        return os.path.join(out, 'data.js')
+    a = os.path.join(os.path.dirname(ROOT), 'biz-radar', 'data.js')
+    if os.path.exists(a):
+        return a
+    return os.path.join(os.path.dirname(ROOT), 'data.js')
+
+
+DATA = _data_js()
 
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36'
 CTX = ssl.create_default_context(); CTX.check_hostname = False; CTX.verify_mode = ssl.CERT_NONE
