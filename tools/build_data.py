@@ -280,6 +280,9 @@ def make_rec(x, prov):
             'buyer': (x.get('buyer') or '').strip(),
             'win': (x.get('win') or '').strip(),
             'amt': parse_amt(x.get('amt')),
+            # 金额口径：win=中标/成交/合同价，inv=项目总投资/投资估算。
+            # 两者能差 3~10 倍，2026-11-04 用户确认必须分开，不能再混进一个「已公示金额」。
+            'amtKind': (x.get('amtKind') or '').strip(),
             'amtTxt': (x.get('amtTxt') or '').strip(),
             'd': (x.get('d') or '')[:10],
             'dl': '' if str(x.get('dl')) in ('None', 'null') else (str(x.get('dl'))[:10]),
@@ -464,6 +467,7 @@ for x in old_raw:
         'buyer': (x.get('buyer') or x.get('_buyer') or '').strip(),
         'win': (x.get('win') or '').strip(),
         'amt': parse_amt(x.get('amt')) if x.get('amt') not in ('—', '-', '') else None,
+        'amtKind': (x.get('amtKind') or '').strip(),
         'amtTxt': (x.get('amt') or '').strip() if x.get('amt') not in ('—',) else '',
         'd': (x.get('d') or '')[:10],
         'dl': '' if str(x.get('dl')) in ('—', 'None', 'null') else str(x.get('dl'))[:10],
@@ -561,17 +565,34 @@ for r in old + new:
 #     差额只是业主名，应合并。中煤宝山两条（宝能变扩建 vs 锅炉除灰脱硝）不是子串关系，安全。
 keys = sorted(merged.keys(), key=len)
 sub_dup = 0
+# 子串合并索引：按首字符分组（子串必然同首字符），组内按长度升序
+_sub_idx = {}
+for _k in keys:
+    _sub_idx.setdefault(_k[0], []).append(_k)
+for _v in _sub_idx.values():
+    _v.sort(key=len)
 for i, k1 in enumerate(keys):
     if k1 not in merged or len(k1) < 10:
         continue
-    for k2 in keys[i + 1:]:
-        # 窗口 14：已按长度升序，后面只会更长，超过就停。
-        # 为什么是 14 —— 试过 22，会把「上海石化热电机组清洁提效改造项目」和
-        # 「…改造工程分系统、整套启动调试劳务协助用工」（差 16 字）误并成一条，
-        # 那其实是两个不同的标（主体工程 vs 调试劳务）。14 字差≈一个业主名或
-        # 「中标候选人公示」的长度，够覆盖「只差业主前缀」和「阶段演进」两种真重复。
+    # 2026-11-04 性能修复：原来是 keys[i+1:] 全量切片 + 逐条 `k1 not in k2`，
+    # 每次切片都复制一遍 list，而且 k1 已经被合并掉后还在继续内层循环 ——
+    # 库涨到 2670 条时这一步跑了 10 分钟以上没出来（O(n²) 切片 + 大量子串匹配）。
+    # 现在：① 用下标 for 循环，不再切片；② 每轮先判 k1 是否还在，不在就 break；
+    # ③ 用「首字符 + 长度窗口」剪枝 —— 子串必然首字符相同，长度差 ≤14，
+    #    所以只在同首字符、长度窗口内的候选里找，候选量从 n 降到几十。
+    #
+    # 窗口 14：已按长度升序，后面只会更长，超过就停。
+    # 为什么是 14 —— 试过 22，会把「上海石化热电机组清洁提效改造项目」和
+    # 「…改造工程分系统、整套启动调试劳务协助用工」（差 16 字）误并成一条，
+    # 那其实是两个不同的标（主体工程 vs 调试劳务）。14 字差≈一个业主名或
+    # 「中标候选人公示」的长度，够覆盖「只差业主前缀」和「阶段演进」两种真重复。
+    _cands = _sub_idx.get(k1[0], ())
+    for j in range(len(_cands)):
+        k2 = _cands[j]
+        if k2 == k1:
+            continue
         if len(k2) - len(k1) > 14:
-            break
+            break                      # 组内按长度升序，后面只会更长
         if k2 not in merged or k1 not in merged:
             continue
         if k1 not in k2:
@@ -616,6 +637,13 @@ for i, (k, r) in enumerate(merged.items()):
     r['st'] = top if top != '其他' or r['st'] == '其他' else r['st']
     r['id'] = 'P' + hashlib.md5((r['t'] + r['d']).encode()).hexdigest()[:8]
     r['amtY'] = round(r['amt'] / 1e8, 4) if r['amt'] else None
+    # 金额口径兜底：老数据（10-28 之前入库的）没有 amtKind 字段，
+    # 靠 amtTxt 里的字眼反推。判不出的一律按 'win'（中标价）算 —— 库里
+    # 绝大多数金额本来就是「投标报价/中标价」，总投资类 28 条都带明确字眼。
+    if r['amt'] and not r.get('amtKind'):
+        _t = (r.get('amtTxt') or '')
+        r['amtKind'] = 'inv' if any(k in _t for k in (
+            '总投资', '投资总额', '投资估算', '估算总投资', '项目投资', '投资额')) else 'win'
     out.append(r)
 
 # ============ 6.5 本轮新增判定：与上一版线上库比对 id ============
