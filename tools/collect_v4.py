@@ -41,8 +41,11 @@ UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.
 # 站点配置：base 是接口前缀，host 是原文域名前缀
 SITES = {
     '江苏': {
-        'api': 'http://jsggzy.jszwfw.gov.cn/inteligentsearch/rest/esinteligentsearch/getFullTextDataNew',
-        'host': 'http://jsggzy.jszwfw.gov.cn',
+        # 2026-11-04：原来是 http://，GitHub Actions 上 curl rc=7（端口 80 连不上），
+        # 沙箱里也是 Network is unreachable —— 江苏站早已只走 https。
+        # 换 https 后 200 正常。这一个字符就是「10-24 之后江苏再没进过新数据」的根因。
+        'api': 'https://jsggzy.jszwfw.gov.cn/inteligentsearch/rest/esinteligentsearch/getFullTextDataNew',
+        'host': 'https://jsggzy.jszwfw.gov.cn',
         'plat': '江苏省公共资源交易平台',
         'level': '省级',
     },
