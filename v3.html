@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>商机雷达 · 都市环保 V3.0</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--f:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif}
+button,input{font-family:inherit}
+b,i,em,u{font-style:normal;text-decoration:none}
+
+/* ══════════ 四套主题：所有颜色走变量，切换 body[data-theme] 即全站生效 ══════════ */
+body[data-theme="graphite"]{
+  --bg:#f7f8fa;--card:#fff;--line:#e5e7eb;--line2:#eef2f7;--input:#fbfcfd;--inputline:#e2e8f0;
+  --ink:#0f172a;--ink2:#475569;--ink3:#64748b;--ink4:#94a3b8;--ink5:#cbd5e1;
+  --brand:#475569;--brandbtn:#334155;--brandtx:#fff;--hot:#b45309;--hover:#f1f5f9;
+  --up:#c2410c;--dn:#15803d;--ok:#16a34a;--leadbg:#f8fafc;--leadline:#e2e8f0}
+body[data-theme="paper"]{
+  --bg:#f7f5f1;--card:#fffdfa;--line:#e9e2d8;--line2:#f2ece3;--input:#fdfaf5;--inputline:#e4dacb;
+  --ink:#231f1a;--ink2:#57534e;--ink3:#78716c;--ink4:#a8a29e;--ink5:#d6d0c8;
+  --brand:#b45309;--brandbtn:#7c3f12;--brandtx:#fff;--hot:#b45309;--hover:#f6f1e9;
+  --up:#c2410c;--dn:#15803d;--ok:#16a34a;--leadbg:#fdf6ef;--leadline:#f0e0cd}
+body[data-theme="jade"]{
+  --bg:#f2f7f5;--card:#fff;--line:#dceae5;--line2:#eaf3f0;--input:#f8fcfa;--inputline:#d3e5de;
+  --ink:#102a24;--ink2:#3f5f56;--ink3:#5e8177;--ink4:#8aa89f;--ink5:#c2d6cf;
+  --brand:#0f766e;--brandbtn:#0f5c56;--brandtx:#fff;--hot:#b45309;--hover:#eaf5f1;
+  --up:#c2410c;--dn:#15803d;--ok:#0f9d6e;--leadbg:#eef7f4;--leadline:#cfe6df}
+body[data-theme="night"]{
+  --bg:#14171a;--card:#1c2024;--line:#2c333a;--line2:#232a30;--input:#191d21;--inputline:#333b43;
+  --ink:#eef2f5;--ink2:#c3ccd3;--ink3:#94a1ab;--ink4:#6f7d87;--ink5:#4b5862;
+  --brand:#6ea8c7;--brandbtn:#2f6d8c;--brandtx:#fff;--hot:#e0a25a;--hover:#232a31;
+  --up:#ef8a5c;--dn:#4fc08a;--ok:#4fc08a;--leadbg:#20272d;--leadline:#33414a}
+
+body{font-family:var(--f);background:var(--bg);color:var(--ink);height:100vh;overflow:hidden;
+  -webkit-font-smoothing:antialiased;transition:background .18s,color .18s}
+
+/* 定稿控制条：只是给你挑主题用，接进正式站点后可整条删掉 */
+#sw{position:fixed;top:0;left:0;right:0;height:46px;z-index:99;background:#1c1917;
+  display:flex;align-items:center;gap:7px;padding:0 16px;color:#fff}
+#sw .lg{font-size:12px;font-weight:800;margin-right:8px;white-space:nowrap}
+#sw .lg em{font-size:9px;color:#a8a29e;font-weight:600;margin-left:5px}
+#sw button{height:26px;padding:0 11px;border:1px solid #44403c;border-radius:5px;
+  background:transparent;color:#d6d3d1;font-size:10.5px;font-weight:700;cursor:pointer}
+#sw button:hover{border-color:#78716c}
+#sw button.on{background:#f5f5f4;color:#1c1917;border-color:#f5f5f4}
+#sw .hint{margin-left:auto;font-size:10px;color:#78716c;white-space:nowrap}
+
+.app{position:absolute;top:46px;left:0;right:0;bottom:0;display:flex;overflow:hidden}
+
+/* ── 左导航：未来权限菜单的落点 ── */
+.nav{flex:0 0 202px;background:var(--card);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;padding:16px 12px;overflow:auto}
+.brand{font-size:14px;font-weight:800;letter-spacing:-.3px;color:var(--ink)}
+.brand em{font-size:8.5px;font-weight:800;color:var(--brand);border:1px solid var(--line);
+  border-radius:3px;padding:1px 5px;margin-left:5px;vertical-align:2px}
+.brand2{font-size:9.5px;color:var(--ink4);margin-top:4px;line-height:1.5}
+.navlist{margin-top:20px;display:flex;flex-direction:column;gap:2px}
+.navlist div{font-size:11.5px;font-weight:600;color:var(--ink3);padding:8px 10px;
+  border-radius:5px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.navlist div:hover{background:var(--hover)}
+.navlist div.on{background:var(--hover);color:var(--ink);font-weight:800}
+.navlist i{font-size:9.5px;color:var(--ink4);font-variant-numeric:tabular-nums}
+.navlist div.locked{opacity:.45;cursor:not-allowed}
+.navlist div.locked:hover{background:transparent}
+.navlist .lock{font-size:9px;color:var(--ink4)}
+.navsep{font-size:9px;font-weight:800;letter-spacing:.6px;color:var(--ink5);
+  margin:20px 10px 8px}
+/* 预留位：统一虚线框 + 「预留」标签，不假装已实现 */
+.ph{border:1px dashed var(--line);border-radius:7px;background:var(--input);
+  padding:10px 11px;display:flex;flex-direction:column;gap:3px;margin-bottom:6px}
+.ph b{font-size:10.5px;font-weight:800;color:var(--ink2)}
+.ph span{font-size:9.5px;color:var(--ink4);line-height:1.5}
+.tag{display:inline-block;align-self:flex-start;font-size:8.5px;font-weight:800;
+  letter-spacing:.4px;color:var(--ink4);border:1px solid var(--line);border-radius:3px;padding:1px 5px}
+.navnote{margin-top:auto;font-size:9.5px;color:var(--ink5);padding-top:12px;line-height:1.6;
+  border-top:1px solid var(--line2)}
+.navnote b{color:var(--ink3)}
+
+/* ── 中间主区 ── */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{flex:0 0 auto;display:flex;align-items:center;gap:9px;padding:9px 18px;
+  border-bottom:1px solid var(--line);background:var(--card)}
+.q{flex:0 0 230px;height:29px;border:1px solid var(--inputline);border-radius:5px;
+  padding:0 10px;font-size:11px;outline:none;background:var(--input);color:var(--ink)}
+.q::placeholder{color:var(--ink4)}
+.q:focus{border-color:var(--brand)}
+.top .flex{flex:1}
+.top button{height:28px;padding:0 11px;border:1px solid var(--line);border-radius:5px;
+  background:var(--card);font-size:10.5px;font-weight:700;color:var(--ink2);cursor:pointer}
+.top button:hover{background:var(--hover)}
+.top button.pri{background:var(--brandbtn);color:var(--brandtx);border-color:var(--brandbtn)}
+/* 顶栏右侧：组织 / 可见范围 / 用户位 —— 登录体系预留 */
+.who{display:flex;align-items:center;gap:10px;margin-left:6px;padding-left:12px;
+  border-left:1px solid var(--line)}
+.org{font-size:10.5px;font-weight:700;color:var(--ink2);cursor:pointer;white-space:nowrap}
+.org u{color:var(--ink4);margin-left:3px}
+.scope{font-size:9.5px;color:var(--ink4);white-space:nowrap;max-width:180px;
+  overflow:hidden;text-overflow:ellipsis}
+.user{display:flex;align-items:center;gap:7px;cursor:pointer;white-space:nowrap}
+.av{width:26px;height:26px;border-radius:50%;background:var(--brandbtn);color:var(--brandtx);
+  display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800}
+.user b{display:block;font-size:10px;font-weight:800;color:var(--ink);line-height:1.3}
+.user small{display:block;font-size:8.5px;color:var(--ink4);line-height:1.3}
+.user u{color:var(--ink4);font-size:9px;margin-left:2px}
+.slotlab{font-size:8px;font-weight:800;letter-spacing:.3px;color:var(--ink4);
+  border:1px dashed var(--line);border-radius:3px;padding:1px 4px;white-space:nowrap}
+
+.kpi{flex:0 0 auto;display:flex;gap:0;padding:10px 18px;background:var(--card);
+  border-bottom:1px solid var(--line)}
+.kpi>div{flex:1;border-right:1px solid var(--line2);padding-left:14px}
+.kpi>div:first-child{padding-left:0}
+.kpi>div:last-child{border-right:none}
+.kpi b{display:block;font-size:19px;font-weight:800;color:var(--ink);letter-spacing:-.6px;
+  font-variant-numeric:tabular-nums;line-height:1.1}
+.kpi span{display:block;font-size:9.5px;color:var(--ink4);margin-top:3px}
+.kpi div.hot b{color:var(--hot)}
+/* ⚠ 关键：权限会改变数据可见范围，进而改变上面这些数字。
+   不写清楚，用户会以为「数据库没同步」（本项目真实踩过）。 */
+.scope-bar{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:6px 18px;
+  background:var(--leadbg);border-bottom:1px solid var(--leadline);font-size:9.5px;color:var(--ink3)}
+.scope-bar b{color:var(--ink2);font-weight:800}
+.scope-bar .sep{color:var(--ink5)}
+.scope-bar .rt{margin-left:auto;color:var(--ink4);font-variant-numeric:tabular-nums}
+
+.list{flex:1;overflow:auto;padding:0 18px}
+.row{display:grid;grid-template-columns:19px 3px minmax(0,1fr) 150px;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--line2);align-items:center}
+.row:hover{background:var(--hover)}
+.no{font-size:9.5px;color:var(--ink5);text-align:right;font-variant-numeric:tabular-nums}
+.bar{height:26px;background:var(--line);border-radius:2px}
+.row.a .bar{background:var(--hot)}.row.b .bar{background:var(--ink4)}
+.meta{display:flex;gap:6px;align-items:center;font-size:9.5px;color:var(--ink4);margin-bottom:2px}
+.meta .g{font-weight:800;color:var(--hot)}
+.meta .g.b{color:var(--ink3)}
+.meta .g.c,.meta .g.d{color:var(--ink5)}
+.row h3{font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;line-height:1.5}
+.sn{font-size:10px;color:var(--ink4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.fact{text-align:right;border-left:1px solid var(--line2);padding-left:10px}
+.fact b{display:block;font-size:14px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.fact b.no{font-size:10px;color:var(--ink5);font-weight:500}
+.fact span{display:block;font-size:9.5px;color:var(--ink4);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.pgbar{flex:0 0 auto;display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--ink4);
+  border-top:1px solid var(--line);padding:9px 18px;background:var(--card)}
+.pgbar .pgnav{flex-direction:row;margin-left:auto;display:flex;gap:3px;align-items:center}
+.pgbar .pgnav span{min-width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+  border-radius:4px;border:1px solid transparent;font-size:10.5px}
+.pgbar .pgnav span.cur{background:var(--brandbtn);color:var(--brandtx);font-weight:700}
+.pgbar .pgnav a{color:var(--ink2);cursor:pointer;padding:0 7px;height:24px;
+  display:flex;align-items:center;font-size:10.5px}
+
+/* ── 右栏：功能位 ── */
+.side{flex:0 0 292px;background:var(--card);border-left:1px solid var(--line);
+  padding:12px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+/* 行情手风琴（A 形态） */
+.mk{border:1px solid var(--line);border-radius:7px;overflow:hidden;background:var(--card)}
+.mkh{display:flex;align-items:center;gap:7px;padding:10px 11px;cursor:pointer;user-select:none}
+.mkh:hover{background:var(--hover)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--ok);flex:0 0 auto}
+.mkh b{font-size:11px;font-weight:800;color:var(--ink)}
+.mksum{font-size:9.5px;color:var(--ink4);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;flex:1}
+.mksum i{color:var(--dn);font-weight:700}
+.caret{margin-left:auto;font-size:11px;color:var(--ink4);transition:transform .18s}
+.mk.open .caret{transform:rotate(180deg)}
+.mkb{max-height:0;overflow:hidden;transition:max-height .22s ease}
+.mk.open .mkb{max-height:400px}
+.mrow{display:flex;align-items:baseline;gap:8px;padding:6px 11px;
+  border-top:1px solid var(--line2);font-size:10.5px}
+.mrow span{flex:0 0 60px;color:var(--ink3);font-weight:600}
+.mrow b{flex:1;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.mrow i{flex:0 0 58px;text-align:right;font-size:10px;font-weight:700;font-variant-numeric:tabular-nums}
+.mrow i.up{color:var(--up)}.mrow i.dn{color:var(--dn)}
+/* 本周变化：接上真汇报视图，可点 */
+.wk{border:1px solid var(--line);border-radius:7px;background:var(--leadbg);
+  padding:11px 12px;cursor:pointer}
+.wk:hover{border-color:var(--brand)}
+.wk .t{font-size:9.5px;font-weight:800;letter-spacing:.4px;color:var(--ink4)}
+.wk .n{font-size:12px;color:var(--ink2);margin-top:4px;line-height:1.6}
+.wk .n b{color:var(--hot);font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
+.wk .go{font-size:10px;font-weight:800;color:var(--brand);margin-top:6px}
+.side .ph{margin-bottom:0;min-height:66px;justify-content:center}
+
+/* ══════════ 汇报视图弹层 ══════════ */
+.dlg{display:none;position:fixed;inset:0;z-index:80;background:rgba(20,18,16,.42);
+  backdrop-filter:blur(2px);align-items:flex-start;justify-content:center}
+.dlgbox{background:var(--card);border-radius:10px;width:730px;max-width:calc(100vw - 40px);
+  max-height:calc(100vh - 60px);margin-top:8vh;display:flex;flex-direction:column;
+  box-shadow:0 18px 50px -12px rgba(20,18,16,.4);overflow:hidden}
+.dlgh{display:flex;align-items:flex-start;gap:12px;padding:17px 22px 13px;
+  border-bottom:1px solid var(--line2)}
+.dlgh h2{font-size:15px;font-weight:800;color:var(--ink);margin:0;letter-spacing:-.2px}
+.dlgh .rng{font-size:11px;font-weight:500;color:var(--ink4);margin-left:6px}
+.dlgh .dsub{font-size:11.5px;color:var(--ink3);margin:4px 0 0}
+.dlgh .x{margin-left:auto;font-size:15px;color:var(--ink4);cursor:pointer;line-height:1;padding:2px 4px}
+.dlgb{padding:14px 24px 10px;overflow:auto}
+.lead{background:var(--leadbg);border:1px solid var(--leadline);border-left:3px solid var(--hot);
+  border-radius:6px;padding:11px 14px;margin-bottom:12px}
+.leadtag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.6px;color:var(--hot);margin-bottom:4px}
+.lead p{font-size:12.5px;line-height:1.75;color:var(--ink2)}
+.lead p b{color:var(--hot);font-size:14px;font-weight:800}
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.kc{border:1px solid var(--line);border-radius:6px;padding:9px 11px;background:var(--input)}
+.kc.hot{border-color:var(--leadline);background:var(--leadbg)}
+.kc b{display:block;font-size:21px;font-weight:800;color:var(--ink);letter-spacing:-.7px;
+  line-height:1.1;font-variant-numeric:tabular-nums}
+.kc.hot b{color:var(--hot)}
+.kc span{display:block;font-size:10.5px;color:var(--ink2);font-weight:600;margin-top:3px}
+.kc i{display:block;font-size:9.5px;color:var(--ink4);margin-top:1px}
+.gsec{padding:11px 0 9px;border-bottom:1px solid var(--line2)}
+.gsec:last-child{border-bottom:none;padding-bottom:4px}
+.ghd{display:flex;align-items:baseline;gap:9px;margin-bottom:7px}
+.ghd b{font-size:12px;font-weight:800;color:var(--ink)}
+.ghd span{font-size:10.5px;color:var(--ink4)}
+.grow{display:flex;align-items:baseline;gap:8px;padding:6px 0;line-height:1.5}
+.gno{flex:0 0 17px;font-size:10px;color:var(--ink5);text-align:right;font-variant-numeric:tabular-nums}
+.gd{flex:0 0 17px;height:15px;border-radius:3px;font-size:9.5px;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center;color:#fff}
+.gd.a{background:#b45309}.gd.b{background:#0f766e}
+.gtit{font-size:12px;color:var(--ink);flex:1;min-width:0}
+.gmeta{font-size:10.5px;color:var(--ink4);white-space:nowrap;font-variant-numeric:tabular-nums}
+.gtxt{font-size:11.5px;color:var(--ink2);line-height:1.85;background:var(--input);
+  border-radius:6px;padding:10px 13px}
+.gtxt b{color:var(--ink);font-weight:700}
+.dlgf{display:flex;align-items:center;gap:10px;padding:11px 22px;border-top:1px solid var(--line2);
+  background:var(--input)}
+.dlgf .note{font-size:10.5px;color:var(--ink4);flex:1;line-height:1.5}
+.dlgf button{height:29px;padding:0 12px;border:1px solid var(--line);border-radius:5px;
+  background:var(--card);font-size:10.5px;font-weight:700;color:var(--ink2);cursor:pointer}
+.dlgf button.pri{background:var(--brandbtn);color:var(--brandtx);border-color:var(--brandbtn)}
+
+/* 窄屏：侧栏依次收起，避免主列表被挤成 274px */
+@media(max-width:1200px){.side{display:none}}
+@media(max-width:900px){.nav{display:none}.who .scope{display:none}}
+@media(max-width:640px){.q{flex:0 0 150px}.who .org,.who .slotlab{display:none}}
+</style>
+</head>
+<body data-theme="graphite">
+
+<div id="sw">
+  <span class="lg">界面主题<em>四套配色</em></span>
+  <button data-t="graphite" class="on">石墨</button>
+  <button data-t="paper">暖纸</button>
+  <button data-t="jade">青釉</button>
+  <button data-t="night">夜墨</button>
+  <span class="hint">V3.0 新版界面 · 布局与主题定稿 · 实时全库数据以主站为准</span>
+</div>
+
+<div class="app">
+  <aside class="nav">
+    <div class="brand">商机雷达 <em>V3.0</em></div>
+    <div class="brand2">都市环保 · 江浙沪皖</div>
+    <div class="navlist">
+      <div class="on">能投的标 <i>1021</i></div>
+      <div>已出结果 <i>949</i></div>
+      <div>立项线索 <i>749</i></div>
+      <div>客户与业主 <i>—</i></div>
+      <div>同业伙伴 <i>—</i></div>
+      <div class="locked">审计日志 <span class="lock">🔒 需管理员</span></div>
+    </div>
+    <div class="navsep">功能位 · 预留</div>
+    <div class="ph"><span class="tag">预留</span><b>业主 / 客户检索</b><span>搜索框 + 画像入口</span></div>
+    <div class="ph"><span class="tag">预留</span><b>竞争地图</b><span>区域 / 对手分布</span></div>
+    <div class="ph"><span class="tag">预留</span><b>组织与成员管理</b><span>登录体系接入后放这里</span></div>
+    <div class="navnote"><b>权限落点：</b>菜单按角色显隐，无权限项不渲染（上方「审计日志」为示意）。
+      数据可见范围由角色决定，见顶部口径条。</div>
+  </aside>
+
+  <main class="main">
+    <header class="top">
+      <input class="q" placeholder="搜项目 / 业主（全库，不限档位）">
+      <span class="flex"></span>
+      <button>筛选</button><button>导出</button><button class="pri">周报</button>
+      <!-- 登录体系预留：组织切换 / 可见范围 / 用户菜单 -->
+      <div class="who">
+        <span class="org">都市环保 <u>▾</u></span>
+        <span class="scope" title="角色可见范围">江浙沪皖 · 全部档位</span>
+        <div class="user">
+          <span class="av">赵</span>
+          <span><b>赵工</b><small>市场部 · 编辑</small></span>
+          <u>⌄</u>
+        </div>
+        <span class="slotlab">登录位 · 预留</span>
+      </div>
+    </header>
+
+    <div class="kpi">
+      <div class="hot"><b>1021</b><span>能投的标</span></div>
+      <div><b>949</b><span>已出结果</span></div>
+      <div><b>749</b><span>立项线索</span></div>
+      <div><b>451 亿</b><span>中标总额</span></div>
+      <div><b>107</b><span>A 级必争</span></div>
+    </div>
+    <div class="scope-bar">
+      <span><b>当前角色可见：</b>江浙沪皖 · 全部档位 · 全库 2796 条</span>
+      <span class="sep">|</span>
+      <span>口径：按公告日统计，金额取披露值</span>
+      <span class="rt">数据截至 2026-11-03 16:05 · 更新 11-04 18:05</span>
+    </div>
+
+    <div class="list" id="lst"></div>
+
+    <div class="pgbar"><span>第 1–12 条，共 1021 条 · 每页 12 条</span>
+      <div class="pgnav"><span>‹</span><span class="cur">1</span><a>2</a><a>3</a><a>4</a><a>5</a><span>…</span><a>86</a><a>›</a></div></div>
+  </main>
+
+  <aside class="side">
+    <section class="mk" id="mk">
+      <div class="mkh" onclick="tgMk()">
+        <span class="dot"></span><b>当日行情</b>
+        <span class="mksum">沪铜 <i>-0.99%</i> · 沪锡 <i>-2.70%</i></span>
+        <span class="caret">⌄</span>
+      </div>
+      <div class="mkb" id="mkb"></div>
+    </section>
+
+    <div class="wk" onclick="document.getElementById('dlg').style.display='flex'">
+      <div class="t">本周变化 · 汇报视图</div>
+      <div class="n"><b>5</b> 条 A/B 重点 / 全库新增 78</div>
+      <div class="go">打开汇报视图 →</div>
+    </div>
+
+    <div class="ph"><span class="tag">预留</span><b>重点客户</b><span>业主画像与历史中标</span></div>
+    <div class="ph"><span class="tag">预留</span><b>项目详情画像</b><span>点列表条目后在此展开</span></div>
+    <div class="ph"><span class="tag">预留</span><b>时间线 / 竞争提示</b><span>项目状态流转与对手对比</span></div>
+  </aside>
+</div>
+
+<div class="dlg" id="dlg">
+  <div class="dlgbox">
+    <div class="dlgh">
+      <div>
+        <h2>本周变化 <span class="rng">汇报视图 · 2026-10-28 ~ 11-03</span></h2>
+        <p class="dsub">都市环保 EPC 商机监测 · 江浙沪皖四地</p>
+      </div>
+      <span class="x" onclick="document.getElementById('dlg').style.display='none'">✕</span>
+    </div>
+
+    <div class="dlgb">
+      <!-- 一句话结论：汇报时第一句就能念 -->
+      <div class="lead">
+        <span class="leadtag">一句话结论</span>
+        <p>全库新增 <b>78</b> 条，值得跟进的只有 <b>5</b> 条；4 条新增可投中 <b>3</b> 条属光伏 / 储能类，
+          建议作为下周跟进重点。</p>
+      </div>
+
+      <!-- 核心数字：直接可搬进 PPT 的四个格子 -->
+      <div class="kgrid">
+        <div class="kc"><b>78</b><span>全库新增</span><i>近 7 天</i></div>
+        <div class="kc hot"><b>5</b><span>A/B 级重点</span><i>占比 6.4%</i></div>
+        <div class="kc"><b>1</b><span>A 级必争</span><i>储能 EPC</i></div>
+        <div class="kc"><b>1</b><span>A/B 已出结果</span><i>可看对手</i></div>
+      </div>
+
+      <!-- 重点条目 -->
+      <div class="gsec">
+        <div class="ghd"><b>新增可投 · 4 条</b><span class="gt">已到招标 / 招标计划阶段</span></div>
+        <div class="grow"><span class="gno">01</span><span class="gd a">A</span>
+          <span class="gtit">清能万帮盐城经开区 150MW/300MWh 储能电站施工总承包</span>
+          <span class="gmeta">江苏盐城 · 10-29</span></div>
+        <div class="grow"><span class="gno">02</span><span class="gd b">B</span>
+          <span class="gtit">宁海县国投集团光储充项目一期 · 城西充电站充电桩采购及安装</span>
+          <span class="gmeta">浙江宁波 · 10-28</span></div>
+        <div class="grow"><span class="gno">03</span><span class="gd b">B</span>
+          <span class="gtit">温岭市东部松门渔光互补光伏电站台损修复工程</span>
+          <span class="gmeta">浙江台州 · 10-29</span></div>
+        <div class="grow"><span class="gno">04</span><span class="gd b">B</span>
+          <span class="gtit">嘉兴发电厂 1–10 号炉磨煤机石子煤清运（2027–2028）</span>
+          <span class="gmeta">浙江嘉兴 · 11-03</span></div>
+      </div>
+
+      <div class="gsec">
+        <div class="ghd"><b>已出结果 · 1 条</b><span class="gt">可核对中标单位与价格</span></div>
+        <div class="grow"><span class="gno">05</span><span class="gd b">B</span>
+          <span class="gtit">浙能常电厂区 1.23MWp 光伏（二期）设计施工</span>
+          <span class="gmeta">浙江 · 10-29 中标结果</span></div>
+      </div>
+
+      <!-- 判断段：可整段复制进汇报材料 -->
+      <div class="gsec">
+        <div class="ghd"><b>判断</b><span class="gt">可直接写进汇报材料</span></div>
+        <div class="gtxt">本周新增量集中在 <b>D 级 63 条（81%）</b>，多为水土保持监测、生物资源调查、
+          设备采购等配套服务类，与 EPC 总承包主业关联弱，不建议逐条跟进。
+          按档位拆分：新增条目中落入「能投的标」60 条、「已出结果」12 条、「立项线索」6 条。
+          真正值得排期的是上述 5 条 A/B 级，其中 3 条属光伏 / 储能类，
+          反映区域内新能源配套需求持续释放。</div>
+      </div>
+    </div>
+
+    <div class="dlgf">
+      <span class="note">口径：公告日落在区间内的新增条目（nw=1）；A/B 级按库内评分规则。<br>
+        当前只能统计「新增」与「档位」，金额变动需每日快照才能 diff。</span>
+      <button class="" onclick="document.getElementById('dlg').style.display='none'">关闭</button>
+      <button class="pri" id="btnCopy" onclick="copyReport()">复制汇报稿</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var DATA = [{"t": "江苏公司谏壁电厂八期2×100万千瓦扩建项目脱硫(含湿式电除尘器、废水零排放)脱硝EPC工程", "st": "中标结果公示", "g": "A", "ind": "电力", "rg": "江苏", "city": "镇江", "buyer": "国家能源集团谏壁发电厂（江苏公司）", "amt": 3.4892, "d": "2026-06-02", "p": "国能e招", "sc": 103, "snip": "拟建设2×1000MW超超临界二次再热清洁高效灵活燃煤机组；招标范围含整套烟气脱硫（含湿式电除尘器、废水零排放）、脱硝EPC总承包，包括设计、设备供货、建筑施工、安装、调试、移交、试运行等全部工作"}, {"t": "生物质燃料制备及输送系统工程总承包", "st": "中标结果公示", "g": "B", "ind": "电力", "rg": "浙江", "city": "绍兴", "buyer": "浙江浙能绍兴滨海热电有限责任公司", "amt": 0.45, "d": "2026-07-01", "p": "浙江省公共资源交易服务平台", "sc": 96, "snip": "本项目 为生物质掺烧改造工程，布置在电厂#8机锅炉房、电除尘的东侧空地，用地面积约1500m2。本项目新建卸料车间、颗粒料仓、粉体料仓、掺烧配电间等。根据初步 规划，卸料车间、颗粒料仓布置于#8机电除尘东侧的20m×38"}, {"t": "长丰县“源网荷储”一体化EPC项目（50MW交流侧集中式坑塘水面光伏发电项目）", "st": "中标候选人公示", "g": "A", "ind": "电力", "rg": "安徽", "city": "合肥", "buyer": "安徽皖丰长能投资有限责任公司", "amt": 1.1949, "d": "2026-08-13", "p": "安徽省招标投标信息网", "sc": 95, "snip": "项目编号2026AFFGZ50746；建设规模：50MW（交流侧）集中式坑塘水面光伏发电项目，源网荷储一体化；工期240日历天；开标日期2026年8月11日。"}, {"t": "江苏大禹水务滨湖厂、武南厂、武南二厂分布式光伏发电项目设计、采购、施工工程总承包（EPC一体化）", "st": "招标公告", "g": "B", "ind": "电力", "rg": "江苏", "city": "常州", "buyer": "常州武南新能源投资有限公司", "amt": 0.2994, "d": "2026-08-14", "p": "江苏省公共资源交易平台", "sc": 91, "snip": "江苏大禹水务滨湖厂、武南厂、武南二厂分布式光伏发电项目设计、采购、施工工程总承包（EPC一体化）工程总承包招标公告   1. 招标条件   本招标项目常州武南新能源投资有限公司建设江苏大禹水务有限公司武南二厂(海湖路 1"}, {"t": "苏交控沭阳、先锋、广陵服务区分布式光伏项目EPC工程", "st": "招标公告", "g": "B", "ind": "其他", "rg": "江苏", "city": "宿迁", "buyer": "江苏交通控股有限公司", "amt": 0.1333, "d": "2026-10-01", "p": "采招信息网（江苏交控电子采购平台 /", "sc": 91, "snip": "沭阳、先锋、广陵三个服务区分布式光伏项目EPC工程，采购文件发售2026-10-01 09:00开始，要求澄清截止2026-10-15，电子投标文件上传截止2026-10-29 09:30，同步推送中国招标投标公共服务平"}, {"t": "通州湾港区热电联产项目招标计划公告", "st": "招标计划", "g": "A", "ind": "其他", "rg": "江苏", "city": "南通", "buyer": "南通沿海热能发展有限公司", "amt": 1.15, "d": "2026-07-08", "p": "南通市公共资源交易网", "sc": 90, "snip": "位于通州湾示范区现代纺织产业园，总规模3×150t/h高温超高压循环流化床锅炉+2×15MW抽汽背压式汽轮机及配套生产辅助设施；本期主要招标1×150t/h锅炉+1台15MW抽汽背压式汽轮机，计划招标时间2026年8月8"}, {"t": "安徽省宿松县经济开发区生物质热电联产项目（环评一次公示）", "st": "立项公示", "g": "A", "ind": "其他", "rg": "安徽", "city": "安庆", "buyer": "宿松龙瑞热电有限公司", "amt": 7.8472, "d": "2026-09-03", "p": "宿松县人民政府", "sc": 88, "snip": "建设规模：新建3×150t/h高温高压循环流化床生物质锅炉+2×18MW背压机组，同步建设炉后烟气处理系统、集中供冷供气设施；含锅炉烟风系统及燃烧系统、汽轮机系统、电制冷冷水机组、集中供压缩空气、冷却系统、电气仪表DCS"}, {"t": "确成绿色科技（盐城）有限公司余气资源综合利用发电项目", "st": "立项公示", "g": "A", "ind": "有色", "rg": "江苏", "city": "盐城", "buyer": "确成绿色科技（盐城）有限公司", "amt": 4.2, "d": "2026-07-09", "p": "发改委规划附件·PDF", "sc": 88, "snip": "省/市规划重点项目（2026-2030 规划）。4×12MW 汽轮发电机组；资源：稻壳气化副产合成气 208000Nm3/h（主体工程年产10万吨生物质二氧化硅）；年发电量 38400 万kW·h，供电量 33870 万"}, {"t": "盐城市联鑫钢铁有限公司煤气综合利用发电扩建项目", "st": "立项公示", "g": "A", "ind": "钢铁", "rg": "江苏", "city": "盐城", "buyer": "盐城市联鑫钢铁有限公司", "amt": 3.0, "d": "2026-07-09", "p": "发改委规划附件·PDF", "sc": 88, "snip": "省/市规划重点项目（2026-2030 规划）。1×80MW 汽轮发电机组（含煤气锅炉）；资源：折合高炉煤气 18.33 万Nm3/h（作业时间）/18.56 万Nm3/h（日历时间）；年发电量 53506 万kW·h，"}, {"t": "安徽省合肥联合发电有限公司2×350MW机组电加热熔盐储热提升机组灵活性改造EPC项目", "st": "中标结果公示", "g": "A", "ind": "电力", "rg": "安徽", "city": "合肥", "buyer": "安徽省合肥联合发电有限公司", "amt": 1.1561, "d": "2026-07-21", "p": "安徽省招标投标信息网", "sc": 87, "snip": "项目编号JG2026-12-0480；建设规模：2×350MW机组电加热熔盐储热提升机组灵活性改造EPC总承包。"}, {"t": "国华投资国骅(上海)新能源有限公司国华商飞综合智慧能源项目(一期)EPC总承包公开招标中标候选人公示", "st": "中标候选人公示", "g": "B", "ind": "电力", "rg": "上海", "city": "上海", "buyer": "国华投资国骅(上海)新能源有限公司", "amt": 0.5486, "d": "2026-09-29", "p": "国能e招（国家能源集团招标平台）", "sc": 87, "snip": "国华商飞综合智慧能源项目（一期）EPC总承包，招标编号CEZB260107469001。第一中标候选人中建八局科技建设有限公司（电力工程施工总承包壹级、承装(修、试)二级）；第二中标候选人中国电建集团江西省水电工程局有限"}, {"t": "安徽公司蚌埠电厂#2锅炉综合提效技术改造EPC总承包", "st": "中标候选人公示", "g": "B", "ind": "电力", "rg": "安徽", "city": "蚌埠", "buyer": "国家能源集团安徽公司蚌埠电厂", "amt": 0.3329, "d": "2026-04-29", "p": "国能e招（国家能源招标网）", "sc": 87, "snip": "招标编号CEZB260602096001；建设规模：#2锅炉综合提效技术改造EPC总承包（烟气余热深度利用类业绩要求：射阳港电厂2×100万千瓦燃煤机组扩建工程烟气余热深度利用装置EPC等）。"}, {"t": "合肥热电集团有限公司金源分公司#3锅炉环保系统效能提升项目工程总承包", "st": "招标公告", "g": "A", "ind": "钢铁", "rg": "安徽", "city": "合肥", "buyer": "合肥热电集团有限公司", "amt": 0.0834, "d": "2026-07-17", "p": "电力建设项目网（合肥公共资源交易中心", "sc": 86, "snip": "项目编号2026BFFGZ50768；建设规模：现有3×220t/h高温高压煤粉锅炉+1×50MW背压式汽轮发电机组+1×25MW背压式汽轮发电机组，装机容量75MW；对#3锅炉除尘器改造（保留钢架及原输灰系统，新设灰斗"}, {"t": "大唐广德凤桥南北光伏发电项目勘察设计总承包项目招标公告", "st": "中标结果公示", "g": "B", "ind": "电力", "rg": "安徽", "city": "", "buyer": "大唐安徽发电有限公司", "amt": 0.075, "d": "2026-09-23", "p": "合肥公共资源交易中心", "sc": 86, "snip": "大唐广德凤桥南、北光伏发电项目勘察设计总承包项目中标结果公示大唐广德凤桥南、北光伏发电项目勘察设计总承包项目（项目编号：2026DFWBZ51190/GN2026-08-7492）评标工作已经结束，中标人已经确定。现将中"}, {"t": "上海马桥绿色生产配套设施及节能降碳项目EPC总承包项目公开招标公告", "st": "招标公告", "g": "B", "ind": "电力", "rg": "上海", "city": "上海", "buyer": "中技江苏清洁能源有限公司", "amt": 0.069, "d": "2026-09-29", "p": "华汇城市建设服务平台（通用技术集团中", "sc": 86, "snip": "上海马桥中成维尔利厂区绿色生产配套设施及节能降碳项目EPC总承包，光伏+储能类业绩要求（2023年1月1日以来1项光伏+储能业绩，或光伏、储能业绩各1项），电力工程施工总承包三级及以上资质；计划工期自开工令起120日历天"}, {"t": "颍上县城管局、党校、住建局合同能源管理项目节能改造工程EPC总承包项目招标公告", "st": "招标公告", "g": "B", "ind": "电力", "rg": "安徽", "city": "阜阳市", "buyer": "安徽省皖能电力运营检修股份公司", "amt": 0.0456, "d": "2026-09-29", "p": "安徽省招标投标信息网", "sc": 86, "snip": "项目编号WNGK20260928002。建设地点阜阳市颍上县，EPC总承包范围含中央空调系统改造（新增磁悬浮变频离心式冷水机组）、供暖系统改造（风冷热泵机组）、生活热水系统改造（空气源热泵机组）、分布式光伏发电系统建设、"}, {"t": "利辛县零碳水务30MW光伏+10MW储能电站建设项目一期（二次）招标公告（评定分离）", "st": "中标候选人公示", "g": "A", "ind": "电力", "rg": "安徽", "city": "", "buyer": "利辛县开源水务有限公司", "amt": 0.915, "d": "2026-08-26", "p": "合肥公共资源交易中心", "sc": 84, "snip": "利辛县零碳水务30MW光伏+10MW储能电站建设项目一期（二次）招标公告（评定分离）&nbsp;1.招标条件1.1 项目名称：利辛县零碳水务30MW光伏+10MW储能电站建设项目1.2 项目审批、核准或备案机关名称：利辛"}, {"t": "丰县市政供热改造提档升级项目(2026年度局部改造工程)二标段（二次公告）", "st": "中标结果公示", "g": "B", "ind": "市政", "rg": "江苏", "city": "徐州", "buyer": "丰县凤鸣热力有限公司", "amt": 0.4133, "d": "2026-07-09", "p": "江苏省公共资源交易平台", "sc": 84, "snip": "丰县市政供热改造提档升级项目(2026年度局部改造工程)二标段招标公告（二次公告）（资格后审）（标段编号:E3203010380000456004001）1.招标条件本招标项目丰县市政供热改造提档升级项目已由丰县政务服务"}, {"t": "庆元县屏都街道和美乡村共富产业平台提质工程-农光互补光伏发电项目招标公告", "st": "招标公告", "g": "B", "ind": "电力", "rg": "浙江", "city": "丽水市", "buyer": "庆元县森呼吸农业产业发展有限公司", "amt": 0.3875, "d": "2026-09-30", "p": "浙江省公共资源交易服务平台", "sc": 84, "snip": "农光互补光伏：新增交流侧装机容量约9MW，配套建设逆变器、集电线路及防雷接地等全套光伏配套设施，并完成场区线路规整、安全防护改造。建设地点屏都街道菊水村，工期270日历天"}, {"t": "马钢北区烧结机余热发电系统更新建安标段", "st": "中标结果公示", "g": "A", "ind": "钢铁", "rg": "安徽", "city": "马鞍山", "buyer": "马鞍山钢铁有限公司", "amt": 0.3745, "d": "2026-09-10", "p": "宝华智慧招标共享平台（上海宝华国际招", "sc": 84, "snip": "建设规模：马鞍山市厂区内烧结机余热发电更新，新建主厂房一座，内设1套30MW补凝式汽轮机及发电机及凝结水泵、水环真空泵等辅助设备；新建循环水泵房（含水池、电气室）和高压消防系统；工期263日历天。"}, {"t": "桐乡市公建设施屋面分布式光伏资源建设项目（一期）[A3304830640005833001001]", "st": "招标公告", "g": "B", "ind": "其他", "rg": "浙江", "city": "桐乡市", "buyer": "桐乡市凤栖聚源新能源科技有限公司", "amt": 0.3336, "d": "2026-10-12", "p": "浙江省公共资源交易服务平台", "sc": 84, "snip": "&lt;span id=\"litPosition\"&gt;合同订立信息&lt;/span&gt; 项目名称: 桐乡市公建设施屋面分布式光伏资源建设项目（一期） 项目代码: 2606-330483-04-01-606448"}, {"t": "浙能长兴电厂迁建项目汽轮机、发电机及附属设备", "st": "中标结果公示", "g": "A", "ind": "电力", "rg": "浙江", "city": "湖州", "buyer": "浙江浙能长兴发电有限公司", "amt": 8.3942, "d": "2026-03-17", "p": "浙江省公共资源交易服务平台", "sc": 83, "snip": "浙能长兴电厂迁建项目汽轮机、发电机及附属设备采购，工期760天，签约时间2026年3月9日"}, {"t": "智慧能源产业基地及配套工程项目中标候选人公示[A3300000090008120001001]", "st": "中标候选人公示", "g": "A", "ind": "其他", "rg": "浙江", "city": "", "buyer": "桐乡市两新控股有限公司", "amt": 1.509, "d": "2026-10-23", "p": "浙江省公共资源交易服务平台", "sc": 83, "snip": "信息公开中标候选人公示 项目名称: 智慧能源产业基地及配套工程项目 项目代码: 2604-330483-04-01-661192 招标人: 名称:桐乡..."}, {"t": "灌云县分布式屋顶光伏项目（一期）", "st": "招标计划", "g": "B", "ind": "其他", "rg": "江苏", "city": "连云港", "buyer": "连云港恒利新能源开发有限公司", "amt": 0.38, "d": "2026-07-01", "p": "江苏省公共资源交易平台", "sc": 82, "snip": "连云港市工程建设项目招标计划表                                项目名称          灌云县分布式屋顶光伏项目（一期）                          招标人    "}, {"t": "淮南市潘集区热能综合利用项目二期工程EPC总承包", "st": "中标候选人公示", "g": "B", "ind": "其他", "rg": "安徽", "city": "淮南", "buyer": "淮南市潘集区（潘集经济开发区）", "amt": 0.2743, "d": "2026-09-20", "p": "淮南市公共资源交易中心", "sc": 82, "snip": "标段编号2026GCHNG0155-1；工期210日历天（设计30日历天+施工180日历天）；同类业绩：毛集实验区绿色食品产业园及配套设施建设（集中供热工程）EPC总承包合同价3562.1万元。"}, {"t": "安徽华谊化工有限公司燃煤锅炉SCR改造项目工程总承包", "st": "中标候选人公示", "g": "B", "ind": "化工", "rg": "安徽", "city": "芜湖", "buyer": "安徽华谊化工有限公司", "amt": 0.1707, "d": "2026-09-23", "p": "上海机电设备招标有限公司", "sc": 82, "snip": "招标编号0613-266017024671（鸠工信技改备[2026]44号）；建设规模：现有3×150t/h CFB燃煤锅炉SCR改造；建设地点安徽省芜湖市鸠江区二坝工业园区；总工期257天，第一台锅炉改造工期111天，"}, {"t": "盐城市联鑫钢铁有限公司余热发电扩建项目", "st": "立项公示", "g": "A", "ind": "钢铁", "rg": "江苏", "city": "盐城", "buyer": "盐城市联鑫钢铁有限公司", "amt": 1.5, "d": "2026-07-09", "p": "发改委规划附件·PDF", "sc": 80, "snip": "省/市规划重点项目（2026-2030 规划）。1×30MW 汽轮发电机组；资源：9.81MPa、535℃ 蒸汽 97.80t/h；年发电量 20400 万kW·h，供电量 18972 万kW·h，供热量 11.50 万"}, {"t": "潜山市虚拟电厂22.86MW分布式光伏及21MW/53MWh用户侧储能电站建设项目（EPC）", "st": "中标结果公示", "g": "A", "ind": "电力", "rg": "安徽", "city": "安庆", "buyer": "潜山市博达新能源有限公司", "amt": 0.8857, "d": "2026-01-26", "p": "潜山市人民政府（潜山市经开区管委会）", "sc": 79, "snip": "项目编号H3QT26Z106258；建设规模：22.86MW分布式光伏+21MW/53MWh用户侧储能电站；建设周期270日历天。"}, {"t": "国家电投集团江苏电力有限公司滨海发电2号锅炉烟气余热灵活利用技术改造项目", "st": "招标公告", "g": "B", "ind": "电力", "rg": "江苏", "city": "盐城", "buyer": "国家电投集团江苏电力有限公司", "amt": 0.288, "d": "2026-06-16", "p": "国能招标网", "sc": 79, "snip": "协鑫(滨海)发电有限公司现场，2号锅炉烟气余热灵活利用技术改造，含热管低温省煤器、一/二次风暖风器及其系统的设计、供货、安装(EPC)及调试，计划2026年9月停机检修工期55天"}, {"t": "江山市莲华山工业园区生物质集中供热项目招标公告", "st": "招标公告", "g": "B", "ind": "其他", "rg": "浙江", "city": "衢州市", "buyer": "江山市莲华山投资开发有限公司", "amt": 0.2201, "d": "2026-09-30", "p": "浙江省公共资源交易服务平台", "sc": 79, "snip": "园区集中供热热源：配置1台40t/h生物质链条炉排锅炉主机，配套锅炉辅机、软化水制取、环保处理、智慧供热管控及蒸汽输送连接系统；同步建1万吨/年生物质成型燃料制备线。建成后15-40t/h稳定供汽，年运行7000小时、年"}];
+var METALS = [{"name": "沪铜", "price": "106170", "chg": -0.99, "code": "CU"}, {"name": "沪铝", "price": "23000", "chg": -0.5, "code": "AL"}, {"name": "沪锌", "price": "25565", "chg": -0.33, "code": "ZN"}, {"name": "沪铅", "price": "15790", "chg": -0.41, "code": "PB"}, {"name": "沪镍", "price": "116900", "chg": -0.09, "code": "NI"}, {"name": "沪锡", "price": "352670", "chg": -2.7, "code": "SN"}, {"name": "氧化铝", "price": "2641", "chg": 0.19, "code": "AO"}, {"name": "不锈钢", "price": "13825", "chg": 0.58, "code": "SS"}, {"name": "碳酸锂", "price": "86460", "chg": -3.91, "code": "LC"}, {"name": "螺纹钢", "price": "3008", "chg": 0.2, "code": "RB"}, {"name": "热轧卷板", "price": "3161", "chg": 0.29, "code": "HC"}, {"name": "铁矿石", "price": "682", "chg": 1.56, "code": "I"}];
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function money(a){
+  if(a==null||!isFinite(a)||a<=0) return null;
+  if(a>=1) return (+a.toFixed(2))+'亿';
+  return Math.round(a*10000)+'万';
+}
+function meta(x){
+  var g=String(x.g||'').toLowerCase();
+  return '<span class="g '+g+'">'+x.g+' 级</span><span>'+esc(x.st)+'</span>'+
+    '<span>'+esc(x.rg)+' · '+esc(x.city||'')+'</span><span>'+esc(x.d)+'</span>';
+}
+document.getElementById('lst').innerHTML=DATA.slice(0,16).map(function(x,i){
+  var m=money(x.amt), g=String(x.g||'').toLowerCase();
+  return '<div class="row '+g+'"><div class="no">'+String(i+1).padStart(2,'0')+'</div>'+
+    '<div class="bar"></div><div><div class="meta">'+meta(x)+'</div>'+
+    '<h3 title="'+esc(x.t)+'">'+esc(x.t)+'</h3><div class="sn">'+esc(x.snip||'')+'</div></div>'+
+    '<div class="fact">'+(m?'<b>'+m+'</b>':'<b class="no">金额未披露</b>')+
+    '<span>'+esc(x.buyer)+'</span></div></div>';
+}).join('');
+
+function chg(m){
+  var up=m.chg>0, dn=m.chg<0;
+  return {cls:up?'up':(dn?'dn':''),txt:(up?'▲':(dn?'▼':'—'))+Math.abs(m.chg).toFixed(2)+'%'};
+}
+document.getElementById('mkb').innerHTML=METALS.map(function(m){
+  var c=chg(m);
+  return '<div class="mrow"><span>'+esc(m.name)+'</span><b>'+m.price+'</b>'+
+    '<i class="'+c.cls+'">'+c.txt+'</i></div>';
+}).join('');
+function tgMk(){document.getElementById('mk').classList.toggle('open')}
+
+/* 主题切换 */
+var THEME={graphite:'石墨 · 冷灰蓝',paper:'暖纸 · 米色琥珀',jade:'青釉 · 低饱和绿',night:'夜墨 · 暗色'};
+function theme(t){
+  document.body.setAttribute('data-theme',t);
+  document.querySelectorAll('#sw button').forEach(function(b){b.classList.toggle('on',b.dataset.t===t)});
+  location.hash=t;
+}
+document.querySelectorAll('#sw button').forEach(function(b){
+  b.addEventListener('click',function(){theme(b.dataset.t)})});
+theme((location.hash||'#graphite').slice(1));
+
+/* 复制汇报稿 */
+function copyReport(){
+  var T=[
+    '【商机雷达 · 本周变化】2026-10-28 ~ 11-03',
+    '都市环保 EPC 商机监测 · 江浙沪皖四地','',
+    '一、一句话结论',
+    '全库新增 78 条，值得跟进的只有 5 条；4 条新增可投中 3 条属光伏 / 储能类，建议作为下周跟进重点。','',
+    '二、核心数字',
+    '全库新增 78 条 | A/B 级重点 5 条（占 6.4%）| A 级必争 1 条 | A/B 已出结果 1 条',
+    '分级：A 1 / B 4 / C 10 / D 63',
+    '档位：能投的标 60 / 已出结果 12 / 立项线索 6','',
+    '三、重点条目（A/B 级 5 条）','新增可投 4 条：',
+    '  01 [A] 清能万帮盐城经开区 150MW/300MWh 储能电站施工总承包（江苏盐城 · 10-29）',
+    '  02 [B] 宁海县国投集团光储充项目一期 · 城西充电站充电桩采购及安装（浙江宁波 · 10-28）',
+    '  03 [B] 温岭市东部松门渔光互补光伏电站台损修复工程（浙江台州 · 10-29）',
+    '  04 [B] 嘉兴发电厂 1-10 号炉磨煤机石子煤清运 2027-2028（浙江嘉兴 · 11-03）',
+    '已出结果 1 条：',
+    '  05 [B] 浙能常电厂区 1.23MWp 光伏（二期）设计施工（浙江 · 10-29 中标结果）','',
+    '四、判断',
+    '本周新增量集中在 D 级 63 条（81%），多为水土保持监测、生物资源调查、设备采购等配套服务类，与 EPC 总承包主业关联弱，不建议逐条跟进。真正值得排期的是上述 5 条 A/B 级，其中 3 条属光伏 / 储能类。','',
+    '口径：公告日落在区间内的新增条目（nw=1）；A/B 级按库内评分规则。',
+    '说明：当前只统计「新增」与「档位」，金额变动需每日快照才能 diff。'
+  ].join('\n');
+  function fallback(){var ta=document.createElement('textarea');ta.value=T;
+    ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);
+    ta.select();try{document.execCommand('copy')}catch(e){}document.body.removeChild(ta)}
+  function done(){var b=document.getElementById('btnCopy');if(!b)return;
+    var o=b.textContent;b.textContent='已复制 ✓';setTimeout(function(){b.textContent=o},1900)}
+  if(navigator.clipboard&&window.isSecureContext){
+    navigator.clipboard.writeText(T).then(done,function(){fallback();done()});
+  }else{fallback();done()}
+}
+</script>
+</body>
+</html>
