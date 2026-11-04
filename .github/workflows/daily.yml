@@ -236,6 +236,22 @@ jobs:
           if total < 1000:
               print('条数异常，疑似采集失败，本次不提交')
               sys.exit(1)
+          # ── 数据新鲜度卡口（2026-11-04）─────────────────────────────
+          # 10-24 起江苏站（http 端口被封）、浙江站（被劫持页顶掉）、合肥站（DNS）
+          # 三站全挂，连续 11 天新增 0 条，可 workflow 一路绿灯 —— 页面顶部写着
+          # 「数据更新 今天」，用户只能靠「怎么感觉没更新」自己发现。
+          # 比失败更糟的是「成功但没数据」。最新公告滞后 > 2 天直接判失败。
+          import datetime
+          asof = meta.get('dataAsOf') or ''
+          try:
+              d0 = datetime.date.fromisoformat(asof[:10])
+              lag = (datetime.date.today() - d0).days
+          except Exception:
+              lag = 99
+          print('公告滞后: %s 天（截止 %s）' % (lag, asof))
+          if lag > 2:
+              print('❌ 最新公告已滞后 %d 天，采集链路疑似中断（查 collect_v4 的各站日志）' % lag)
+              sys.exit(1)
           # 海外动态也检查一下：这批是人工维护的，被冲掉说明 raw 源没读到
           try:
               n = open('data.news.js', encoding='utf-8').read()
