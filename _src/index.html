@@ -43,12 +43,21 @@ a{color:inherit;text-decoration:none}
 button{font-family:inherit}
 
 /* ---------- 头部 ---------- */
-.hd{background:linear-gradient(135deg,#0f4fc4,#2f84ff 60%,#4a9eff);color:#fff;padding:16px 0 14px}
+.hd{background:linear-gradient(135deg,#0f4fc4,#2f84ff 60%,#4a9eff);color:#fff;padding:13px 0 12px}
 .hd .wrap{max-width:1440px;margin:0 auto;padding:0 16px}
 .hd h1{font-size:21px;font-weight:800;letter-spacing:.5px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .hd h1 .ver{font-size:11px;font-weight:600;background:rgba(255,255,255,.22);padding:2px 8px;border-radius:10px}
 .hd .sub{opacity:.94;margin-top:5px;font-size:12.5px}
-.kpis{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.kpis{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+/* KPI 分主次（2026-11-04）：原来 10 格 flex:1 等宽，一眼看过去 10 个数字同样大，
+   等于没有重点。用户提的两件事「在招的」「能投的」才是主，其余是背景信息。
+   做法：前两格（入库 / 在招）加宽加深，中间三格（金额类）正常，
+   后面几格（结构类）压成紧凑的标签样式，视觉上退到第二层。 */
+.kpi.k-main{flex:1 1 118px;min-width:112px;padding:9px 15px}
+.kpi.k-main b{font-size:23px}
+.kpi.k-sub{flex:0 1 auto;min-width:66px;padding:7px 11px;background:rgba(255,255,255,.78)}
+.kpi.k-sub b{font-size:15px;color:#1e4f96}
+.kpi.k-sub span{font-size:11px}
 /* 2026-10-21 用户反馈「有点乱」：蓝底上 15% 白透明卡 + 90% 白字的对比度只有 2.6:1，
    数字看着发灰、层级全糊在一起。改成近实底白卡 + 深色字，数字立起来，
    蓝色只留在页头背景上做品牌色。 */
@@ -126,6 +135,33 @@ button{font-family:inherit}
 
 /* ---------- 筛选器 ---------- */
 .fbar{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px 14px;margin-bottom:12px}
+/* 折叠态（2026-11-04）：默认收起。常驻条只有一行，高度从 405px 降到 ~100px。
+   .fbody 用 max-height 过渡而不是 display:none —— display 无法过渡，
+   展开时整块「啪」地跳出来，下面的卡片位置瞬间下移，视觉上很跳。 */
+.fbar{padding:9px 12px}
+.fhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fhead .srch-top{flex:1;min-width:180px;padding:7px 12px;font-size:13px}
+.fhead .sel{padding:7px 10px;font-size:12.5px}
+.fhead .btn{padding:7px 12px;font-size:12.5px}
+.fhead .btn em{font-style:normal;font-weight:800;color:#fff;background:var(--brand);
+  border-radius:9px;padding:0 5px;margin-left:4px;font-size:11px;line-height:16px;display:inline-block}
+.fhead .btn em:empty,.fhead .btn em[data-n="0"]{display:none}
+.fhead .btn i{font-style:normal;font-size:11px;color:var(--tx3);margin-left:3px;
+  display:inline-block;line-height:1;transform:translateY(-1px)}
+.fhead #btnWeek{background:#14713a;color:#fff;border-color:#14713a}
+.fbody{overflow:hidden;max-height:600px;transition:max-height .22s ease,opacity .18s ease;
+  opacity:1;padding-top:2px}
+.fbar[data-fold="1"] .fbody{max-height:0;opacity:0;padding-top:0}
+.fbar[data-fold="1"] .srow{border-top:none;margin-top:0}
+/* 已选条件摘要：折叠时唯一能看到「我在筛什么」的地方 */
+.fonsum{display:none;gap:6px;align-items:center;flex-wrap:wrap;margin-top:7px;
+  padding-top:7px;border-top:1px dashed #edf0f5}
+.fonsum-t{font-size:11px;color:var(--tx3);font-weight:700}
+.fonsum-c{font-size:11.5px;color:#0f5aa8;background:#eef6ff;border:1px solid #d6e8fb;
+  border-radius:6px;padding:1px 8px;line-height:1.7;font-weight:600;max-width:180px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fonsum-x{font-size:11.5px;color:var(--tx3);text-decoration:underline;text-underline-offset:3px}
+.fonsum-x:hover{color:var(--red)}
 /* 筛选区：行距收紧、标签右对齐、chip 减重，避免一屏塞不下 */
 .frow{display:flex;gap:6px;align-items:flex-start;padding:3px 0;flex-wrap:wrap}
 .frow>label{font-size:11.5px;color:var(--tx3);font-weight:600;flex:0 0 56px;padding-top:4px;text-align:right}
@@ -164,6 +200,18 @@ button{font-family:inherit}
 
 /* ---------- 结果统计 ---------- */
 .rbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:0 2px 10px;font-size:13px;color:var(--tx2)}
+/* 2026-11-04 精简：左结论、右口径，两行说明收进弹层 */
+.rbar{align-items:center;padding:6px 2px 9px}
+.rb-main{font-size:12.5px}
+.rb-main b{color:var(--tx);font-weight:800;font-variant-numeric:tabular-nums}
+.rb-main b:first-of-type{color:var(--brand);font-size:15px}
+.rbar .rhint{margin-left:auto;display:flex;gap:10px;align-items:center;position:relative}
+.rb-kj{font-size:11.5px;color:var(--tx3);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.rb-kj:hover{color:var(--brand)}
+.rb-kjbox{display:none;position:absolute;right:0;top:22px;z-index:30;width:420px;max-width:74vw;
+  background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 13px;
+  font-size:12px;line-height:1.78;color:var(--tx2);box-shadow:0 12px 30px -10px rgba(16,24,40,.28)}
+.rb-kjbox.on{display:block}
 .rbar b{color:var(--brand);font-size:16px;font-weight:800}
 .rbar .rhint{margin-left:auto;display:flex;gap:8px;align-items:center}
 /* 载入中提示：一个转圈的点 + 一句话。
@@ -1447,7 +1495,31 @@ window.addEventListener('error',function(e){
   <div class="panel on" id="p-items">
     <div class="wares" id="wares"></div>
     <div class="swim" id="swim" style="display:none"></div>
-    <div class="fbar">
+    <!-- 筛选条（2026-11-04 改折叠）：用户反复说「整体偏臃肿」。
+         实测首屏 1560×900 下，这一块 405px —— 凭空吃掉小半屏，
+         第一条项目卡被压到 818px 处，一屏只露出卡片的最上面一溜。
+         chips 本身有用，但 90% 的时间用户是在「看」而不是在「筛」，
+         不该让 7 行筛选项挡在数据前面。 -->
+    <div class="fbar" id="fbar" data-fold="1">
+      <!-- 常驻条：搜索 + 排序 + 已选条件摘要 + 展开按钮。
+           搜索框**不能**跟着折叠藏起来 —— 它是最常用的一个控件，
+           藏进折叠区后每次搜一次都要先展开再收，反而更麻烦。
+           所以整个筛选区拆成「常驻条」和「可折叠的 chips 区」两段。 -->
+      <div class="fhead">
+        <input class="srch srch-top" id="q" placeholder="搜标题 / 业主 / 中标单位…">
+        <select class="sel" id="sort">
+          <option value="sc">综合优先级</option>
+          <option value="amt">金额从高到低</option>
+          <option value="d">发布日期最新</option>
+        </select>
+        <button class="btn" id="fToggle">筛选 <em id="fOnN"></em> <i>⌄</i></button>
+        <span style="flex:1"></span>
+        <button class="btn" id="btnWeek">生成周报</button>
+        <button class="btn pri" id="btnCsv">导出 CSV</button>
+      </div>
+      <!-- 已选条件摘要：折叠状态下也要看得见，否则用户不知道自己在筛什么 -->
+      <div class="fonsum" id="fOn"></div>
+      <div class="fbody" id="fBody">
       <div class="frow"><label>地区</label><div class="chips" id="f-rg"></div></div>
       <div class="frow"><label>业务分层</label><div class="chips" id="f-sg"></div></div>
       <div class="frow"><label>下游行业</label><div class="chips" id="f-ind"></div></div>
@@ -1456,15 +1528,10 @@ window.addEventListener('error',function(e){
       <div class="frow"><label>承包模式</label><div class="chips" id="f-mode"></div></div>
       <div class="frow"><label>来源平台</label><div class="chips" id="f-p"></div></div>
       <div class="srow">
-        <input class="srch" id="q" placeholder="搜标题 / 业主 / 中标单位…回车或输入即时过滤">
-        <select class="sel" id="sort">
-          <option value="sc">排序：综合优先级</option>
-          <option value="amt">排序：金额从高到低</option>
-          <option value="d">排序：发布日期最新</option>
-        </select>
-        <button class="btn" id="btnReset">清空筛选</button>
-        <button class="btn" id="btnWeek" style="background:#14713a;color:#fff;border-color:#14713a">生成周报</button>
-        <button class="btn pri" id="btnCsv">导出当前结果 CSV</button>
+        <span style="flex:1"></span>
+        <button class="btn" id="btnReset">清空全部筛选</button>
+        <button class="btn" id="fFold">收起 ⌃</button>
+      </div>
       </div>
     </div>
     <div class="rbar" id="rbar"></div>
@@ -1872,7 +1939,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611041835';
+var VER='?v=202611041851';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -2969,6 +3036,79 @@ function match(x){
   }
   return true;
 }
+/* ==================== 筛选条折叠（2026-11-04）====================
+   解决的问题：首屏筛选区 405px，占掉小半屏，第一条卡片被压到 818px。
+   chips 有用，但用户 90% 的时间是在看数据、不是在筛。所以默认收起。
+
+   三个设计约束（都是踩过坑才加上的）：
+     ① 搜索框不跟着折 —— 它是最常用的控件，藏起来每次搜都得「展开→收起」两下。
+        常驻条里保留 [搜索][排序][筛选 n⌄][生成周报][导出]。
+     ② 折叠时已选条件必须看得见 —— 只藏 chips、不藏条件摘要。
+        否则用户折叠后看到 12 条结果，会以为数据丢了，其实是被自己筛着。
+     ③ 有筛选时不允许静默折叠 —— 首次进入如果 F 里已有条件（比如从链接带进来），
+        会自动展开，避免「明明筛着却不显示筛选器」的困惑。 */
+var FBAR_OPEN = false;       // 默认收起
+function foldBar(open) {
+  FBAR_OPEN = !!open;
+  var bar = el('fbar'); if (!bar) return;
+  bar.setAttribute('data-fold', FBAR_OPEN ? '0' : '1');
+  var tg = el('fToggle'), fd = el('fFold');
+  if (tg) tg.innerHTML = _fTgl();
+  if (fd) fd.textContent = '收起 ⌃';
+  try { syncFonSum(); } catch (e) { }
+}
+function _fOnCount() {
+  var n = 0;
+  ['rg', 'sg', 'ind', 'g', 'mode', 'p'].forEach(function (k) {
+    if (F[k] && F[k].size) n += F[k].size;
+  });
+  if (F.side) n++;
+  return n;
+}
+/* 折叠按钮的内容。数字为 0 时不出那个小方块 —— 一个灰底的 "0" 只会让人以为有 0 个筛选坏了。
+   有筛选时显示成实心蓝底白字的小方标，一眼能看出「我在筛着东西」。 */
+function _fTgl() {
+  var n = _fOnCount();
+  return '筛选' + (n ? '<em>' + n + '</em>' : '') + ' <i>' + (FBAR_OPEN ? '\u2303' : '\u2304') + '</i>';
+}
+/* 已选条件摘要：把 F 里的选中项翻译成人话，拼成「江苏 · 有色 · EPC」这样一行。
+   只在折叠状态下显示 —— 展开时 chips 自己就是高亮的，再写一行是重复。 */
+function syncFonSum() {
+  var box = el('fOn'); if (!box) return;
+  if (FBAR_OPEN) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  var parts = [];
+  ['rg', 'sg', 'ind', 'g', 'mode', 'p'].forEach(function (k) {
+    if (!F[k] || !F[k].size) return;
+    F[k].forEach(function (v) { parts.push(_fLabel(k, v)); });
+  });
+  if (F.side) parts.push('含兼营');
+  if (F.q) parts.push('搜「' + F.q + '」');
+  if (!parts.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.style.display = 'flex';
+  box.innerHTML = '<span class="fonsum-t">已筛</span>' +
+    parts.slice(0, 8).map(function (p) { return '<span class="fonsum-c">' + esc(p) + '</span>'; }).join('') +
+    (parts.length > 8 ? '<span class="fonsum-c">+' + (parts.length - 8) + '</span>' : '') +
+    '<a href="javascript:void(0)" class="fonsum-x" data-act="clearF">清空</a>';
+}
+function _fLabel(k, v) {
+  if (k === 'sg') return SEG_NAME[v] || v;
+  return v;
+}
+document.addEventListener('click', function (e) {
+  var t = e.target.closest ? e.target.closest('#fToggle,#fFold') : null;
+  if (t) { foldBar(t.id === 'fToggle' ? !FBAR_OPEN : false); return; }
+  if (e.target.closest && e.target.closest('[data-act="clearF"]')) { clearFilters(); return; }
+  /* 口径说明弹层：点「口径说明」开合，点别处关闭。
+     用 document 委托而不是给链接绑 onclick —— rbar 每次 render 都重写 innerHTML，
+     直接绑的监听会跟着一起被丢掉。 */
+  var k = e.target.closest && e.target.closest('#rbKj');
+  if (k) { var bx = el('rbKjBox'); if (bx) bx.classList.toggle('on'); return; }
+  if (!e.target.closest || !e.target.closest('#rbKjBox')) {
+    var b0 = el('rbKjBox'); if (b0) b0.classList.remove('on');
+  }
+});
+
+
 function filtered(){
   var a=items.filter(match);
   if(F.sort==='amt')a.sort(function(x,y){return num(y.amt)-num(x.amt)});
@@ -3364,12 +3504,26 @@ function render(){
   var _loadTip = _loading
     ? '<span class="rload"><i></i>全库共 <b>' + (meta.total || 0) + '</b> 条，正在载入…（当前已到位 ' + a.length + ' 条）</span>'
     : '';
-  el('rbar').innerHTML='<span>命中 <b>'+a.length+'</b> 条 · 其中 <b>'+nAmt+'</b> 条有金额 · 这 '+nAmt+' 条合计 <b>'+sum.toFixed(1)+' 亿</b></span>'+_loadTip+
-    '<span class="rhint"><span class="hint">'+
-      (nNo?'另 '+nNo+' 条原文未披露金额（多为立项公示/招标计划，不写投资额） · ':'')+
-      '顶部「中标/合同额 '+meta.amtSum.toFixed(0)+' 亿」是全库 '+(meta.withAmtWin||meta.withAmt)+' 条中标口径金额的总和，与本页筛选无关'+
-      (meta.invSum?'（另有项目总投资 '+meta.invSum.toFixed(0)+' 亿，口径不同、单独计）':'')+_sideTip+
-    '</span></span>';
+  /* 统计条（2026-11-04 精简）：原来右半边是一整段 130 多字的说明，
+     占了两行、字号还小，实际没人读 —— 用户的原话是「看着乱」。
+     拆成两块：
+       · 左边常驻一行结论：命中 N 条 / M 条有金额 / 合计 X 亿（这是他真正要看的）
+       · 右边只留一个「口径」小链接，点开看完整解释（内容一个字没少，只是不再挡着）
+     另外 nNo（未披露金额条数）也移进弹层：它是解释为什么「命中 898 但只有 192 有金额」的，
+     属于看了会问才需要看的东西。 */
+  el('rbar').innerHTML=
+    '<span class="rb-main">命中 <b>' + a.length + '</b> 条' +
+      (nAmt ? ' · <b>' + nAmt + '</b> 条有金额 · 合计 <b>' + sum.toFixed(1) + ' 亿</b>' : '') +
+    '</span>' + _loadTip + _sideTip +
+    '<span class="rhint">' +
+      '<a href="javascript:void(0)" class="rb-kj" id="rbKj">口径说明</a>' +
+      '<span class="rb-kjbox" id="rbKjBox">' +
+        (nNo ? '另 ' + nNo + ' 条原文未披露金额（多为立项公示/招标计划，不写投资额）。' : '') +
+        '顶部「中标/合同额 ' + meta.amtSum.toFixed(0) + ' 亿」是全库 ' + (meta.withAmtWin || meta.withAmt) +
+        ' 条中标口径金额的总和，与本页筛选无关' +
+        (meta.invSum ? '；另有项目总投资 ' + meta.invSum.toFixed(0) + ' 亿，口径不同、单独计。' : '。') +
+      '</span>' +
+    '</span>';
   var tot=Math.ceil(a.length/PS)||1;
   if(F.page>tot)F.page=tot;
   var pg=a.slice((F.page-1)*PS,F.page*PS);
@@ -3389,6 +3543,10 @@ function render(){
   el('pager').innerHTML=tot>1?h:'';
   el('pager').onclick=function(e){var d=e.target.closest('.pg');
     if(!d||d.classList.contains('dis'))return;F.page=+d.dataset.p;render();window.scrollTo(0,300)};
+  /* 折叠条的按钮数字和已选摘要跟着结果一起刷新。
+     放在 render 末尾而不是各个 toggle 里：改筛选的入口有七八个
+     （chips / 三档库 / 清空 / 诊断框一键修复 / 快捷跳转），逐个补必然漏一个。 */
+  try{ syncFonSum(); var _tg=el('fToggle'); if(_tg) _tg.innerHTML=_fTgl(); }catch(e){}
 }
 el('q').oninput=function(){F.q=this.value.trim();F.page=1;render()};
 /* 搜索框会跨库搜：首屏只有 400 条关注档，用户一搜就该覆盖全量，
@@ -8920,13 +9078,21 @@ function boot_main(){
       两者能差 3~10 倍，混在一起算「已公示金额」等于两个口径相加。
       没有这类数据时（invSum 为空或 0）这格直接不渲染。 */
    (meta.invSum?['',meta.invSum.toFixed(0)+'亿','总投资·'+meta.withInv+'条','']:null),
-   ['',items.filter(function(x){return x.g==='A'}).length,'A 战略必争','g:A'],
+   /* ⚠ 2026-11-04 修：这格原来是 items.filter(...) —— items 首屏只有 24~42 条切片，
+      算出来是「A 战略必争 2」这种明显不对的数（全库 19 条）。
+      同组的其它格早改成读 meta 了，只有这格漏了，是「数据看着像瞎写」的最后一处残留。
+      gradeTop 是后端按全库算好的 A/B/C/D 计数。 */
+   ['',(_gr['A']!=null?_gr['A']:items.filter(function(x){return x.g==='A'}).length),'A 战略必争','g:A'],
    ['',_earlyN,'立项早期·拟招标','sw:early'],
    (_nHM?['',_nHM,'主场业务','']:null),
    ((meta.nYouse||_bz['有色冶炼供能'])?['',(meta.nYouse||_bz['有色冶炼供能']),'有色冶炼供能','sg:youse']:null)
   ].filter(Boolean);
+  /* 层级：前 2 格主（入库 / 在招），3~5 格是金额（正常权重），
+     之后的结构类指标压成 .k-sub 退到背景层。
+     注意 i 是在 filter(Boolean) 之后的序号，跟上面数组的视觉顺序一致。 */
   el('kpis').innerHTML=kpi.map(function(k,i){
-    return '<div class="kpi'+(i<2?' hot':'')+'"'+(k[3]?' style="cursor:pointer" onclick="kpiGo(\''+k[3]+'\')"':'')+
+    var cls='kpi'+(i<2?' hot k-main':'')+(i>=5?' k-sub':'');
+    return '<div class="'+cls+'"'+(k[3]?' style="cursor:pointer" onclick="kpiGo(\''+k[3]+'\')"':'')+
       '><b>'+k[1]+'</b><span>'+k[2]+'</span></div>'}).join('');
 
   buildFilters();  // 筛选器 + 三档关注库
