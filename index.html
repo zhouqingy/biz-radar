@@ -1516,6 +1516,10 @@ body[data-theme="night"]{
   --brand:#6ea8c7;--brandbtn:#2f6d8c;--brandtx:#fff;--hot:#e0a25a;--hover:#232a31;
   --up:#ef8a5c;--dn:#4fc08a;--ok:#4fc08a;--leadbg:#20272d;--leadline:#33414a}
 body[data-theme]{background:var(--bg);color:var(--ink)}
+/* 老页面大量组件仍用 --tx/--tx2/--tx3/--red/--green，主题变量只定义了新名。
+   这里做一次映射，暗色主题下弹层/卡片里的老文字才不会变成深灰看不见。 */
+body[data-theme]{--tx:var(--ink);--tx2:var(--ink2);--tx3:var(--ink3);
+  --red:var(--up);--green:var(--dn)}
 body{height:100vh!important;overflow:hidden!important;background:var(--bg)!important;
   color:var(--ink)!important;-webkit-font-smoothing:antialiased;
   transition:background .18s,color .18s}
@@ -1524,30 +1528,33 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
 ::-webkit-scrollbar-thumb{background:var(--ink5);border-radius:6px}
 ::-webkit-scrollbar-track{background:transparent}
 
-/* ── 顶控条：主题 / 字号 / 回退 ── */
-#aBar{position:fixed;top:0;left:0;right:0;height:46px;z-index:999;background:#1c1917;
-  display:flex;align-items:center;gap:6px;padding:0 14px;color:#fff;white-space:nowrap;overflow:hidden}
-#aBar .a-lg{font-size:calc(12px*var(--z));font-weight:800;margin-right:6px}
-#aBar .a-lg em{font-size:calc(9px*var(--z));color:#a8a29e;font-weight:600;margin-left:5px;font-style:normal}
-#aBar .a-lab{font-size:calc(9px*var(--z));color:#78716c;font-weight:800;letter-spacing:.5px;margin-left:8px}
-#aBar button{height:26px;padding:0 10px;border:1px solid #44403c;border-radius:5px;
-  background:transparent;color:#d6d3d1;font-size:calc(10px*var(--z));font-weight:700;cursor:pointer}
-#aBar button:hover{border-color:#78716c}
-#aBar button.on{background:#f5f5f4;color:#1c1917;border-color:#f5f5f4}
-#aBar .a-vr{width:1px;height:18px;background:#3a3632;margin:0 6px}
-#aBar .a-rt{margin-left:auto;font-size:calc(9.5px*var(--z));color:#78716c;overflow:hidden;text-overflow:ellipsis}
-#aBar .a-back{font-size:calc(10px*var(--z));color:#a8a29e;text-decoration:none;
-  border:1px solid #44403c;border-radius:5px;padding:4px 9px;margin-left:10px}
-#aBar .a-back:hover{color:#fff;border-color:#78716c}
+/* ── 外观设置：收进顶栏的一个功能按钮 + 下拉浮层，不再单独占一行 ── */
+.a-opt{position:relative;flex:0 0 auto}
+#aOpt{white-space:nowrap}
+#aPop{display:none;position:absolute;right:0;top:36px;z-index:1200;width:232px;
+  background:var(--card);border:1px solid var(--line);border-radius:9px;
+  box-shadow:0 14px 36px rgba(15,23,42,.22);padding:11px 12px;white-space:normal}
+#aPop.on{display:block}
+#aPop .a-pl{font-size:calc(9px*var(--z));font-weight:800;letter-spacing:.5px;
+  color:var(--ink4);margin:1px 0 6px}
+#aPop .a-pr{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+#aPop button{height:25px;padding:0 9px;border:1px solid var(--line);border-radius:5px;
+  background:var(--leadbg);color:var(--ink2);font-size:calc(10px*var(--z));
+  font-weight:700;cursor:pointer}
+#aPop button:hover{border-color:var(--brand)}
+#aPop button.on{background:var(--brandbtn);border-color:var(--brandbtn);color:var(--brandtx)}
+#aPop .a-plink{display:block;border-top:1px solid var(--line2);padding-top:9px;
+  font-size:calc(10px*var(--z));color:var(--brand);text-decoration:none;font-weight:700}
+#aPop .a-plink:hover{text-decoration:underline}
 
-/* ── 三栏骨架 ── */
-#aNav{position:fixed;top:46px;left:0;bottom:0;width:212px;z-index:30;overflow:auto;
+/* ── 三栏骨架（顶控条已并入主顶栏，整屏从 0 开始） ── */
+#aNav{position:fixed;top:0;left:0;bottom:0;width:212px;z-index:30;overflow:auto;
   background:var(--card);border-right:1px solid var(--line);padding:16px 12px;
   display:flex;flex-direction:column}
-#aSide{position:fixed;top:46px;right:0;bottom:0;width:232px;z-index:30;overflow:auto;
+#aSide{position:fixed;top:0;right:0;bottom:0;width:232px;z-index:30;overflow:auto;
   background:var(--card);border-left:1px solid var(--line);padding:12px;
   display:flex;flex-direction:column;gap:9px}
-#aMain{position:fixed;top:46px;left:212px;right:232px;bottom:0;overflow:auto;
+#aMain{position:fixed;top:0;left:212px;right:232px;bottom:0;overflow:auto;
   background:var(--bg)}
 
 /* ── 左导航 ── */
@@ -1585,20 +1592,19 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
   text-overflow:ellipsis;white-space:nowrap;flex:1}
 .a-mkh .a-ct{font-size:calc(11px*var(--z));color:var(--ink4);margin-left:auto}
 .a-mkb{max-height:0;opacity:0;overflow:hidden;transition:max-height .2s,opacity .2s}
-.a-mk.open .a-mkb{max-height:340px;opacity:1;overflow:auto}
-.a-mr{display:flex;align-items:center;gap:6px;padding:6px 10px;
-  border-bottom:1px solid var(--line2);font-size:calc(10px*var(--z));color:var(--ink2)}
+.a-mk.open .a-mkb{max-height:430px;opacity:1;overflow:auto}
+.a-mr{display:flex;align-items:center;gap:6px;padding:7px 10px;cursor:pointer;
+  border-bottom:1px solid var(--line2);font-size:calc(10.5px*var(--z));color:var(--ink2)}
+.a-mr:hover{background:var(--hover)}
 .a-mr span{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .a-mr b{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:700}
-.a-mr i{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums;min-width:52px;text-align:right}
-/* 老行情条移进右栏后重排成竖列表 */
-#aSide #mstrip{display:flex!important;flex-direction:column;gap:0;margin:0!important;
-  padding:0!important;border:0!important;overflow:visible!important}
-#aSide #mstrip > *{border-bottom:1px solid var(--line2)!important;padding:5px 10px!important;
-  font-size:calc(10px*var(--z))!important;background:transparent!important;color:var(--ink2)!important;
-  opacity:1!important;display:flex!important;justify-content:space-between!important}
-#aSide #mstrip .mslab,#aSide #mstrip .sep,#aSide #mstrip .dt{display:none!important}
-#aSide #mstrip .mi{display:flex!important;width:100%!important}
+.a-mr i{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums;min-width:48px;text-align:right}
+.a-mr .a-mtrend{font-style:normal;font-size:calc(8.5px*var(--z));color:var(--ink4);
+  flex:0 0 auto;white-space:nowrap;opacity:.75}
+.a-mr:hover .a-mtrend{color:var(--brand);opacity:1}
+/* 老行情条搬进右栏后隐藏：右栏已用 DATA_CORE 自渲染 13 行，且每行直接可点开走势图，
+   再留一份 mstrip 会出现两套重复价格。 */
+#aSide #mstrip{display:none!important}
 .a-wk{border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:var(--leadbg);cursor:pointer}
 .a-wk .t{font-size:calc(9.5px*var(--z));font-weight:800;letter-spacing:.4px;color:var(--ink4)}
 .a-wk .n{font-size:calc(11px*var(--z));color:var(--ink2);margin-top:4px;line-height:1.6}
@@ -1737,42 +1743,134 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
   border-color:var(--line)!important;color:var(--ink)!important}
 #aMain .panel:not(#p-items) .sect,#aMain .panel:not(#p-items) .hint{color:var(--ink2)!important}
 
+/* ══════════════ 本轮精修（字体层级 / 行式列表 / 精简文案） ══════════════ */
+
+/* 档位行：去掉「看全部含小项目」入口和长篇数字解释 */
+#aMain #wares .wtip{font-size:calc(10px*var(--z))!important;color:var(--ink4)!important;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+#aMain #waAll{display:none!important}
+/* 各页顶部说明统一收成一行，不再逐条教怎么用 */
+#aMain .panel .hint{font-size:calc(10px*var(--z))!important;color:var(--ink3)!important;
+  line-height:1.5!important;margin:0 0 8px!important;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 行业动态里的「行业动态与政策」新闻流与情报精选重复，整块收掉；
+   业务信号与金属仪表盘保留。 */
+#aMain #p-trend details{display:none!important}
+
+/* 次要入口 */
+.a-more{margin-top:6px}
+.a-more .a-sep{margin:12px 0 6px}
+.a-ni.a-mini{font-size:calc(10.5px*var(--z));padding:5px 10px;color:var(--ink4)}
+.a-ni.a-mini:hover{color:var(--ink2)}
+.a-ni.a-mini.on{background:var(--brand);color:var(--brandtx)}
+
+/* ── 字号层级重新分配：标题 > 金额 > KPI 数字 > 行号 ≈ 摘要 ── */
+#aMain .pj::before{font-size:calc(12.5px*var(--z))!important;color:var(--ink3)!important;
+  font-weight:800!important;padding-top:1px!important}
+#aMain .pj-t{font-size:calc(13.5px*var(--z))!important}
+#aMain .pj.gA .pj-t,#aMain .pj.gD .pj-t{font-size:calc(13.5px*var(--z))!important}
+#aMain .pj-snip{font-size:calc(11px*var(--z))!important;color:var(--ink3)!important}
+#aMain .pj-meta{font-size:calc(10.5px*var(--z))!important;color:var(--ink3)!important}
+#aMain .pj-meta .mi i,#aMain .pj-meta .mi b{font-size:calc(10.5px*var(--z))!important;color:var(--ink3)!important}
+#aMain .kpis > * b,#aMain .kpis > * strong{font-size:calc(17px*var(--z))!important}
+#aMain .kpis > * span,#aMain .kpis > * small{font-size:calc(10.5px*var(--z))!important}
+.a-ni{font-size:calc(12px*var(--z))}
+#aMain .pager .pg{font-size:calc(11px*var(--z))!important}
+
+/* ── 其它面板：卡片一律改紧凑行式，不再三列大卡 ── */
+#aMain .panel:not(#p-items) .cgrid,
+#aMain .panel:not(#p-items) .news,
+#aMain .panel:not(#p-items) .siggrid,
+#aMain .panel:not(#p-items) .mtgrid{
+  display:flex!important;flex-direction:column!important;gap:0!important;
+  align-items:stretch!important;margin:0 0 10px!important}
+#aMain .panel:not(#p-items) .cgrid > *,
+#aMain .panel:not(#p-items) .news > *,
+#aMain .panel:not(#p-items) .siggrid > *,
+#aMain .panel:not(#p-items) .mtgrid > *{
+  display:block!important;background:transparent!important;border:0!important;
+  border-bottom:1px solid var(--line2)!important;border-radius:0!important;
+  box-shadow:none!important;padding:8px 10px!important;margin:0!important;
+  min-height:0!important;transform:none!important;position:static!important}
+#aMain .panel:not(#p-items) .cgrid > *:hover,
+#aMain .panel:not(#p-items) .news > *:hover,
+#aMain .panel:not(#p-items) .siggrid > *:hover{background:var(--hover)!important}
+/* 主标题一行 */
+#aMain .panel:not(#p-items) .ccard .cc-h{display:flex!important;align-items:center!important;
+  gap:7px!important;flex-wrap:nowrap!important;overflow:hidden;margin:0!important}
+#aMain .panel:not(#p-items) .ccard .cc-h b,
+#aMain .panel:not(#p-items) .ncard h3,
+#aMain .panel:not(#p-items) .sigc h3{
+  font-size:calc(12.5px*var(--z))!important;color:var(--ink)!important;
+  font-weight:700!important;line-height:1.5!important;margin:0!important;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1 1 auto;min-width:0}
+#aMain .panel:not(#p-items) .ccard .cc-h .cc-tag,
+#aMain .panel:not(#p-items) .sigc .sig-h{
+  font-size:calc(9px*var(--z))!important;flex:0 0 auto;
+  display:flex!important;gap:5px;align-items:center}
+/* 一行摘要（招标编号 / 观点 / 摘要都只留一行） */
+#aMain .panel:not(#p-items) .ccard .cc-m,
+#aMain .panel:not(#p-items) .ncard .nd,
+#aMain .panel:not(#p-items) .sigc .sig-why,
+#aMain .panel:not(#p-items) .sigc .sig-d,
+#aMain .panel:not(#p-items) .mt .mp{
+  font-size:calc(10.5px*var(--z))!important;color:var(--ink3)!important;
+  line-height:1.5!important;margin:2px 0 0!important;padding:0!important;
+  background:transparent!important;border:0!important;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:none!important}
+/* 长篇「观点 / 逐条教怎么写」的内容收掉，点名称看弹层仍有全量 */
+#aMain .panel:not(#p-items) .cc-track,
+#aMain .panel:not(#p-items) .cc-i,
+#aMain .panel:not(#p-items) .ec-more,
+#aMain .panel:not(#p-items) .cc-prof,
+#aMain .panel:not(#p-items) .cc-hits,
+#aMain .panel:not(#p-items) .ab-why,
+#aMain .panel:not(#p-items) .ab-proj,
+#aMain .panel:not(#p-items) .sigc .sig-f,
+#aMain .panel:not(#p-items) .mt .mh,
+#aMain .panel:not(#p-items) .mt .mcat,
+#aMain .panel:not(#p-items) .cc-open,
+#aMain .panel:not(#p-items) .grpd{display:none!important}
+/* 「库内战绩」按用户要求下线；资质简介保留一行作为同业行的摘要 */
+#aMain .panel:not(#p-items) .ccard .cc-body{display:block!important;
+  font-size:calc(10.5px*var(--z))!important;color:var(--ink3)!important;
+  line-height:1.5!important;margin:2px 0 0!important;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#aMain .panel:not(#p-items) .ccard .cc-body p{margin:0!important;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-height:none!important}
+/* 情报来源/日期压成一行小字 */
+#aMain .panel:not(#p-items) .ncard .ns{display:flex!important;gap:9px!important;
+  font-size:calc(9px*var(--z))!important;color:var(--ink4)!important;
+  margin:2px 0 0!important;overflow:hidden;white-space:nowrap;
+  background:transparent!important;border:0!important;padding:0!important}
+/* 分组标题 */
+#aMain .panel:not(#p-items) .grpt{font-size:calc(11px*var(--z))!important;
+  font-weight:800!important;color:var(--ink2)!important;
+  background:var(--leadbg)!important;border-left:3px solid var(--brand)!important;
+  padding:6px 10px!important;margin:8px 0 0!important;border-radius:0!important}
+/* 主站搜索/顶栏文字也略放大 */
+.a-top .a-q{font-size:calc(12px*var(--z))}
+
 /* ── 响应式 ── */
 @media(max-width:1200px){#aSide{display:none}#aMain{right:0}}
-@media(max-width:900px){#aNav{display:none}#aMain{left:0}
-  #aBar .a-rt{display:none}}
-@media(max-width:640px){#aMain .pj{grid-template-columns:20px 3px minmax(0,1fr) 120px}
-  .a-who .org,.a-who .scope,.a-slot{display:none}
-  #aBar .a-lab{display:none}}
+@media(max-width:900px){#aNav{display:none}#aMain{left:0}}
+@media(max-width:640px){#aMain .pj{grid-template-columns:24px 3px minmax(0,1fr) 120px}
+  .a-who .org,.a-who .scope,.a-slot{display:none}}
 
 </style>
 </head>
 <body data-theme="graphite">
 
-<div id="aBar">
-  <span class="a-lg">界面主题<em>V3.0 全屏版</em></span>
-  <button data-t="graphite" class="on">石墨</button>
-  <button data-t="paper">暖纸</button>
-  <button data-t="jade">青釉</button>
-  <button data-t="night">夜墨</button>
-  <span class="a-vr"></span>
-  <span class="a-lab">字号</span>
-  <button data-z="1">标准</button>
-  <button data-z="1.15">较大</button>
-  <button data-z="1.30" class="on">大</button>
-  <button data-z="1.45">特大</button>
-  <span class="a-rt">A 版界面 · 全库真实数据 · 功能与原站一致</span>
-  <a class="a-back" href="classic.html">经典视图 ↗</a>
-</div>
 <aside id="aNav">
   <div class="a-brand">商机雷达 <em>V3.0</em></div>
   <div class="a-brand2">都市环保 · 江浙沪皖</div>
   <div class="a-navlist" id="aNavList"></div>
   <div class="a-sep">功能位 · 预留</div>
-  <div class="a-ph"><span class="a-tag">预留</span><b>业主 / 客户检索</b><span>搜索框 + 画像入口</span></div>
-  <div class="a-ph"><span class="a-tag">预留</span><b>竞争地图</b><span>区域 / 对手分布</span></div>
-  <div class="a-ph"><span class="a-tag">预留</span><b>组织与成员管理</b><span>登录体系接入后放这里</span></div>
-  <div class="a-note"><b>权限落点：</b>菜单按角色显隐，无权限项不渲染。数据可见范围由角色决定，见顶部口径条。</div>
+  <div class="a-ph"><span class="a-tag">预留</span><b>业主 / 客户检索</b></div>
+  <div class="a-ph"><span class="a-tag">预留</span><b>竞争地图</b></div>
+  <div class="a-ph"><span class="a-tag">预留</span><b>组织与成员管理</b></div>
+  <div class="a-note">菜单与数据范围按角色显隐。</div>
+  <div class="a-more" id="aMore"></div>
 </aside>
 <main id="aMain"></main>
 <aside id="aSide">
@@ -1782,13 +1880,12 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
     <div class="a-mkb" id="aMkBody"></div>
   </div>
   <div class="a-wk" id="aWk">
-    <div class="t">本周变化 · 汇报视图</div>
-    <div class="n">点开生成<b>周报</b>，含本周新增与重点条目</div>
-    <div class="go">打开周报 →</div>
+    <div class="t">本周变化</div>
+    <div class="go">打开汇报视图 →</div>
   </div>
-  <div class="a-ph"><span class="a-tag">预留</span><b>重点客户</b><span>业主画像与历史中标</span></div>
-  <div class="a-ph"><span class="a-tag">预留</span><b>项目详情画像</b><span>点列表条目后在此展开</span></div>
-  <div class="a-ph"><span class="a-tag">预留</span><b>时间线 / 竞争提示</b><span>项目状态流转与对手对比</span></div>
+  <div class="a-ph"><span class="a-tag">预留</span><b>重点客户</b></div>
+  <div class="a-ph"><span class="a-tag">预留</span><b>项目详情画像</b></div>
+  <div class="a-ph"><span class="a-tag">预留</span><b>时间线 / 竞争提示</b></div>
 </aside>
 
 
@@ -2276,7 +2373,7 @@ var meta = D.meta || {};
    副标题是给一级页签用的——光看「同业与伙伴」不知道点进去干嘛，
    下面一行小字说清楚。二级页签（sub）不显示副标题，用「·」分隔并排靠右。 */
 var TABS = [
-  ['p-items',   '找商机',    0, '◆', '能投的标 · 已出结果 · 立项线索', 'mv'],
+  ['p-items',   '商机库',    0, '◆', '能投的标 · 已出结果 · 立项线索', 'mv'],
   ['p-rival',   '同业与伙伴', 0, '◈', '谁在拿单 · 对手档案 · 联合体',   'mv'],
   ['p-client',  '客户与业主', 0, '▣', '业主买什么 · 找过谁 · 海外建厂', 'mv'],
   ['p-overseas', '海外',      0, '◎', '中资出海·用能配套',              'mv'],
@@ -9516,7 +9613,21 @@ function boot_main(){
           '<div class="a-who"><span class="org">都市环保 ▾</span>'+
           '<span class="scope">江浙沪皖 · 全部档位</span>'+
           '<span class="av">赵</span><span><b>赵工</b><small>市场部 · 编辑</small></span>'+
-          '<span class="a-slot">登录位 · 预留</span></div>';
+          '<span class="a-slot">登录位</span>'+
+          '<span class="a-opt">'+
+            '<button id="aOpt" title="界面主题与字号">◐ 外观</button>'+
+            '<div id="aPop">'+
+              '<div class="a-pl">界面主题</div><div class="a-pr">'+
+                '<button data-t="graphite" class="on">石墨</button>'+
+                '<button data-t="paper">暖纸</button>'+
+                '<button data-t="jade">青釉</button>'+
+                '<button data-t="night">夜墨</button></div>'+
+              '<div class="a-pl">字号</div><div class="a-pr">'+
+                '<button data-z="1">标准</button><button data-z="1.15">较大</button>'+
+                '<button data-z="1.30" class="on">大</button><button data-z="1.45">特大</button></div>'+
+              '<a class="a-plink" href="classic.html">经典视图 ↗</a>'+
+            '</div>'+
+          '</span></div>';
         hw.insertBefore(top,hw.firstChild);
       }
       // 口径条
@@ -9541,32 +9652,55 @@ function boot_main(){
         var fmt=function(n){try{return Number(n).toLocaleString('zh-CN',{maximumFractionDigits:2});}catch(e){return n;}};
         var rows=arr.map(function(it){
           var chg=it.chg, up=chg>0, col=up?'var(--up)':'var(--dn)';
-          return '<div class="a-mr"><span>'+es(it.name)+'</span>'+
+          return '<div class="a-mr" data-code="'+es(it.code||'')+'" title="点开看历史走势 ›">'+
+            '<span>'+es(it.name)+'</span>'+
             '<b>'+fmt(it.price)+'</b>'+
-            '<i style="color:'+col+'">'+(up?'+':'')+(chg==null?'—':Number(chg).toFixed(2))+'%</i></div>';
+            '<i style="color:'+col+'">'+(up?'+':'')+(chg==null?'—':Number(chg).toFixed(2))+'%</i>'+
+            '<em class="a-mtrend">走势 ›</em></div>';
         }).join('');
         if(mkb)mkb.insertAdjacentHTML('afterbegin',rows||'<div class="a-mr"><span>行情数据载入中…</span></div>');
-        var sum=arr.slice(0,2).map(function(it){return it.name+' '+it.chg+'%';}).join(' · ');
+        // 点品种行 → 复用原站 openMetalHist（近1月/3月/1年/5年/全部 + SVG 折线图）
+        if(mkb)mkb.addEventListener('click',function(ev){
+          var r=ev.target.closest('.a-mr[data-code]');
+          if(r&&r.dataset.code&&typeof window.openMetalHist==='function'){
+            window.openMetalHist(r.dataset.code);
+          }
+        });
         var sm=document.getElementById('aMkSum');
-        if(sm)sm.textContent=(upd?('更新 '+upd+' · '):'')+(sum||'点开展开')+' · 共 '+arr.length+' 品种';
+        if(sm)sm.textContent=(upd?('更新 '+upd+' · '):'')+'共 '+arr.length+' 品种 · 点品种看走势';
       }catch(e){}
 
       // 左导航 = 真实页签，点击走原 goTab
+      // 行业动态(4) 的「业务信号」与「立项线索」重复、规划前瞻(8) 与情报重复，
+      // 用户明确说这两个「功能应该是重复的」→ 移出主导航，功能仍保留在次要入口。
       var nl=document.getElementById('aNavList');
+      var SKIP={4:1,8:1};
+      function jumpTo(d,box){
+        if(!d||typeof window.goTab!=='function')return;
+        var i=+d.dataset.i;
+        [].forEach.call(document.querySelectorAll('#aNavList .a-ni,#aMore .a-ni'),function(x){
+          x.classList.remove('on')});
+        d.classList.add('on');
+        window.goTab(i);
+        main.scrollTop=0;
+        // 切页后业务 JS 会重填 #tSigTip 等动态说明，延时再压一次
+        setTimeout(shorten,500); setTimeout(shorten,1600);
+      }
       if(nl&&window.TABS){
         nl.innerHTML=window.TABS.map(function(t,i){
+          if(SKIP[i])return '';
           var n=t[2]||0;
           return '<div class="a-ni'+(i===0?' on':'')+'" data-i="'+i+'"><span>'+
             String(t[1]).replace(/[<>]/g,'')+'</span>'+(n?'<i>'+n+'</i>':'')+'</div>';
         }).join('')+'<div class="a-ni lock"><span>审计日志</span><i>🔒 需管理员</i></div>';
-        nl.onclick=function(e){
-          var d=e.target.closest('[data-i]'); if(!d||typeof window.goTab!=='function')return;
-          var i=+d.dataset.i;
-          [].forEach.call(nl.querySelectorAll('.a-ni'),function(x){x.classList.remove('on')});
-          d.classList.add('on');
-          window.goTab(i);
-          main.scrollTop=0;
-        };
+        nl.onclick=function(e){jumpTo(e.target.closest('[data-i]'),nl)};
+      }
+      var more=document.getElementById('aMore');
+      if(more){
+        more.innerHTML='<div class="a-sep">次要入口</div>'+
+          '<div class="a-ni a-mini" data-i="4"><span>景气与信号</span></div>'+
+          '<div class="a-ni a-mini" data-i="8"><span>规划前瞻</span></div>';
+        more.onclick=function(e){jumpTo(e.target.closest('[data-i]'),more)};
       }
 
       // 新顶栏控件 → 复用原逻辑
@@ -9594,31 +9728,65 @@ function boot_main(){
       var _os=window.scrollTo.bind(window);
       window.scrollTo=function(x,y){ if(main){main.scrollTop=(y||0);} else {_os(x,y);} };
 
-      // 主题 / 字号
+      // 主题 / 字号：收在顶栏「外观」浮层里
+      var pop=document.getElementById('aPop'), opt=document.getElementById('aOpt');
+      if(opt&&pop){
+        opt.onclick=function(e){e.stopPropagation();pop.classList.toggle('on')};
+        pop.onclick=function(e){e.stopPropagation()};
+        document.addEventListener('click',function(){pop.classList.remove('on')});
+      }
       function setTheme(t){
         document.body.setAttribute('data-theme',t);
-        [].forEach.call(document.querySelectorAll('#aBar button[data-t]'),function(b){
+        [].forEach.call(document.querySelectorAll('#aPop button[data-t]'),function(b){
           b.classList.toggle('on',b.dataset.t===t);});
         try{localStorage.setItem('aTheme',t);}catch(e){}
       }
       function setZ(z){
         document.documentElement.style.setProperty('--z',z);
-        [].forEach.call(document.querySelectorAll('#aBar button[data-z]'),function(b){
+        [].forEach.call(document.querySelectorAll('#aPop button[data-z]'),function(b){
           b.classList.toggle('on',b.dataset.z===z);});
         try{localStorage.setItem('aZ',z);}catch(e){}
       }
-      [].forEach.call(document.querySelectorAll('#aBar button[data-t]'),function(b){
+      [].forEach.call(document.querySelectorAll('#aPop button[data-t]'),function(b){
         b.onclick=function(){setTheme(b.dataset.t);};});
-      [].forEach.call(document.querySelectorAll('#aBar button[data-z]'),function(b){
+      [].forEach.call(document.querySelectorAll('#aPop button[data-z]'),function(b){
         b.onclick=function(){setZ(b.dataset.z);};});
       try{
         var t=localStorage.getItem('aTheme'), z=localStorage.getItem('aZ');
         if(t)setTheme(t); if(z)setZ(z);
       }catch(e){}
 
-      // 分块数据载完后刷新左导航计数
+      // ── 文案瘦身：用户原话「简单写一下就行，不用每一行都教怎么写」 ──
+      // 保留 DOM 与事件绑定，只清掉文本节点 / 隐藏多余入口，避免业务 JS 找不到元素。
+      var wt=document.getElementById('waTip');
+      if(wt){
+        [].forEach.call(wt.childNodes,function(n){if(n.nodeType===3)n.nodeValue='';});
+        // 保留 <b>/<a> 节点（业务 JS 用 closest('#waAll') 判断点击），只隐藏文字
+        [].forEach.call(wt.children,function(n){n.style.display='none';});
+        wt.insertBefore(document.createTextNode('默认不含小项目与兼营业务'),wt.firstChild);
+      }
+      var SHORT=[
+        ['#tSigTip','建厂前端信号，比挂公告早 6~18 个月；能投的标在商机库。'],
+        ['#p-rival .hint','同业与伙伴：按能源 / 环保 / 综合分类，点名称看本库记录。'],
+        ['#p-client .hint','客户与业主：按公开采购记录反推，点开看画像。'],
+        ['#p-wechat .hint','竞对官网与微信深度稿，S / A / B 分级，点标题看原文。'],
+        ['#p-trend .hint:not(#tSigTip)','金属价格是扩产意愿与造价的先行指标，点品种看走势。']
+      ];
+      function shorten(){
+        SHORT.forEach(function(p){
+          [].forEach.call(document.querySelectorAll(p[0]),function(e){
+            var t=e.textContent.trim();
+            if(t&&t!==p[1]){try{e.setAttribute('title',t);}catch(_){}}
+            e.textContent=p[1];
+          });
+        });
+      }
+      shorten();
+
+      // 分块数据载完后刷新左导航计数；业务 JS 会重填 #tSigTip，这里再压一次文案
       setTimeout(function(){
         try{
+          shorten();
           if(window.TABS&&nl){
             [].forEach.call(nl.querySelectorAll('.a-ni[data-i]'),function(d){
               var i=+d.dataset.i, n=window.TABS[i]&&window.TABS[i][2];

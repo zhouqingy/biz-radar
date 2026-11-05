@@ -36,9 +36,15 @@ body[data-theme="night"]{
 body{font-family:var(--f);background:var(--bg);color:var(--ink);height:100vh;overflow:hidden;
   -webkit-font-smoothing:antialiased;transition:background .18s,color .18s}
 
-/* 定稿控制条：只是给你挑主题用，接进正式站点后可整条删掉 */
-#sw{position:fixed;top:0;left:0;right:0;height:46px;z-index:99;background:#1c1917;
-  display:flex;align-items:center;gap:7px;padding:0 16px;color:#fff}
+/* 外观设置：收成右上角一个功能按钮 + 浮层，不再单独占一行 */
+#sw{display:none;position:fixed;top:44px;right:14px;z-index:110;
+  align-items:center;gap:6px;padding:10px 12px;color:#fff;background:#1c1917;
+  border-radius:9px;box-shadow:0 14px 36px rgba(15,23,42,.28);flex-wrap:wrap;max-width:430px}
+#sw.on{display:flex}
+#swTg{position:fixed;top:9px;right:14px;z-index:111;height:26px;padding:0 11px;
+  border:1px solid #44403c;border-radius:6px;background:#1c1917;color:#e7e5e4;
+  font-size:calc(10.5px * var(--z));font-weight:700;cursor:pointer}
+#swTg:hover{border-color:#78716c}
 #sw .lg{font-size:calc(12px * var(--z));font-weight:800;margin-right:8px;white-space:nowrap}
 #sw .lg em{font-size:calc(9px * var(--z));color:#a8a29e;font-weight:600;margin-left:5px}
 #sw button{height:26px;padding:0 11px;border:1px solid #44403c;border-radius:5px;
@@ -46,9 +52,9 @@ body{font-family:var(--f);background:var(--bg);color:var(--ink);height:100vh;ove
 #sw button:hover{border-color:#78716c}
 #sw button.on{background:#f5f5f4;color:#1c1917;border-color:#f5f5f4}
 #sw .a-vr{width:1px;height:18px;background:#3a3632;margin:0 5px;flex:0 0 auto}
-#sw .hint{margin-left:auto;font-size:calc(10px * var(--z));color:#78716c;white-space:nowrap}
+#sw .hint{flex:1 0 100%;font-size:calc(10px * var(--z));color:#78716c;white-space:nowrap}
 
-.app{position:absolute;top:46px;left:0;right:0;bottom:0;display:flex;overflow:hidden}
+.app{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;overflow:hidden}
 
 /* ── 左导航：未来权限菜单的落点 ── */
 .nav{flex:0 0 202px;background:var(--card);border-right:1px solid var(--line);
@@ -241,6 +247,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--ink);height:100vh;ove
 </head>
 <body data-theme="graphite">
 
+<button id="swTg" title="界面主题与字号">◐ 外观</button>
 <div id="sw">
   <span class="lg">界面主题<em>四套配色</em></span>
   <button data-t="graphite" class="on">石墨</button>
@@ -442,10 +449,10 @@ function tgMk(){document.getElementById('mk').classList.toggle('open')}
 var THEME={graphite:'石墨 · 冷灰蓝',paper:'暖纸 · 米色琥珀',jade:'青釉 · 低饱和绿',night:'夜墨 · 暗色'};
 function theme(t){
   document.body.setAttribute('data-theme',t);
-  document.querySelectorAll('#sw button').forEach(function(b){b.classList.toggle('on',b.dataset.t===t)});
+  document.querySelectorAll('#sw button[data-t]').forEach(function(b){b.classList.toggle('on',b.dataset.t===t)});
   location.hash=t;
 }
-document.querySelectorAll('#sw button').forEach(function(b){
+document.querySelectorAll('#sw button[data-t]').forEach(function(b){
   b.addEventListener('click',function(){theme(b.dataset.t)})});
 theme((location.hash||'#graphite').slice(1));
 
@@ -494,6 +501,16 @@ function copyReport(){
   document.querySelectorAll('#sw button[data-z]').forEach(function(b){
     b.onclick=function(){setZ(b.dataset.z);};});
   try{var z=localStorage.getItem('aZ');if(z)setZ(z);}catch(e){}
+})();
+</script>
+
+<script>
+(function(){
+  var sw=document.getElementById('sw'), tg=document.getElementById('swTg');
+  if(!sw||!tg)return;
+  tg.onclick=function(e){e.stopPropagation();sw.classList.toggle('on')};
+  sw.onclick=function(e){e.stopPropagation()};
+  document.addEventListener('click',function(){sw.classList.remove('on')});
 })();
 </script>
 </body>
