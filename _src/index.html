@@ -2605,6 +2605,7 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
 
 <script src="data.core.js?v=202611041807"></script>
 <script src="data.items.js?v=202611041807"></script>
+<script src="data.metalhist.js?v=202611041941"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
    原来是一个 3MB 的 data.js 同步阻塞加载：没下完页面一片空白。
@@ -11250,7 +11251,17 @@ function boot_main(){
     }catch(err){console.error('[A皮肤]',err);}
   }
   // boot.js 是 defer，等它跑完再搬 DOM
-  if(document.readyState==='complete')setTimeout(boot,120);
-  else window.addEventListener('load',function(){setTimeout(boot,120);});
+  var _booted=0;
+  function bootOnce(){if(_booted)return;_booted=1;setTimeout(boot,120);}
+  if(document.readyState==='complete')bootOnce();
+  else{
+    window.addEventListener('load',bootOnce);
+    // 外部字体/行情资源常拖住 load（国内访问尤其明显），加两级兜底；
+    // bootOnce 幂等，boot() 里搬 DOM 的动作绝不会执行两次。
+    if(document.readyState==='loading')
+      document.addEventListener('DOMContentLoaded',function(){setTimeout(bootOnce,600);});
+    else setTimeout(bootOnce,600);
+    setTimeout(bootOnce,2500);
+  }
 })();
 </script>
