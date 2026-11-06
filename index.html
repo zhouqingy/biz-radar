@@ -2034,6 +2034,40 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
       </div>
       <pre id="flText" style="display:none;white-space:pre-wrap;font-size:11.5px;line-height:1.7;background:#fff;border:1px solid var(--line);border-radius:7px;padding:9px 11px;margin-top:10px"></pre>
     </details>
+    <details id="lossFold" style="margin:0 0 12px;border:1px solid var(--line);border-radius:9px;background:#fbfcfe;padding:0 12px 10px">
+      <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2);padding:9px 0">
+        F09 · 丢标与未投复盘 · 只存本机
+        <span id="lsCnt" style="font-weight:400;color:var(--tx3)"></span>
+        <span style="font-weight:400;color:var(--tx3);font-size:11.5px">（结果由你自己填，页面不判输赢）</span>
+      </summary>
+      <div class="br4note" id="lsNote"></div>
+      <div style="display:flex;gap:6px;align-items:center;margin:8px 0 10px;flex-wrap:wrap">
+        <select id="lsPick" style="flex:2 1 220px;min-width:180px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;font-size:12.5px"></select>
+        <select id="lsRes" style="flex:0 1 120px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;font-size:12.5px">
+          <option value="">（选结果）</option>
+          <option value="投了没中">投了没中</option>
+          <option value="没投">没投</option>
+          <option value="已中">已中</option>
+        </select>
+        <input id="lsQ" type="text" placeholder="季度如2026Q4" title="季度由你自己填，如 2026Q4；留空则如实单列「未填季度」，页面不按公告日期自动推算"
+          style="flex:0 1 130px;min-width:110px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;font-size:12.5px" />
+        <input id="lsWho" type="text" placeholder="被谁拿走（可空）" title="被谁拿走由你自己填，可留空；页面不会从 win 字段自动填"
+          style="flex:1 1 150px;min-width:130px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;font-size:12.5px" />
+        <input id="lsWhy" type="text" placeholder="原因/复盘（可空）" title="原因 / 复盘由你自己填，可留空"
+          style="flex:1 1 170px;min-width:140px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;font-size:12.5px" />
+        <a href="javascript:void(0)" data-act="lsAdd"
+          style="padding:6px 12px;border:1px solid var(--line);border-radius:6px;font-size:12px;font-weight:700;color:var(--brand);text-decoration:none">记录复盘</a>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--tx2);margin:12px 0 6px">按季度回看（只按你填的季度做条数统计）</div>
+      <div id="lsQuarter" style="overflow-x:auto"></div>
+      <div style="font-size:12px;font-weight:700;color:var(--tx2);margin:12px 0 6px">复盘明细（按当前①库实时查名）</div>
+      <div id="lsList" style="overflow-x:auto"></div>
+      <div style="margin-top:10px;display:flex;gap:12px;flex-wrap:wrap">
+        <a href="javascript:void(0)" data-act="lsExport" style="font-size:12px;font-weight:700;color:var(--brand);text-decoration:none">导出复盘清单 .txt</a>
+        <span style="font-size:11.5px;color:var(--tx3)">同一项目重复记录 = 覆盖，不产生重复行</span>
+      </div>
+      <pre id="lsText" style="display:none;white-space:pre-wrap;font-size:11.5px;line-height:1.7;background:#fff;border:1px solid var(--line);border-radius:7px;padding:9px 11px;margin-top:10px"></pre>
+    </details>
     <div class="wares" id="wares"></div>
     <div class="swim" id="swim" style="display:none"></div>
     <!-- 筛选条（2026-11-04 改折叠）：用户反复说「整体偏臃肿」。
@@ -4593,10 +4627,11 @@ function br4Num(v){return (v||0).toLocaleString('zh-CN');}
 var USR_KEY='br4user', USR_CACHE=null;   /* 与皮肤已有 aTheme / aZ 分开，互不覆盖 */
 function usrGet(){
   if(USR_CACHE)return USR_CACHE;
-  var o={sub:[],fol:{}};
+  var o={sub:[],fol:{},los:{}};
   try{var r=JSON.parse(localStorage.getItem(USR_KEY)||'{}');
       if(Array.isArray(r.sub))o.sub=r.sub;
-      if(r.fol&&typeof r.fol==='object')o.fol=r.fol;}catch(e){}
+      if(r.fol&&typeof r.fol==='object')o.fol=r.fol;
+      if(r.los&&typeof r.los==='object')o.los=r.los;}catch(e){}
   USR_CACHE=o; return o;
 }
 function usrSet(o){ USR_CACHE=o; try{localStorage.setItem(USR_KEY,JSON.stringify(o));}catch(e){} }
@@ -4648,7 +4683,8 @@ function flRender(){
   el('flCnt').textContent='· '+ids.length+' 条';
   el('flNote').innerHTML='口径：跟进勾选与备注<b>只存你自己的浏览器</b>（localStorage），不写主库、不回流①库、不参与筛选。'+
     '列表按当前①库实时查名；若某条 ID 已不在库中，如实标注「已不在当前①库」并只保留你的备注，不补造项目。'+
-    '本轮只做 <b>F04 跟进台</b>，F09 丢标复盘依赖它、暂不做。';
+    '本区只做 <b>F04 跟进台</b>；<b>F09 丢标复盘</b>在下方独立折叠区，'+
+    '结果 / 季度 / 被谁拿走全部由你自己填，页面不判输赢。';
   if(!ids.length){box.innerHTML='<div class="empty">还没有跟进项目。在项目卡片上点「☆ 跟进」，或在「我的订阅词」命中列表里加。</div>';return;}
   var rows=ids.map(function(id){
     var x=map[id], f=u.fol[id]||{};
@@ -4720,6 +4756,108 @@ document.addEventListener('keydown',function(e){
     var u=usrGet(); if(u.sub.indexOf(q)<0)u.sub.push(q);
     usrSet(u); e.target.value='';
     try{loadAllItems(function(){try{subRender()}catch(err){console.warn('[subEnter]',err)}});}catch(err){}
+  }
+});
+
+/* ── 第 4 批 4a 第四批 · F09 丢标与未投复盘（底稿 §5.23）──────────────
+   ⚠ 口径护栏：结果 / 季度 / 被谁拿走 / 原因**全部由使用者自己填**，页面只存不改。
+   · 不自动从 win / st / hist 判输赢，不按公告日期自动推算季度（那是页面自造判据）；
+   · 三档结果只是下拉选项，不是①库分类字段：不产生 w、不改 bk/st、不参与筛选；
+   · 只写本机 localStorage.br4user.los，不写任何 data*.js、不回流①库、不引后端；
+   · 按季度只做**条数**回看，不做输单率/胜率测算（测算口径须先写进底稿，见第4批清单 F18）；
+   · 数据源只有使用者录入的记录，不读②库、不做客户/对手排名、不反推①库。 */
+var LS_RES=['投了没中','没投','已中'];
+function lsQuarterLabel(q){return String(q||'').trim()||'（未填季度 · 如实单列）';}
+function lsText(u,map){
+  var ids=Object.keys(u.los||{}), o=[
+    '商机雷达 · F09 丢标与未投复盘（只存本机浏览器，不是①库导出）',
+    '口径：结果 / 季度 / 被谁拿走 / 原因均由本人填写；页面不判输赢、不参与任何筛选、不改主数据',''];
+  ids.forEach(function(id,i){
+    var x=map[id], r=u.los[id]||{};
+    o.push((i+1)+'. '+(x?x.t:'（ID '+id+' 已不在当前①库，仅保留你的复盘）'));
+    o.push('   季度 '+lsQuarterLabel(r.q)+' ｜ 结果 '+(r.res||'（未选）')+
+           ' ｜ 被谁拿走 '+(r.who||'（未填）'));
+    o.push('   原因 / 复盘：'+(r.why||'（空）'));
+  });
+  return o.join('\n');
+}
+function lsRender(){
+  var box=el('lsList'); if(!box)return;
+  var u=usrGet(), map=usrMap(), rec=u.los||{}, ids=Object.keys(rec);
+  el('lsCnt').textContent='· '+ids.length+' 条';
+  el('lsNote').innerHTML='口径：<b>结果、季度、被谁拿走、原因全部由你自己填</b>，页面只存不改；'+
+    '<b>不自动从 win / st 判输赢</b>，也不按公告日期自动推算季度（季度不填就如实单列「未填季度」）。'+
+    '三档结果只是下拉选项，<b>不是①库分类字段</b>：不产生 <b>w</b>、不改 <b>bk/st</b>、不参与筛选、不增删①库任何一行。'+
+    '按季度只做<b>条数</b>回看，<b>不做输单率 / 胜率测算</b>（测算口径须先写进底稿，不能只在前端算）。'+
+    '只写本机 localStorage，不写任何 data*.js、不回流主库、不引后端。';
+  /* 下拉只列「我的跟进台」已有项目：F09 依赖 F04，不凭空造项目 */
+  var pick=el('lsPick'), fol=Object.keys(u.fol||{});
+  if(pick){
+    pick.innerHTML=fol.length?fol.map(function(id){
+      var x=map[id];
+      return '<option value="'+esc(id)+'">'+esc(x?x.t:'（'+id+' 已不在当前①库）')+'</option>';
+    }).join(''):'<option value="">（先到「我的跟进台」加项目）</option>';
+  }
+  /* 季度聚合：只数条数，不测算比率 */
+  var g={}, tot=0;
+  ids.forEach(function(id){
+    var q=lsQuarterLabel((rec[id]||{}).q);
+    if(!g[q])g[q]={'投了没中':0,'没投':0,'已中':0,'其他':0,'合计':0};
+    var r=rec[id].res;
+    if(LS_RES.indexOf(r)>=0)g[q][r]++;else g[q]['其他']++;
+    g[q]['合计']++; tot++;
+  });
+  var qs=Object.keys(g).sort().reverse();
+  el('lsQuarter').innerHTML=tot?br4Rows(qs.map(function(q){
+    var v=g[q];return [esc(q),String(v['投了没中']),String(v['没投']),String(v['已中']),
+      String(v['其他']),'<b>'+v['合计']+'</b>'];
+  }),['季度（你填的）','投了没中','没投','已中','未选结果','合计'],['30%','14%','12%','12%','16%','16%'])+
+    '<div style="font-size:11.5px;color:var(--tx3);margin-top:7px">共 <b>'+br4Num(tot)+
+    '</b> 条复盘 / '+qs.length+' 个季度；<b>只是你填的结果条数，不是输单率</b>，不与②库业绩做归因。</div>'
+    :'<div class="empty">还没有复盘记录。选一条跟进项目、填结果与季度后点「记录复盘」。</div>';
+  if(!ids.length){box.innerHTML='<div class="empty">还没有复盘记录。</div>';
+    el('lsText').textContent=lsText(u,map);return;}
+  var rows=ids.map(function(id){
+    var x=map[id], r=rec[id]||{};
+    return [x?esc(x.t):'<span style="color:#c33">该 ID 已不在当前①库，仅保留你的复盘</span>',
+            esc(lsQuarterLabel(r.q)),esc(r.res||'（未选）'),esc(r.who||'—'),esc(r.why||'—'),
+            '<a href="javascript:void(0)" data-act="lsDel" data-id="'+esc(id)+'" style="color:#c33;text-decoration:none;font-weight:700">移除</a>'];
+  });
+  box.innerHTML=br4Rows(rows,['项目','季度','结果','被谁拿走','原因 / 复盘','操作'],
+    ['28%','14%','10%','16%','22%','10%']);
+  el('lsText').textContent=lsText(u,map);
+}
+/* 独立委托：不与 4a2 的 click / change 委托互相干扰（沿用 4a3 的做法） */
+document.addEventListener('click',function(e){
+  var b=(e.target&&e.target.closest)?e.target.closest('[data-act]'):null;
+  if(!b)return;
+  var a=b.getAttribute('data-act'), u=usrGet();
+  if(a==='lsAdd'){
+    var id=String((el('lsPick')||{}).value||''), res=String((el('lsRes')||{}).value||'');
+    if(!id){return;}
+    if(!u.los)u.los={};
+    u.los[id]={res:res,q:String((el('lsQ')||{}).value||'').trim(),
+      who:String((el('lsWho')||{}).value||'').trim(),why:String((el('lsWhy')||{}).value||'').trim(),
+      ts:new Date().toISOString().slice(0,10)};
+    usrSet(u);
+    ['lsQ','lsWho','lsWhy'].forEach(function(k){if(el(k))el(k).value='';});
+    if(el('lsRes'))el('lsRes').value='';
+    try{loadAllItems(function(){try{lsRender()}catch(err){console.warn('[lsAdd]',err)}});}catch(err){lsRender();}
+    return;
+  }
+  if(a==='lsDel'){
+    var did=b.getAttribute('data-id'); if(!did||!u.los)return;
+    delete u.los[did]; usrSet(u); lsRender(); return;
+  }
+  if(a==='lsExport'){
+    var txt=lsText(usrGet(),usrMap()), pre=el('lsText');
+    if(pre){pre.textContent=txt;pre.style.display='block';}
+    try{
+      var blob=new Blob([txt],{type:'text/plain;charset=utf-8'}), url=URL.createObjectURL(blob), d=document.createElement('a');
+      d.href=url; d.download='F09-丢标与未投复盘.txt'; document.body.appendChild(d); d.click(); document.body.removeChild(d);
+      setTimeout(function(){URL.revokeObjectURL(url)},1000);
+    }catch(err){console.warn('[lsExport]',err)}
+    return;
   }
 });
 
@@ -5079,6 +5217,11 @@ document.addEventListener('toggle',function(e){
   if(e.target&&e.target.id==='followFold'&&e.target.open){
     try{ loadAllItems(function(){ try{flRender()}catch(err){console.warn('[followFold]',err)} }); }
     catch(err){console.warn('[followFold load]',err)}
+  }
+  /* 4a 第四批：F09 复盘区，展开才算；补齐全量后再算，不拿首屏切片当全库。 */
+  if(e.target&&e.target.id==='lossFold'&&e.target.open){
+    try{ loadAllItems(function(){ try{lsRender()}catch(err){console.warn('[lossFold]',err)} }); }
+    catch(err){console.warn('[lossFold load]',err)}
   }
 },true);
 document.addEventListener('input',function(e){
