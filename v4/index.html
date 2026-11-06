@@ -565,6 +565,38 @@ body.dark .nav{--navsel:#37618c}
 .preview.tablet .brand em,.preview.mobile .brand em{display:inline-block}
 @media(max-width:720px){.brand{font-size:15px;gap:7px}.brand em{display:inline-block}}
 @media(max-width:1100px){.nav .navbrand{display:none}}
+
+/* ===== 2026-11-06 第五次反馈：②库画像可点 / 卡片两栏填满 / 行情不截断 ===== */
+/* 卡片加大内边距，文字不再贴着左边框；②库单位卡片改两栏，右侧不再是半屏空白 */
+.card{padding:11px 16px}
+.card.orgcard{display:flex;gap:16px;align-items:stretch}
+.card .cmain{flex:1 1 auto;min-width:0}
+.card .cside{flex:none;width:206px;border-left:1px solid var(--line);padding-left:14px;
+ display:flex;flex-direction:column;justify-content:center;gap:2px}
+.card .cname{font-size:12.5px;font-weight:700;color:var(--brand);cursor:pointer;text-decoration:none}
+.card .cname:hover{text-decoration:underline}
+.card.orgcard .csub{margin-top:4px}
+.card.orgcard .cfoot{display:flex;flex-direction:column;gap:2px;flex-wrap:nowrap;
+ margin:0;padding:0;border:0;align-items:stretch}
+.card.orgcard .cfoot span{font-size:10.5px;color:var(--ink3);display:flex;
+ justify-content:space-between;gap:10px}
+.card.orgcard .cfoot b{color:var(--ink2);font-weight:700;font-variant-numeric:tabular-nums}
+.cprofile{margin-top:8px;border:1px solid var(--line2);background:var(--surface);color:var(--brand);
+ border-radius:4px;padding:4px 9px;font-size:10.5px;cursor:pointer;white-space:nowrap;align-self:flex-start}
+.cprofile:hover{border-color:var(--brand);background:var(--brandsoft)}
+/* 顶栏行情：只留一条完整代表品种 + 全览入口，不再横向塞 13 条把数字切一半 */
+.ticker{max-width:none;overflow:visible;flex:none}
+.tk{padding:0 9px}
+.tk.more{color:var(--brand);cursor:pointer;font-weight:700;border-left:1px solid var(--line)}
+.tk.more:hover{background:var(--brandsoft)}
+/* 下拉面板加宽，13 行完整可读 */
+.mktpop{width:min(560px,92vw);max-height:calc(100vh - 72px)}
+.mktrow{grid-template-columns:minmax(0,1fr) 96px 68px 62px;gap:10px;padding:8px}
+.mktsum{display:flex;gap:14px;align-items:center;font-size:10.5px;color:var(--ink2);
+ background:var(--surface2);border:1px solid var(--line);border-radius:5px;padding:7px 10px;margin-bottom:9px}
+.mktsum b{font-variant-numeric:tabular-nums}
+.mktsum b.u{color:var(--up)}.mktsum b.d{color:var(--down)}
+@media(max-width:1240px){.ticker{display:none}}
 </style></head><body>
 <div class="preview" id="preview">
 <div class="app" id="app">
@@ -1085,15 +1117,21 @@ function renderItems(d){
  pager(d.total,d.size,state.page);
 }
 function orgCard(x,grp,i){
- var id='org-'+grp+'-'+i,name=String(pick(x.name,x.n,x.company,'（单位）'));
+ var key=grp+'|'+i,name=String(pick(x.name,x.n,x.company,'（单位）'));
+ /* 存下本条真实数据：点单位名 / 「查看画像」时直接用它渲染右栏，不二次查询，也不会查不到 */
+ state.profileMap[key]={x:x,grp:grp};
  var meta=[['业绩条目',x.n||x.count],['金额(亿)',x.amt],['地区',x.rg||x.city],
-           ['主业',short(pick(x.main,x.type,x.why,x.role),16)],['分层',x.tier],['分组',grp]];
+           ['主业',short(pick(x.main,x.type,x.why,x.role),16)],['分层',x.tier],['分组',groupLabel(grp)]];
  var its=(x.items||[]).slice(0,2).map(function(it){return short(pick(it.t,it.title,it.nm),34);}).filter(Boolean);
- var html='<div class="card"><div class="ch"><b>'+esc(name)+'</b>'+
-  (x.tier?'<span class="tagx t-info">'+esc(x.tier)+'</span>':'')+'</div>'+
-  (its.length?'<div class="csub">'+its.map(esc).join('<br>')+'</div>':'')+
-  '<div class="cfoot">'+meta.filter(function(k){return k[1]!==''&&k[1]!=null;}).slice(0,4).map(function(k){
-    return '<span>'+esc(k[0])+' <b>'+esc(k[1])+'</b></span>';}).join('')+'</div></div>';
+ var html='<div class="card orgcard">'+
+   '<div class="cmain"><div class="ch"><a class="cname" data-profile="'+esc(key)+'" '+
+    'title="点开该单位的 ②库画像">'+esc(name)+' ↗</a>'+
+    (x.tier?'<span class="tagx t-info">'+esc(x.tier)+'</span>':'')+'</div>'+
+   (its.length?'<div class="csub">'+its.map(esc).join('<br>')+'</div>':'')+'</div>'+
+   '<div class="cside"><div class="cfoot">'+
+    meta.filter(function(k){return k[1]!==''&&k[1]!=null;}).slice(0,4).map(function(k){
+     return '<span>'+esc(k[0])+' <b>'+esc(k[1])+'</b></span>';}).join('')+'</div>'+
+    '<button class="cprofile" data-profile="'+esc(key)+'">查看画像 ↗</button></div></div>';
  return {html:html,text:name+' '+JSON.stringify(x)};
 }
 function newsCard(x,grp,i){
@@ -1118,6 +1156,7 @@ function groupLabel(k){
 function renderGroups(d,kind,cardFn){
  var groups=d.groups||{},pick=curMod().pick;
  var keys=pick?pick.filter(function(k){return k in groups;}):Object.keys(groups);
+ state.profileMap={};
  var cards=[],max=0,visMax=0,size=state.size,h='';
  var first=keys.length?(groups[keys[0]]||{}):{};
  /* 兼容新旧后端：新版返回 page/size 并已切片；旧版只读快照每组固定前 20 条、忽略 page。
@@ -1132,7 +1171,7 @@ function renderGroups(d,kind,cardFn){
   h+='<div class="grid">'+items.map(function(x,i){var c=cardFn(x,k,i);cards.push(c);return c.html;}).join('')+'</div>';
  });
  var box=document.getElementById('rows');box.className='rows';box.innerHTML=h||'<div class="empty">接口返回空集合</div>';
- bindStars();
+ bindStars();bindProfile();
  if(srvPaged)pager(max,size,state.page,'按最大分组分页 · 每组独立切片');
  else pager(visMax,size,state.page,'服务端快照版：每组最多返回 '+visMax+
   ' 条；更新薄服务后可翻全量（最大分组 '+num(max)+' 条）');
@@ -1423,13 +1462,21 @@ function loadPeripherals(){
  });
  api('/api/metals').then(function(m){
   if(!m||!m.items)return;state.metals=m;
-  var h='<span class="tk-label" id="tkAll">有色行情 · '+m.items.length+' 品种</span>';
-  m.items.forEach(function(x){var c=Number(x.chg||0);
-   h+='<span class="tk" data-tk="'+esc(x.code)+'"><b>'+esc(x.name)+'</b> '+esc(num(x.price))+
-    ' <i class="'+(c>0?'u':(c<0?'d':''))+'">'+(c>0?'+':'')+esc(x.chg)+'%</i></span>';});
+  /* 顶栏只放一条完整代表品种 + 全览入口；13 个品种的完整价格 / 涨跌 / 迷你走势在下拉面板里。
+     修复前把 13 条数字塞进 310px 横向滚动条，「沪铝 23,000 -0(」被切一半，根本没法看。 */
+  var lead=m.items[0],c=Number(lead.chg||0);
+  var h='<span class="tk-label" id="tkAll">有色行情</span>';
+  h+='<span class="tk" data-tk="'+esc(lead.code)+'" title="点开看 '+esc(lead.name)+' 历史曲线"><b>'+
+     esc(lead.name)+'</b> '+esc(num(lead.price))+' <i class="'+(c>0?'u':(c<0?'d':''))+'">'+
+     (c>0?'+':'')+esc(lead.chg)+'%</i></span>';
+  h+='<span class="tk more" data-mkall="1" title="展开 '+m.items.length+
+     ' 个品种的价格 / 涨跌 / 迷你走势">'+m.items.length+' 品种全览 ▸</span>';
   document.getElementById('ticker').innerHTML=h;
   [].forEach.call(document.querySelectorAll('[data-tk]'),function(el){
    el.onclick=function(){openMetal(el.dataset.tk);};});
+  [].forEach.call(document.querySelectorAll('[data-mkall]'),function(el){
+   /* 必须阻止冒泡：全局 document 点击监听会把刚打开的面板当成「点到外面」立刻收掉 */
+   el.onclick=function(e){if(e)e.stopPropagation();openMkt();};});
   renderMktPanel(m);
  });
  /* 导航角标 + 右栏「实时关注」：数字一律来自契约接口，页面不写死、不重判 */
@@ -1554,11 +1601,49 @@ function bindOwner(){
  [].forEach.call(document.querySelectorAll('[data-owner]'),function(b){
   b.onclick=function(e){e.preventDefault();e.stopPropagation();openOwner(b.dataset.owner);};});
 }
+/* ②库单位画像：直接用 /api/orgs 已返回的同一条记录渲染，不二次查询、不补假数据。
+   修复前 orgCard 生成的是纯 <b> 文本、renderGroups 也没绑点击，点单位永远停在「实时关注」。 */
+function openOrgProfile(x,grp){
+ showPane('owner');
+ var box=document.getElementById('dOwner');
+ var name=String(pick(x.name,x.n,x.company,'（单位）'));
+ var h='<div class="ovhead">'+esc(name)+'</div>';
+ h+='<div class="ovrow"><span>来源分组</span><b>'+esc(groupLabel(grp))+' · ②库按单位聚合</b></div>';
+ [['业绩条目',x.n||x.count],['金额(亿)',x.amt],['地区',x.rg||x.city],
+  ['主业',short(pick(x.main,x.type,x.why,x.role,''),28)],['分层',x.tier],
+  ['分组键',grp]].forEach(function(p){
+  if(p[1]!=null&&p[1]!=='')h+='<div class="ovrow"><span>'+esc(p[0])+'</span><b>'+esc(String(p[1]))+'</b></div>';});
+ var its=x.items||x.recent||[];
+ if(its.length){
+  h+='<div class="ovlist"><b style="font-size:11px">最近项目 / 动向（'+Math.min(its.length,8)+
+     ' 条真实条目，不补造）</b>';
+  its.slice(0,8).forEach(function(it){
+   var t=short(pick(it.t,it.title,it.nm,''),68);
+   h+='<div class="ovitem">'+esc(t)+(it.d?' <span style="color:var(--ink3)">'+esc(it.d)+'</span>':'')+'</div>';});
+  h+='</div>';
+ }
+ h+='<div class="mktnote">字段来自 GET /api/orgs 返回的同一条单位记录；只读展示，'+
+    '不反推①库、不测算、不产生删留规则或投资判断。</div>';
+ h+='<div class="dact"><button data-back="ctx">← 回到实时关注</button></div>';
+ box.innerHTML=h;
+ [].forEach.call(box.querySelectorAll('[data-back]'),function(bt){
+   bt.onclick=function(){setDrawTab('ctx');};});
+}
+function bindProfile(){
+ [].forEach.call(document.querySelectorAll('[data-profile]'),function(el){
+  el.onclick=function(e){e.preventDefault();e.stopPropagation();
+   var rec=(state.profileMap||{})[el.dataset.profile];
+   if(rec)openOrgProfile(rec.x,rec.grp);};});
+}
 function renderMktPanel(m){
  var up=m.items.filter(function(x){return Number(x.chg)>0;}).length;
  var dn=m.items.filter(function(x){return Number(x.chg)<0;}).length;
  document.getElementById('mktBtnTxt').textContent='当日行情 · '+up+'涨 / '+dn+'跌';
  var h='<h4>● 当日行情 <span>更新 '+esc(m.updated||'—')+' · 共 '+m.items.length+' 个品种</span></h4>';
+ h+='<div class="mktsum"><span>上涨 <b class="u">'+up+'</b></span>'+
+    '<span>下跌 <b class="d">'+dn+'</b></span>'+
+    '<span>平盘 <b>'+(m.items.length-up-dn)+'</b></span>'+
+    '<span style="margin-left:auto;color:var(--brand)">点任一品种 → 右栏看历史曲线 ↗</span></div>';
  m.items.forEach(function(x){
   var c=Number(x.chg||0),cls=c>0?'u':(c<0?'d':'f');
   h+='<div class="mktrow" data-mk="'+esc(x.code)+'" title="点开看历史曲线与解读"><b>'+esc(x.name)+
@@ -1566,8 +1651,9 @@ function renderMktPanel(m){
    '<span class="mp">'+esc(num(x.price))+'</span>'+
    '<span class="mc '+cls+'">'+(c>0?'+':'')+esc(x.chg)+'%</span>'+sparkSvg(x.code,58,20)+'</div>';
  });
- h+='<div class="mktnote">点任一品种看历史曲线与解读。行情只是用热用电 / 造价的成本风向标，'+
-    '页面不测算、不产生投资判断；数据来自 data.core.js + data.metalhist.js。</div>';
+ h+='<div class="mktnote">13 个品种的价格 / 涨跌 / 迷你走势都在上面，不用横向拖动；'+
+    '点任一品种，右栏「项目详情」会显示该品种的历史曲线、区间最高 / 最低与数据日。'+
+    '行情只是用热用电 / 造价的成本风向标，页面不测算、不产生投资判断；数据来自 data.core.js + data.metalhist.js。</div>';
  var pop=document.getElementById('mktPop');pop.innerHTML=h;
  [].forEach.call(pop.querySelectorAll('[data-mk]'),function(el){
   el.onclick=function(){pop.classList.remove('on');openMetal(el.dataset.mk);};});
