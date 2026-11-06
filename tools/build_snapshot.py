@@ -359,12 +359,20 @@ def build(args):
                  'note': 'wechat / digest 为 {updated,items} 包装，已展平'},
     })
     mt = core.get('metals', {}) or d.get('metals', {}) or {}
-    hist = load_js(args.data_dir, 'data.metalhist.js').get('series', {}) or {}
+    # 顶层字段是 s（不是 series）；误读 series 会让静态快照的 hist 恒为空、曲线画不出来。
+    # 只裁末 120 点做视图采样，原始全量仍在 data.metalhist.js（不改动、不补造）。
+    _mh = load_js(args.data_dir, 'data.metalhist.js')
+    _raw = _mh.get('s') or _mh.get('series') or {}
+    hist = {}
+    for code, one in _raw.items():
+        if isinstance(one, dict):
+            hist[code] = dict(one, d=(one.get('d') or [])[-120:], p=(one.get('p') or [])[-120:])
     put('metals', {
         'items': mt.get('items', []) or [],
         'updated': mt.get('updated', ''),
         'hist': hist,
-        'meta': {'source': 'data.core.js + data.metalhist.js'},
+        'meta': {'source': 'data.core.js + data.metalhist.js',
+                 'note': 'hist 取顶层 s 字段末 120 点作视图采样；原始全量未改动'},
     })
     pol = load_js(args.data_dir, 'data.policy.js')
     plist, rlist = pol.get('policies', []) or [], pol.get('related', []) or []
