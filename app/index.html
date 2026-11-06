@@ -486,6 +486,85 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:10.5
 .dcard .dact button{border:1px solid var(--line2);background:var(--surface);color:var(--ink2);
  border-radius:5px;padding:3px 8px;font-size:10.5px}
 .dcard .dact button:hover{border-color:var(--brand);color:var(--brand)}
+
+/* ============ 2026-11-06 第四次版式反馈：最左栏回退旧 V3.0 朴素细线版式 ============
+   用户原话：「侧边栏是好的，包括功能啊什么的……但是最左边那个，可以做成这样的」。
+   因此只换视觉：纯文字导航、深蓝实底选中、细线低圆角、功能位细线卡片；
+   9 个入口、模块搜索、数字角标、规划中折叠、点击链路、主区与右栏一律不动。 */
+.nav{--navsel:#3c4d61}
+body.dark .nav{--navsel:#37618c}
+/* 品牌头 */
+.nav .navbrand{display:block;padding:16px 14px 13px;border-bottom:1px solid var(--line);
+ font-size:13px;color:var(--ink);line-height:1.5;flex:none}
+.navbrand .nb-t{display:flex;align-items:center;gap:7px;font-size:15px;font-weight:800;
+ letter-spacing:.3px;color:var(--ink)}
+.navbrand .nb-t em{font-style:normal;font-size:9.5px;font-weight:700;color:var(--ink3);
+ border:1px solid var(--line2);border-radius:3px;padding:1px 5px;letter-spacing:0}
+.navbrand .nb-s{font-size:10.5px;color:var(--ink3);margin-top:5px;letter-spacing:.2px}
+.app.collapsed .nav .navbrand,.preview.tablet .nav .navbrand{display:none}
+/* 搜索框：细线白底，去掉灰底与蓝色光晕 */
+.navtop{padding:10px 12px 9px;border-bottom:1px solid var(--line)}
+.navtop .nf{border:1px solid var(--line2);border-radius:3px;background:var(--surface);height:29px;padding:0 8px}
+.navtop .nf:focus-within{border-color:var(--brand2);background:var(--surface);box-shadow:none}
+.navtop .nf input{font-size:11.5px}
+/* 分组标题：上方细线 + 浅灰小字 */
+.nav .grp{font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--ink3);
+ margin:13px 0 6px;padding:10px 4px 0;border-top:1px solid var(--line);gap:0}
+.nav .grp::after{display:none}
+.navlist{padding:0 10px 12px}
+/* 导航项：纯文字、大字、疏朗、深蓝实底选中（旧版观感） */
+.ni{font-size:13.5px;font-weight:600;color:var(--ink2);padding:9px 12px;
+ border-radius:3px;margin:0 0 1px;gap:0;min-height:38px}
+.ni .nm{flex:1;overflow:hidden;text-overflow:ellipsis}
+.ni:hover{background:var(--surface2);color:var(--ink)}
+.ni.on,.ni.on:hover{background:var(--navsel);color:#fff;font-weight:700}
+.ni.on .cnt,.ni.on .bd{color:#fff;opacity:.9}
+.ni .cnt{font-size:11px;font-weight:700;color:var(--ink3);margin-left:auto;padding-left:8px}
+.ni .bd{font-size:9.5px;background:transparent;border:1px solid var(--line2);border-radius:3px;
+ color:var(--ink3);padding:0 5px;margin-left:auto}
+/* 展开态隐藏图标方块；折叠态 / 平板 / 窄屏仍靠它当缩略导航，所以限定宽屏展开态 */
+@media(min-width:1101px){
+ #preview:not(.tablet) .app:not(.collapsed) .ni .mi{display:none}
+}
+/* 规划中：折叠标题 + 展开后的细线卡片条（单卡 < 60px，不撑高整栏） */
+.nav .fold{border-top:1px solid var(--line);color:var(--ink2);font-size:10.5px;font-weight:700}
+.nav .sdesc{display:none}
+@media(min-width:1101px){
+ #preview:not(.tablet) .app:not(.collapsed) .ni.soon{display:block;position:relative;
+  border:1px solid var(--line2);border-radius:4px;background:var(--surface);
+  padding:5px 9px;margin:0 0 6px;min-height:0;line-height:1.3;font-size:11px}
+ #preview:not(.tablet) .app:not(.collapsed) .ni.soon .mi{display:inline-block;width:auto;height:15px;
+  background:transparent;border:1px solid var(--line2);border-radius:3px;color:var(--ink3);
+  font-size:0;padding:0 5px;vertical-align:middle;line-height:13px}
+ #preview:not(.tablet) .app:not(.collapsed) .ni.soon .mi::after{content:'入口';
+  font-size:9px;font-weight:700;letter-spacing:0}
+ #preview:not(.tablet) .app:not(.collapsed) .ni.soon .nm{display:inline-block;margin:0 0 0 6px;
+  font-size:11.5px;font-weight:700;color:var(--ink2);line-height:16px;vertical-align:middle;
+  max-width:calc(100% - 44px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #preview:not(.tablet) .app:not(.collapsed) .ni.soon .sdesc{display:block;font-size:9.5px;
+  color:var(--ink3);line-height:13px;margin-top:2px;padding-right:42px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #preview:not(.tablet) .app:not(.collapsed) .ni.soon .bd{position:absolute;right:8px;bottom:5px;
+  margin:0;font-size:9px;line-height:13px;padding:0 5px}
+ #preview:not(.tablet) .app:not(.collapsed) .ni.soon.on{background:var(--brandsoft);border-color:var(--brand)}
+}
+/* 底部资产速览 / 脚注：去灰底，改细线 + 灰字 */
+.navside{background:var(--surface);border-top:1px solid var(--line);padding:10px 13px 9px}
+.navside .nst{font-size:9.5px;letter-spacing:.5px}
+.navside .nsnote{border-top:1px solid var(--line)}
+.navfoot{font-size:9.5px;color:var(--ink3);border-top:1px solid var(--line);padding:8px 13px}
+/* 顶栏品牌方块弱化：避免和左栏品牌头出现两个深蓝实心块 */
+.brand{font-size:15px;color:var(--ink);gap:7px}
+.brand .logo{border:1px solid var(--line2);background:var(--surface);color:var(--brand);
+ border-radius:4px;width:24px;height:24px;font-size:12px}
+.brand em{background:var(--surface);border-color:var(--line2);color:var(--ink3)}
+/* 旧版顶栏本就没有品牌文字：宽屏把品牌名交给左栏品牌头，顶栏只留细线方块 logo，
+   避免出现两个「商机雷达 V4」；左栏被隐藏的窄屏 / 平板 / 手机档恢复顶栏文字。 */
+@media(min-width:721px){.brand{font-size:0;gap:0}.brand em{display:none}}
+.preview.tablet .brand,.preview.mobile .brand{font-size:15px;gap:7px}
+.preview.tablet .brand em,.preview.mobile .brand em{display:inline-block}
+@media(max-width:720px){.brand{font-size:15px;gap:7px}.brand em{display:inline-block}}
+@media(max-width:1100px){.nav .navbrand{display:none}}
 </style></head><body>
 <div class="preview" id="preview">
 <div class="app" id="app">
@@ -536,7 +615,10 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:10.5
  </header>
  <div class="body">
   <aside class="nav">
-   <div class="brandsub">都市环保 · 江浙沪皖 · 只读视图</div>
+   <div class="brandsub navbrand">
+    <div class="nb-t">商机雷达<em>V4</em></div>
+    <div class="nb-s">都市环保 · 江浙沪皖 · 只读视图</div>
+   </div>
    <div class="navtop"><div class="nf"><span style="color:var(--ink3);font-size:12px">⌕</span>
     <input id="navFilter" placeholder="筛选功能 / 模块…"></div></div>
    <div class="navlist" id="navList"></div>
@@ -708,12 +790,13 @@ function renderNav(){
   if(g==='规划中'&&!f){
    h+='<div class="grp fold" data-fold="1">'+(state.soonOpen?'▾':'▸')+' 功能位 · 规划中（'+list.length+'）</div>';
    if(!state.soonOpen)return;
-  }else h+='<div class="grp">功能位 · 已接入</div>';
+  }else h+='<div class="grp">功能位 · 已接入（'+list.length+'）</div>';
   list.forEach(function(m){
    var soon=isSoon(m),c=state.counts[m.badge];
    h+='<div class="ni'+(soon?' soon':'')+(m.id===state.mod?' on':'')+'" data-id="'+m.id+'" title="'+esc(m.name)+'">'+
       '<span class="mi">'+esc(m.ic)+'</span><span class="nm">'+esc(m.name)+'</span>'+
-      (soon?'<span class="bd">待实现</span>':(c!=null?'<span class="cnt">'+esc(num(c))+'</span>':''))+'</div>';
+      (soon?'<span class="sdesc">'+esc(m.desc2||m.desc||'')+'</span><span class="bd">待实现</span>':
+       (c!=null?'<span class="cnt">'+esc(num(c))+'</span>':''))+'</div>';
   });
  });
  if(!h)h='<div style="font-size:11px;color:var(--ink3);padding:12px 8px">没有匹配的功能模块</div>';
