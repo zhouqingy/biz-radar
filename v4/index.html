@@ -108,8 +108,12 @@ a:hover{text-decoration:underline}
 .pop .quick button:hover{border-color:var(--brand2);color:var(--brand)}
 
 /* ============ 主体三区 ============ */
-.body{display:grid;grid-template-columns:var(--navw) minmax(0,1fr) 0;flex:1;min-height:0}
-.app.collapsed .body{grid-template-columns:var(--navw2) minmax(0,1fr) 0}
+/* 旧版三栏常驻：右信息栏默认就在，点条目只换内容，不从边上弹出、不挤压主区。
+   2026-11-06 用户反馈「点完从边上弹出来更奇怪」→ 改回常驻。drawer 类保留给窄屏浮层。 */
+.body{display:grid;grid-template-columns:var(--navw) minmax(0,1fr) var(--draww);flex:1;min-height:0}
+.app.collapsed .body{grid-template-columns:var(--navw2) minmax(0,1fr) var(--draww)}
+.app.rightoff .body{grid-template-columns:var(--navw) minmax(0,1fr) 0}
+.app.collapsed.rightoff .body{grid-template-columns:var(--navw2) minmax(0,1fr) 0}
 .app.drawer .body{grid-template-columns:var(--navw) minmax(0,1fr) var(--draww)}
 .app.collapsed.drawer .body{grid-template-columns:var(--navw2) minmax(0,1fr) var(--draww)}
 .nav{background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden;min-height:0;
@@ -221,9 +225,12 @@ select.sel{border:1px solid var(--line2);background:var(--surface2);color:var(--
 .row:last-child{border-bottom:0}
 .row:hover{background:var(--surface2)}
 .row .rno{font-size:10.5px;color:var(--ink3);text-align:right;font-variant-numeric:tabular-nums}
-.row .rmain{min-width:0}
-.row .rtags{display:inline-flex;gap:4px;flex-wrap:wrap;align-items:center;margin-right:5px}
-.row .rt{font-size:12.5px;font-weight:600;line-height:1.45;color:var(--ink);cursor:pointer;text-decoration:none}
+.row .rmain{min-width:0;overflow:hidden}
+/* 旧版明细行：标题单行省略，完整标题在右栏项目详情里；行高不再被长标题撑开 */
+.row .rtitle{display:flex;align-items:center;gap:5px;min-width:0}
+.row .rtags{display:inline-flex;gap:4px;align-items:center;flex:none}
+.row .rt{flex:1 1 auto;min-width:0;font-size:12.5px;font-weight:600;line-height:1.45;
+ color:var(--ink);cursor:pointer;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row .rt:hover{color:var(--brand);text-decoration:underline}
 .row .rlink{font-size:9.5px;color:var(--ink3);margin-left:6px;text-decoration:none;white-space:nowrap}
 .row .rlink:hover{color:var(--brand)}
@@ -246,16 +253,18 @@ select.sel{border:1px solid var(--line2);background:var(--surface2);color:var(--
  .row .rbuyer{display:none}}
 @media(max-width:760px){.row{grid-template-columns:24px minmax(0,1fr) 78px 50px;gap:7px;padding:8px 9px}
  .row .rdate,.row .ract button.star{display:none}}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:10px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 13px;
- box-shadow:var(--sh);min-width:0;display:flex;flex-direction:column;gap:6px;transition:border-color .15s}
-.card:hover{border-color:var(--line2)}
-.card .ch{display:flex;align-items:flex-start;gap:7px}
-.card .ch b{font-size:12px;line-height:1.45;flex:1;word-break:break-word}
-.card .csub{font-size:10.5px;color:var(--ink3);line-height:1.55;
- display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.card .cfoot{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:auto;padding-top:4px;
- border-top:1px dashed var(--line)}
+/* 2026-11-06：卡片网格改回旧版紧凑明细行，去掉花哨方块与阴影 */
+.grid{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:var(--r);
+ background:var(--surface);overflow:hidden}
+.card{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;
+ padding:9px 12px;box-shadow:none;min-width:0;display:block}
+.card:last-child{border-bottom:0}
+.card:hover{background:var(--surface2)}
+.card .ch{display:block}
+.card .ch b{font-size:12px;line-height:1.5;word-break:break-word}
+.card .csub{font-size:10.5px;color:var(--ink3);line-height:1.55;margin-top:2px;
+ display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .cfoot{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:5px;padding:0;border:0}
 .card .cfoot span{font-size:10px;color:var(--ink3)}
 .card .cfoot b{color:var(--ink2);font-weight:600}
 .grphead{font-size:11px;font-weight:800;color:var(--ink2);margin:14px 0 8px;display:flex;
@@ -336,8 +345,9 @@ select.sel{border:1px solid var(--line2);background:var(--surface2);color:var(--
 .slot.no b{text-decoration:none}
 
 /* ============ 右抽屉：上下文 / 条目详情 ============ */
-.draw{background:var(--surface);border-left:1px solid var(--line);display:none;overflow:auto;min-height:0}
-.app.drawer .draw{display:block}
+.draw{background:var(--surface);border-left:1px solid var(--line);display:block;overflow:auto;min-height:0;
+ position:sticky;top:58px;align-self:start;height:calc(100vh - 58px)}
+.app.rightoff .draw{display:none}
 .drawtabs{display:flex;gap:4px;padding:10px 11px;border-bottom:1px solid var(--line);position:sticky;top:0;
  background:var(--surface);z-index:2}
 .drawtabs button{flex:1;border:1px solid var(--line);background:var(--surface2);color:var(--ink2);
@@ -355,16 +365,25 @@ select.sel{border:1px solid var(--line2);background:var(--surface2);color:var(--
 /* ============ 响应式三档（真实屏宽；预览档在个人中心里复刻） ============ */
 @media(max-width:1200px){.ticker{display:none}.pk{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:1100px){
- .body,.app.drawer .body,.app.collapsed .body,.app.collapsed.drawer .body{grid-template-columns:var(--navw2) minmax(0,1fr) 0}
- .app.drawer .draw{display:none}
- .navtop,.nav .grp,.ni .nm,.ni .bd,.navfoot,.navside{display:none}
+ .body,.app.drawer .body,.app.collapsed .body,.app.collapsed.drawer .body,
+ .app.rightoff .body,.app.collapsed.rightoff .body{grid-template-columns:var(--navw2) minmax(0,1fr) 0}
+ /* 窄屏：右栏退化为点条目才浮出的浮层；宽屏始终常驻 */
+ .draw{display:none;position:fixed;right:0;top:58px;bottom:0;width:min(330px,88vw);height:auto;
+  z-index:38;box-shadow:var(--sh2)}
+ .app.drawer .draw{display:block!important}
+ .app.rightoff .draw{display:none!important}
+ .navtop,.nav .grp,.ni .nm,.ni .bd,.ni .cnt,.navfoot,.navside,.nav .brandsub{display:none}
  .ni{justify-content:center;padding:7px 0}
  .dstat{display:none}
  .row{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 80px;gap:10px}
 }
 @media(max-width:720px){
- .body,.app.drawer .body,.app.collapsed .body,.app.collapsed.drawer .body{grid-template-columns:minmax(0,1fr)}
- .nav,.draw{display:none!important}
+ .body,.app.drawer .body,.app.collapsed .body,.app.collapsed.drawer .body,
+ .app.rightoff .body,.app.collapsed.rightoff .body{grid-template-columns:minmax(0,1fr)}
+ .nav{display:none!important}
+ .draw{top:0}
+ .app.drawer .draw{display:block!important}
+ .app.rightoff .draw{display:none!important}
  .top{height:auto;padding:8px 12px;flex-wrap:wrap}
  .gs{order:5;flex-basis:100%;max-width:none}
  .top-right{order:2}
@@ -382,14 +401,19 @@ select.sel{border:1px solid var(--line2);background:var(--surface2);color:var(--
 .preview.mobile{max-width:400px;margin:0 auto;border:1px solid var(--line);box-shadow:var(--sh2)}
 .preview.tablet .body,.preview.tablet .app.drawer .body,
 .preview.tablet .app.collapsed .body,.preview.tablet .app.collapsed.drawer .body{grid-template-columns:var(--navw2) minmax(0,1fr) 0}
-.preview.tablet .app.drawer .draw,.preview.tablet .navtop,.preview.tablet .nav .grp,
-.preview.tablet .ni .nm,.preview.tablet .ni .bd,.preview.tablet .navfoot,
-.preview.tablet .navside,.preview.tablet .dstat{display:none}
+.preview.tablet .navtop,.preview.tablet .nav .grp,
+.preview.tablet .ni .nm,.preview.tablet .ni .bd,.preview.tablet .ni .cnt,.preview.tablet .navfoot,
+.preview.tablet .navside,.preview.tablet .dstat,.preview.tablet .nav .brandsub{display:none}
+.preview.tablet .draw{display:none;position:fixed;right:0;top:58px;bottom:0;width:min(330px,88vw);
+ height:auto;z-index:38;box-shadow:var(--sh2)}
+.preview.tablet .app.drawer .draw{display:block!important}
 .preview.tablet .ni{justify-content:center;padding:7px 0}
 .preview.tablet .pk{grid-template-columns:repeat(2,minmax(0,1fr))}
 .preview.mobile .body,.preview.mobile .app.drawer .body,
 .preview.mobile .app.collapsed .body,.preview.mobile .app.collapsed.drawer .body{grid-template-columns:minmax(0,1fr)}
-.preview.mobile .nav,.preview.mobile .draw,.preview.mobile .dstat{display:none!important}
+.preview.mobile .nav,.preview.mobile .dstat{display:none!important}
+.preview.mobile .draw{display:none;top:0}
+.preview.mobile .app.drawer .draw{display:block!important}
 .preview.mobile .top{height:auto;padding:8px 12px;flex-wrap:wrap}
 .preview.mobile .gs{order:5;flex-basis:100%;max-width:none}
 .preview.mobile .pk{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -438,6 +462,29 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:10.5
 .ovitem a{color:var(--brand);text-decoration:none}
 .ovtag{display:inline-block;font-size:9.5px;background:var(--brandsoft);color:var(--brand);
  border-radius:4px;padding:1px 6px;margin:0 4px 4px 0}
+
+/* ============ 2026-11-06 回退优化：常驻右栏 / 可点链接 / 导航角标 ============ */
+.row .rlink.act{color:var(--brand)}
+.row .rlink.mir{color:var(--ink3)}
+.row .rlink:hover{text-decoration:underline}
+.nav .brandsub{font-size:10px;color:var(--ink3);padding:0 8px 9px;border-bottom:1px solid var(--line)}
+.nav .cnt{font-size:10px;color:var(--ink3);font-variant-numeric:tabular-nums;flex:none;font-weight:700}
+.ni.on .cnt{color:var(--brand)}
+.nav .fold{cursor:pointer}
+.nav .fold:hover{color:var(--brand)}
+.sidehint{font-size:10px;color:var(--ink3);line-height:1.75;background:var(--surface2);
+ border:1px dashed var(--line2);border-radius:8px;padding:8px 10px;margin-bottom:9px}
+.sidehint b{color:var(--ink2)}
+.dcard .dk a{color:var(--brand);text-decoration:none}
+.dcard .dk a:hover{text-decoration:underline}
+.dcard .dk .mir{color:var(--ink3);font-size:10px}
+.dcard .dtitle{font-size:12px;font-weight:700;line-height:1.55;color:var(--ink);margin-bottom:7px}
+.dhist{font-size:10.5px;color:var(--ink2)}
+.dhist div{padding:3px 0;border-bottom:1px dashed var(--line)}
+.dcard .dact{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.dcard .dact button{border:1px solid var(--line2);background:var(--surface);color:var(--ink2);
+ border-radius:5px;padding:3px 8px;font-size:10.5px}
+.dcard .dact button:hover{border-color:var(--brand);color:var(--brand)}
 </style></head><body>
 <div class="preview" id="preview">
 <div class="app" id="app">
@@ -451,7 +498,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:10.5
    <div class="ticker" id="ticker"></div>
    <div class="dstat"><i id="dot"></i><span id="ds">正在读取数据源…</span></div>
    <button class="iconbtn hasdot" id="btnBell" title="通知">♧</button>
-   <button class="iconbtn" id="btnDraw" title="上下文抽屉">◧</button>
+   <button class="iconbtn" id="btnDraw" title="隐藏 / 显示右侧信息栏">◨</button>
    <button class="avatar" id="btnUser" title="个人中心">赵</button>
   </div>
   <!-- 个人中心：原顶部验收工具条（预览档 / 暗色 / 状态）全部收进这里 -->
@@ -488,6 +535,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:10.5
  </header>
  <div class="body">
   <aside class="nav">
+   <div class="brandsub">都市环保 · 江浙沪皖 · 只读视图</div>
    <div class="navtop"><div class="nf"><span style="color:var(--ink3);font-size:12px">⌕</span>
     <input id="navFilter" placeholder="筛选功能 / 模块…"></div></div>
    <div class="navlist" id="navList"></div>
@@ -521,19 +569,23 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:10.5
    <div class="slots" id="slots"></div>
   </main>
   <aside class="draw">
-   <div class="drawtabs"><button id="dtCtx" class="on">上下文</button><button id="dtDetail">条目详情</button><button id="dtOwner">业主画像</button></div>
+   <div class="drawtabs"><button id="dtCtx" class="on">实时关注</button><button id="dtDetail">项目详情</button><button id="dtOwner">业主画像</button></div>
    <div class="drawbody">
     <div id="drawCtx">
+     <div class="sidehint"><b>这一栏常驻，不会从边上弹出。</b><br>
+      点列表<b>标题 / 详情</b> → 项目详情；点<b>业主名</b> → 业主画像；点<b>原文 ↗</b> → 原始公告；
+      点顶栏<b>当日行情</b>里的品种 → 历史曲线。顶部三个按钮随时切回来。</div>
+     <div class="dcard" id="dFocus"><b>实时关注 · 只读事实</b>读取中…</div>
      <div class="dcard" id="dRule"><b>规则源（资产）</b>读取中…</div>
      <div class="dcard" id="dHealth"><b>数据体检（资产）</b>读取中…</div>
      <div class="dcard" id="dCollect"><b>抓取状态</b>读取中…</div>
      <div class="dcard"><b>占位规范</b>规划中的功能位置已预留，标「规划中 / 数据未接」；不画假图、不写死数字、不产生筛选判据。</div>
     </div>
     <div id="drawDetail" style="display:none">
-     <div class="dcard" id="dDetail"><b>条目详情</b>点数据行标题或右侧「详情」，通过 <code>GET /api/opportunities/:id</code> 拉取该条真实字段与状态历史。</div>
+     <div class="dcard" id="dDetail"><b>项目详情</b>点列表里的项目标题或右侧「详情」，这里会显示该条的真实字段、原文入口与状态历史。</div>
     </div>
     <div id="drawOwner" style="display:none">
-     <div class="dcard" id="dOwner"><b>业主画像</b>点数据行里的业主名，从 ②业绩 / 动向库按单位聚合只读展示；不反推①库、不测算。</div>
+     <div class="dcard" id="dOwner"><b>业主画像</b>点列表里的业主名，这里显示 ②业绩 / 动向库按单位聚合的只读档案；不反推①库、不测算。</div>
     </div>
    </div>
   </aside>
@@ -547,62 +599,64 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:10.5
    每个模块都有自己的模块内检索框（search: api / local / off）。
    ================================================================== */
 var MODS=[
- {id:'opportunities',name:'找商机',ic:'商',grp:'主线',api:'/api/opportunities',kind:'items',search:'api',
+ {id:'opportunities',name:'找商机',ic:'商',badge:'items',grp:'已接入',api:'/api/opportunities',kind:'items',search:'api',
   desc:'①投放 / 商机库 · 标的必须是能源设施本体；关注档与能否投由服务端入库时判定，页面只读',
   ph:'搜项目标题 / 业主 / 中标单位 / 摘要…',size:12,
   slots:[['F01 相关度理由卡','规划中 · 数据未接'],['F07 中标企业榜 / 赛道份额','规划中 · 份额口径待定'],
          ['F08 中标价基准','规划中 · 需测算口径'],['F06 中标结果库：主体在②库，跳原文','no','已裁决不做']]},
- {id:'orgs',name:'同业与伙伴',ic:'同',grp:'主线',api:'/api/orgs',kind:'orgs',search:'api',
+ {id:'orgs',name:'同业与伙伴',ic:'同',badge:'orgs',grp:'已接入',api:'/api/orgs',kind:'orgs',search:'api',
   desc:'②业绩 / 动向库 · 按单位聚合；只读展示，不反推①库',
   ph:'搜单位名称 / 主业 / 地区 / 业绩条目…',size:12,
   slots:[['F10 对手动态时间线','规划中 · 数据未接'],['F11 对手画像卡 + 重叠度','规划中 · 算法需口径'],
          ['F12 联合体网络图','规划中 · 数据未接'],['F13 对手预警','规划中 · 依赖订阅'],
          ['F14 伙伴业绩卡','规划中 · 按单位聚合'],['F15 资质采集：四库一平台跳转','no','已裁决不做']]},
- {id:'clients',name:'客户与业主',ic:'客',grp:'主线',api:'/api/orgs?type=owner',kind:'orgs',search:'api',
+ {id:'clients',name:'客户与业主',ic:'客',badge:'clients',grp:'已接入',api:'/api/orgs?type=owner',kind:'orgs',search:'api',
   desc:'业主 / 客户单位分组（buyers / clients / domestic）· ②库只读',
   ph:'搜业主名称 / 地区 / 项目 / 主业…',size:12,
   slots:[['F18 业主 360 + 三类画像测算','规划中 · 需新口径'],['F19 国内 / 海外业主分栏','规划中 · 数据未接'],
          ['F20 业主复购提醒','规划中 · 依赖跟进台']]},
- {id:'overseas',name:'海外机会',ic:'海',grp:'主线',api:'/api/news?kind=all',kind:'news',search:'api',
+ {id:'overseas',name:'海外机会',ic:'海',badge:'overseas',grp:'已接入',api:'/api/news?kind=all',kind:'news',search:'api',
   pick:['overseas','overseaFlash','overseaOdi'],
   desc:'海外投资 / 快讯 / 境外投资备案三组情报 · 只读，不产生投资判断',
   ph:'搜海外项目 / 企业 / 国别 / 摘要…',size:12,
   slots:[['F26 矿→冶炼→自备电厂链路图','规划中 · 数据未接'],
          ['F27「跟不跟」决策卡','no','已裁决不做 · 口径禁止自造投资判断']]},
- {id:'metals',name:'有色金属 · 行情',ic:'金',grp:'主线',api:'/api/metals',kind:'metals',search:'local',hidden:true,
+ {id:'metals',name:'有色金属 · 行情',ic:'金',grp:'已接入',api:'/api/metals',kind:'metals',search:'local',hidden:true,
   desc:'行情 13 个品种 · 有色主线（用热用电 + 海水淡化）的成本风向标；价格与涨跌来自数据包，页面不测算',
   ph:'搜品种 / 代码 / 解读…（如 沪铜、CU、电解铝）',
   slots:[['F17 双主线景气传导层','规划中 · 需口径'],['F24 价格异动预警','规划中 · 依赖订阅']]},
- {id:'trend',name:'行业动态',ic:'动',grp:'情报',api:'/api/news?kind=trends',kind:'news',search:'api',
+ {id:'trend',name:'行业动态',ic:'动',hidden:true,grp:'已接入',api:'/api/news?kind=trends',kind:'news',search:'api',
   desc:'政策 / 市场 / 技术动态 · 按标题、标签、摘要检索，支持分页',
   ph:'搜动态标题 / 标签 / 摘要…',size:12,
   slots:[['行业动态时序','规划中 · 需口径'],['F23 与情报精选归属收拢','规划中 · 结构待定']]},
- {id:'wechat',name:'情报精选',ic:'情',grp:'情报',api:'/api/news?kind=wechat',kind:'news',search:'api',
-  desc:'公众号深稿 / 快讯 · 只读视图，外链跳原文',
-  ph:'搜文章标题 / 来源 / 标签…',size:12,
+ {id:'wechat',name:'情报 · 动态 / 精选 / 摘要',ic:'情',grp:'已接入',badge:'news',
+  api:'/api/news?kind=trends,wechat,digest',kind:'news',search:'api',
+  pick:['trends','wechat','digest'],
+  desc:'行业动态 / 公众号精选 / 情报摘要三组合并为一个入口（原三个 tab 重复）；只读视图，外链跳原文',
+  ph:'搜情报标题 / 来源 / 标签 / 摘要…',size:12,
   slots:[['赛道打标入口（现挂在行业动态）','规划中 · 归属待收拢']]},
- {id:'digest',name:'情报摘要',ic:'摘',grp:'情报',api:'/api/news?kind=digest',kind:'news',search:'api',
+ {id:'digest',name:'情报摘要',ic:'摘',hidden:true,grp:'已接入',api:'/api/news?kind=digest',kind:'news',search:'api',
   desc:'中标签约 / 项目动向摘要 · 按来源与标签筛选',
   ph:'搜摘要标题 / 来源单位 / 标签…',size:12,
   slots:[['F23 公众号深稿按赛道打标','规划中 · 归属待收拢']]},
- {id:'policies',name:'政策档',ic:'政',grp:'情报',api:'/api/policies',kind:'policies',search:'api',
+ {id:'policies',name:'政策档',ic:'政',badge:'policies',grp:'已接入',api:'/api/policies',kind:'policies',search:'api',
   desc:'837 号令 / 49 号令 + 配套规定逐条原文 · 官方原文，不是二手解读',
   ph:'搜政策文号 / 条款原文 / 关键词…（如 跨境资金）',
   slots:[['F22 政策→赛道标注','规划中 · 需口径']]},
- {id:'plan',name:'规划前瞻',ic:'规',grp:'决策',api:'/api/opportunities',kind:'items',sort:'d',search:'api',
+ {id:'plan',name:'规划前瞻',ic:'规',hidden:true,grp:'已接入',api:'/api/opportunities',kind:'items',sort:'d',search:'api',
   desc:'阶段枚举由接口 facets 返回，页面不写死；默认按发布日期最新，不预设任何阈值',
   ph:'搜规划项目 / 业主 / 阶段…',size:12,
   hint:'阶段筛选全部来自 <code>facets.stage</code>；点选任一阶段即按该阶段视图筛选，不产生新的删留规则。',
   slots:[['与立项线索交叉提醒','规划中 · 数据未接']]},
- {id:'changes',name:'本周变化',ic:'变',grp:'决策',api:'/api/changes',kind:'changes',search:'local',
+ {id:'changes',name:'本周变化',ic:'变',badge:'changes',grp:'已接入',api:'/api/changes',kind:'changes',search:'local',
   desc:'F31 新增 / 阶段推进 / 新出结果 / 疑似漏项四类 · 都是提示去原文复核，不代表改库',
   ph:'搜本周变化条目 / 规则说明…（本机视图筛选）',
   slots:[['漏项判据收紧','规划中 · 待口径确认']]},
- {id:'platforms',name:'招标平台 · 体检',ic:'台',grp:'资料',api:'/api/health',kind:'health',search:'local',
+ {id:'platforms',name:'招标平台 · 体检',ic:'台',badge:'health',grp:'已接入',api:'/api/health',kind:'health',search:'local',
   desc:'数据质量体检 23 项 · 字段缺失、链接、日期异常，数字由 healthcheck 生成',
   ph:'搜体检项 / 说明…（本机视图筛选）',
   slots:[['采集频次与漏项提示','规划中 · 依赖采集调度']]},
- {id:'help',name:'口径与帮助',ic:'口',grp:'资料',api:'/api/rules',kind:'rules',search:'local',
+ {id:'help',name:'口径与帮助',ic:'口',badge:'rules',grp:'已接入',api:'/api/rules',kind:'rules',search:'local',
   desc:'筛选逻辑口径（资产）· 服务端规则源只读展示；前端不重写业务判定',
   ph:'搜口径 / 规则码 / 说明…（本机视图筛选）',
   slots:[['F29 数据血缘说明','规划中 · 需鉴权'],['审计日志（需管理员）','规划中 · 需鉴权']]}
@@ -620,9 +674,9 @@ var SOON=[
 ];
 SOON.forEach(function(s){s.grp='规划中';s.kind='soon';s.search='off';s.api='';s.desc2=s.desc;});
 var ALL=MODS.concat(SOON);
-var GROUPS=['主线','情报','决策','资料','规划中'];
+var GROUPS=['已接入','规划中'];
 var state={mod:'opportunities',page:1,size:12,q:'',gq:'',region:'',stage:'',segment:'',focus:'',sort:'sc',
-           facets:null,offline:false,theme:'light',preview:'full',fav:{},metals:null,drawTab:'ctx',navFilter:''};
+           facets:null,offline:false,theme:'light',preview:'full',fav:{},metals:null,drawTab:'ctx',navFilter:'',counts:{},soonOpen:false,curItems:[]};
 try{var _s=JSON.parse(localStorage.getItem('br4v4app')||'{}');
  if(_s){if(_s.theme)state.theme=_s.theme;if(_s.fav)state.fav=_s.fav;}}catch(e){}
 function savePref(){try{localStorage.setItem('br4v4app',JSON.stringify({theme:state.theme,fav:state.fav}));}catch(e){}}
@@ -756,18 +810,23 @@ function renderNav(){
  GROUPS.forEach(function(g){
   var list=ALL.filter(function(m){return m.grp===g&&!m.hidden&&(!f||m.name.toLowerCase().indexOf(f)>=0||m.id.indexOf(f)>=0);});
   if(!list.length)return;
-  h+='<div class="grp">'+g+'</div>';
+  if(g==='规划中'&&!f){
+   h+='<div class="grp fold" data-fold="1">'+(state.soonOpen?'▾':'▸')+' 功能位 · 规划中（'+list.length+'）</div>';
+   if(!state.soonOpen)return;
+  }else h+='<div class="grp">功能位 · 已接入</div>';
   list.forEach(function(m){
-   var soon=isSoon(m);
+   var soon=isSoon(m),c=state.counts[m.badge];
    h+='<div class="ni'+(soon?' soon':'')+(m.id===state.mod?' on':'')+'" data-id="'+m.id+'" title="'+esc(m.name)+'">'+
       '<span class="mi">'+esc(m.ic)+'</span><span class="nm">'+esc(m.name)+'</span>'+
-      (soon?'<span class="bd">待实现</span>':'')+'</div>';
+      (soon?'<span class="bd">待实现</span>':(c!=null?'<span class="cnt">'+esc(num(c))+'</span>':''))+'</div>';
   });
  });
  if(!h)h='<div style="font-size:11px;color:var(--ink3);padding:12px 8px">没有匹配的功能模块</div>';
  document.getElementById('navList').innerHTML=h;
  [].forEach.call(document.querySelectorAll('#navList .ni'),function(el){
   el.onclick=function(){closePops();go(el.dataset.id);};});
+ [].forEach.call(document.querySelectorAll('#navList .fold'),function(el){
+  el.onclick=function(){state.soonOpen=!state.soonOpen;renderNav();};});
 }
 /* 旧页 #t0–#t8 深链映射（见 app/LEGACY_REDIRECT.md）；只在入口归一化，旧归档页不删不改不注入。 */
 var LEGACY={t0:'opportunities',t1:'orgs',t2:'clients',t3:'overseas',
@@ -784,14 +843,14 @@ function go(id){
  state.sort=m.sort||'sc';state.size=m.size||12;state.facets=null;
  document.getElementById('gq').value='';document.getElementById('extra').innerHTML='';
  if(location.hash!=='#/'+id)location.hash='#/'+id;
- state.drawTab='ctx';setDrawTab('ctx');
+ state.drawTab='ctx';setDrawTab('ctx');resetPanes();
  renderNav();load();
 }
 window.addEventListener('hashchange',function(){
  var id=normHash();
  if(id&&id!==state.mod&&modById(id).id===id){var m=modById(id);
   state.mod=id;state.page=1;state.q='';state.size=m.size||12;state.sort=m.sort||'sc';state.facets=null;
-  renderNav();load();}});
+  resetPanes();renderNav();load();}});
 
 /* ================= 通用小组件 ================= */
 function kpi(arr){document.getElementById('pk').innerHTML=(arr||[]).map(function(x,i){
@@ -872,8 +931,17 @@ function pager(total,size,page,note){
 }
 function linkHtml(u,label){
  var s=String(u||'');
- if(/^https?:\/\//i.test(s))return '<a href="'+esc(s)+'" target="_blank" rel="noopener">'+esc(label)+' ↗</a>';
- return '<span style="color:var(--ink3)">'+esc(label)+'（归档链接）</span>';
+ if(/^https?:\/\//i.test(s))return '<a class="rlink act" href="'+esc(s)+'" target="_blank" rel="noopener">'+esc(label)+' ↗</a>';
+ if(/^#/.test(s))return '<a class="rlink mir" href="../'+esc(s)+'" target="_blank" rel="noopener" '+
+  'title="该条原文为采集时的本地镜像快照，线上无对应正文文件；点开到归档页">'+esc(label)+' · 镜像 ↗</a>';
+ return '<span style="color:var(--ink3)">'+esc(label)+'（无链接）</span>';
+}
+function detailLink(u){
+ var s=String(u||'');
+ if(/^https?:\/\//i.test(s))return '<a href="'+esc(s)+'" target="_blank" rel="noopener">打开原始公告 ↗</a>';
+ if(/^#/.test(s))return '<a class="mir" href="../'+esc(s)+'" target="_blank" rel="noopener">'+esc(s)+' ↗</a>'+
+  '<div class="mir">本地镜像快照：线上无对应正文文件，完整正文在归档库；页面不补造链接。</div>';
+ return '—';
 }
 function paint(cards,note){
  var m=curMod(),q=state.q.trim().toLowerCase(),arr=cards;
@@ -905,17 +973,15 @@ function renderItems(d){
   var tags='';
   if(String(x.w)==='1')tags+='<span class="tagx t-ok">重点 ≥1亿</span>';
   if(x.bk==='win')tags+='<span class="tagx t-info">已出结果</span>';
-  if(x.iv==='0')tags+='<span class="tagx t-no">非投</span>';
-  if(x.st)tags+='<span class="tagx t-wait">'+esc(x.st)+'</span>';
   var title=esc(x.t||'（无标题）'), desc=x.snip||x.buyer||'';
   var amt=pick(x.amtTxt,(x.amt?x.amt+' 亿':''));
   var buyer=String(x.buyer||'').trim();
-  var link=x.url?linkHtml(x.url,'原文').replace('<a ','<a class="rlink" '):'';
+  var link=x.url?linkHtml(x.url,'原文'):'';
   var html='<div class="row">'+
    '<div class="rno">'+(start+i+1)+'</div>'+
-   '<div class="rmain">'+
-    (tags?'<span class="rtags">'+tags+'</span>':'')+
-    '<a class="rt" data-detail="'+esc(x.id)+'" title="打开项目详情">'+title+'</a>'+link+
+    '<div class="rmain">'+
+    '<div class="rtitle">'+(tags?'<span class="rtags">'+tags+'</span>':'')+
+    '<a class="rt" data-detail="'+esc(x.id)+'" title="'+esc(x.t||'')+' · 点开项目详情">'+title+'</a>'+link+'</div>'+
     (desc?'<div class="rd">'+esc(short(desc,150))+'</div>':'')+
    '</div>'+
    (buyer?'<a class="rbuyer" data-owner="'+esc(buyer)+'" title="打开业主画像">'+esc(short(buyer,16))+'</a>':
@@ -926,6 +992,7 @@ function renderItems(d){
    '</div>';
   return {html:html,text:JSON.stringify(x)};
  });
+ state.curItems=d.items||[];
  var box=document.getElementById('rows');box.className='rows';
  if(!cards.length){box.innerHTML='<div class="empty">该筛选条件下没有条目。<br>接口如实返回空结果，页面不补假数据。</div>';
   document.getElementById('pager').innerHTML='';return;}
@@ -1241,6 +1308,7 @@ function loadPeripherals(){
  });
  api('/api/rules').then(function(r){
   if(!r)return;
+  state.counts.rules=r.active_code_count;renderNav();
   var ns=document.getElementById('nsRules');
   if(ns)ns.textContent=r.imported?'是 · 唯一规则源':'未接通';
   document.getElementById('dRule').innerHTML='<b>规则源（资产）</b>'+
@@ -1253,6 +1321,7 @@ function loadPeripherals(){
  api('/api/health').then(function(h){
   if(!h||!h.summary)return;
   var s=h.summary;
+  state.counts.health=s.checks;renderNav();
   var n1=document.getElementById('nsRows'),n2=document.getElementById('nsCheck'),n3=document.getElementById('nsGen');
   if(n1)n1.textContent=num(s.lib1_rows)+' 行';
   if(n2)n2.textContent=esc(s.checks)+' / '+esc(s.errors);
@@ -1279,6 +1348,35 @@ function loadPeripherals(){
    el.onclick=function(){openMetal(el.dataset.tk);};});
   renderMktPanel(m);
  });
+ /* 导航角标 + 右栏「实时关注」：数字一律来自契约接口，页面不写死、不重判 */
+ api('/api/opportunities',{page:1,size:1}).then(function(d){
+  if(!d)return;
+  state.counts.items=d.total;
+  var w1=(d.items||[]).filter(function(x){return String(x.w)==='1';}).length;
+  document.getElementById('dFocus').innerHTML='<b>实时关注 · 只读事实</b>'+
+   '<div class="dk"><span>①库条目</span><b>'+esc(num(d.total))+'</b></div>'+
+   '<div class="dk"><span>覆盖地区（facets）</span><b>'+esc(((d.facets||{}).region||[]).length)+'</b></div>'+
+   '<div class="dk"><span>本页重点关注</span><b>'+esc(w1)+'</b></div>'+
+   '<div class="dk"><span>数据包更新日</span><b>'+esc((d.meta||{}).updated||'—')+'</b></div>'+
+   '<div style="margin-top:5px;color:var(--ink3)">数字由接口返回；关注档 w 沿用入库值，页面不重判。</div>';
+  renderNav();
+ });
+ api('/api/orgs',{page:1,size:1}).then(function(d){
+  if(!d||!d.groups)return;
+  var gs=d.groups,cnt=function(k){return (gs[k]||{}).count||0;};
+  state.counts.orgs=cnt('rivals');
+  state.counts.clients=cnt('buyers')+cnt('clients')+cnt('domestic');
+  renderNav();
+ });
+ api('/api/news',{page:1,size:1,kind:'all'}).then(function(d){
+  if(!d||!d.groups)return;
+  var t=0;Object.keys(d.groups).forEach(function(k){t+=(d.groups[k]||{}).count||0;});
+  state.counts.news=t;renderNav();
+ });
+ api('/api/policies',{q:''}).then(function(d){
+  if(!d)return;state.counts.policies=(d.policies||[]).length+(d.related||[]).length;renderNav();});
+ api('/api/changes').then(function(d){
+  if(!d)return;state.counts.changes=Object.keys(((d.changes||{}).kpi)||{}).length;renderNav();});
 }
 
 /* ============ 新增：行情曲线 / 品种详情 / 业主画像 / 当日行情面板 ============
@@ -1314,7 +1412,7 @@ function chartSvg(code){
 function openMetal(code){
  var m=state.metals;if(!m||!m.items)return;
  var x=m.items.filter(function(a){return String(a.code)===String(code);})[0];if(!x)return;
- document.getElementById('app').classList.add('drawer');setDrawTab('detail');
+ showPane('detail');
  var box=document.getElementById('dDetail');
  var h='<b>'+esc(x.name)+' · '+esc(x.code)+'</b>';
  h+='<div class="ovrow"><span>最新价</span><b>'+esc(num(x.price))+' '+esc(x.unit||'')+'</b></div>';
@@ -1334,7 +1432,7 @@ function openMetal(code){
  box.innerHTML=h;
 }
 function openOwner(name){
- document.getElementById('app').classList.add('drawer');setDrawTab('owner');
+ showPane('owner');
  var box=document.getElementById('dOwner');
  box.innerHTML='<b>业主画像</b>读取中… '+esc(name);
  api('/api/orgs',{type:'owner',q:name,size:20}).then(function(r){
@@ -1362,7 +1460,10 @@ function openOwner(name){
    h+='</div>';
   }
   h+='<div class="mktnote">②业绩 / 动向库按单位聚合，只读展示；不反推①库、不产生新的删留规则或投资判断。</div>';
+  h+='<div class="dact"><button data-back="ctx">← 回到实时关注</button></div>';
   box.innerHTML=h;
+  [].forEach.call(box.querySelectorAll('[data-back]'),function(bt){
+    bt.onclick=function(){setDrawTab('ctx');};});
  });
 }
 function bindOwner(){
@@ -1389,7 +1490,22 @@ function renderMktPanel(m){
 }
 function openMkt(){closePops();document.getElementById('mktPop').classList.add('on');}
 
-/* ================= 交互：抽屉 / 个人中心 / 全局检索 ================= */
+/* ================= 交互：常驻右栏 / 个人中心 / 全局检索 ================= */
+/* 2026-11-06：右栏改为常驻。宽屏只换内容、不弹出不挤压；窄屏才浮出。 */
+function showPane(t){
+ setDrawTab(t);
+ var app=document.getElementById('app');
+ app.classList.remove('rightoff');
+ /* drawer 类在宽屏无视觉差异（右栏本就常驻），窄屏用来浮出右栏；保留它也让既有验收脚本不返工 */
+ app.classList.add('drawer');
+}
+/* 切模块 / 换页时清掉上一条详情与业主画像残留，避免点 A 看到 B 的内容 */
+function resetPanes(){
+ document.getElementById('dDetail').innerHTML='<b>项目详情</b>点列表里的项目标题或右侧「详情」，这里会显示该条的真实字段、原文入口与状态历史。';
+ document.getElementById('dOwner').innerHTML='<b>业主画像</b>点列表里的业主名，这里显示 ②业绩 / 动向库按单位聚合的只读档案；不反推①库、不测算。';
+ state.curItems=[];
+ document.getElementById('app').classList.remove('drawer');
+}
 function setDrawTab(t){
  state.drawTab=t;
  var tabs={ctx:'dtCtx',detail:'dtDetail',owner:'dtOwner'};
@@ -1401,30 +1517,58 @@ function setDrawTab(t){
 }
 function bindDetail(){
  [].forEach.call(document.querySelectorAll('[data-detail]'),function(b){
-  b.onclick=function(){
-   var id=b.dataset.detail;
-   document.getElementById('app').classList.add('drawer');setDrawTab('detail');
-   document.getElementById('dDetail').innerHTML='<b>条目详情</b>读取中…';
+  b.onclick=function(e){if(e){e.preventDefault();e.stopPropagation();}
+   var id=b.dataset.detail,box=document.getElementById('dDetail');
+   showPane('detail');
+   box.innerHTML='<b>项目详情</b>读取中…';
    api('/api/opportunities/'+encodeURIComponent(id)).then(function(r){
-    if(!r){document.getElementById('dDetail').innerHTML='<b>条目详情</b>离线降级：无服务端，不补假数据。';return;}
-    if(r.error){document.getElementById('dDetail').innerHTML='<b>条目详情</b>'+esc(r.error);return;}
-    var x=r.item||{},h='<b>'+esc(short(x.t||'（无标题）',80))+'</b>';
-    [['ID',x.id],['业主',x.buyer],['地区',pick(x.city,x.rg)],['阶段',x.st],['业务分层',pick(x.sub,x.sg)],
-     ['交付模式',x.mode],['金额',pick(x.amtTxt,(x.amt?x.amt+' 亿':''))],['发布日期',pick(x.d,x.dl)],
-     ['中标单位',x.win],['关注档','w='+String(x.w)],['综合分',x.sc],['原文',x.url]].forEach(function(p){
+    if(!r){box.innerHTML='<b>项目详情</b>离线降级：无服务端，不补假数据。';return;}
+    if(r.error){box.innerHTML='<b>项目详情</b>'+esc(r.error);return;}
+    var x=r.item||{},h='<div class="dtitle">'+esc(x.t||'（无标题）')+'</div>';
+    [['ID',x.id],['阶段',x.st],['业务分层',pick(x.sub,x.sg)],['交付模式',x.mode],
+     ['金额',pick(x.amtTxt,(x.amt?x.amt+' 亿':''))],['发布日期',pick(x.d,x.dl)],
+     ['中标单位',x.win],['关注档','w='+String(x.w)],['综合分',x.sc],
+     ['地区',pick(x.city,x.rg)]].forEach(function(p){
      if(p[1]!==''&&p[1]!=null)h+='<div class="dk"><span>'+esc(p[0])+'</span><b>'+esc(short(p[1],60))+'</b></div>';});
+    var buyer=String(x.buyer||'').trim();
+    h+='<div class="dk"><span>业主</span><b>'+(buyer?
+      '<a href="javascript:void(0)" data-owner="'+esc(buyer)+'" title="点开业主画像">'+esc(short(buyer,44))+' ↗</a>':'—')+'</b></div>';
+    h+='<div class="dk"><span>原文</span><b>'+(x.url?detailLink(x.url):'—')+'</b></div>';
     if(x.snip)h+='<div style="margin-top:7px;border-top:1px dashed var(--line);padding-top:6px">'+esc(short(x.snip,300))+'</div>';
     var hist=x.hist||[];
-    h+='<div style="margin-top:7px;border-top:1px dashed var(--line);padding-top:6px"><b>状态历史</b> '+
-       (hist.length?esc(JSON.stringify(hist).slice(0,300)):'暂无')+'</div>';
-    document.getElementById('dDetail').innerHTML=h;
+    h+='<div style="margin-top:7px;border-top:1px dashed var(--line);padding-top:6px"><b>状态历史</b>';
+    h+=hist.length?'<div class="dhist">'+hist.slice(0,12).map(function(z){
+      return '<div>'+esc(typeof z==='object'?JSON.stringify(z):String(z))+'</div>';}).join('')+'</div>':
+      ' <span style="color:var(--ink3)">暂无</span>';
+    h+='</div>';
+    var real=/^https?:\/\//i.test(String(x.url||''))?String(x.url):'';
+    h+='<div class="dact"><button data-back="ctx">← 回到实时关注</button>'+
+       '<button data-openurl="'+esc(real)+'"'+(real?'':' disabled')+'>打开原文 ↗</button></div>';
+    h+='<div class="mktnote">字段来自 <code>GET /api/opportunities/:id</code>；判定只在服务端入库时执行，页面只读。</div>';
+    box.innerHTML=h;
+    bindOwner();
+    [].forEach.call(box.querySelectorAll('[data-back]'),function(bt){
+      bt.onclick=function(){setDrawTab('ctx');};});
+    [].forEach.call(box.querySelectorAll('[data-openurl]:not([disabled])'),function(bt){
+      bt.onclick=function(){window.open(bt.dataset.openurl,'_blank','noopener');};});
    });};});
 }
 function closePops(){document.getElementById('popUser').classList.remove('on');
  document.getElementById('popBell').classList.remove('on');}
 function updateFavCount(){document.getElementById('favCount').textContent=Object.keys(state.fav).length+' 条';}
 document.getElementById('btnNav').onclick=function(){document.getElementById('app').classList.toggle('collapsed');};
-document.getElementById('btnDraw').onclick=function(){closePops();document.getElementById('app').classList.toggle('drawer');};
+document.getElementById('btnDraw').onclick=function(){closePops();
+ var app=document.getElementById('app');
+ if(window.matchMedia&&window.matchMedia('(max-width:1100px)').matches)app.classList.toggle('drawer');
+ else app.classList.toggle('rightoff');};
+/* 宽屏→窄屏时收掉「宽屏点详情」留下的浮层状态，避免右栏无端盖住内容；
+   窄屏里用户主动点详情仍会重新浮出。 */
+var _brNarrow=(window.innerWidth<=1100);
+window.addEventListener('resize',function(){
+ var narrow=window.innerWidth<=1100;
+ if(narrow!==_brNarrow){_brNarrow=narrow;
+  if(narrow)document.getElementById('app').classList.remove('drawer');}
+});
 document.getElementById('dtCtx').onclick=function(){setDrawTab('ctx');};
 document.getElementById('dtDetail').onclick=function(){setDrawTab('detail');};
 document.getElementById('dtOwner').onclick=function(){setDrawTab('owner');};
