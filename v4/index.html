@@ -465,7 +465,7 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:10.5
 
 /* ============ 2026-11-06 回退优化：常驻右栏 / 可点链接 / 导航角标 ============ */
 .row .rlink.act{color:var(--brand)}
-.row .rlink.mir{color:var(--ink3)}
+.row .rlink.mir{color:var(--brand2);opacity:.88;text-decoration:underline dotted}
 .row .rlink:hover{text-decoration:underline}
 .nav .brandsub{font-size:10px;color:var(--ink3);padding:0 8px 9px;border-bottom:1px solid var(--line)}
 .nav .cnt{font-size:10px;color:var(--ink3);font-variant-numeric:tabular-nums;flex:none;font-weight:700}
@@ -477,7 +477,8 @@ code{background:var(--surface2);padding:1px 5px;border-radius:3px;font-size:10.5
 .sidehint b{color:var(--ink2)}
 .dcard .dk a{color:var(--brand);text-decoration:none}
 .dcard .dk a:hover{text-decoration:underline}
-.dcard .dk .mir{color:var(--ink3);font-size:10px}
+.dcard .dk a.mir{color:var(--brand2);text-decoration:underline dotted}
+.dcard .dk div.mir{color:var(--ink3);font-size:10px;line-height:1.55;margin-top:3px}
 .dcard .dtitle{font-size:12px;font-weight:700;line-height:1.55;color:var(--ink);margin-bottom:7px}
 .dhist{font-size:10.5px;color:var(--ink2)}
 .dhist div{padding:3px 0;border-bottom:1px dashed var(--line)}
@@ -1541,9 +1542,10 @@ function bindDetail(){
       return '<div>'+esc(typeof z==='object'?JSON.stringify(z):String(z))+'</div>';}).join('')+'</div>':
       ' <span style="color:var(--ink3)">暂无</span>';
     h+='</div>';
-    var real=/^https?:\/\//i.test(String(x.url||''))?String(x.url):'';
+    var u=String(x.url||''),real=/^https?:\/\//i.test(u)?u:(/^#/.test(u)?'../'+u:'');
     h+='<div class="dact"><button data-back="ctx">← 回到实时关注</button>'+
-       '<button data-openurl="'+esc(real)+'"'+(real?'':' disabled')+'>打开原文 ↗</button></div>';
+       '<button data-openurl="'+esc(real)+'"'+(real?'':' disabled')+'>'+
+       (/^https?:\/\//i.test(u)?'打开原文 ↗':'归档页 ↗')+'</button></div>';
     h+='<div class="mktnote">字段来自 <code>GET /api/opportunities/:id</code>；判定只在服务端入库时执行，页面只读。</div>';
     box.innerHTML=h;
     bindOwner();
