@@ -96,8 +96,8 @@ with sync_playwright() as p:
                 pg.locator('.nav').evaluate('e=>getComputedStyle(e).display') == 'none')
             chk('预览档手机复刻响应式（全库检索折到下一行）',
                 pg.locator('.gs').evaluate('e=>getComputedStyle(e).order') == '5')
-            chk('预览档手机复刻响应式（KPI 两列）',
-                pg.locator('#pk').evaluate('e=>getComputedStyle(e).gridTemplateColumns').count('px') == 2)
+            chk('预览档手机复刻响应式（KPI 自动换行）',
+                pg.locator('#pk').evaluate('e=>getComputedStyle(e).flexWrap') == 'wrap')
         pg.screenshot(path=OUT + '预览-' + label + '.png', full_page=False)
     pg.locator('#popUser [data-v="full"]').click()
     pg.locator('#btnUser').click()

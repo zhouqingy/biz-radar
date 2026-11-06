@@ -49,9 +49,10 @@ def run(pg, label, shots):
     chk('%s · 主区变宽（≥ 1100px @1440）' % label,
         pg.locator('.main').bounding_box()['width'] >= 1100,
         str(round(pg.locator('.main').bounding_box()['width'])))
-    chk('%s · 弹窗容器 / 关闭按钮 / 三个页签齐备' % label,
+    chk('%s · 弹窗容器 / 关闭按钮齐备，且无多余页签（单页）' % label,
         pg.locator('#modal').count() == 1 and pg.locator('#modalClose').count() == 1 and
-        pg.locator('.modal-tabs button').count() == 3)
+        pg.locator('.modal-tabs').count() == 0 and
+        pg.locator('#modal button[id^="dt"]').count() == 0)
     if shots:
         pg.screenshot(path=OUT + '整页-无弹窗.png', full_page=False)
 
@@ -116,6 +117,11 @@ def run(pg, label, shots):
     chk('%s · 画像用真实条目表（不是空壳）' % label,
         pg.locator('#dOwner .ovtable tr').count() >= 2,
         '%d 行' % pg.locator('#dOwner .ovtable tr').count())
+    chk('%s · 弹窗单页：仅画像面板可见、无跳页按钮' % label,
+        pg.locator('#drawOwner').is_visible() and
+        not pg.locator('#drawCtx').is_visible() and
+        not pg.locator('#drawDetail').is_visible() and
+        pg.locator('#modal [data-back]').count() == 0)
     chk('%s · 画像仍声明不反推①库' % label, '不反推①库' in ot2)
     if shots:
         pg.screenshot(path=OUT + '业主画像弹窗.png', full_page=False)

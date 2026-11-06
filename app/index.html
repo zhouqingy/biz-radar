@@ -108,7 +108,7 @@ a:hover{text-decoration:underline}
 .pop .quick button:hover{border-color:var(--brand2);color:var(--brand)}
 
 /* ============ 主体两区（2026-11-06 20:40 用户拍板：详情不做右边常驻栏，改居中弹窗） ============
-   左导航 + 全宽主区；第三列「实时关注 / 项目详情 / 业主画像」整段搬进页面底部 #modal。
+   左导航 + 全宽主区；详情 / 画像 / 曲线按触发入口进页面底部 #modal 单页弹窗。
    #app.drawer 保留为「弹窗已打开」状态标记，不再参与栅格计算。 */
 .body{display:grid;grid-template-columns:var(--navw) minmax(0,1fr);flex:1;min-height:0}
 .app.collapsed .body{grid-template-columns:var(--navw2) minmax(0,1fr)}
@@ -156,13 +156,13 @@ body.modalopen{overflow:hidden}
 .main{padding:var(--sp) var(--sp) 34px;min-width:0;max-width:1720px;width:100%;margin:0 auto}
 .crumb{font-size:10.5px;color:var(--ink3);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .crumb b{color:var(--ink2);font-weight:600}
-.phead{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-.phead .pic{width:38px;height:38px;border-radius:9px;background:var(--brand);color:var(--brandtx);
- display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex:none}
+.phead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:9px}
+.phead .pic{width:28px;height:28px;border-radius:6px;background:var(--brand);color:var(--brandtx);
+ display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex:none}
 .phead .ptxt{flex:1 1 260px;min-width:0}
-.phead h1{margin:0;font-size:19px;line-height:1.3;letter-spacing:.3px}
-.phead .pd{font-size:11px;color:var(--ink3);margin-top:2px;line-height:1.5}
-.phead .pmeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.phead h1{margin:0;font-size:15.5px;line-height:1.3;letter-spacing:.3px}
+.phead .pd{font-size:10.5px;color:var(--ink3);margin-top:1px;line-height:1.4}
+.phead .pmeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:3px}
 .apitag{font-size:10px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--brandsoft);
  color:var(--brand);border:1px solid var(--line);border-radius:4px;padding:2px 7px}
 .pill{font-size:10.5px;background:var(--surface);border:1px solid var(--line);border-radius:20px;
@@ -193,15 +193,20 @@ body.modalopen{overflow:hidden}
 select.sel{border:1px solid var(--line2);background:var(--surface2);color:var(--ink2);border-radius:6px;
  font-size:11px;padding:5px 7px;outline:0}
 
-/* ============ KPI：扁平数字条，不再四张花哨卡片 ============ */
-.pk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin-bottom:12px;
- background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-.k{background:var(--surface);padding:8px 13px;min-width:0}
+/* ============ KPI：1 页面式紧凑数字条（2026-11-06 21:40） ============
+   1 页面实测：KPI 数字 13.5px、与正文同大小、无内边距，一排 9 组；2 页面原来是
+   18px 大字 + 4 张卡，占一整块高度。这里改回紧凑横排：数字与标签同一行。
+   数字仍全部由接口 / 数据文件经 kpi(arr) 传入，页面不写死、不为了凑 9 组造字段。 */
+.pk{display:flex;flex-wrap:wrap;align-items:stretch;gap:0;margin-bottom:10px;
+ background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.k{flex:1 1 0;min-width:0;padding:6px 12px;border-right:1px solid var(--line);
+ display:flex;align-items:center;background:var(--surface)}
+.k:last-child{border-right:0}
 .k .ki{display:none}
-.k .kb{min-width:0}
-.k b{display:block;font-size:18px;color:var(--ink);line-height:1.3;font-variant-numeric:tabular-nums;
+.k .kb{min-width:0;display:flex;align-items:baseline;gap:7px;min-width:0}
+.k b{font-size:13.5px;color:var(--ink);line-height:1.35;font-weight:800;font-variant-numeric:tabular-nums;
  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.k span{font-size:10.5px;color:var(--ink3);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.k span{font-size:10.5px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ============ 工具条 ============ */
 .toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:var(--surface);
@@ -218,7 +223,7 @@ select.sel{border:1px solid var(--line2);background:var(--surface2);color:var(--
 .rows{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:var(--r);
  background:var(--surface);overflow:hidden}
 .row{display:grid;grid-template-columns:28px minmax(0,1fr) 148px 94px 84px 58px;gap:10px;
- align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);min-height:48px;transition:background .12s}
+ align-items:center;padding:6px 12px;border-bottom:1px solid var(--line);min-height:42px;transition:background .12s}
 .row:last-child{border-bottom:0}
 .row:hover{background:var(--surface2)}
 .row .rno{font-size:10.5px;color:var(--ink3);text-align:right;font-variant-numeric:tabular-nums}
@@ -264,7 +269,7 @@ select.sel{border:1px solid var(--line2);background:var(--surface2);color:var(--
 .card .cfoot{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:5px;padding:0;border:0}
 .card .cfoot span{font-size:10px;color:var(--ink3)}
 .card .cfoot b{color:var(--ink2);font-weight:600}
-.grphead{font-size:11px;font-weight:800;color:var(--ink2);margin:14px 0 8px;display:flex;
+.grphead{font-size:11px;font-weight:800;color:var(--ink2);margin:10px 0 6px;display:flex;
  align-items:center;gap:8px;letter-spacing:.3px}
 .grphead::after{content:'';height:1px;background:var(--line);flex:1}
 .grphead .gn{font-size:10px;color:var(--ink3);font-weight:600}
@@ -334,16 +339,18 @@ select.sel{border:1px solid var(--line2);background:var(--surface2);color:var(--
 .pager button{border:1px solid var(--line2);background:var(--surface);color:var(--ink2);border-radius:5px;
  padding:4px 10px;font-size:11px}
 .pager button:disabled{opacity:.4;cursor:default}
-.slots{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.slots{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .slot{font-size:10.5px;border:1px dashed #dcb87e;background:var(--waitbg);color:var(--wait);
  border-radius:var(--r2);padding:6px 10px;line-height:1.55;min-width:190px}
 .slot b{display:block;font-size:9.5px;opacity:.85;font-weight:800;letter-spacing:.3px}
 .slot.no{border:1px solid var(--line);background:var(--nobg);color:var(--no);text-decoration:line-through}
 .slot.no b{text-decoration:none}
 
-/* ============ 居中弹窗：实时关注 / 项目详情 / 业主画像 ============
+/* ============ 居中弹窗：按触发入口单页展示 ============
    2026-11-06 20:40 用户原话「你能做成这种弹窗的形式吗？我不想放在右边」。
-   原第三列常驻右栏整段搬进 #modal：半透明遮罩 + 居中卡片 + 右上角「关闭 ×」。 */
+   2026-11-06 21:08 用户「明明就只有一个画像，为什么还有其他两个可以切换的，有啥意义」：
+   删掉「实时关注 / 项目详情 / 业主画像」三个页签与弹窗内跳页按钮，弹窗内容由点击入口决定，
+   标题栏显示实体名；遮罩 + 居中卡片 + 右上角「关闭 ×」保留。 */
 .modal{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;
  padding:24px;background:rgba(15,26,44,.44);backdrop-filter:blur(1.5px)}
 .modal.on{display:flex}
@@ -359,11 +366,7 @@ select.sel{border:1px solid var(--line2);background:var(--surface2);color:var(--
 .modal-x{border:1px solid var(--line2);background:var(--surface);color:var(--ink2);border-radius:6px;
  padding:4px 10px;font-size:11px;white-space:nowrap;flex:none}
 .modal-x:hover{border-color:var(--brand);color:var(--brand);background:var(--brandsoft)}
-.modal-tabs{display:flex;gap:5px;padding:9px 20px 0;flex:none;background:var(--surface)}
-.modal-tabs button{border:1px solid var(--line);border-bottom:0;background:var(--surface2);
- color:var(--ink2);border-radius:6px 6px 0 0;padding:5px 15px;font-size:11px}
-.modal-tabs button.on{background:var(--brand);color:var(--brandtx);border-color:var(--brand)}
-.modal-bd{overflow:auto;padding:14px 20px 20px;min-height:0}
+.modal-bd{overflow:auto;padding:16px 20px 20px;min-height:0}
 .modal-ft{flex:none;border-top:1px solid var(--line);padding:8px 20px;font-size:10px;
  color:var(--ink3);background:var(--surface2);line-height:1.5}
 .draw{display:block}   /* 保留类名/id 供既有验收与渲染函数定位；可见性由 #modal 控制 */
@@ -403,8 +406,6 @@ select.sel{border:1px solid var(--line2);background:var(--surface2);color:var(--
  .modal{padding:10px}
  .modal-box{width:100%;max-height:92vh}
  .modal-hd{padding:12px 14px}
- .modal-tabs{padding:8px 14px 0}
- .modal-tabs button{padding:5px 10px;font-size:10.5px}
  .modal-bd{padding:12px 14px 16px}
  .modal-ft{padding:7px 14px}
  .ovtable{min-width:620px}
@@ -571,24 +572,40 @@ body.dark .nav{--navsel:#37618c}
 @media(max-width:720px){.brand{font-size:15px;gap:7px}.brand em{display:inline-block}}
 @media(max-width:1100px){.nav .navbrand{display:none}}
 
-/* ===== 2026-11-06 第五次反馈：②库画像可点 / 卡片两栏填满 / 行情不截断 ===== */
-/* 卡片加大内边距，文字不再贴着左边框；②库单位卡片改两栏，右侧不再是半屏空白 */
+/* ===== 2026-11-06 21:08 第六次反馈：②库单位卡片改紧凑对齐行 ===== */
+/* 用户原话「你举得这个布局好看吗？？？？」：原「左主区 flex:1 + 固定右栏 206px」在
+   全宽主区下把摘要右侧撑出半屏空白，字段在右侧竖排堆叠、按钮孤立、行高约 90px。
+   改四列网格：单位名 | 最近条目（撑满中间） | 指标 2×2 横排 | 查看画像，行高约 50px。
+   数据字段、data-profile 点击链路、state.profileMap 全部原样保留。 */
 .card{padding:11px 16px}
-.card.orgcard{display:flex;gap:16px;align-items:stretch}
-.card .cmain{flex:1 1 auto;min-width:0}
-.card .cside{flex:none;width:206px;border-left:1px solid var(--line);padding-left:14px;
- display:flex;flex-direction:column;justify-content:center;gap:2px}
-.card .cname{font-size:12.5px;font-weight:700;color:var(--brand);cursor:pointer;text-decoration:none}
+.card.orgcard{display:grid;grid-template-columns:minmax(170px,1.05fr) minmax(0,1.85fr) minmax(0,1.25fr) 84px;
+ gap:14px;align-items:center;padding:9px 16px}
+.card .oc-name{min-width:0;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+.card .cname{font-size:12.5px;font-weight:700;color:var(--brand);cursor:pointer;text-decoration:none;
+ display:block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card .cname:hover{text-decoration:underline}
-.card.orgcard .csub{margin-top:4px}
-.card.orgcard .cfoot{display:flex;flex-direction:column;gap:2px;flex-wrap:nowrap;
- margin:0;padding:0;border:0;align-items:stretch}
-.card.orgcard .cfoot span{font-size:10.5px;color:var(--ink3);display:flex;
- justify-content:space-between;gap:10px}
-.card.orgcard .cfoot b{color:var(--ink2);font-weight:700;font-variant-numeric:tabular-nums}
-.cprofile{margin-top:8px;border:1px solid var(--line2);background:var(--surface);color:var(--brand);
- border-radius:4px;padding:4px 9px;font-size:10.5px;cursor:pointer;white-space:nowrap;align-self:flex-start}
+.card .oc-items{font-size:10.5px;color:var(--ink3);line-height:1.5;min-width:0;
+ display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .oc-none{color:var(--ink3)}
+.card .oc-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 12px;min-width:0}
+.card .oc-metrics span{font-size:10px;color:var(--ink3);display:flex;justify-content:space-between;
+ gap:8px;min-width:0;white-space:nowrap}
+.card .oc-metrics i{font-style:normal;flex:none}
+.card .oc-metrics b{color:var(--ink2);font-weight:700;font-variant-numeric:tabular-nums;
+ overflow:hidden;text-overflow:ellipsis}
+.card .oc-r{display:flex;justify-content:flex-end}
+.cprofile{border:1px solid var(--line2);background:var(--surface);color:var(--brand);
+ border-radius:4px;padding:4px 9px;font-size:10.5px;cursor:pointer;white-space:nowrap}
 .cprofile:hover{border-color:var(--brand);background:var(--brandsoft)}
+@media(max-width:1100px){
+ .card.orgcard{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) 84px}
+ .card .oc-metrics{display:none}
+}
+@media(max-width:720px){
+ .card.orgcard{grid-template-columns:minmax(0,1fr);gap:5px;align-items:start;padding:9px 12px}
+ .card .oc-items{display:block;-webkit-line-clamp:unset}
+ .card .oc-r{justify-content:flex-start}
+}
 /* 顶栏行情：只留一条完整代表品种 + 全览入口，不再横向塞 13 条把数字切一半 */
 .ticker{max-width:none;overflow:visible;flex:none}
 .tk{padding:0 9px}
@@ -714,9 +731,11 @@ body.dark .nav{--navsel:#37618c}
 </div>
 </div>
 
-<!-- ============ 居中弹窗：实时关注 / 项目详情 / 业主画像 ============
+<!-- ============ 居中弹窗：按触发入口单页展示 ============
      2026-11-06 20:40 用户：「你能做成这种弹窗的形式吗？我不想放在右边」。
-     原第三列常驻右栏整体搬到这里；id 与渲染函数全部保留，点击链路、数据口径不变。
+     2026-11-06 21:08 用户：「明明就只有一个画像，为什么还有其他两个可以切换的，有啥意义」。
+     原第三列常驻右栏的三个可切页签已删除；弹窗内容由点击入口决定，标题栏显示实体名。
+     id 与渲染函数保留，点击链路、数据口径不变。
      关闭方式：右上角「关闭 ×」/ 点弹窗外遮罩 / Esc。 -->
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
  <div class="modal-box">
@@ -725,16 +744,14 @@ body.dark .nav{--navsel:#37618c}
     <div class="mh-s" id="modalSub">只读事实 · 数据来自接口，页面不做业务判定</div></div>
    <button class="modal-x" id="modalClose" title="关闭弹窗（也可点空白处或按 Esc）">关闭 ×</button>
   </div>
-  <div class="modal-tabs">
-   <button id="dtCtx" class="on">实时关注</button><button id="dtDetail">项目详情</button><button id="dtOwner">业主画像</button>
-  </div>
   <div class="modal-bd">
    <aside class="draw">
     <div class="drawbody">
      <div id="drawCtx">
       <div class="sidehint"><b>这是居中弹窗，不再贴在页面右边。</b><br>
        点列表<b>标题 / 详情</b> → 项目详情；点<b>业主名</b> → 业主画像；点<b>原文 ↗</b> → 原始公告；
-       点顶栏<b>当日行情</b>里的品种 → 历史曲线。上面三个按钮随时切页；点「关闭 ×」、点弹窗外空白处或按 Esc 收起。</div>
+       点顶栏<b>当日行情</b>里的品种 → 历史曲线。弹窗按你点的入口单页展示，不再有无关页签；
+       点「关闭 ×」、点弹窗外空白处或按 Esc 收起。</div>
       <div class="dcard" id="dFocus"><b>实时关注 · 只读事实</b>读取中…</div>
       <div class="dcard" id="dRule"><b>规则源（资产）</b>读取中…</div>
       <div class="dcard" id="dHealth"><b>数据体检（资产）</b>读取中…</div>
@@ -750,7 +767,7 @@ body.dark .nav{--navsel:#37618c}
     </div>
    </aside>
   </div>
-  <div class="modal-ft">弹窗内只展示接口返回的真实字段；能不能投由服务端规则源在入库时判定，页面不重判、不补假数据。</div>
+  <div class="modal-ft">弹窗按点击入口单页展示，只展示接口返回的真实字段；能不能投由服务端规则源在入库时判定，页面不重判、不补假数据。</div>
  </div>
 </div>
 
@@ -1061,17 +1078,18 @@ function orgCard(x,grp,i){
  /* 存下本条真实数据：点单位名 / 「查看画像」时直接用它渲染弹窗，不二次查询，也不会查不到 */
  state.profileMap[key]={x:x,grp:grp};
  var meta=[['业绩条目',x.n||x.count],['金额(亿)',x.amt],['地区',x.rg||x.city],
-           ['主业',short(pick(x.main,x.type,x.why,x.role),16)],['分层',x.tier],['分组',groupLabel(grp)]];
+           ['主业',short(pick(x.main,x.type,x.why,x.role),16)],['分层',x.tier],['分组',groupLabel(grp)]]
+   .filter(function(k){return k[1]!==''&&k[1]!=null;}).slice(0,4);
  var its=(x.items||[]).slice(0,2).map(function(it){return short(pick(it.t,it.title,it.nm),34);}).filter(Boolean);
+ /* 2026-11-06 21:08：四列紧凑对齐行，中间列由最近条目撑满，不再留半屏空白 */
  var html='<div class="card orgcard">'+
-   '<div class="cmain"><div class="ch"><a class="cname" data-profile="'+esc(key)+'" '+
+   '<div class="oc-name"><a class="cname" data-profile="'+esc(key)+'" '+
     'title="点开该单位的 ②库画像">'+esc(name)+' ↗</a>'+
     (x.tier?'<span class="tagx t-info">'+esc(x.tier)+'</span>':'')+'</div>'+
-   (its.length?'<div class="csub">'+its.map(esc).join('<br>')+'</div>':'')+'</div>'+
-   '<div class="cside"><div class="cfoot">'+
-    meta.filter(function(k){return k[1]!==''&&k[1]!=null;}).slice(0,4).map(function(k){
-     return '<span>'+esc(k[0])+' <b>'+esc(k[1])+'</b></span>';}).join('')+'</div>'+
-    '<button class="cprofile" data-profile="'+esc(key)+'">查看画像 ↗</button></div></div>';
+   '<div class="oc-items">'+(its.length?its.map(esc).join('<br>'):'<span class="oc-none">—</span>')+'</div>'+
+   '<div class="oc-metrics">'+meta.map(function(k){
+     return '<span><i>'+esc(k[0])+'</i><b>'+esc(k[1])+'</b></span>';}).join('')+'</div>'+
+   '<div class="oc-r"><button class="cprofile" data-profile="'+esc(key)+'">查看画像 ↗</button></div></div>';
  return {html:html,text:name+' '+JSON.stringify(x)};
 }
 function newsCard(x,grp,i){
@@ -1522,8 +1540,6 @@ function openOwner(name){
   setModalTitle(String(u.o.name||u.o.n||name),
     '业主画像 · ②业绩 / 动向库按单位聚合，只读展示、不反推①库');
   box.innerHTML=orgProfileHtml(u.o,u.grp);
-  [].forEach.call(box.querySelectorAll('[data-back]'),function(bt){
-    bt.onclick=function(){setDrawTab('ctx');};});
  });
 }
 function bindOwner(){
@@ -1557,8 +1573,7 @@ function orgProfileHtml(o,grp){
  }else h+='<div class="mktnote">该单位在本组里没有可展示的条目，页面不补造。</div>';
  h+='<div class="mktnote">字段来自 GET /api/orgs 返回的同一条单位记录；②业绩 / 动向库按单位聚合，'+
     '只读展示，不反推①库、不测算、不产生删留规则或投资判断。</div>';
- h+='<div class="dact"><button data-back="ctx">← 回到实时关注</button>'+
-    '<button data-close="1">关闭弹窗</button></div>';
+ h+='<div class="dact"><button data-close="1">关闭弹窗</button></div>';
  return h;
 }
 function openOrgProfile(x,grp){
@@ -1567,8 +1582,6 @@ function openOrgProfile(x,grp){
    '业主画像 · ②业绩 / 动向库按单位聚合，只读展示、不反推①库');
  var box=document.getElementById('dOwner');
  box.innerHTML=orgProfileHtml(x,grp);
- [].forEach.call(box.querySelectorAll('[data-back]'),function(bt){
-   bt.onclick=function(){setDrawTab('ctx');};});
 }
 function bindProfile(){
  [].forEach.call(document.querySelectorAll('[data-profile]'),function(el){
@@ -1593,7 +1606,7 @@ function renderMktPanel(m){
    '<span class="mc '+cls+'">'+(c>0?'+':'')+esc(x.chg)+'%</span>'+sparkSvg(x.code,58,20)+'</div>';
  });
  h+='<div class="mktnote">13 个品种的价格 / 涨跌 / 迷你走势都在上面，不用横向拖动；'+
-    '点任一品种，会弹出居中「项目详情」，显示该品种的历史曲线、区间最高 / 最低与数据日。'+
+    '点任一品种，会弹出居中弹窗，显示该品种的历史曲线、区间最高 / 最低与数据日。'+
     '行情只是用热用电 / 造价的成本风向标，页面不测算、不产生投资判断；数据来自 data.core.js + data.metalhist.js。</div>';
  var pop=document.getElementById('mktPop');pop.innerHTML=h;
  [].forEach.call(pop.querySelectorAll('[data-mk]'),function(el){
@@ -1605,7 +1618,7 @@ function openMkt(){closePops();document.getElementById('mktPop').classList.add('
 /* 2026-11-06 20:40：用户要求「做成这种弹窗的形式，我不想放在右边」；右栏整段改为居中弹窗。 */
 function showPane(t){
  setDrawTab(t);
- /* 2026-11-06 20:40：详情不再放右边，统一打开居中弹窗。
+ /* 2026-11-06 21:08：弹窗按触发入口单页展示，不再提供无关页签。
     drawer 类只作为「弹窗已打开」状态标记，沿用既有验收脚本识别方式。 */
  document.getElementById('app').classList.add('drawer');
  document.getElementById('modal').classList.add('on');
@@ -1630,16 +1643,13 @@ function setModalTitle(t,sub){
  if(ms)ms.textContent=sub;
 }
 function setDrawTab(t){
+ /* 2026-11-06 21:08：只切面板，不再有页签按钮，也不覆盖标题。
+    标题由触发入口 setModalTitle(实体名) 决定；顶栏「实时关注」入口自己设标题。 */
  state.drawTab=t;
- var tabs={ctx:'dtCtx',detail:'dtDetail',owner:'dtOwner'};
- var ttl={ctx:['实时关注','只读事实 · 数据来自接口，页面不做业务判定'],
-  detail:['项目详情','①投放 / 商机库 · 字段来自 GET /api/opportunities/:id'],
-  owner:['业主画像','②业绩 / 动向库 · 按单位聚合，只读展示、不反推①库']};
- if(ttl[t])setModalTitle(ttl[t][0],ttl[t][1]);
- Object.keys(tabs).forEach(function(k){
-  var on=(k===t),btn=document.getElementById(tabs[k]),pane=document.getElementById('draw'+k.charAt(0).toUpperCase()+k.slice(1));
-  if(btn)btn.classList.toggle('on',on);
-  if(pane)pane.style.display=on?'':'none';
+ var panes={ctx:'drawCtx',detail:'drawDetail',owner:'drawOwner'};
+ Object.keys(panes).forEach(function(k){
+  var pane=document.getElementById(panes[k]);
+  if(pane)pane.style.display=(k===t)?'':'none';
  });
 }
 function bindDetail(){
@@ -1672,14 +1682,13 @@ function bindDetail(){
       ' <span style="color:var(--ink3)">暂无</span>';
     h+='</div>';
     var u=String(x.url||''),real=/^https?:\/\//i.test(u)?u:(/^#/.test(u)?'../'+u:'');
-    h+='<div class="dact"><button data-back="ctx">← 回到实时关注</button>'+
+    h+='<div class="dact">'+
        '<button data-openurl="'+esc(real)+'"'+(real?'':' disabled')+'>'+
-       (/^https?:\/\//i.test(u)?'打开原文 ↗':'归档页 ↗')+'</button></div>';
+       (/^https?:\/\//i.test(u)?'打开原文 ↗':'归档页 ↗')+'</button>'+
+       '<button data-close="1">关闭弹窗</button></div>';
     h+='<div class="mktnote">字段来自 <code>GET /api/opportunities/:id</code>；判定只在服务端入库时执行，页面只读。</div>';
     box.innerHTML=h;
     bindOwner();
-    [].forEach.call(box.querySelectorAll('[data-back]'),function(bt){
-      bt.onclick=function(){setDrawTab('ctx');};});
     [].forEach.call(box.querySelectorAll('[data-openurl]:not([disabled])'),function(bt){
       bt.onclick=function(){window.open(bt.dataset.openurl,'_blank','noopener');};});
    });};});
@@ -1688,7 +1697,8 @@ function closePops(){document.getElementById('popUser').classList.remove('on');
  document.getElementById('popBell').classList.remove('on');}
 function updateFavCount(){document.getElementById('favCount').textContent=Object.keys(state.fav).length+' 条';}
 document.getElementById('btnNav').onclick=function(){document.getElementById('app').classList.toggle('collapsed');};
-document.getElementById('btnDraw').onclick=function(){closePops();showPane('ctx');};
+document.getElementById('btnDraw').onclick=function(){closePops();showPane('ctx');
+ setModalTitle('实时关注','只读事实 · 数据来自接口，页面不做业务判定');};
 /* 弹窗三种关闭方式：右上角 ×、点遮罩空白处、Esc；弹窗内的「关闭弹窗」按钮走事件委托。 */
 document.getElementById('modalClose').onclick=closeModal;
 document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
@@ -1697,9 +1707,6 @@ document.addEventListener('keydown',function(e){
 document.addEventListener('click',function(e){
  var t=(e.target&&e.target.closest)?e.target.closest('[data-close]'):null;
  if(t)closeModal();});
-document.getElementById('dtCtx').onclick=function(){setDrawTab('ctx');};
-document.getElementById('dtDetail').onclick=function(){setDrawTab('detail');};
-document.getElementById('dtOwner').onclick=function(){setDrawTab('owner');};
 document.getElementById('btnMkt').onclick=function(e){e.stopPropagation();closePops();
  var p=document.getElementById('mktPop');p.classList.toggle('on');
  if(p.classList.contains('on')&&!state.metals)api('/api/metals').then(function(m){if(m)renderMktPanel(m);});};
