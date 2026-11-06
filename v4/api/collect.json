@@ -1,0 +1,1 @@
+{"implemented":false,"message":"静态快照为只读交付；自动采集属后端分期，本页不产生任何数据变更。","next":["collect_v4.py 包装成任务","入库前 semantic_drop() 硬过滤","judge() 判能否投","增量入库 + hist 状态历史"],"status":"planned"}
