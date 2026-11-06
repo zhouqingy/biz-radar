@@ -11325,6 +11325,11 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         if(sc.fwd){
           var dst=document.getElementById(sc.fwd);
           if(dst){dst.value=v;try{dst.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
+          /* 规划前瞻首拉期间 pl-q.oninput 还没绑（plBuild 要等数据到位才跑），
+             只转发 input 会丢词：数据到了 124 条全显示、输入框却还挂着搜索词。
+             这里把值补进页面已有的视图筛选状态 PL.f.q，数据到位后
+             renderPlan()->plApply() 自然带上；不碰 judge()/semantic_drop()/①库。 */
+          if(sc.fwd==='pl-q'&&window.PL&&window.PL.f)window.PL.f.q=(v||'').trim();
         }
         if(sc.cards){
           var r=filter544(i,v);
@@ -11334,7 +11339,8 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
       function clear544(i){
         var sc=SCOPE544[i]||SCOPE544[0];
         if(sc.fwd){var dst=document.getElementById(sc.fwd);
-          if(dst&&dst.value){dst.value='';try{dst.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}}
+          if(dst&&dst.value){dst.value='';try{dst.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
+          if(sc.fwd==='pl-q'&&window.PL&&window.PL.f)window.PL.f.q='';}
         if(sc.cards)filter544(i,'');
         var bx=box544(i),inp=bx?bx.querySelector('input'):null;
         if(inp)inp.value='';
