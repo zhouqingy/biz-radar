@@ -107,15 +107,12 @@ a:hover{text-decoration:underline}
  border-radius:5px;padding:3px 8px;font-size:10.5px}
 .pop .quick button:hover{border-color:var(--brand2);color:var(--brand)}
 
-/* ============ 主体三区 ============ */
-/* 旧版三栏常驻：右信息栏默认就在，点条目只换内容，不从边上弹出、不挤压主区。
-   2026-11-06 用户反馈「点完从边上弹出来更奇怪」→ 改回常驻。drawer 类保留给窄屏浮层。 */
-.body{display:grid;grid-template-columns:var(--navw) minmax(0,1fr) var(--draww);flex:1;min-height:0}
-.app.collapsed .body{grid-template-columns:var(--navw2) minmax(0,1fr) var(--draww)}
-.app.rightoff .body{grid-template-columns:var(--navw) minmax(0,1fr) 0}
-.app.collapsed.rightoff .body{grid-template-columns:var(--navw2) minmax(0,1fr) 0}
-.app.drawer .body{grid-template-columns:var(--navw) minmax(0,1fr) var(--draww)}
-.app.collapsed.drawer .body{grid-template-columns:var(--navw2) minmax(0,1fr) var(--draww)}
+/* ============ 主体两区（2026-11-06 20:40 用户拍板：详情不做右边常驻栏，改居中弹窗） ============
+   左导航 + 全宽主区；第三列「实时关注 / 项目详情 / 业主画像」整段搬进页面底部 #modal。
+   #app.drawer 保留为「弹窗已打开」状态标记，不再参与栅格计算。 */
+.body{display:grid;grid-template-columns:var(--navw) minmax(0,1fr);flex:1;min-height:0}
+.app.collapsed .body{grid-template-columns:var(--navw2) minmax(0,1fr)}
+body.modalopen{overflow:hidden}
 .nav{background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden;min-height:0;
  position:sticky;top:58px;align-self:start;height:calc(100vh - 58px)}
 .navtop{padding:11px 10px 8px;border-bottom:1px solid var(--line)}
@@ -226,7 +223,7 @@ select.sel{border:1px solid var(--line2);background:var(--surface2);color:var(--
 .row:hover{background:var(--surface2)}
 .row .rno{font-size:10.5px;color:var(--ink3);text-align:right;font-variant-numeric:tabular-nums}
 .row .rmain{min-width:0;overflow:hidden}
-/* 旧版明细行：标题单行省略，完整标题在右栏项目详情里；行高不再被长标题撑开 */
+/* 旧版明细行：标题单行省略，完整标题在居中弹窗「项目详情」里；行高不再被长标题撑开 */
 .row .rtitle{display:flex;align-items:center;gap:5px;min-width:0}
 .row .rtags{display:inline-flex;gap:4px;align-items:center;flex:none}
 .row .rt{flex:1 1 auto;min-width:0;font-size:12.5px;font-weight:600;line-height:1.45;
@@ -344,46 +341,53 @@ select.sel{border:1px solid var(--line2);background:var(--surface2);color:var(--
 .slot.no{border:1px solid var(--line);background:var(--nobg);color:var(--no);text-decoration:line-through}
 .slot.no b{text-decoration:none}
 
-/* ============ 右抽屉：上下文 / 条目详情 ============ */
-.draw{background:var(--surface);border-left:1px solid var(--line);display:block;overflow:auto;min-height:0;
- position:sticky;top:58px;align-self:start;height:calc(100vh - 58px)}
-.app.rightoff .draw{display:none}
-.drawtabs{display:flex;gap:4px;padding:10px 11px;border-bottom:1px solid var(--line);position:sticky;top:0;
- background:var(--surface);z-index:2}
-.drawtabs button{flex:1;border:1px solid var(--line);background:var(--surface2);color:var(--ink2);
- border-radius:6px;padding:5px;font-size:10.5px}
-.drawtabs button.on{background:var(--brand);color:var(--brandtx);border-color:var(--brand)}
-.drawbody{padding:11px}
-.dcard{border:1px solid var(--line);border-radius:var(--r2);padding:9px 11px;margin-bottom:9px;
- font-size:10.5px;color:var(--ink2);line-height:1.7;background:var(--surface2);word-break:break-word}
-.dcard b{display:block;color:var(--ink);font-size:11px;margin-bottom:3px}
-.dcard .dk{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line);padding:3px 0}
+/* ============ 居中弹窗：实时关注 / 项目详情 / 业主画像 ============
+   2026-11-06 20:40 用户原话「你能做成这种弹窗的形式吗？我不想放在右边」。
+   原第三列常驻右栏整段搬进 #modal：半透明遮罩 + 居中卡片 + 右上角「关闭 ×」。 */
+.modal{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;
+ padding:24px;background:rgba(15,26,44,.44);backdrop-filter:blur(1.5px)}
+.modal.on{display:flex}
+.modal-box{width:min(780px,94vw);max-height:min(86vh,880px);display:flex;flex-direction:column;
+ background:var(--surface);border:1px solid var(--line);border-radius:12px;
+ box-shadow:0 26px 72px rgba(10,22,44,.30);overflow:hidden}
+.modal-hd{padding:14px 20px 12px;border-bottom:1px solid var(--line);display:flex;
+ align-items:flex-start;gap:14px;flex:none;background:var(--surface)}
+.modal-hd .mh-t{flex:1;min-width:0}
+.modal-hd h3{margin:0;font-size:17px;font-weight:800;line-height:1.45;color:var(--ink);
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.modal-hd .mh-s{font-size:10.5px;color:var(--ink3);margin-top:2px;line-height:1.5}
+.modal-x{border:1px solid var(--line2);background:var(--surface);color:var(--ink2);border-radius:6px;
+ padding:4px 10px;font-size:11px;white-space:nowrap;flex:none}
+.modal-x:hover{border-color:var(--brand);color:var(--brand);background:var(--brandsoft)}
+.modal-tabs{display:flex;gap:5px;padding:9px 20px 0;flex:none;background:var(--surface)}
+.modal-tabs button{border:1px solid var(--line);border-bottom:0;background:var(--surface2);
+ color:var(--ink2);border-radius:6px 6px 0 0;padding:5px 15px;font-size:11px}
+.modal-tabs button.on{background:var(--brand);color:var(--brandtx);border-color:var(--brand)}
+.modal-bd{overflow:auto;padding:14px 20px 20px;min-height:0}
+.modal-ft{flex:none;border-top:1px solid var(--line);padding:8px 20px;font-size:10px;
+ color:var(--ink3);background:var(--surface2);line-height:1.5}
+.draw{display:block}   /* 保留类名/id 供既有验收与渲染函数定位；可见性由 #modal 控制 */
+.drawbody{padding:0}
+.dcard{border:1px solid var(--line);border-radius:var(--r2);padding:12px 15px;margin-bottom:10px;
+ font-size:11.5px;color:var(--ink2);line-height:1.75;background:var(--surface2);word-break:break-word}
+.dcard b{display:block;color:var(--ink);font-size:12px;margin-bottom:4px}
+.dcard .dk{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed var(--line);padding:5px 0}
 .dcard .dk:last-child{border-bottom:0}
-.dcard .dk span{color:var(--ink3)}
-.dcard .dk b{display:inline;font-size:10.5px;margin:0;text-align:right;word-break:break-all}
+.dcard .dk span{color:var(--ink3);flex:none}
+.dcard .dk b{display:inline;font-size:11.5px;margin:0;text-align:right;word-break:break-all}
 
 /* ============ 响应式三档（真实屏宽；预览档在个人中心里复刻） ============ */
 @media(max-width:1200px){.ticker{display:none}.pk{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:1100px){
- .body,.app.drawer .body,.app.collapsed .body,.app.collapsed.drawer .body,
- .app.rightoff .body,.app.collapsed.rightoff .body{grid-template-columns:var(--navw2) minmax(0,1fr) 0}
- /* 窄屏：右栏退化为点条目才浮出的浮层；宽屏始终常驻 */
- .draw{display:none;position:fixed;right:0;top:58px;bottom:0;width:min(330px,88vw);height:auto;
-  z-index:38;box-shadow:var(--sh2)}
- .app.drawer .draw{display:block!important}
- .app.rightoff .draw{display:none!important}
+ .body,.app.collapsed .body{grid-template-columns:var(--navw2) minmax(0,1fr)}
  .navtop,.nav .grp,.ni .nm,.ni .bd,.ni .cnt,.navfoot,.navside,.nav .brandsub{display:none}
  .ni{justify-content:center;padding:7px 0}
  .dstat{display:none}
  .row{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 80px;gap:10px}
 }
 @media(max-width:720px){
- .body,.app.drawer .body,.app.collapsed .body,.app.collapsed.drawer .body,
- .app.rightoff .body,.app.collapsed.rightoff .body{grid-template-columns:minmax(0,1fr)}
+ .body,.app.collapsed .body{grid-template-columns:minmax(0,1fr)}
  .nav{display:none!important}
- .draw{top:0}
- .app.drawer .draw{display:block!important}
- .app.rightoff .draw{display:none!important}
  .top{height:auto;padding:8px 12px;flex-wrap:wrap}
  .gs{order:5;flex-basis:100%;max-width:none}
  .top-right{order:2}
@@ -396,24 +400,25 @@ select.sel{border:1px solid var(--line2);background:var(--surface2);color:var(--
  .phead h1{font-size:17px}
  .ms .mnote{display:none}
  .pop{right:12px;top:48px;width:min(288px,calc(100vw - 24px))}
+ .modal{padding:10px}
+ .modal-box{width:100%;max-height:92vh}
+ .modal-hd{padding:12px 14px}
+ .modal-tabs{padding:8px 14px 0}
+ .modal-tabs button{padding:5px 10px;font-size:10.5px}
+ .modal-bd{padding:12px 14px 16px}
+ .modal-ft{padding:7px 14px}
+ .ovtable{min-width:620px}
 }
 .preview.tablet{max-width:840px;margin:0 auto;border-left:1px solid var(--line);border-right:1px solid var(--line)}
 .preview.mobile{max-width:400px;margin:0 auto;border:1px solid var(--line);box-shadow:var(--sh2)}
-.preview.tablet .body,.preview.tablet .app.drawer .body,
-.preview.tablet .app.collapsed .body,.preview.tablet .app.collapsed.drawer .body{grid-template-columns:var(--navw2) minmax(0,1fr) 0}
+.preview.tablet .body,.preview.tablet .app.collapsed .body{grid-template-columns:var(--navw2) minmax(0,1fr)}
 .preview.tablet .navtop,.preview.tablet .nav .grp,
 .preview.tablet .ni .nm,.preview.tablet .ni .bd,.preview.tablet .ni .cnt,.preview.tablet .navfoot,
 .preview.tablet .navside,.preview.tablet .dstat,.preview.tablet .nav .brandsub{display:none}
-.preview.tablet .draw{display:none;position:fixed;right:0;top:58px;bottom:0;width:min(330px,88vw);
- height:auto;z-index:38;box-shadow:var(--sh2)}
-.preview.tablet .app.drawer .draw{display:block!important}
 .preview.tablet .ni{justify-content:center;padding:7px 0}
 .preview.tablet .pk{grid-template-columns:repeat(2,minmax(0,1fr))}
-.preview.mobile .body,.preview.mobile .app.drawer .body,
-.preview.mobile .app.collapsed .body,.preview.mobile .app.collapsed.drawer .body{grid-template-columns:minmax(0,1fr)}
+.preview.mobile .body,.preview.mobile .app.collapsed .body{grid-template-columns:minmax(0,1fr)}
 .preview.mobile .nav,.preview.mobile .dstat{display:none!important}
-.preview.mobile .draw{display:none;top:0}
-.preview.mobile .app.drawer .draw{display:block!important}
 .preview.mobile .top{height:auto;padding:8px 12px;flex-wrap:wrap}
 .preview.mobile .gs{order:5;flex-basis:100%;max-width:none}
 .preview.mobile .pk{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -597,6 +602,28 @@ body.dark .nav{--navsel:#37618c}
 .mktsum b{font-variant-numeric:tabular-nums}
 .mktsum b.u{color:var(--up)}.mktsum b.d{color:var(--down)}
 @media(max-width:1240px){.ticker{display:none}}
+/* ===== 弹窗内分区与明细表：字段全部来自接口，页面不补造、不反推①库 ===== */
+.sec-h{font-size:11.5px;font-weight:800;color:var(--ink);line-height:1.3;margin:14px 0 8px;
+ padding-left:9px;border-left:3px solid var(--brand)}
+.sec-h:first-child{margin-top:2px}
+.ovhead{font-size:16px;font-weight:800;margin-bottom:4px;line-height:1.5}
+.ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:0 18px}
+.ovcell{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;padding:5px 0;
+ border-bottom:1px dashed var(--line)}
+.ovcell span{color:var(--ink3);flex:none}
+.ovcell b{font-weight:600;color:var(--ink2);text-align:right;word-break:break-word}
+.ovtablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:7px;background:var(--surface)}
+.ovtable{width:100%;border-collapse:collapse;font-size:11px;line-height:1.6}
+.ovtable th{text-align:left;font-size:10px;color:var(--ink3);font-weight:700;letter-spacing:.3px;
+ padding:7px 9px;background:var(--surface3);border-bottom:1px solid var(--line);white-space:nowrap}
+.ovtable td{padding:7px 9px;border-bottom:1px solid var(--line);color:var(--ink2);vertical-align:top}
+.ovtable tr:last-child td{border-bottom:0}
+.ovtable tr:hover td{background:var(--surface2)}
+.ovtable td.num{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:700;white-space:nowrap}
+.ovtable .osg{font-size:9.5px;color:var(--ink3);margin-top:2px}
+.ovtable a{color:var(--brand);text-decoration:none;white-space:nowrap}
+.ovtable a:hover{text-decoration:underline}
+.dcard .dact [data-close]{margin-left:auto}
 </style></head><body>
 <div class="preview" id="preview">
 <div class="app" id="app">
@@ -610,7 +637,7 @@ body.dark .nav{--navsel:#37618c}
    <div class="ticker" id="ticker"></div>
    <div class="dstat"><i id="dot"></i><span id="ds">正在读取数据源…</span></div>
    <button class="iconbtn hasdot" id="btnBell" title="通知">♧</button>
-   <button class="iconbtn" id="btnDraw" title="隐藏 / 显示右侧信息栏">◨</button>
+   <button class="iconbtn" id="btnDraw" title="实时关注 / 只读事实（居中弹窗）">▦</button>
    <button class="avatar" id="btnUser" title="个人中心">赵</button>
   </div>
   <!-- 个人中心：原顶部验收工具条（预览档 / 暗色 / 状态）全部收进这里 -->
@@ -683,29 +710,48 @@ body.dark .nav{--navsel:#37618c}
    <div class="pager" id="pager"></div>
    <div class="slots" id="slots"></div>
   </main>
-  <aside class="draw">
-   <div class="drawtabs"><button id="dtCtx" class="on">实时关注</button><button id="dtDetail">项目详情</button><button id="dtOwner">业主画像</button></div>
-   <div class="drawbody">
-    <div id="drawCtx">
-     <div class="sidehint"><b>这一栏常驻，不会从边上弹出。</b><br>
-      点列表<b>标题 / 详情</b> → 项目详情；点<b>业主名</b> → 业主画像；点<b>原文 ↗</b> → 原始公告；
-      点顶栏<b>当日行情</b>里的品种 → 历史曲线。顶部三个按钮随时切回来。</div>
-     <div class="dcard" id="dFocus"><b>实时关注 · 只读事实</b>读取中…</div>
-     <div class="dcard" id="dRule"><b>规则源（资产）</b>读取中…</div>
-     <div class="dcard" id="dHealth"><b>数据体检（资产）</b>读取中…</div>
-     <div class="dcard" id="dCollect"><b>抓取状态</b>读取中…</div>
-     <div class="dcard"><b>占位规范</b>规划中的功能位置已预留，标「规划中 / 数据未接」；不画假图、不写死数字、不产生筛选判据。</div>
-    </div>
-    <div id="drawDetail" style="display:none">
-     <div class="dcard" id="dDetail"><b>项目详情</b>点列表里的项目标题或右侧「详情」，这里会显示该条的真实字段、原文入口与状态历史。</div>
-    </div>
-    <div id="drawOwner" style="display:none">
-     <div class="dcard" id="dOwner"><b>业主画像</b>点列表里的业主名，这里显示 ②业绩 / 动向库按单位聚合的只读档案；不反推①库、不测算。</div>
-    </div>
-   </div>
-  </aside>
  </div>
 </div>
+</div>
+
+<!-- ============ 居中弹窗：实时关注 / 项目详情 / 业主画像 ============
+     2026-11-06 20:40 用户：「你能做成这种弹窗的形式吗？我不想放在右边」。
+     原第三列常驻右栏整体搬到这里；id 与渲染函数全部保留，点击链路、数据口径不变。
+     关闭方式：右上角「关闭 ×」/ 点弹窗外遮罩 / Esc。 -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+ <div class="modal-box">
+  <div class="modal-hd">
+   <div class="mh-t"><h3 id="modalTitle">实时关注</h3>
+    <div class="mh-s" id="modalSub">只读事实 · 数据来自接口，页面不做业务判定</div></div>
+   <button class="modal-x" id="modalClose" title="关闭弹窗（也可点空白处或按 Esc）">关闭 ×</button>
+  </div>
+  <div class="modal-tabs">
+   <button id="dtCtx" class="on">实时关注</button><button id="dtDetail">项目详情</button><button id="dtOwner">业主画像</button>
+  </div>
+  <div class="modal-bd">
+   <aside class="draw">
+    <div class="drawbody">
+     <div id="drawCtx">
+      <div class="sidehint"><b>这是居中弹窗，不再贴在页面右边。</b><br>
+       点列表<b>标题 / 详情</b> → 项目详情；点<b>业主名</b> → 业主画像；点<b>原文 ↗</b> → 原始公告；
+       点顶栏<b>当日行情</b>里的品种 → 历史曲线。上面三个按钮随时切页；点「关闭 ×」、点弹窗外空白处或按 Esc 收起。</div>
+      <div class="dcard" id="dFocus"><b>实时关注 · 只读事实</b>读取中…</div>
+      <div class="dcard" id="dRule"><b>规则源（资产）</b>读取中…</div>
+      <div class="dcard" id="dHealth"><b>数据体检（资产）</b>读取中…</div>
+      <div class="dcard" id="dCollect"><b>抓取状态</b>读取中…</div>
+      <div class="dcard"><b>占位规范</b>规划中的功能位置已预留，标「规划中 / 数据未接」；不画假图、不写死数字、不产生筛选判据。</div>
+     </div>
+     <div id="drawDetail" style="display:none">
+      <div class="dcard" id="dDetail"><b>项目详情</b>点列表里的项目标题或行内「详情」，这里会显示该条的真实字段、原文入口与状态历史。</div>
+     </div>
+     <div id="drawOwner" style="display:none">
+      <div class="dcard" id="dOwner"><b>业主画像</b>点列表里的业主名，这里显示 ②业绩 / 动向库按单位聚合的只读档案；不反推①库、不测算。</div>
+     </div>
+    </div>
+   </aside>
+  </div>
+  <div class="modal-ft">弹窗内只展示接口返回的真实字段；能不能投由服务端规则源在入库时判定，页面不重判、不补假数据。</div>
+ </div>
 </div>
 
 <script>
@@ -1012,7 +1058,7 @@ function renderItems(d){
 }
 function orgCard(x,grp,i){
  var key=grp+'|'+i,name=String(pick(x.name,x.n,x.company,'（单位）'));
- /* 存下本条真实数据：点单位名 / 「查看画像」时直接用它渲染右栏，不二次查询，也不会查不到 */
+ /* 存下本条真实数据：点单位名 / 「查看画像」时直接用它渲染弹窗，不二次查询，也不会查不到 */
  state.profileMap[key]={x:x,grp:grp};
  var meta=[['业绩条目',x.n||x.count],['金额(亿)',x.amt],['地区',x.rg||x.city],
            ['主业',short(pick(x.main,x.type,x.why,x.role),16)],['分层',x.tier],['分组',groupLabel(grp)]];
@@ -1373,7 +1419,7 @@ function loadPeripherals(){
    el.onclick=function(e){if(e)e.stopPropagation();openMkt();};});
   renderMktPanel(m);
  });
- /* 导航角标 + 右栏「实时关注」：数字一律来自契约接口，页面不写死、不重判 */
+ /* 导航角标 + 弹窗「实时关注」：数字一律来自契约接口，页面不写死、不重判 */
  api('/api/opportunities',{page:1,size:1}).then(function(d){
   if(!d)return;
   state.counts.items=d.total;
@@ -1438,6 +1484,7 @@ function openMetal(code){
  var m=state.metals;if(!m||!m.items)return;
  var x=m.items.filter(function(a){return String(a.code)===String(code);})[0];if(!x)return;
  showPane('detail');
+ setModalTitle(String(x.name)+' · '+String(x.code),'品种历史曲线 · 价格与历史来自数据包，页面不测算');
  var box=document.getElementById('dDetail');
  var h='<b>'+esc(x.name)+' · '+esc(x.code)+'</b>';
  h+='<div class="ovrow"><span>最新价</span><b>'+esc(num(x.price))+' '+esc(x.unit||'')+'</b></div>';
@@ -1458,35 +1505,23 @@ function openMetal(code){
 }
 function openOwner(name){
  showPane('owner');
+ setModalTitle(String(name),'业主画像 · ②业绩 / 动向库按单位聚合，正在读取…');
  var box=document.getElementById('dOwner');
  box.innerHTML='<b>业主画像</b>读取中… '+esc(name);
  api('/api/orgs',{type:'owner',q:name,size:20}).then(function(r){
   if(!r){box.innerHTML='<b>业主画像</b>离线降级：无服务端，不补假数据。';return;}
   var hits=[];
   Object.keys(r.groups||{}).forEach(function(k){
-   ((r.groups[k]||{}).items||[]).forEach(function(o){hits.push({grp:k,o:o});});});
+   var v=r.groups[k];
+   (Array.isArray(v)?v:(v&&v.items)||[]).forEach(function(o){hits.push({grp:k,o:o});});});
   if(!hits.length){box.innerHTML='<b>业主画像</b>②库暂无「'+esc(name)+
    '」的单位档案，页面不补假数据、不反推①库。';return;}
   var nm=String(name);
   var exact=hits.filter(function(z){var t=String(z.o.name||z.o.n||'');return t===nm||t.indexOf(nm)>=0||nm.indexOf(t)>=0;});
-  var u=exact.length?exact[0]:hits[0],o=u.o;
-  var h='<div class="ovhead">'+esc(String(o.name||o.n||name))+'</div>';
-  h+='<div class="ovrow"><span>来源分组</span><b>'+esc(u.grp)+' · ②库按单位聚合</b></div>';
-  [['业绩条目',o.n||o.count],['金额(亿)',o.amt],['地区',o.rg||o.city],
-   ['主业',short(pick(o.main,o.type,o.why,o.role,''),28)],['分层',o.tier],
-   ['合作 / 中标单位数',(o.hits||[]).length||'—']].forEach(function(p){
-   if(p[1]!=null&&p[1]!=='')h+='<div class="ovrow"><span>'+esc(p[0])+'</span><b>'+esc(String(p[1]))+'</b></div>';});
-  var its=o.items||o.recent||[];
-  if(its.length){
-   h+='<div class="ovlist"><b style="font-size:11px">最近项目 / 动向（真实条目，不补造）</b>';
-   its.slice(0,6).forEach(function(it){
-    var t=short(pick(it.t,it.title,it.nm,''),68);
-    h+='<div class="ovitem">'+esc(t)+(it.d?' <span style="color:var(--ink3)">'+esc(it.d)+'</span>':'')+'</div>';});
-   h+='</div>';
-  }
-  h+='<div class="mktnote">②业绩 / 动向库按单位聚合，只读展示；不反推①库、不产生新的删留规则或投资判断。</div>';
-  h+='<div class="dact"><button data-back="ctx">← 回到实时关注</button></div>';
-  box.innerHTML=h;
+  var u=exact.length?exact[0]:hits[0];
+  setModalTitle(String(u.o.name||u.o.n||name),
+    '业主画像 · ②业绩 / 动向库按单位聚合，只读展示、不反推①库');
+  box.innerHTML=orgProfileHtml(u.o,u.grp);
   [].forEach.call(box.querySelectorAll('[data-back]'),function(bt){
     bt.onclick=function(){setDrawTab('ctx');};});
  });
@@ -1496,30 +1531,42 @@ function bindOwner(){
   b.onclick=function(e){e.preventDefault();e.stopPropagation();openOwner(b.dataset.owner);};});
 }
 /* ②库单位画像：直接用 /api/orgs 已返回的同一条记录渲染，不二次查询、不补假数据。
-   修复前 orgCard 生成的是纯 <b> 文本、renderGroups 也没绑点击，点单位永远停在「实时关注」。 */
+   2026-11-06 20:40：改成居中弹窗里的「客户概况 / 业绩总结」分区 + 真实条目表，
+   列值全部取接口原字段（d / t / amt / st / win / url / sg），空值显示 —，不补造。 */
+function orgProfileHtml(o,grp){
+ var h='<div class="sec-h">客户概况</div><div class="ovgrid">';
+ [['来源分组',groupLabel(grp)+' · ②库按单位聚合'],
+  ['业绩条目',o.n||o.count],['金额(亿)',o.amt],['地区',o.rg||o.city],
+  ['主业',short(pick(o.main,o.type,o.why,o.role,''),28)],['分层',o.tier],['分组键',grp]
+ ].forEach(function(p){
+  if(p[1]!=null&&p[1]!=='')h+='<div class="ovcell"><span>'+esc(p[0])+'</span><b>'+esc(String(p[1]))+'</b></div>';});
+ h+='</div>';
+ var its=o.items||o.recent||[];
+ h+='<div class="sec-h">业绩总结 · 最近 '+Math.min(its.length,8)+' 条真实条目</div>';
+ if(its.length){
+  h+='<div class="ovtablewrap"><table class="ovtable"><thead><tr><th>日期</th><th>项目 / 标的</th>'+
+     '<th>金额(亿)</th><th>阶段</th><th>中标 / 合作单位</th><th>原文</th></tr></thead><tbody>';
+  its.slice(0,8).forEach(function(it){
+   var t=short(pick(it.t,it.title,it.nm,''),80);
+   h+='<tr><td>'+esc(it.d||'—')+'</td><td>'+esc(t)+
+      (it.sg?'<div class="osg">'+esc(it.sg)+'</div>':'')+'</td>'+
+      '<td class="num">'+(it.amt==null||it.amt===''?'—':esc(String(it.amt)))+'</td>'+
+      '<td>'+esc(it.st||'—')+'</td><td>'+esc(short(it.win||'—',40))+'</td>'+
+      '<td>'+(it.url?linkHtml(it.url,'原文'):'—')+'</td></tr>';});
+  h+='</tbody></table></div>';
+ }else h+='<div class="mktnote">该单位在本组里没有可展示的条目，页面不补造。</div>';
+ h+='<div class="mktnote">字段来自 GET /api/orgs 返回的同一条单位记录；②业绩 / 动向库按单位聚合，'+
+    '只读展示，不反推①库、不测算、不产生删留规则或投资判断。</div>';
+ h+='<div class="dact"><button data-back="ctx">← 回到实时关注</button>'+
+    '<button data-close="1">关闭弹窗</button></div>';
+ return h;
+}
 function openOrgProfile(x,grp){
  showPane('owner');
+ setModalTitle(String(pick(x.name,x.n,x.company,'（单位）')),
+   '业主画像 · ②业绩 / 动向库按单位聚合，只读展示、不反推①库');
  var box=document.getElementById('dOwner');
- var name=String(pick(x.name,x.n,x.company,'（单位）'));
- var h='<div class="ovhead">'+esc(name)+'</div>';
- h+='<div class="ovrow"><span>来源分组</span><b>'+esc(groupLabel(grp))+' · ②库按单位聚合</b></div>';
- [['业绩条目',x.n||x.count],['金额(亿)',x.amt],['地区',x.rg||x.city],
-  ['主业',short(pick(x.main,x.type,x.why,x.role,''),28)],['分层',x.tier],
-  ['分组键',grp]].forEach(function(p){
-  if(p[1]!=null&&p[1]!=='')h+='<div class="ovrow"><span>'+esc(p[0])+'</span><b>'+esc(String(p[1]))+'</b></div>';});
- var its=x.items||x.recent||[];
- if(its.length){
-  h+='<div class="ovlist"><b style="font-size:11px">最近项目 / 动向（'+Math.min(its.length,8)+
-     ' 条真实条目，不补造）</b>';
-  its.slice(0,8).forEach(function(it){
-   var t=short(pick(it.t,it.title,it.nm,''),68);
-   h+='<div class="ovitem">'+esc(t)+(it.d?' <span style="color:var(--ink3)">'+esc(it.d)+'</span>':'')+'</div>';});
-  h+='</div>';
- }
- h+='<div class="mktnote">字段来自 GET /api/orgs 返回的同一条单位记录；只读展示，'+
-    '不反推①库、不测算、不产生删留规则或投资判断。</div>';
- h+='<div class="dact"><button data-back="ctx">← 回到实时关注</button></div>';
- box.innerHTML=h;
+ box.innerHTML=orgProfileHtml(x,grp);
  [].forEach.call(box.querySelectorAll('[data-back]'),function(bt){
    bt.onclick=function(){setDrawTab('ctx');};});
 }
@@ -1537,7 +1584,7 @@ function renderMktPanel(m){
  h+='<div class="mktsum"><span>上涨 <b class="u">'+up+'</b></span>'+
     '<span>下跌 <b class="d">'+dn+'</b></span>'+
     '<span>平盘 <b>'+(m.items.length-up-dn)+'</b></span>'+
-    '<span style="margin-left:auto;color:var(--brand)">点任一品种 → 右栏看历史曲线 ↗</span></div>';
+    '<span style="margin-left:auto;color:var(--brand)">点任一品种 → 居中弹窗看历史曲线 ↗</span></div>';
  m.items.forEach(function(x){
   var c=Number(x.chg||0),cls=c>0?'u':(c<0?'d':'f');
   h+='<div class="mktrow" data-mk="'+esc(x.code)+'" title="点开看历史曲线与解读"><b>'+esc(x.name)+
@@ -1546,7 +1593,7 @@ function renderMktPanel(m){
    '<span class="mc '+cls+'">'+(c>0?'+':'')+esc(x.chg)+'%</span>'+sparkSvg(x.code,58,20)+'</div>';
  });
  h+='<div class="mktnote">13 个品种的价格 / 涨跌 / 迷你走势都在上面，不用横向拖动；'+
-    '点任一品种，右栏「项目详情」会显示该品种的历史曲线、区间最高 / 最低与数据日。'+
+    '点任一品种，会弹出居中「项目详情」，显示该品种的历史曲线、区间最高 / 最低与数据日。'+
     '行情只是用热用电 / 造价的成本风向标，页面不测算、不产生投资判断；数据来自 data.core.js + data.metalhist.js。</div>';
  var pop=document.getElementById('mktPop');pop.innerHTML=h;
  [].forEach.call(pop.querySelectorAll('[data-mk]'),function(el){
@@ -1554,25 +1601,41 @@ function renderMktPanel(m){
 }
 function openMkt(){closePops();document.getElementById('mktPop').classList.add('on');}
 
-/* ================= 交互：常驻右栏 / 个人中心 / 全局检索 ================= */
-/* 2026-11-06：右栏改为常驻。宽屏只换内容、不弹出不挤压；窄屏才浮出。 */
+/* ================= 交互：居中弹窗 / 个人中心 / 全局检索 ================= */
+/* 2026-11-06 20:40：用户要求「做成这种弹窗的形式，我不想放在右边」；右栏整段改为居中弹窗。 */
 function showPane(t){
  setDrawTab(t);
- var app=document.getElementById('app');
- app.classList.remove('rightoff');
- /* drawer 类在宽屏无视觉差异（右栏本就常驻），窄屏用来浮出右栏；保留它也让既有验收脚本不返工 */
- app.classList.add('drawer');
+ /* 2026-11-06 20:40：详情不再放右边，统一打开居中弹窗。
+    drawer 类只作为「弹窗已打开」状态标记，沿用既有验收脚本识别方式。 */
+ document.getElementById('app').classList.add('drawer');
+ document.getElementById('modal').classList.add('on');
+ document.body.classList.add('modalopen');
+ try{document.getElementById('modalClose').focus();}catch(e){}
 }
-/* 切模块 / 换页时清掉上一条详情与业主画像残留，避免点 A 看到 B 的内容 */
+function closeModal(){
+ document.getElementById('modal').classList.remove('on');
+ document.getElementById('app').classList.remove('drawer');
+ document.body.classList.remove('modalopen');
+}
+/* 切模块 / 换页时清掉上一条详情与业主画像残留，并收起弹窗，避免点 A 看到 B 的内容 */
 function resetPanes(){
- document.getElementById('dDetail').innerHTML='<b>项目详情</b>点列表里的项目标题或右侧「详情」，这里会显示该条的真实字段、原文入口与状态历史。';
+ document.getElementById('dDetail').innerHTML='<b>项目详情</b>点列表里的项目标题或行内「详情」，这里会显示该条的真实字段、原文入口与状态历史。';
  document.getElementById('dOwner').innerHTML='<b>业主画像</b>点列表里的业主名，这里显示 ②业绩 / 动向库按单位聚合的只读档案；不反推①库、不测算。';
  state.curItems=[];
- document.getElementById('app').classList.remove('drawer');
+ closeModal();
+}
+function setModalTitle(t,sub){
+ var mt=document.getElementById('modalTitle'),ms=document.getElementById('modalSub');
+ if(mt)mt.textContent=t;
+ if(ms)ms.textContent=sub;
 }
 function setDrawTab(t){
  state.drawTab=t;
  var tabs={ctx:'dtCtx',detail:'dtDetail',owner:'dtOwner'};
+ var ttl={ctx:['实时关注','只读事实 · 数据来自接口，页面不做业务判定'],
+  detail:['项目详情','①投放 / 商机库 · 字段来自 GET /api/opportunities/:id'],
+  owner:['业主画像','②业绩 / 动向库 · 按单位聚合，只读展示、不反推①库']};
+ if(ttl[t])setModalTitle(ttl[t][0],ttl[t][1]);
  Object.keys(tabs).forEach(function(k){
   var on=(k===t),btn=document.getElementById(tabs[k]),pane=document.getElementById('draw'+k.charAt(0).toUpperCase()+k.slice(1));
   if(btn)btn.classList.toggle('on',on);
@@ -1589,6 +1652,9 @@ function bindDetail(){
     if(!r){box.innerHTML='<b>项目详情</b>离线降级：无服务端，不补假数据。';return;}
     if(r.error){box.innerHTML='<b>项目详情</b>'+esc(r.error);return;}
     var x=r.item||{},h='<div class="dtitle">'+esc(x.t||'（无标题）')+'</div>';
+    setModalTitle(short(String(x.t||'项目详情'),46),
+      '项目详情 · ①投放 / 商机库 · 字段来自 GET /api/opportunities/:id');
+    h+='<div class="sec-h">基本信息 · 接口原字段</div>';
     [['ID',x.id],['阶段',x.st],['业务分层',pick(x.sub,x.sg)],['交付模式',x.mode],
      ['金额',pick(x.amtTxt,(x.amt?x.amt+' 亿':''))],['发布日期',pick(x.d,x.dl)],
      ['中标单位',x.win],['关注档','w='+String(x.w)],['综合分',x.sc],
@@ -1600,7 +1666,7 @@ function bindDetail(){
     h+='<div class="dk"><span>原文</span><b>'+(x.url?detailLink(x.url):'—')+'</b></div>';
     if(x.snip)h+='<div style="margin-top:7px;border-top:1px dashed var(--line);padding-top:6px">'+esc(short(x.snip,300))+'</div>';
     var hist=x.hist||[];
-    h+='<div style="margin-top:7px;border-top:1px dashed var(--line);padding-top:6px"><b>状态历史</b>';
+    h+='<div class="sec-h">状态历史 · 采集时留痕</div>';
     h+=hist.length?'<div class="dhist">'+hist.slice(0,12).map(function(z){
       return '<div>'+esc(typeof z==='object'?JSON.stringify(z):String(z))+'</div>';}).join('')+'</div>':
       ' <span style="color:var(--ink3)">暂无</span>';
@@ -1622,18 +1688,15 @@ function closePops(){document.getElementById('popUser').classList.remove('on');
  document.getElementById('popBell').classList.remove('on');}
 function updateFavCount(){document.getElementById('favCount').textContent=Object.keys(state.fav).length+' 条';}
 document.getElementById('btnNav').onclick=function(){document.getElementById('app').classList.toggle('collapsed');};
-document.getElementById('btnDraw').onclick=function(){closePops();
- var app=document.getElementById('app');
- if(window.matchMedia&&window.matchMedia('(max-width:1100px)').matches)app.classList.toggle('drawer');
- else app.classList.toggle('rightoff');};
-/* 宽屏→窄屏时收掉「宽屏点详情」留下的浮层状态，避免右栏无端盖住内容；
-   窄屏里用户主动点详情仍会重新浮出。 */
-var _brNarrow=(window.innerWidth<=1100);
-window.addEventListener('resize',function(){
- var narrow=window.innerWidth<=1100;
- if(narrow!==_brNarrow){_brNarrow=narrow;
-  if(narrow)document.getElementById('app').classList.remove('drawer');}
-});
+document.getElementById('btnDraw').onclick=function(){closePops();showPane('ctx');};
+/* 弹窗三种关闭方式：右上角 ×、点遮罩空白处、Esc；弹窗内的「关闭弹窗」按钮走事件委托。 */
+document.getElementById('modalClose').onclick=closeModal;
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.addEventListener('keydown',function(e){
+ if(e.key==='Escape'&&document.getElementById('modal').classList.contains('on'))closeModal();});
+document.addEventListener('click',function(e){
+ var t=(e.target&&e.target.closest)?e.target.closest('[data-close]'):null;
+ if(t)closeModal();});
 document.getElementById('dtCtx').onclick=function(){setDrawTab('ctx');};
 document.getElementById('dtDetail').onclick=function(){setDrawTab('detail');};
 document.getElementById('dtOwner').onclick=function(){setDrawTab('owner');};

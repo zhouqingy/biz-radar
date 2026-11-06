@@ -34,11 +34,13 @@ with sync_playwright() as p:
     pg.wait_for_timeout(600)
 
     print('=== 1 · 骨架 / 接通 / 源码红线 ===')
-    chk('顶栏 / 左导航 / 主区 / 右信息栏齐备',
+    chk('顶栏 / 左导航 / 主区 / 居中弹窗齐备',
         pg.locator('.top').count() == 1 and pg.locator('.nav').count() == 1 and
-        pg.locator('.main').count() == 1 and pg.locator('.draw').count() == 1)
-    chk('右信息栏默认常驻（不再点一下才从边上弹出）',
-        pg.locator('.draw').evaluate('e=>getComputedStyle(e).display') != 'none')
+        pg.locator('.main').count() == 1 and pg.locator('#modal').count() == 1 and
+        pg.locator('.draw').count() == 1)
+    chk('默认不占右边第三列（详情收在居中弹窗里）',
+        len(pg.locator('.body').evaluate('e=>getComputedStyle(e).gridTemplateColumns').split()) == 2
+        and not pg.locator('#modal').is_visible())
     chk('顶部不再外露验收工具条（.preview-bar 为 0）',
         pg.locator('.preview-bar').count() == 0)
     chk('API 已接通（非离线降级）',
@@ -121,14 +123,14 @@ with sync_playwright() as p:
     pg.locator('#rows .rt[data-detail]').first.click(); pg.wait_for_timeout(420)
     chk('点标题打开项目详情（真实字段）',
         pg.locator('#app.drawer').count() == 1 and '业主' in pg.locator('#drawDetail').inner_text())
-    pg.locator('#btnDraw').click(); pg.wait_for_timeout(150)
+    pg.locator('#modalClose').click(); pg.wait_for_timeout(150)
     if pg.locator('#rows .rbuyer[data-owner]').count():
         pg.locator('#rows .rbuyer[data-owner]').first.click(); pg.wait_for_timeout(520)
         ot = pg.locator('#drawOwner').inner_text()
         chk('点业主名打开业主画像（②库只读 / 不补假数据）',
             pg.locator('#app.drawer').count() == 1 and ('②库' in ot or '暂无' in ot),
             ot.replace('\n', ' | ')[:80])
-        pg.locator('#btnDraw').click(); pg.wait_for_timeout(150)
+        pg.locator('#modalClose').click(); pg.wait_for_timeout(150)
     else:
         chk('点业主名打开业主画像（②库只读 / 不补假数据）', True, '本页无业主名，跳过')
 
@@ -147,7 +149,7 @@ with sync_playwright() as p:
     chk('各模块 placeholder 按业务定制（非同一句）', len(set(phs)) >= 9, '%d 种' % len(set(phs)))
 
     # 客户与业主：搜索生效 + 切换后不污染下一个模块
-    pg.locator('#navList .ni[data-id="clients"]').click(); pg.wait_for_timeout(300)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="clients"]').click(); pg.wait_for_timeout(300)
     before = pg.locator('#pk').inner_text()
     pg.locator('#mq').fill('热电'); pg.wait_for_timeout(480)
     chk('客户与业主搜「热电」命中下降且内容相关',
@@ -155,7 +157,7 @@ with sync_playwright() as p:
         pg.locator('#pk').inner_text() != before,
         pg.locator('#pk').inner_text().replace('\n', ' | ')[:70])
     pg.screenshot(path=OUT + '模块内检索-客户业主.png', full_page=False)
-    pg.locator('#navList .ni[data-id="orgs"]').click(); pg.wait_for_timeout(330)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="orgs"]').click(); pg.wait_for_timeout(330)
     chk('切到同业与伙伴后检索词不残留（作用域隔离）',
         pg.locator('#mq').input_value() == '' and '热电' not in pg.locator('#msearch').inner_text())
     org_all = pg.locator('#pk').inner_text()
@@ -164,13 +166,13 @@ with sync_playwright() as p:
         '华光' in pg.locator('#rows').inner_text() and
         pg.locator('#pk').inner_text() != org_all,
         pg.locator('#pk').inner_text().replace('\n', ' | ')[:70])
-    pg.locator('#navList .ni[data-id="overseas"]').click(); pg.wait_for_timeout(320)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="overseas"]').click(); pg.wait_for_timeout(320)
     ov_all = pg.locator('#pk').inner_text()
     pg.locator('#mq').fill('印尼'); pg.wait_for_timeout(480)
     chk('海外机会搜「印尼」生效（不用一条条翻）',
         pg.locator('#pk').inner_text() != ov_all,
         pg.locator('#pk').inner_text().replace('\n', ' | ')[:70])
-    pg.locator('#navList .ni[data-id="help"]').click(); pg.wait_for_timeout(620)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="help"]').click(); pg.wait_for_timeout(620)
     help_all = pg.locator('#rows').inner_text()
     pg.locator('#mq').fill('N13'); pg.wait_for_timeout(620)
     _help_after = pg.locator('#rows').inner_text()
@@ -197,8 +199,8 @@ with sync_playwright() as p:
         pg.locator('#drawDetail svg').count() >= 1 and
         '区间最高' in pg.locator('#drawDetail').inner_text())
     pg.screenshot(path=OUT + '品种曲线.png', full_page=False)
-    pg.locator('#btnDraw').click(); pg.wait_for_timeout(150)
-    pg.locator('#navList .ni[data-id="wechat"]').click(); pg.wait_for_timeout(330)
+    pg.locator('#modalClose').click(); pg.wait_for_timeout(150)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="wechat"]').click(); pg.wait_for_timeout(330)
     chk('情报三合一只占一个入口、同时展示 3 个来源分组',
         '情报' in pg.locator('#ptitle').inner_text() and
         'kind=trends,wechat,digest' in pg.locator('#papi').inner_text() and
@@ -213,7 +215,7 @@ with sync_playwright() as p:
         all(pg.locator('#navList .ni[data-id="%s"]' % x).count() == 1 for x in soon_ids))
     chk('空 tab 导航标「待实现」', pg.locator('#navList .ni.soon').count() == 7,
         str(pg.locator('#navList .ni.soon').count()))
-    pg.locator('#navList .ni[data-id="funnel"]').click(); pg.wait_for_timeout(300)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="funnel"]').click(); pg.wait_for_timeout(300)
     soon_txt = pg.locator('#rows').inner_text()
     chk('点开显示「功能待实现」', '功能待实现' in soon_txt)
     chk('标注功能编号 / 前置条件 / 不画假图 / 不写死数字',
@@ -226,7 +228,7 @@ with sync_playwright() as p:
     pg.screenshot(path=OUT + '空tab-功能待实现.png', full_page=False)
 
     print('=== 7 · 筛选 / facets / 分页 / 排序 / 详情 / 本机标记 ===')
-    pg.locator('#navList .ni[data-id="opportunities"]').click(); pg.wait_for_timeout(360)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="opportunities"]').click(); pg.wait_for_timeout(360)
     chk('facets 工具条有筛选项', pg.locator('#toolbar .fchip').count() >= 12,
         '%d 个' % pg.locator('#toolbar .fchip').count())
     chk('7 个阶段枚举由 facets 返回且未写死',
@@ -258,19 +260,19 @@ with sync_playwright() as p:
     chk('本机标记可切换（纯视图偏好，不改数据）',
         pg.locator('.star[data-star]').first.evaluate("e=>e.classList.contains('on')"))
     pg.locator('[data-detail]').first.click(); pg.wait_for_timeout(450)
-    chk('点详情打开右抽屉并展示真实字段',
+    chk('点详情打开居中弹窗并展示真实字段',
         pg.locator('#app.drawer').count() == 1 and
         '业主' in pg.locator('#drawDetail').inner_text() and
         pg.locator('#drawDetail').is_visible())
     pg.screenshot(path=OUT + '条目详情抽屉.png', full_page=False)
-    pg.locator('#btnDraw').click()
+    pg.locator('#modalClose').click()
 
     print('=== 8 · 全库统一检索 / 刷新 / 导航收起 / 通知 ===')
     pg.locator('#gq').fill('余热'); pg.wait_for_timeout(800)
     chk('全库检索返回跨库分组命中',
         '全库统一检索' in pg.locator('#extra').inner_text() and
         '命中' in pg.locator('#extra').inner_text())
-    pg.locator('#navList .ni[data-id="orgs"]').click(); pg.wait_for_timeout(330)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="orgs"]').click(); pg.wait_for_timeout(330)
     chk('切模块后全库检索词与结果面板一并清空（不污染模块筛选）',
         pg.locator('#gq').input_value() == '' and pg.locator('#extra').inner_text().strip() == '')
     pg.locator('#btnUser').click(); pg.wait_for_timeout(120)
@@ -291,14 +293,14 @@ with sync_playwright() as p:
     chk('导航内功能筛选生效', 0 < pg.locator('#navList .ni').count() < 20,
         str(pg.locator('#navList .ni').count()))
     pg.locator('#navFilter').fill(''); pg.wait_for_timeout(150)
-    pg.locator('#navList .ni[data-id="opportunities"]').click(); pg.wait_for_timeout(380)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="opportunities"]').click(); pg.wait_for_timeout(380)
     pg.screenshot(path=OUT + '桌面-找商机.png', full_page=False)
     pg.screenshot(path=OUT + '桌面-整页.png', full_page=True)
 
     print('=== 9 · 真实响应式（改 viewport，非预览按钮） ===')
     pg.set_viewport_size({'width': 390, 'height': 844}); pg.wait_for_timeout(320)
     chk('390px 下左导航隐藏', pg.locator('.nav').evaluate('e=>getComputedStyle(e).display') == 'none')
-    chk('390px 下右抽屉隐藏', pg.locator('.draw').evaluate('e=>getComputedStyle(e).display') == 'none')
+    chk('390px 下弹窗默认收起', not pg.locator('#modal').is_visible())
     chk('390px 下 KPI 仍可见', pg.locator('#pk .k').count() >= 2)
     chk('390px 下数据行收敛为 ≤ 4 列',
         len(pg.locator('#rows .row').first.evaluate('e=>getComputedStyle(e).gridTemplateColumns').split()) <= 4)
@@ -377,14 +379,14 @@ with sync_playwright() as p:
         nst.replace('\n', ' | ')[:70])
     chk('左栏日期标签口径准确（体检报告日 ≠ 数据包日期）',
         '体检报告日' in nst and '数据包日期' not in nst)
-    chk('通知 / 右抽屉不再把体检 gen 标成「数据包 gen」',
+    chk('通知 / 弹窗不再把体检 gen 标成「数据包 gen」',
         '数据包 gen' not in src and '体检生成' in src)
     ph1 = pg.evaluate('document.documentElement.scrollHeight')
     slb = pg.locator('#slots').bounding_box()
     gap1 = ph1 - (slb['y'] + slb['height'])
     chk('默认页主区下方留白 < 100px（修复前 519.6）', gap1 < 100, '%.1f px' % gap1)
 
-    pg.locator('#navList .ni[data-id="funnel"]').click(); pg.wait_for_timeout(330)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="funnel"]').click(); pg.wait_for_timeout(330)
     ph2 = pg.evaluate('document.documentElement.scrollHeight')
     rb, sb = pg.locator('#rows').bounding_box(), pg.locator('#rows .soonbox').bounding_box()
     chk('空 tab 整页约一屏（950 ± 80，修复前 3611）', abs(ph2 - 950) <= 80, '%d px' % ph2)
@@ -394,7 +396,7 @@ with sync_playwright() as p:
         ph2 - (sb['y'] + sb['height']) < 120, '%.1f px' % (ph2 - (sb['y'] + sb['height'])))
     chk('主区不再使用通用 .soon 类（防复发）', pg.locator('#rows .soon').count() == 0)
     pg.screenshot(path=OUT + '空tab-无留白.png', full_page=True)
-    pg.locator('#navList .ni[data-id="opportunities"]').click(); pg.wait_for_timeout(320)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="opportunities"]').click(); pg.wait_for_timeout(320)
     chk('布局往返后仍 0 控制台错误', len(errors) == 0, '; '.join(errors[:3]))
     b.close()
 

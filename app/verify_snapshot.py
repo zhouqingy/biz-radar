@@ -65,8 +65,9 @@ with sync_playwright() as p:
         pg.locator('#pk').inner_text().replace('\n', ' | ')[:80])
     chk('左导航合并为 9 个已接入入口（规划中折叠、行情收进顶栏）',
         pg.locator('#navList .ni').count() == 9, str(pg.locator('#navList .ni').count()))
-    chk('右信息栏默认常驻（不再点一下才弹出）',
-        pg.locator('.draw').evaluate('e=>getComputedStyle(e).display') != 'none')
+    chk('默认不占右边第三列（详情收在居中弹窗里）',
+        len(pg.locator('.body').evaluate('e=>getComputedStyle(e).gridTemplateColumns').split()) == 2
+        and not pg.locator('#modal').is_visible())
     chk('默认页 12 条数据行', pg.locator('#rows .row').count() == 12,
         str(pg.locator('#rows .row').count()))
     rh = pg.locator('#rows .row').first.evaluate('e=>e.getBoundingClientRect().height')
@@ -109,10 +110,10 @@ with sync_playwright() as p:
     chk('下一页生效（静态快照本地分页）', '第 2 /' in pg.locator('#pager').inner_text())
     pg.locator('#pgP').click(); pg.wait_for_timeout(320)
     pg.locator('[data-detail]').first.click(); pg.wait_for_timeout(400)
-    chk('点详情打开右抽屉并展示真实字段',
+    chk('点详情打开居中弹窗并展示真实字段',
         pg.locator('#app.drawer').count() == 1 and
         '业主' in pg.locator('#drawDetail').inner_text())
-    pg.locator('#btnDraw').click()
+    pg.locator('#modalClose').click()
 
     print('=== 4 · 12 个模块独立检索（静态本地视图筛选） ===')
     impl = ['opportunities', 'orgs', 'clients', 'overseas', 'wechat',
@@ -126,16 +127,16 @@ with sync_playwright() as p:
         phs.append(pg.locator('#mq').get_attribute('placeholder') or '')
         chk('模块 %-16s 有检索框且切模块自动清空' % mid, has and empty)
     chk('各模块 placeholder 按业务定制', len(set(phs)) >= 9, '%d 种' % len(set(phs)))
-    pg.locator('#navList .ni[data-id="clients"]').click(); pg.wait_for_timeout(300)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="clients"]').click(); pg.wait_for_timeout(300)
     before = pg.locator('#pk').inner_text()
     pg.locator('#mq').fill('热电'); pg.wait_for_timeout(420)
     chk('客户与业主搜「热电」命中下降',
         '热电' in pg.locator('#rows').inner_text() and pg.locator('#pk').inner_text() != before)
-    pg.locator('#navList .ni[data-id="orgs"]').click(); pg.wait_for_timeout(300)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="orgs"]').click(); pg.wait_for_timeout(300)
     chk('切模块后检索词不残留', pg.locator('#mq').input_value() == '')
     pg.locator('#mq').fill('华光'); pg.wait_for_timeout(420)
     chk('同业与伙伴搜「华光」生效', '华光' in pg.locator('#rows').inner_text())
-    pg.locator('#navList .ni[data-id="overseas"]').click(); pg.wait_for_timeout(300)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="overseas"]').click(); pg.wait_for_timeout(300)
     ov = pg.locator('#pk').inner_text()
     pg.locator('#mq').fill('印尼'); pg.wait_for_timeout(420)
     chk('海外机会搜「印尼」生效', pg.locator('#pk').inner_text() != ov)
@@ -159,37 +160,37 @@ with sync_playwright() as p:
         pg.locator('#drawDetail svg').count() >= 1 and
         '区间最高' in pg.locator('#drawDetail').inner_text())
     pg.screenshot(path=OUT + '品种曲线.png', full_page=False)
-    pg.locator('#btnDraw').click(); pg.wait_for_timeout(150)
-    pg.locator('#navList .ni[data-id="opportunities"]').click(); pg.wait_for_timeout(330)
+    pg.locator('#modalClose').click(); pg.wait_for_timeout(150)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="opportunities"]').click(); pg.wait_for_timeout(330)
     pg.locator('#rows .rt[data-detail]').first.click(); pg.wait_for_timeout(420)
     chk('点标题打开项目详情（真实字段）',
         pg.locator('#app.drawer').count() == 1 and '业主' in pg.locator('#drawDetail').inner_text())
-    pg.locator('#btnDraw').click(); pg.wait_for_timeout(150)
+    pg.locator('#modalClose').click(); pg.wait_for_timeout(150)
     if pg.locator('#rows .rbuyer[data-owner]').count():
         pg.locator('#rows .rbuyer[data-owner]').first.click(); pg.wait_for_timeout(520)
         ot = pg.locator('#drawOwner').inner_text()
         chk('点业主名打开业主画像（②库只读 / 不补假数据）',
             pg.locator('#app.drawer').count() == 1 and ('②库' in ot or '暂无' in ot),
             ot.replace('\n', ' | ')[:80])
-        pg.locator('#btnDraw').click(); pg.wait_for_timeout(150)
+        pg.locator('#modalClose').click(); pg.wait_for_timeout(150)
     pg.screenshot(path=OUT + '桌面-找商机.png', full_page=False)
     pg.screenshot(path=OUT + '桌面-整页.png', full_page=True)
-    pg.locator('#navList .ni[data-id="policies"]').click(); pg.wait_for_timeout(350)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="policies"]').click(); pg.wait_for_timeout(350)
     chk('政策档原文可见', pg.locator('#rows').inner_text().count('条') > 0 and
         len(pg.locator('#rows').inner_text()) > 200)
-    pg.locator('#navList .ni[data-id="help"]').click(); pg.wait_for_timeout(350)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="help"]').click(); pg.wait_for_timeout(350)
     chk('口径与帮助：规则源可 import / 12 条启用规则',
         '唯一规则源' in pg.locator('#rows').inner_text() or
         '12' in pg.locator('#pk').inner_text())
 
     print('=== 6 · 空 tab / 全库检索 / 个人中心 / 通知 ===')
     pg.locator('#navList .fold').click(); pg.wait_for_timeout(160)
-    pg.locator('#navList .ni[data-id="funnel"]').click(); pg.wait_for_timeout(320)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="funnel"]').click(); pg.wait_for_timeout(320)
     chk('空 tab 提示「功能待实现」且检索禁用',
         '功能待实现' in pg.locator('#rows').inner_text() and pg.locator('#mq').is_disabled())
     ph = pg.evaluate('document.documentElement.scrollHeight')
     chk('空 tab 整页约一屏（无大片留白）', abs(ph - 950) <= 100, '%d px' % ph)
-    pg.locator('#navList .ni[data-id="opportunities"]').click(); pg.wait_for_timeout(350)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="opportunities"]').click(); pg.wait_for_timeout(350)
     pg.locator('#gq').fill('余热'); pg.wait_for_timeout(750)
     chk('全库统一检索返回跨库分组命中',
         '全库统一检索' in pg.locator('#extra').inner_text() and '命中' in pg.locator('#extra').inner_text())
@@ -212,7 +213,7 @@ with sync_playwright() as p:
     chk('旧深链 #t3 → #/overseas（海外机会）',
         pg.evaluate('location.hash') == '#/overseas' and
         pg.locator('#ptitle').inner_text() == '海外机会')
-    pg.locator('#navList .ni[data-id="opportunities"]').click(); pg.wait_for_timeout(380)
+    pg.keyboard.press('Escape'); pg.locator('#navList .ni[data-id="opportunities"]').click(); pg.wait_for_timeout(380)
     pg.set_viewport_size({'width': 390, 'height': 844}); pg.wait_for_timeout(320)
     chk('390px 下左导航隐藏', pg.locator('.nav').evaluate('e=>getComputedStyle(e).display') == 'none')
     chk('390px 下数据行收敛为 ≤ 4 列',
