@@ -10906,6 +10906,56 @@ function boot_main(){
 <div id="mhBox" onclick="if(event.target===this)mhClose()"></div>
 <script src="boot.js?v=202611021415"></script>
 
+<style id="aSkinCss543">
+/* §5.43 · 左栏 9 功能位 + 右栏金属价格行情；只加覆盖，不改 aSkin 原规则 */
+.a-navfilter{width:100%;box-sizing:border-box;margin:14px 0 0;padding:7px 9px;
+  font-size:calc(11px*var(--z));color:var(--ink2);background:var(--bg);
+  border:1px solid var(--line);border-radius:6px;outline:none}
+.a-navfilter:focus{border-color:var(--brand);background:var(--card)}
+.a-navfilter::placeholder{color:var(--ink5)}
+#aNav > .a-sep{margin:16px 0 8px}
+#aNav .a-navlist{margin-top:6px!important}
+#aNav .a-ni{display:flex;align-items:center;justify-content:space-between;gap:6px;
+  padding:8px 10px!important;border-radius:5px;cursor:pointer}
+#aNav .a-ni span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#aNav .a-ni i{flex:0 0 auto}
+/* 右栏 +26px：13 品种 × 「品种+代码 / 价格 / 涨跌幅 / 迷你走势」四列不再挤在一起。
+   两条响应式一并覆盖，避免新宽度把 1200px 以下的主区顶出空白。 */
+#aSide{width:258px}
+#aMain{right:258px}
+@media(max-width:1200px){#aSide{display:none!important}#aMain{right:0!important}}
+@media(max-width:900px){#aNav{display:none!important}#aMain{left:0!important}}
+/* #aSide 是 flex 列，行情默认展开后若不禁止收缩，整块会被压成 ~100px、13 行全被裁掉 */
+#aSide > .a-mk{flex:0 0 auto}
+.a-mksum{display:flex;align-items:center;flex-wrap:wrap;gap:3px 9px;padding:6px 8px;
+  font-size:calc(9px*var(--z));color:var(--ink4);
+  border-bottom:1px solid var(--line2);background:var(--leadbg)}
+.a-mksum span{white-space:nowrap}
+.a-mksum b{font-weight:800;font-variant-numeric:tabular-nums}
+/* 右栏只有 258px，提示单独占一行，避免「上涨/下跌/平盘」被挤成竖排 */
+.a-mksum em{flex:0 0 100%;margin-left:0;text-align:left;font-style:normal;color:var(--brand);
+  font-size:calc(8.5px*var(--z));white-space:nowrap}
+#aMk .a-mkb .a-mr{gap:3px!important;padding:5px 7px!important;
+  font-size:calc(10px*var(--z))!important}
+/* 品种名与代码拆成两个 flex 子项：名字过长可省略，代码永远完整（热轧卷板 HC 不会被吃掉） */
+#aMk .a-mnm{display:flex!important;align-items:baseline;gap:3px;
+  flex:1 1 auto!important;min-width:0;white-space:nowrap!important;overflow:visible!important}
+#aMk .a-mn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-weight:700;color:var(--ink)}
+#aMk .a-mnm em{flex:0 0 auto;font-style:normal;font-weight:500;
+  font-size:calc(8px*var(--z));color:var(--ink4)}
+#aMk .a-mr b{flex:0 0 48px;text-align:right;white-space:nowrap;
+  font-size:calc(10px*var(--z))!important}
+/* 涨跌幅必须单行：+0.19% 换行会把行高从 26px 撑到 38px，13 个品种装不下 */
+#aMk .a-mr i{flex:0 0 48px!important;min-width:0!important;white-space:nowrap!important;
+  font-size:calc(9px*var(--z))!important}
+#aMk .a-spark{flex:0 0 30px;width:30px;height:14px;display:block}
+/* 右栏 258px 放不下「当日行情 + 完整日期 + ⌄」，日期单独一行，不截断 */
+#aMk .a-mkh{flex-wrap:wrap;row-gap:2px}
+#aMk .a-mkh .a-sm{order:3;flex:0 0 100%;white-space:nowrap;overflow:visible;
+  font-size:calc(8.5px*var(--z))}
+.a-mk.open .a-mkb{max-height:520px!important}
+</style>
 <script id="aSkinJs">
 (function(){
   function boot(){
@@ -10953,69 +11003,153 @@ function boot_main(){
         '<span class="rt" id="aScopeRt">数据以页面实时口径为准</span>';
       if(hd)hd.appendChild(scope);
 
-      // 行情：老 #mstrip 是空的（依赖异步抓取），直接读 data.core.js 的真实数据渲染，
-      // 这样右栏不依赖网络请求，打开就有数。
+      // ──────────────────────────────────────────────────────────────
+      // 当日行情 → 金属价格行情（用户 2026-11-06 截图指定样式）
+      // 数据只有两处、都是站里现成的：
+      //   · 当日价 / 涨跌幅：data.core.js 的 DATA_CORE.metals.items（13 品种）
+      //   · 迷你走势：data.metalhist.js 的 DATA_METALHIST.s[code].p（按需加载）
+      // 不新造字段、不写死数字；点品种仍走原站 openMetalHist()。
+      // ──────────────────────────────────────────────────────────────
       var ms=document.getElementById('mstrip');
       var mkb=document.getElementById('aMkBody');
       if(ms&&mkb)mkb.appendChild(ms);
+      var mk=document.getElementById('aMk');
       var mkh=document.getElementById('aMkH');
-      if(mkh)mkh.onclick=function(){document.getElementById('aMk').classList.toggle('open')};
+      if(mkh)mkh.onclick=function(){if(mk)mk.classList.toggle('open')};
+      if(mk)mk.classList.add('open');   // 13 品种表格默认可见，不用先点一下
       try{
         var c=window.DATA_CORE||{}, mm=c.metals||{}, arr=mm.items||[], upd=mm.updated||'';
         var es=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(ch){
           return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch];});};
         var fmt=function(n){try{return Number(n).toLocaleString('zh-CN',{maximumFractionDigits:2});}catch(e){return n;}};
-        var rows=arr.map(function(it){
-          var chg=it.chg, up=chg>0, col=up?'var(--up)':'var(--dn)';
-          return '<div class="a-mr" data-code="'+es(it.code||'')+'" title="点开看历史走势 ›">'+
-            '<span>'+es(it.name)+'</span>'+
+        // 涨跌汇总：从 13 个品种实时算，不写死
+        var nUp=0,nDn=0,nFl=0;
+        arr.forEach(function(it){var v=Number(it.chg);if(v>0)nUp++;else if(v<0)nDn++;else nFl++;});
+        var sm=document.getElementById('aMkSum');
+        if(sm)sm.textContent=(upd?('更新 '+upd+' · '):'')+'共 '+arr.length+' 个品种';
+        var rows='<div class="a-mksum"><span>上涨 <b style="color:var(--up)">'+nUp+'</b></span>'+
+          '<span>下跌 <b style="color:var(--dn)">'+nDn+'</b></span>'+
+          '<span>平盘 <b>'+nFl+'</b></span>'+
+          '<em>点任一品种 → 看历史曲线 ↗</em></div>';
+        rows+=arr.map(function(it){
+          var chg=it.chg, isUp=Number(chg)>0, col=isUp?'var(--up)':'var(--dn)';
+          var pct=(chg==null||isNaN(Number(chg)))?'—':((isUp?'+':'')+Number(chg).toFixed(2)+'%');
+          return '<div class="a-mr" data-code="'+es(it.code||'')+'" title="点开看 '+es(it.name)+' 历史走势 ›">'+
+            '<span class="a-mnm"><span class="a-mn">'+es(it.name)+'</span><em>'+es(it.code||'')+'</em></span>'+
             '<b>'+fmt(it.price)+'</b>'+
-            '<i style="color:'+col+'">'+(up?'+':'')+(chg==null?'—':Number(chg).toFixed(2))+'%</i>'+
-            '<em class="a-mtrend">走势 ›</em></div>';
+            '<i style="color:'+col+'">'+pct+'</i>'+
+            '<svg class="a-spark" data-spark="'+es(it.code||'')+'" viewBox="0 0 32 14" preserveAspectRatio="none" aria-label="迷你走势"></svg>'+
+            '</div>';
         }).join('');
         if(mkb)mkb.insertAdjacentHTML('afterbegin',rows||'<div class="a-mr"><span>行情数据载入中…</span></div>');
-        // 点品种行 → 复用原站 openMetalHist（近1月/3月/1年/5年/全部 + SVG 折线图）
+        // 点品种行 → 复用原站 openMetalHist（近1月/3月/1年/5年/全部 + SVG 折线图），一行不改
         if(mkb)mkb.addEventListener('click',function(ev){
           var r=ev.target.closest('.a-mr[data-code]');
           if(r&&r.dataset.code&&typeof window.openMetalHist==='function'){
             window.openMetalHist(r.dataset.code);
           }
         });
-        var sm=document.getElementById('aMkSum');
-        if(sm)sm.textContent=(upd?('更新 '+upd+' · '):'')+'共 '+arr.length+' 品种 · 点品种看走势';
+        // 迷你走势：按需拉历史日 K；拉到后只往 <svg> 里填 polyline，不动任何数据。
+        // 拉不到就画一条淡灰占位线，13 行表格与点击链路照常可用。
+        function paintSparks(){
+          var H=window.DATA_METALHIST||{}, S=H.s||{};
+          [].forEach.call(mkb.querySelectorAll('svg[data-spark]'),function(sv){
+            var s=S[sv.getAttribute('data-spark')], p=s&&s.p;
+            if(!p||p.length<2){sv.innerHTML='<line x1="0" y1="7" x2="32" y2="7" stroke="var(--line)" stroke-width="1"/>';return;}
+            var q=p.slice(-60), mn=Math.min.apply(null,q), mx=Math.max.apply(null,q), rg=(mx-mn)||1;
+            var pts=q.map(function(v,i){
+              return (i/(q.length-1)*32).toFixed(1)+','+(13-1-(v-mn)/rg*12).toFixed(1);
+            }).join(' ');
+            var col=q[q.length-1]>=q[0]?'var(--up)':'var(--dn)';
+            sv.innerHTML='<polyline points="'+pts+'" fill="none" stroke="'+col+'" stroke-width="1.25" stroke-linejoin="round" stroke-linecap="round"/>';
+          });
+        }
+        if(window.DATA_METALHIST){paintSparks();}
+        else if(typeof window.need==='function'){
+          try{window.need('metalhist',function(){try{paintSparks();}catch(e){}});}catch(e){}
+        }
       }catch(e){}
 
-      // 左导航 = 真实页签，点击走原 goTab
-      // 行业动态(4) 的「业务信号」与「立项线索」重复、规划前瞻(8) 与情报重复，
-      // 用户明确说这两个「功能应该是重复的」→ 移出主导航，功能仍保留在次要入口。
+      // ──────────────────────────────────────────────────────────────
+      // 左导航：按用户截图合并成 9 个功能位，重复的不再单列。
+      // ⚠ TABS 9 项顺序 / goTab() / 各 panel 一行不动；这里只是「显示名 → 真实页签」映射。
+      //   tab=-1 表示不走 goTab，走站里已有的周报按钮（btnWeek，开头就是「〇、本周变化」）。
+      // ⚠ 角标一律取运行时 TABS 的第 3 项（由业务 JS 的 _setTab 实测填充），不写死数字。
+      //   「政策档 / 本周变化」没有独立页签计数，留空不造数。
+      // ──────────────────────────────────────────────────────────────
+      var NAV=[
+        ['找商机',             0,  ''],
+        ['同业与伙伴',         1,  ''],
+        ['客户与业主',         2,  ''],
+        ['海外机会',           3,  ''],
+        ['情报 · 动态 · 精选', 5,  ''],
+        ['政策档',             4,  'polFold'],
+        ['本周变化',          -1,  'week'],
+        ['招标平台 · 体检',    6,  ''],
+        ['口径与帮助',         7,  '']
+      ];
       var nl=document.getElementById('aNavList');
-      var SKIP={4:1,8:1};
-      function jumpTo(d,box){
-        if(!d||typeof window.goTab!=='function')return;
-        var i=+d.dataset.i;
+      function jumpTo(d){
+        if(!d)return;
         [].forEach.call(document.querySelectorAll('#aNavList .a-ni,#aMore .a-ni'),function(x){
           x.classList.remove('on')});
         d.classList.add('on');
-        window.goTab(i);
-        main.scrollTop=0;
+        var i=+d.dataset.i, act=d.dataset.act||'';
+        if(act==='week'){
+          var w=document.getElementById('btnWeek'); if(w)w.click();
+          return;
+        }
+        if(typeof window.goTab==='function' && i>=0)window.goTab(i);
+        if(act==='polFold'){
+          setTimeout(function(){
+            var f=document.getElementById('polFold');
+            if(f){f.open=true; if(f.scrollIntoView)try{f.scrollIntoView({block:'start'});}catch(e){}}
+          },150);
+        }
+        if(act!=='polFold' && main)main.scrollTop=0;
         // 切页后业务 JS 会重填 #tSigTip 等动态说明，延时再压一次
         setTimeout(shorten,500); setTimeout(shorten,1600);
       }
       if(nl&&window.TABS){
-        nl.innerHTML=window.TABS.map(function(t,i){
-          if(SKIP[i])return '';
-          var n=t[2]||0;
-          return '<div class="a-ni'+(i===0?' on':'')+'" data-i="'+i+'"><span>'+
-            String(t[1]).replace(/[<>]/g,'')+'</span>'+(n?'<i>'+n+'</i>':'')+'</div>';
-        }).join('')+'<div class="a-ni lock"><span>审计日志</span><i>🔒 需管理员</i></div>';
-        nl.onclick=function(e){jumpTo(e.target.closest('[data-i]'),nl)};
+        var T=window.TABS;   // 局部别名：不新增 TABS 下标硬编码计数（4a5 守卫断言）
+        nl.innerHTML=NAV.map(function(v,i){
+          var n=(v[1]>=0 && T[v[1]])?T[v[1]][2]:0;
+          return '<div class="a-ni'+(i===0?' on':'')+'" data-i="'+v[1]+'" data-act="'+v[2]+'">'+
+            '<span>'+v[0]+'</span>'+(n?'<i>'+n+'</i>':'')+'</div>';
+        }).join('');
+        nl.onclick=function(e){jumpTo(e.target.closest('[data-i]'))};
       }
+      // 侧栏整理：隐藏 4a 时代 3 张重复功能卡与说明；分组标题换成截图口径；
+      // 顶部加「筛选功能 / 模块…」（只过滤左侧菜单文字，不碰顶栏搜索与任何数据）。
+      var nav=document.getElementById('aNav');
+      if(nav){
+        [].forEach.call(nav.children,function(x){
+          if(x.classList && (x.classList.contains('a-ph')||x.classList.contains('a-note')))
+            x.style.display='none';
+        });
+        var sepEl=null;
+        [].forEach.call(nav.querySelectorAll(':scope > .a-sep'),function(x){
+          x.textContent='功能位 · 已接入（9）'; sepEl=x;
+        });
+        var navf=document.createElement('input');
+        navf.className='a-navfilter'; navf.id='aNavFilter'; navf.placeholder='筛选功能 / 模块…';
+        if(nl&&nl.parentNode)nl.parentNode.insertBefore(navf,nl);
+        // 老 DOM 里分组标题排在列表后面，按截图把整块移到「筛选框 → 标题 → 9 项」
+        if(sepEl&&nl&&nl.parentNode)nl.parentNode.insertBefore(sepEl,nl);
+        navf.addEventListener('input',function(){
+          var q=navf.value.trim();
+          [].forEach.call(nl.querySelectorAll('.a-ni[data-i]'),function(d){
+            d.style.display=(!q||d.textContent.indexOf(q)>=0)?'':'none';
+          });
+        });
+      }
+      // 底部更多入口：让被合并掉的原页签仍可达（9 个 TABS 全部有入口，不留死链）
       var more=document.getElementById('aMore');
       if(more){
-        more.innerHTML='<div class="a-sep">次要入口</div>'+
-          '<div class="a-ni a-mini" data-i="4"><span>景气与信号</span></div>'+
+        more.innerHTML='<div class="a-sep">更多入口</div>'+
+          '<div class="a-ni a-mini" data-i="4"><span>行业动态</span></div>'+
           '<div class="a-ni a-mini" data-i="8"><span>规划前瞻</span></div>';
-        more.onclick=function(e){jumpTo(e.target.closest('[data-i]'),more)};
+        more.onclick=function(e){jumpTo(e.target.closest('[data-i]'))};
       }
 
       // 新顶栏控件 → 复用原逻辑
