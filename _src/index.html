@@ -10957,6 +10957,49 @@ function boot_main(){
   font-size:calc(8.5px*var(--z))}
 .a-mk.open .a-mkb{max-height:520px!important}
 </style>
+<style id="aSkinCss544">
+/* §5.44 · 每个 tab 的页内检索条 */
+.a-tabq{display:flex;align-items:center;gap:8px;margin:0 0 12px;padding:7px 10px;
+  border:1px solid var(--line);border-radius:4px;background:transparent}
+.a-tabq label{font-size:11.5px;color:var(--tx3);white-space:nowrap}
+.a-tabq input{flex:1;min-width:110px;border:1px solid var(--line);border-radius:3px;
+  padding:5px 9px;font-size:12.5px;background:transparent;color:var(--tx)}
+.a-tabq .a-tabqn{font-size:11px;color:var(--tx3);white-space:nowrap}
+/* 顶栏搜索作用域徽标 */
+.a-qbox{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+.a-qscope{font-size:11px;color:#1053c9;background:#e8f1ff;border:1px solid #cfe0ff;
+  border-radius:3px;padding:3px 7px;white-space:nowrap}
+.a-qbox .a-q{flex:1;min-width:0}
+/* 序号：CSS counter，零 DOM 结构改动，动态重建自动重排 */
+table:not([data-a-skip="1"]) tbody{counter-reset:aRow544}
+table:not([data-a-skip="1"]) tbody>tr{counter-increment:aRow544}
+table:not([data-a-skip="1"]) tbody>tr>td:first-child::before{content:counter(aRow544);
+  float:left;width:20px;margin-right:6px;text-align:right;color:var(--tx3);
+  font-size:10.5px;font-weight:400}
+table:not([data-a-skip="1"]) thead>tr>th:first-child::before{content:'#';
+  float:left;width:20px;margin-right:6px;text-align:right;color:var(--tx3);
+  font-size:10.5px;font-weight:400}
+.cgrid,#grid,#sigGrid,#wxGrid,.plgrid,#newsGrid{counter-reset:aCard544}
+.cgrid>div,#grid>div,#sigGrid>div,#wxGrid>div,.plgrid>.pl,#newsGrid>div{counter-increment:aCard544}
+.cgrid>div::before,#grid>div::before,#sigGrid>div::before,#wxGrid>div::before,
+.plgrid>.pl::before,#newsGrid>div::before{content:counter(aCard544);float:left;
+  margin:2px 8px 0 0;color:var(--tx3);font-size:10.5px;font-weight:400}
+/* 规划中占位（内部滚动，不撑爆左栏） */
+.a-plangrp{max-height:230px;overflow:auto;padding:2px 8px}
+.a-planitem{font-size:11px;color:var(--tx3);padding:3px 2px;line-height:1.5;cursor:default}
+.a-planitem b{color:var(--tx2);font-weight:600}
+.a-plantag{display:inline-block;font-size:9.5px;border:1px solid var(--line);
+  border-radius:2px;padding:0 3px;margin-right:4px}
+/* 规划线索只读折叠区 */
+details.a-plancue{border:1px dashed var(--line);border-radius:4px;padding:8px 12px;margin:12px 0}
+details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-weight:700}
+.a-cuetb{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px}
+.a-cuetb td,.a-cuetb th{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left}
+.a-mknote{font-size:12px;color:var(--tx3);border:1px dashed var(--line);
+  border-radius:4px;padding:8px 10px;margin:8px 0}
+/* 中间不再重复列 13 品种价格（右栏「金属价格行情」是唯一价格表） */
+#aMain #p-trend #mtGrid{display:none!important}
+</style>
 <script id="aSkinJs">
 (function(){
   function boot(){
@@ -10973,7 +11016,8 @@ function boot_main(){
       var hw=hd&&hd.querySelector('.wrap');
       if(hw){
         var top=document.createElement('div'); top.className='a-top';
-        top.innerHTML='<input class="a-q" id="aQ" placeholder="搜项目 / 业主 / 中标单位（全库，不限档位）">'+
+        top.innerHTML='<div class="a-qbox"><span class="a-qscope" id="aQScope">找商机</span>'+
+          '<input class="a-q" id="aQ" placeholder="搜项目 / 业主 / 中标单位（①投放库）"></div>'+
           '<button id="aFilter">筛选</button><button id="aCsv">导出 CSV</button>'+
           '<button class="a-pri" id="aWeek">周报</button>'+
           '<div class="a-who"><span class="org">都市环保 ▾</span>'+
@@ -11084,9 +11128,9 @@ function boot_main(){
         ['客户与业主',         2,  ''],
         ['海外机会',           3,  ''],
         ['情报 · 动态 · 精选', 5,  ''],
-        ['政策档',             4,  'polFold'],
+        ['行业动态 · 政策档',  4,  'polFold'],
         ['本周变化',          -1,  'week'],
-        ['招标平台 · 体检',    6,  ''],
+        ['招标平台 · 来源清单',6,  ''],
         ['口径与帮助',         7,  '']
       ];
       var nl=document.getElementById('aNavList');
@@ -11115,7 +11159,7 @@ function boot_main(){
         var T=window.TABS;   // 局部别名：不新增 TABS 下标硬编码计数（4a5 守卫断言）
         nl.innerHTML=NAV.map(function(v,i){
           var n=(v[1]>=0 && T[v[1]])?T[v[1]][2]:0;
-          return '<div class="a-ni'+(i===0?' on':'')+'" data-i="'+v[1]+'" data-act="'+v[2]+'">'+
+          return '<div class="a-ni" data-i="'+v[1]+'" data-act="'+v[2]+'">'+
             '<span>'+v[0]+'</span>'+(n?'<i>'+n+'</i>':'')+'</div>';
         }).join('');
         nl.onclick=function(e){jumpTo(e.target.closest('[data-i]'))};
@@ -11222,6 +11266,242 @@ function boot_main(){
         ['#p-wechat .hint','竞对官网与微信深度稿，S / A / B 分级，点标题看原文。'],
         ['#p-trend .hint:not(#tSigTip)','金属价格是扩产意愿与造价的先行指标，点品种看走势。']
       ];
+      // ═══════════ §5.44 第二轮 · 纯视图层（不碰业务 JS / 数据）═══════════
+      var PLAN15=[
+        ['F01','相关度理由卡','规划中 · 需接评分字段展示位'],
+        ['F07','中标企业榜 / 赛道份额','规划中 · 需榜单口径'],
+        ['F08','中标价与造价基准','规划中 · 需新测算口径'],
+        ['F10','对手动态时间线','规划中 · 需按日落盘'],
+        ['F11','对手画像卡（含重叠度）','规划中 · 需匹配口径'],
+        ['F12','联合体网络图','规划中 · 需关系数据'],
+        ['F13','对手预警','规划中 · 需订阅规则'],
+        ['F14','伙伴业绩卡','规划中 · 需按单位聚合'],
+        ['F16','联合体匹配推荐','规划中 · 需匹配口径'],
+        ['F18','业主 360 + 画像测算','规划中 · 需测算口径'],
+        ['F19','国内 / 海外业主分栏','规划中 · 需分栏口径'],
+        ['F20','业主复购提醒','规划中 · 需周期口径'],
+        ['F06','中标结果库独立视图','已裁决不做 · 主体在②库'],
+        ['F15','资质档案','已裁决不做 · 不采集不编造'],
+        ['F27','「跟不跟」决策卡','已裁决不做 · 口径禁止自造投资判断']
+      ];
+      var SCOPE544=[
+        {ph:'搜项目 / 业主 / 中标单位（①投放库）',fwd:'q',cards:false},
+        {ph:'搜对手 / 伙伴 / 代表项目',fwd:'',cards:true},
+        {ph:'搜业主 / 集团 / 海外基地',fwd:'',cards:true},
+        {ph:'搜国家 / 业主 / 项目关键词',fwd:'ovKw',cards:true},
+        {ph:'搜业务信号 / 行业动态 / 政策原文',fwd:'polQ',cards:true},
+        {ph:'搜情报精选 / 微信线索',fwd:'',cards:true},
+        {ph:'搜平台名称 / 覆盖范围',fwd:'',cards:true},
+        {ph:'搜口径说明关键词',fwd:'',cards:true},
+        {ph:'搜规划项目 / 业主 / 城市',fwd:'pl-q',cards:false}
+      ];
+      var NSEL544='#grid > div, .cgrid > div, tbody > tr, .siggrid > div, .news > div, '+
+                  '.ncard, .plgrid > .pl, [id^="ovBox"] > div, #plGrid > div';
+      function curTab544(){
+        try{
+          if(window.F&&typeof window.F.tab==='number')return window.F.tab;
+          var m=(location.hash||'').match(/^#t(\d+)$/);return m?+m[1]:0;
+        }catch(e){return 0;}
+      }
+      function panel544(i){var T=window.TABS;return (T&&T[i])?document.getElementById(T[i][0]):null;}
+      function box544(i){var p=panel544(i);return p?p.querySelector('.a-tabq'):null;}
+      function filter544(i,q){
+        var p=panel544(i);if(!p)return{hit:0,total:0,on:false};
+        var all=[].slice.call(p.querySelectorAll(NSEL544));
+        var ns=all.filter(function(n){return !all.some(function(m){return m!==n&&m.contains(n);});});
+        var qq=(q||'').trim().toLowerCase(),hit=0;
+        ns.forEach(function(n){
+          if(n.dataset.aDisp0===undefined)n.dataset.aDisp0=n.style.display||'';
+          var ok=!qq||((n.textContent||'').toLowerCase().indexOf(qq)>=0);
+          n.style.display=ok?n.dataset.aDisp0:'none';
+          if(ok)hit++;
+        });
+        return{hit:qq?hit:0,total:ns.length,on:!!qq};
+      }
+      function apply544(i,v){
+        var sc=SCOPE544[i]||SCOPE544[0];
+        var bx=box544(i),inp=bx?bx.querySelector('input'):null;
+        if(inp&&inp.value!==v)inp.value=v;
+        if(sc.fwd){
+          var dst=document.getElementById(sc.fwd);
+          if(dst){dst.value=v;try{dst.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
+        }
+        if(sc.cards){
+          var r=filter544(i,v);
+          if(bx){var cc=bx.querySelector('.a-tabqn');if(cc)cc.textContent=r.on?('命中 '+r.hit+' / '+r.total):'';}
+        }
+      }
+      function clear544(i){
+        var sc=SCOPE544[i]||SCOPE544[0];
+        if(sc.fwd){var dst=document.getElementById(sc.fwd);
+          if(dst&&dst.value){dst.value='';try{dst.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}}
+        if(sc.cards)filter544(i,'');
+        var bx=box544(i),inp=bx?bx.querySelector('input'):null;
+        if(inp)inp.value='';
+        if(bx){var cc=bx.querySelector('.a-tabqn');if(cc)cc.textContent='';}
+        if(aq)aq.value='';
+      }
+      function scope544(i){
+        var sc=SCOPE544[i]||SCOPE544[0],T=window.TABS;
+        var b=document.getElementById('aQScope');
+        if(b)b.textContent=(T&&T[i]&&T[i][1])||'当前模块';
+        if(aq)aq.placeholder=sc.ph;
+      }
+      function syncNav544(){
+        if(!nl)return;
+        var tt=curTab544(),hit=null;
+        [].forEach.call(nl.querySelectorAll('.a-ni[data-i]'),function(x){
+          x.classList.remove('on');if(Number(x.dataset.i) === tt)hit=x;
+        });
+        [].forEach.call(document.querySelectorAll('#aMore .a-ni[data-i]'),function(x){x.classList.remove('on');});
+        if(hit)hit.classList.add('on');
+      }
+      function num544(){
+        [].forEach.call(document.querySelectorAll('table'),function(tb){
+          var th=tb.querySelector('thead th');
+          if(!th){tb.setAttribute('data-a-skip','1');return;}
+          var f=(th.textContent||'').trim();
+          tb.setAttribute('data-a-skip',(f==='#'||f==='序号'||f==='No'||f==='No.')?'1':'0');
+        });
+      }
+      function sigNote544(){
+        var sm=document.querySelector('#p-trend .sect small');
+        if(!sm||sm.id==='mtDate')return;
+        var n=(window.D&&window.D.trends)?window.D.trends.length:
+              (window.DATA_NEWS&&window.DATA_NEWS.trends?window.DATA_NEWS.trends.length:null);
+        sm.textContent='新闻池 '+(n==null?'—':n)+' 条 · 页面内关键词识别 · 不是①库标的、不入库';
+      }
+      function cue544(){
+        var box=document.getElementById('aPlanCueBody');if(!box)return;
+        var P=window.DATA_PLAN;
+        if(!P){
+          box.innerHTML='<div class="empty">规划数据加载中…（首次打开需几秒）</div>';
+          if(typeof window.need==='function'){try{window.need('plan',function(){setTimeout(cue544,30);});}catch(e){}}
+          return;
+        }
+        var c=P.cols||{},n=P.n||0,rows=[];
+        for(var i=0;i<Math.min(n,12);i++){
+          var av=(c.a||[])[i];
+          rows.push('<tr><td>'+(i+1)+'</td><td>'+esc(String((c.n||[])[i]||'—'))+'</td><td>'+
+            esc(String((c.c||[])[i]||'—'))+'</td><td>'+esc(String((c.st||[])[i]||'—'))+'</td><td>'+
+            (av!=null?esc(String(av))+' 亿':'—')+'</td></tr>');
+        }
+        box.innerHTML='<table class="a-cuetb"><thead><tr><th>#</th><th>规划项目</th><th>城市</th>'+
+          '<th>阶段</th><th>投资</th></tr></thead><tbody>'+rows.join('')+'</tbody></table>'+
+          '<div style="font-size:11.5px;color:var(--tx3);margin-top:6px">共 '+n+' 条（此处列前 '+
+          rows.length+' 条）· 生成 '+esc(String(P.gen||'—'))+
+          ' · <b>未过①库过滤，不构成可投标的</b>；完整清单见「规划前瞻」。</div>';
+      }
+      function inject544(){
+        // 1) 9 个 TABS 每个一个页内检索条
+        (window.TABS||[]).forEach(function(tb,i){
+          var pn=document.getElementById(tb[0]);if(!pn||pn.querySelector('.a-tabq'))return;
+          var sc=SCOPE544[i]||SCOPE544[0];
+          var bx=document.createElement('div');bx.className='a-tabq';
+          bx.innerHTML='<label>本页检索</label><input type="text" data-tq="'+i+'" placeholder="'+sc.ph+'">'+
+                       '<span class="a-tabqn"></span>';
+          pn.insertBefore(bx,pn.firstChild);
+          var inp=bx.querySelector('input');
+          inp.addEventListener('input',function(){
+            var v=inp.value;
+            if(aq&&aq.value!==v)aq.value=v;
+            apply544(i,v);
+          });
+        });
+        // 2) 更多入口：删与「行业动态 · 政策档」重复的行业动态；规划中 15 项占位
+        if(more){
+          more.innerHTML='<div class="a-sep">更多入口</div>'+
+            '<div class="a-ni a-mini" data-i="8"><span>规划前瞻</span></div>'+
+            '<div class="a-sep">规划中（'+PLAN15.length+'）· 占位不实现</div>'+
+            '<div class="a-plangrp">'+PLAN15.map(function(v){
+              var no=v[2].indexOf('已裁决不做')===0;
+              return '<div class="a-planitem" title="'+v[2]+'"><span class="a-plantag">'+
+                (no?'不做':'规划中')+'</span><b>'+v[0]+'</b> '+v[1]+'</div>';
+            }).join('')+'</div>';
+        }
+        // 3) 周报弹窗移出 #p-items → 任何 tab 都能看见
+        var wkm=document.getElementById('wkMask');
+        if(wkm&&wkm.parentNode!==document.body)document.body.appendChild(wkm);
+        // 4) 右栏收口：删与左栏重复的「本周变化」卡；去开发期标签
+        var awk=document.getElementById('aWk');if(awk&&awk.parentNode)awk.parentNode.removeChild(awk);
+        [['aPhFocus','重点关注 · 实时'],['aPhDetail','项目详情画像'],['aPhChange','本周变化 · 四类速览']]
+          .forEach(function(v){
+            var c=document.getElementById(v[0]);if(!c)return;
+            var tg=c.querySelector(':scope > .a-tag');if(tg&&tg.parentNode)tg.parentNode.removeChild(tg);
+            var bd=c.querySelector(':scope > b');if(bd)bd.textContent=v[1];
+          });
+        // 5) 中间金属仪表盘不再重复列价格
+        var mt=document.getElementById('mtGrid');
+        if(mt){
+          var note=document.createElement('div');note.className='a-mknote';
+          note.innerHTML='13 个品种的当日价格、涨跌幅与迷你走势在右栏「金属价格行情」'+
+            '（点品种可看历史曲线）；这里只保留业务解读，不重复列价格。';
+          mt.parentNode.insertBefore(note,mt);
+        }
+        [].forEach.call(document.querySelectorAll('#p-trend .sect'),function(s){
+          if((s.textContent||'').indexOf('下游景气仪表盘')<0)return;
+          // ⚠ 不能整块 innerHTML 覆盖：<small id="mtDate"> 被 renderMetals() 写，
+          //   删掉会抛 TypeError。只清文本节点，small 节点与 id 原样保留。
+          var sm0=s.querySelector('small');
+          if(sm0){sm0.id='mtDate';sm0.textContent='';}
+          else{var ns=document.createElement('small');ns.id='mtDate';s.appendChild(ns);}
+          [].forEach.call(s.childNodes,function(n){if(n.nodeType===3)n.nodeValue='';});
+          s.insertBefore(document.createTextNode('下游景气解读 · 价格速览见右栏  '),s.firstChild);
+        });
+        // 6) 业务信号数据来源（条数运行时取，不写死）
+        sigNote544();
+        setTimeout(sigNote544,3500);setTimeout(sigNote544,9000);
+        // 7) 找商机内「规划线索」只读折叠区：不写①库、不改 data*.js
+        var pi=document.getElementById('p-items');
+        if(pi&&!document.getElementById('aPlanCue')){
+          var d=document.createElement('details');d.className='a-plancue';d.id='aPlanCue';
+          d.innerHTML='<summary>规划线索 · 2026–2030 热电联产规划（只读，不进①库）</summary>'+
+            '<div style="font-size:11.5px;color:var(--tx3);margin:6px 0">来自《江浙沪皖供热规划可做项目清单》，'+
+            '规划 / 批复阶段、还没挂网；<b>不是已挂公告的标的，不进①投放库</b>。</div>'+
+            '<div id="aPlanCueBody"></div>';
+          var gr=document.getElementById('grid');
+          if(gr&&gr.parentNode)gr.parentNode.insertBefore(d,gr.nextSibling);
+          else pi.appendChild(d);
+          d.addEventListener('toggle',function(){if(d.open)cue544();});
+        }
+        syncNav544();scope544(curTab544());num544();
+      }
+      function init544(){
+        try{
+          inject544();
+          // 顶栏搜索：capture 阶段拦下非①库的输入，绝不写 F.q；①库放行原绑定
+          if(aq){
+            aq.addEventListener('input',function(ev){
+              var i=curTab544();
+              if(i===0){var b0=box544(0),q0=b0?b0.querySelector('input'):null;
+                if(q0&&q0.value!==aq.value)q0.value=aq.value;return;}
+              ev.stopImmediatePropagation();ev.preventDefault();
+              apply544(i,aq.value);scope544(i);
+            },true);
+          }
+          var prev=curTab544();
+          window.addEventListener('hashchange',function(){
+            var i=curTab544();
+            if(prev!==i){clear544(prev);prev=i;}
+            scope544(i);syncNav544();
+            setTimeout(num544,80);
+            if(4===i)setTimeout(sigNote544,150);
+          });
+          if(nl)nl.addEventListener('click',function(e){
+            if(e.target.closest('[data-act="week"]'))return;  // 周报项保留高亮
+            setTimeout(syncNav544,30);
+          });
+          // 动态重建的表格自动标 skip（CSS counter 负责画序号）
+          var mo=new MutationObserver(function(){
+            if(mo._busy)return;mo._busy=1;
+            mo.disconnect();
+            try{num544();}catch(e){}
+            try{mo.observe(document.body,{childList:true,subtree:true});}catch(e){}
+            mo._busy=0;
+          });
+          try{mo.observe(document.body,{childList:true,subtree:true});}catch(e){}
+        }catch(err){console.error('[544]',err);}
+      }
       function shorten(){
         SHORT.forEach(function(p){
           [].forEach.call(document.querySelectorAll(p[0]),function(e){
@@ -11232,6 +11512,7 @@ function boot_main(){
         });
       }
       shorten();
+      init544();
 
       // 分块数据载完后刷新左导航计数；业务 JS 会重填 #tSigTip，这里再压一次文案
       setTimeout(function(){
