@@ -12361,3 +12361,37 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
   }
 })();
 </script>
+<style id="aSkinCss551b">
+/* ══════════ §5.51b · 概览浮层 9 格（2026-11-08 17:30 线上验收发现）══════════
+   现象：点开「数据概览」，前 6 格能看见，后 3 格（838 立项早期 / 898 主场业务 /
+   13 有色冶炼供能）被浮层右边缘切掉，要横向拖才能看。
+   根因不是格太多，是特异性算错：
+     #aMain .kpis{display:flex!important}        → 1 个 id + 1 个类 = (1,1,0)
+     .a-kpipop551 .kpis{display:grid!important}  → 0 个 id + 2 个类 = (0,2,0)  ← 输
+   两条都 !important 时按特异性裁决，id 赢 —— 浮层里那个 grid 从来没生效过，
+   9 格一直是一行 flex（nowrap），靠 overflow-x:auto 横向滚动。
+   修法：选择器提到 (1,3,0)，用 id 反压 id，并把老规则塞进来的
+   min-width:96px / flex:1 0 0 / padding / overflow-x:auto 一起复位。 */
+#aMain .a-kpipop551 .kpis{display:flex!important;flex-wrap:wrap!important;
+  gap:7px!important;margin:0!important;padding:0!important;overflow:visible!important}
+#aMain .a-kpipop551 .kpis > .kpi{flex:1 1 116px!important;min-width:0!important;
+  width:auto!important;max-width:none!important;padding:8px 9px!important;
+  background:#f6f9fd!important;border:1px solid var(--line2)!important;
+  border-radius:9px!important;box-shadow:none!important;
+  display:flex!important;flex-direction:column!important;gap:2px!important}
+#aMain .a-kpipop551 .kpis > .kpi b{font-size:17px!important;line-height:1.25!important;
+  color:#123a7a!important;letter-spacing:-.2px!important}
+#aMain .a-kpipop551 .kpis > .kpi span,
+#aMain .a-kpipop551 .kpis > .kpi small{font-size:10.5px!important;color:var(--ink3)!important;
+  font-weight:600!important;white-space:nowrap!important;overflow:hidden!important;
+  text-overflow:ellipsis!important}
+/* 第一格数字原本被 #aMain .kpis > *:first-child b 染成橙色，浮层里 9 格统一深蓝 */
+#aMain .a-kpipop551 .kpis > .kpi:first-child b{color:#123a7a!important}
+#aMain .a-kpipop551 .kpis > .kpi.hot{background:#fff!important;
+  box-shadow:inset 0 0 0 1.5px #ffd8a8!important}
+#aMain .a-kpipop551 .kpis > .kpi:hover{background:#eef5ff!important;border-color:#bcd4f2!important}
+/* 9 格：第一行 5 格 × 116px，第二行 4 格自动拉伸到 147px 铺满，两行都顶到右边界。
+   不用 grid：grid 5 列对 9 格必然第二行空 1 槽（或让最后一格跨 2 列，右侧一片空），
+   flex-wrap 让最后一行自己均分剩余宽度，视觉最满。 */
+
+</style>
