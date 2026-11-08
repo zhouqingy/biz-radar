@@ -29,7 +29,7 @@ on:
     paths:
       - '.github/workflows/metals.yml'   # 改工作流本身也要跑一次，否则「修完重跑还是失败」
       - 'tools/gen_metal_hist.py'
-      - 'tools/build_web.py'
+      - 'tools/refresh_metals_core.py'
 
 permissions:
   contents: write
@@ -68,27 +68,21 @@ jobs:
           # 但要先把失败原因留在日志里，所以用 || 兜一下再 fail。
           python gen_metal_hist.py
 
-      - name: 2) 重建当日行情 → data.core.js
+      - name: 2) 只刷当日行情段 → data.core.js（不再重建整包）
         id: core
         working-directory: tools
         env:
           BIZ_OUT: ${{ github.workspace }}
-        timeout-minutes: 12
+        timeout-minutes: 8
         run: |
-          # build_web.py 会顺带重建全部数据文件。它的输入（raw/*.json）都在仓库里，
-          # 不跑采集也能确定性重放，所以这一步是安全的。
-          #
-          # ⚠ merged.json 不在仓库里（4MB、由 build_data.py 从 raw 生成，长期当构建产物看）。
-          #   仓库根目录放一份快照，构建前拷进 tools/ 供 build_web.py 读。
-          #   没有这行时，2026-11-04 首次手动运行就挂在
-          #   FileNotFoundError: tools/merged.json。
-          if [ -f ../merged.snapshot.json ]; then
-            cp ../merged.snapshot.json merged.json
-            echo "已用仓库快照 merged.snapshot.json ($(du -h merged.json | cut -f1))"
-          else
-            echo "❌ 仓库缺 merged.snapshot.json，build_web.py 无输入"; exit 1
-          fi
-          python build_web.py
+          # ⚠ 2026-11-08 改：这一步原来跑 build_web.py，等于用仓库里的
+          #   merged.snapshot.json（11-03 快照）重建整个数据包，而第 4 步只提交
+          #   metalhist + core 两个文件，同一批 chunk 被 stash 掉 ——
+          #   结果 core 换成快照版（912 条）、列表还是线上那版（1119 条），
+          #   页面顶部「入库项目」和列表长期对不上（实测 core=912 / 列表=1119）。
+          # 现在只做一件事：打开现有 data.core.js，只替换 metals 键，其余原样写回。
+          # 脚本内部有断言：除 metals 外的键只要变了一个字节就拒绝写盘。
+          python refresh_metals_core.py
 
       - name: 3) 自检
         run: |
@@ -126,8 +120,10 @@ jobs:
           git commit -m "金属行情 $(date -u '+%Y-%m-%d') 收盘更新"
 
           # ⚠ 2026-11-04 修（run #4 失败根因，见该次日志 380-394 行）：
-          #   build_web.py 会顺带重建全部数据文件（data.js / index.html / 分块…），
-          #   本工作流只提交上面两个，其余留在工作区 => 未暂存改动。
+          #   当时第 2 步是 build_web.py，会顺带重建全部数据文件（data.js / index.html /
+          #   分块…），本工作流只提交上面两个，其余留在工作区 => 未暂存改动。
+          #   （2026-11-08 起第 2 步已改成 refresh_metals_core.py，只写 core 一个文件，
+          #     正常不会再有多余产物；下面这段 stash 仍然保留，作为并发冲突的兜底。）
           #   push 撞上并发更新 main 时报
           #     "cannot lock ref 'refs/heads/main': is at ... but expected ..."
           #   随后重试里的裸 `git pull --rebase` 又报

@@ -354,14 +354,21 @@ jobs:
           diff = abs(new - old) / float(max(old, 1))
           print('本次构建 %s 条 | 在库 %s 条 | 差异 %.1f%%' % (new, old, diff * 100))
 
+          # 2026-11-08 22:55 用户裁决「页面已经确定了，可以更新数据了」→ 放开闸门。
+          # 原来的逻辑：构建条数与在库条数差 >1% 就跳过推送（阶段③止血用）。
+          # 现在 tools/ 已与本地口径完全一致（biz_rules 60153B 等逐字节相同），
+          # 全量重建 3905 → judge 剔 1109 → semantic_drop 剔 1884 → 入库 912，
+          # 且这 912 条与线上 core 的 meta.total 逐字节一致。
+          # 阈值放到 50%：正常重建不会触发；只有「规则源跑偏、条数爆掉/塌掉」
+          # 这类事故才会拦住，仍然不判红（数据一条不动，等人工看）。
           ok = 'true'
-          if diff > 0.01:
+          if diff > 0.50:
               ok = 'false'
               print('')
               print('=' * 66)
-              print('⚠ 构建条数与在库条数差 %.0f%%，已跳过推送。' % (diff * 100))
-              print('  原因：CI 用的 tools/ 是旧版规则（缺 semantic_drop），过滤不狠。')
-              print('  处置：这不算失败，数据一条不动。等 tools/ 口径对齐后放开闸门。')
+              print('⚠ 构建条数与在库条数差 %.0f%%，超过 50%% 安全线，已跳过推送。' % (diff * 100))
+              print('  原因：条数变化过大，通常是规则源跑偏或 raw 源异常。')
+              print('  处置：这不算失败，数据一条不动。人工核对后再决定是否手动推送。')
               print('=' * 66)
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
               f.write('ok=%s\n' % ok)
