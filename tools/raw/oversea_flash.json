@@ -1,7 +1,82 @@
 {
- "updated": "2026-11-04 17:49",
- "n": 11,
+ "updated": "2026-11-08 18:30",
+ "n": 17,
  "items": [
+  {
+   "title": "伟明环保：印尼垃圾焚烧发电项目争取明年基本建成",
+   "url": "https://news.goalfore.cn/latest/detail/107205.html",
+   "summary": "11月6日，伟明环保在2026年三季度业绩说明会表示，公司印尼巴厘岛和茂物垃圾焚烧发电项目分别于今年 7 月和 9 月举行开工仪式并陆续启动项目建设。",
+   "date": "2026-11-08",
+   "datetime": "2026-11-08 00:00",
+   "src": "国复咨询",
+   "kw": "auto:国复咨询",
+   "sc": 8,
+   "tier": "S",
+   "tierwhy": "工程含：垃圾焚烧/焚烧发电",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "auto"
+  },
+  {
+   "title": "莫桑比克：华新4.7亿元水泥工厂改造，3000吨熟料线投产，中铁二十局参与建设",
+   "url": "https://mp.weixin.qq.com/s/zZdwK1k94TubC9l5g8F6WQ",
+   "summary": "10月6日，华新建材在莫桑比克中部的Dondo（栋多）工厂，日产3000吨熟料生产线点火投产。 当地媒体披露，Dondo改造还配套一套5MW余热发电系统，利用窑线余热发电。",
+   "date": "2026-11-06",
+   "datetime": "2026-11-06 16:00",
+   "src": "天逻非洲数据故事",
+   "kw": "manual:用户 11-08 投喂：华新 莫桑比克 Dondo 水泥改造 / 配5MW余热发电 / 中铁二十局土建",
+   "sc": 9,
+   "tier": "S",
+   "tierwhy": "工程含：余热",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "manual"
+  },
+  {
+   "title": "天合光能580MW大单落地东欧，再树大型电站价值标杆",
+   "url": "https://news.goalfore.cn/topstories/detail/99676.html",
+   "summary": "近日，天合光能宣布与国际可再生能源公司Energix达成合作，将为东欧四座共计580MW的大型地面光伏电站项目提供组件与支架一体化解决方案。",
+   "date": "2026-11-06",
+   "datetime": "2026-11-06 00:00",
+   "src": "国复咨询",
+   "kw": "auto:国复咨询",
+   "sc": 6,
+   "tier": "A",
+   "tierwhy": "业务层级=selfplant（备案口径未覆盖）",
+   "sem": "KEEP",
+   "semwhy": "规模化容量护栏（580MW ≥ 50MW）",
+   "chan": "auto"
+  },
+  {
+   "title": "150亿美元，中资拟在马来西亚三马拉如建铝厂",
+   "url": "https://mp.weixin.qq.com/s/8-n-H2xRbxdX8bjvsk10cw",
+   "summary": "据吉隆坡11月2日消息，有中国投资者有意在砂拉越民都鲁 三马拉如 （Samalaju）兴建铝厂，并发展绿色能源设施，用来支撑面向国际市场的制造业活动。 他透露，这批中国投资者已初步表明，有意在马来西亚投资 总额达150亿美元 ，方向集中在高科技和高附加值领域。",
+   "date": "2026-11-06",
+   "datetime": "2026-11-06 00:00",
+   "src": "高端铝联合体",
+   "kw": "manual:用户 11-08 投喂：中资 马来西亚 三马拉如 铝厂 / 150亿美元意向含绿电",
+   "sc": 9,
+   "tier": "W",
+   "tierwhy": "客户行业但无产能描述：铝",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "manual"
+  },
+  {
+   "title": "超20亿美元！协鑫拟落子尼日利亚300万吨电解铝项目，绿电巨头跨界出海，产业链机遇开启",
+   "url": "https://mp.weixin.qq.com/s/4O9JDj04QubXGEBD7LSJ-w",
+   "summary": "海外有色金属赛道迎来重磅消息，新能源龙头协鑫计划在尼日利亚布局一座300万吨规模电解铝项目，目前项目尚处在前期磋商阶段，暂未签署正式落地协议。 项目预计总投资超20亿美元，选址、总包单位、核心设备选型均未最终敲定。",
+   "date": "2026-11-05",
+   "datetime": "2026-11-05 18:33",
+   "src": "迎风的谷粒",
+   "kw": "manual:用户 11-08 投喂：协鑫 尼日利亚 300万吨电解铝 / 超20亿美元 / 绿电+自备电",
+   "sc": 9,
+   "tier": "W",
+   "tierwhy": "客户行业但无产能描述：铝",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "manual"
+  },
   {
    "title": "中国垃圾焚烧出海第三季度成绩单:印尼、越南成主战场!",
    "url": "https://weixin.sogou.com/link?url=dn9a_-gY295K0Rci_xozVXfdMkSQTLW6cwJThYulHEtVjXrGTiVgS1oDxOMMvYn00fdH9lblXwiGQ_mViRMtAlqXa8Fplpd9eJaPDqjm3dU9Y40v7uhTEmwH4wSWdlCTPwm5fYrIMntj9dfgRPpw7ZSTUJdnae4QUe3AwiUQ3NDxC96glfKP1IDEij9FoTl3sZsJ1vX6y18hG2TWVuqHBlzN5x3EuU9DuFkkr_EuoA12rNRn0Pt_10ql3C14AaYQM2FMKxW0etACn9lOoZLP2Q..&amp;type=2&amp;query=%E5%9E%83%E5%9C%BE%E7%84%9A%E7%83%A7 %E5%87%BA%E6%B5%B7&amp;token=FE484FBCD1550FAB8087DFF0C80B9C78816404436AEAFF76",
@@ -10,7 +85,9 @@
    "datetime": "2026-11-04 17:05:32",
    "src": "环联社",
    "kw": "垃圾焚烧 出海",
-   "sc": 3
+   "sc": 3,
+   "linkdead": 1,
+   "linkdeadwhy": "sogou 跳转链对机房 IP 一律 302 antispider（2026-11-08 实测 3/3）"
   },
   {
    "title": "数据中心日报|11.04 印尼20GW用电缺口,巴淡岛成电力预制化新战场",
@@ -20,7 +97,9 @@
    "datetime": "2026-11-04 09:08:24",
    "src": "李先生的随心感悟",
    "kw": "数据中心 巴淡",
-   "sc": 7
+   "sc": 7,
+   "linkdead": 1,
+   "linkdeadwhy": "sogou 跳转链对机房 IP 一律 302 antispider（2026-11-08 实测 3/3）"
   },
   {
    "title": "印尼数据中心新规落地,外资必须绑定本地合作,巴淡三岛成为新算力枢纽",
@@ -30,7 +109,9 @@
    "datetime": "2026-11-02 18:24:49",
    "src": "ArtiAI 匠歆AI",
    "kw": "数据中心 巴淡",
-   "sc": 5
+   "sc": 5,
+   "linkdead": 1,
+   "linkdeadwhy": "sogou 跳转链对机房 IP 一律 302 antispider（2026-11-08 实测 3/3）"
   },
   {
    "title": "伟明环保落子哈拉雷 垃圾焚烧出海非洲",
@@ -40,7 +121,9 @@
    "datetime": "2026-11-01 17:01:31",
    "src": "环卫科技网",
    "kw": "垃圾焚烧 出海",
-   "sc": 3
+   "sc": 3,
+   "linkdead": 1,
+   "linkdeadwhy": "sogou 跳转链对机房 IP 一律 302 antispider（2026-11-08 实测 3/3）"
   },
   {
    "title": "比什凯克之后,中亚垃圾焚烧市场应该怎么“进”?",
@@ -50,7 +133,9 @@
    "datetime": "2026-10-29 17:03:53",
    "src": "环保圈",
    "kw": "垃圾焚烧 出海",
-   "sc": 3
+   "sc": 3,
+   "linkdead": 1,
+   "linkdeadwhy": "sogou 跳转链对机房 IP 一律 302 antispider（2026-11-08 实测 3/3）"
   },
   {
    "title": "垃圾焚烧与烟气处理设备怎么出海?排放标准对接、性能担保与目的国验收",
@@ -60,7 +145,9 @@
    "datetime": "2026-10-29 15:09:50",
    "src": "上海瀚优国际",
    "kw": "垃圾焚烧 出海",
-   "sc": 3
+   "sc": 3,
+   "linkdead": 1,
+   "linkdeadwhy": "sogou 跳转链对机房 IP 一律 302 antispider（2026-11-08 实测 3/3）"
   },
   {
    "title": "37.14亿元!海螺要在印尼建垃圾焚烧项目!",
@@ -70,7 +157,9 @@
    "datetime": "2026-10-29 08:43:31",
    "src": "危废网讯",
    "kw": "垃圾焚烧 出海",
-   "sc": 6
+   "sc": 6,
+   "linkdead": 1,
+   "linkdeadwhy": "sogou 跳转链对机房 IP 一律 302 antispider（2026-11-08 实测 3/3）"
   },
   {
    "title": "中建一局连中印尼两座数据中心,44 兆瓦机房楼打头|东南亚算力基建,已经告别 “盖楼红利期”",
@@ -80,7 +169,9 @@
    "datetime": "2026-10-27 18:21:26",
    "src": "ArtiAI 匠歆AI",
    "kw": "印尼 数据中心",
-   "sc": 5
+   "sc": 5,
+   "linkdead": 1,
+   "linkdeadwhy": "sogou 跳转链对机房 IP 一律 302 antispider（2026-11-08 实测 3/3）"
   },
   {
    "title": "东南亚红利消退,中亚会是垃圾焚烧新战场吗?",
@@ -90,7 +181,9 @@
    "datetime": "2026-10-27 17:20:36",
    "src": "环保圈",
    "kw": "垃圾焚烧 出海",
-   "sc": 3
+   "sc": 3,
+   "linkdead": 1,
+   "linkdeadwhy": "sogou 跳转链对机房 IP 一律 302 antispider（2026-11-08 实测 3/3）"
   },
   {
    "title": "电成为东南亚数据中心最大变量:一文读懂柔佛、巴淡电网缺口全景!",
@@ -100,7 +193,9 @@
    "datetime": "2026-10-26 07:08:47",
    "src": "算力机电观",
    "kw": "数据中心 巴淡",
-   "sc": 4
+   "sc": 4,
+   "linkdead": 1,
+   "linkdeadwhy": "sogou 跳转链对机房 IP 一律 302 antispider（2026-11-08 实测 3/3）"
   },
   {
    "title": "印尼电解铝新项目最关键是投产后电的问题,",
@@ -110,7 +205,24 @@
    "datetime": "2026-10-25 17:48:47",
    "src": "丁泰铭",
    "kw": "电解铝 印尼",
-   "sc": 4
+   "sc": 4,
+   "linkdead": 1,
+   "linkdeadwhy": "sogou 跳转链对机房 IP 一律 302 antispider（2026-11-08 实测 3/3）"
+  },
+  {
+   "title": "印尼 Danantara 垃圾发电项目迎融资里程碑，意向规模超需求 3 倍",
+   "url": "https://news.goalfore.cn/topstories/detail/98823.html",
+   "summary": " 34 家金融机构加入达南塔拉（Danantara） 垃圾发电（WtE）贷款人委员会， 意向融资超债务需求 3 倍 NEWS 2026 年 10 月 16 日，印尼 Danantara 集团通过旗下 DIM 与 Denera 宣布，已遴选 34 家海内外金融机构组建垃圾发电（",
+   "date": "2026-10-19",
+   "datetime": "2026-10-19 00:00",
+   "src": "国复咨询",
+   "kw": "auto:国复咨询",
+   "sc": 6,
+   "tier": "A",
+   "tierwhy": "业务层级=wte（备案口径未覆盖）",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "auto"
   }
  ]
 }

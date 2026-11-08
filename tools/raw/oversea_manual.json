@@ -1,0 +1,18 @@
+{
+ "note": "出海速览 · 人工投喂清单（2026-11-08 起）。把公众号文章链接贴进 items[].url 即可；oversea_manual.py 会抓真实标题/公众号/发布时间，链接存永久地址（不再存会过期的 sogou 跳转链）。date 可不填，脚本从页面取。",
+ "updated": "2026-11-08 18:40",
+ "items": [
+  {
+   "url": "https://mp.weixin.qq.com/s/4O9JDj04QubXGEBD7LSJ-w",
+   "note": "用户 11-08 投喂：协鑫 尼日利亚 300万吨电解铝 / 超20亿美元 / 绿电+自备电"
+  },
+  {
+   "url": "https://mp.weixin.qq.com/s/8-n-H2xRbxdX8bjvsk10cw",
+   "note": "用户 11-08 投喂：中资 马来西亚 三马拉如 铝厂 / 150亿美元意向含绿电"
+  },
+  {
+   "url": "https://mp.weixin.qq.com/s/zZdwK1k94TubC9l5g8F6WQ",
+   "note": "用户 11-08 投喂：华新 莫桑比克 Dondo 水泥改造 / 配5MW余热发电 / 中铁二十局土建"
+  }
+ ]
+}

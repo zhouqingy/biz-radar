@@ -34,6 +34,16 @@ import subprocess
 import sys
 import time
 
+# 2026-11-05：采集端接入「全链路唯一规则源」的入库前硬过滤。
+# ⚠ 更正过时注释：第二轮起 12 条规则已全量启用（11 类词表 + N13 存量主设备改造），
+#   不再是「草案 12 类未启用」；第三轮补了护栏 W4。以 biz_rules.py 的
+#   SEM_ACTIVE_CODES 为准，本注释不另行维护规则清单。
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import biz_rules as BR
+
+# 开工必读（2026-11-05 用户要求）：不懂业务口径就采集，等于往库里灌垃圾。
+from preflight import require_briefing
+
 BASE = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(BASE, 'raw')
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36'
@@ -129,6 +139,11 @@ def is_noise(title):
     smallwork = ['管网', '泵站', '接管', '疏通', '清淤', '巡查', '托管', '维修养护',
                  '保洁', '垃圾亭', '公厕', '村道', '户户通', '十必接']
     if any(s in title for s in small) and any(w in title for w in smallwork):
+        return True
+    # 2026-11-05 接入：已拍板口径的入库前硬过滤。
+    # ⚠ 不在本文件另写关键词 —— 规则只在 biz_rules.semantic_drop() 里定义，
+    #   避免采集端与构建端口径分叉。SEM_ACTIVE_CODES 控制启用范围。
+    if BR.semantic_drop(title)[0]:
         return True
     return False
 
@@ -357,6 +372,7 @@ def fetch_site(name, cfg, sdt, edt, per_kw=200, pause=0.35):
 
 
 def main():
+    require_briefing('collect_v4.py')
     ap = argparse.ArgumentParser()
     ap.add_argument('--days', type=int, default=7, help='抓最近多少天')
     ap.add_argument('--perkw', type=int, default=200, help='每个关键词最多取多少条')

@@ -1,7 +1,15 @@
 # -*- coding: utf-8 -*-
 """生成前端数据包 data.js"""
 import json, os, re, random, datetime, math
+import sys
 from collections import Counter, defaultdict
+
+# 2026-11-05 用户要求：任何 AI / 脚本开工前必须先把《00-公司业务口径.md》读一遍，
+# 没搞清「我们是做什么的」就做数据识别 / 筛选 / 入库 = 污染数据库。
+# 这里只做校验与口径摘要打印，不改任何过滤逻辑。
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from preflight import require_briefing
+require_briefing('build_web.py')
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 # 输出去向。三种环境都要能跑：
@@ -20,12 +28,13 @@ os.makedirs(OUT, exist_ok=True)
 
 D = json.load(open(os.path.join(ROOT, 'merged.json'), encoding='utf-8'))
 
-# ── 业务分层与门槛（2026-10-21 用户逐条确认版）────────────────────────────
+# ── 业务分层与门槛（2026-11-05 第三轮更新）────────────────────────────────
 # 用户原话：「正常情况我们是跟踪1亿以上，但是你要是觉得关联性特别大也算上」
 #          「有色冶炼供能一级大半合同额来自于此」
+#          「先按照金额呗，一个亿呗。无金额的就放到那种不怎么关注的里面吧」（11-05）
 # 定义全在 seg_biz.py，判定全在 seg_match.py，这里只调用。
-# 关键变化：不再用 is_watch 的「A/B 级兜底」，改成三段式
-#   ≥1亿 → 进；0.3~1亿 必须「核心工艺词+总承包」双命中；<0.3亿 → 不进。
+# ⚠ 关注档 w 的门槛已简化为纯金额 ≥1 亿（BR.AMT_FOCUS_MIN_YI / focus_of）；
+#   旧三段式（0.3~1 亿双命中、A/B 级兜底）11-05 第三轮废弃，见 is_watch()。
 # 业务分层短码 → 中文名。必须与 index.html 的 SEG_NAME 完全一致，
 # 否则 meta 里的分类标签在前端查不到名字（2026-11-04 踩过）。
 SEG_CN = {
@@ -237,12 +246,14 @@ METALS = fetch_metals()
 # 结果「能投的标」里混进 28 条 200 万-3000 万的：屋顶光伏 EPC、单一锅炉改造、
 # 设计服务、EMC 合同能源管理…… 这些放主列表里，真正值得投的 3 亿储能站就被挤到第 2 页。
 #
-# 现在一刀切：**招标类必须金额 ≥ 3000 万**，金额扒不出来的一律不进主列表。
-# A/B 级只在「金额未知」这一种情况下作为兜底（有规模证据但数字没写在标题里）。
-# 立项线索（还没招标的）不卡金额——那是「我们可以去谈的」，几百万的聊一聊也可能
-# 养成大单，塞进线索池不碍事，反正不在主列表。
+# 当时一刀切：招标类必须金额 ≥ 3000 万，A/B 级在「金额未知」时兜底。
+#
+# ⚠【2026-11-05 第三轮已被用户覆盖】「先按照金额呗，一个亿呗。无金额的就放到
+#   那种不怎么关注的里面吧」→ 门槛改 1 亿、判定改纯金额（BR.focus_of），
+#   **不再有 0.3~1 亿双命中、A/B 级兜底**。无金额 = w=0 留库，不是删。
+#   下面这段保留作历史记录，别再照它改代码。
 # ══════════════════════════════════════════════════════════════════════
-WATCH_AMT = 0.3          # 亿元，即 3000 万
+WATCH_AMT = BR.AMT_FOCUS_MIN_YI   # 亿元。2026-11-05 第三轮用户：「一个亿呗」
 
 
 def _seg_text(r):
@@ -256,17 +267,17 @@ def seg_of(r):
 
 
 def is_watch(r):
-    """这条项目值不值得派人跟。
+    """这条项目值不值得派人跟（= 页面「关注档」w 列）。
 
-    2026-10-21 用户第四次定门槛，改成三段式（详见 seg_match.judge）：
-      ≥1 亿 → 进
-      0.3~1 亿 → 必须「核心工艺词 + 总承包标的」双命中，否则不进
-      <0.3 亿 → 不进
-      金额未知 → 一级业务 + 核心工艺词 才进
-    旧的「A/B 级兜底」已废弃：它把大量几百万的屋顶光伏、单一锅炉改造放进来了。
+    2026-11-05 第三轮用户裁决简化为纯金额：「先按照金额呗，一个亿呗。
+    无金额的就放到那种不怎么关注的里面吧」。
+      金额 ≥1 亿        → w=1（重点关注）
+      <1 亿 / 无金额    → w=0（不怎么关注，**留库，不删**）
+    ⚠ 判据统一走 biz_rules.focus_of()（全链路唯一规则源），别在此另写阈值。
+      旧的三段式（0.3~1 亿双命中 / A/B 级兜底）已废弃 —— 它把小额屋顶光伏、
+      EMC 设计服务放进主列表，把真正的大项目挤到后面；用户这次明确先按金额。
     """
-    ok, _why, _note = SM.judge(r, _seg_text(r))
-    return ok
+    return bool(BR.focus_of(r.get('amtY')))
 
 
 # 立项/审批/重点项目名单：潜在机会，不是招标公告。
@@ -331,6 +342,14 @@ def _clean_unit(w):
 
 brief = []
 _nDrop = [0]      # 被 judge 判纯噪声、连库都不进 的条数
+# ── F30 过滤自检（2026-11-05 第 2 批）──────────────────────────────────
+# 用户要「每次重跑输出：新增 N 条 → 命中哪条规则删了 M 条」，让过滤可见可验。
+# 这里只做**计数与打印**，不改任何数据、不改 judge/semantic_drop 的判定结果。
+# 唯一规则源仍是 biz_rules.py；此处不另写关键词、不另设阈值。
+_dropJudge = [0]           # judge keep=False（纯噪声）
+_dropSem = Counter()       # semantic_drop 命中，按规则码拆
+_dropSemWhy = {}           # 每个规则码留一条示例原因
+_keepGuard = Counter()     # 护栏 W/W2/W3/W4 保住、未删的条数
 for r in D:
     # ── items 瘦身（2026-10-21 用户反馈「加载时间太长」）────────────────
     # items 原来 1.17MB，逐字段量过后发现三处纯浪费：
@@ -353,7 +372,19 @@ for r in D:
                   r.get('st') or '', r.get('buyer') or '', r.get('win') or '')
     if not _j['keep']:
         _nDrop[0] += 1
+        _dropJudge[0] += 1
         continue
+    # 2026-11-05：构建端接入入库前硬过滤（与采集端同一个 semantic_drop）。
+    # 第二轮起 11 类词表 + N13 共 12 条全启用；第三轮补护栏 W4（组合标的）。
+    _sd, _scode, _swhy = BR.semantic_drop(r['t'])
+    if _sd:
+        _nDrop[0] += 1
+        _dropSem[_scode or '?'] += 1
+        if (_scode or '?') not in _dropSemWhy:
+            _dropSemWhy[_scode or '?'] = str(_swhy or '')[:60]
+        continue
+    if str(_scode or '').startswith('W'):
+        _keepGuard[_scode] += 1
     _si = seg_of(r)
     b = {
         'id': r['id'], 't': r['t'], 'rg': r['rg'], 'city': r['city'], 'st': r['st'],
@@ -1447,10 +1478,20 @@ def _load_oversea_extra():
                 # 搜狗跳转链接里的 &amp; 是采集时原样带出来的，浏览器不会二次解码，
                 # 直接拼进 href 会点开 404。这里统一反转义一遍。
                 u = _html.unescape(x.get('url') or '')
-                flash.append({'t': x.get('title') or '', 'u': u,
-                              's': x.get('src') or '', 'd': x.get('date') or '',
-                              'm': (x.get('summary') or '')[:120],
-                              'sc': x.get('sc') or 0})
+                _it = {'t': x.get('title') or '', 'u': u,
+                       's': x.get('src') or '', 'd': x.get('date') or '',
+                       'm': (x.get('summary') or '')[:120],
+                       'sc': x.get('sc') or 0}
+                # 2026-11-08 §5.52：sogou 跳转链对机房 IP 一律 302 antispider，
+                # 老 11 条点开全是验证码。标记出来让前端降级成「用标题搜」，
+                # 不能让人点进白屏 —— 前端判据 x.ld === 1。
+                if x.get('linkdead'):
+                    _it['ld'] = 1
+                if x.get('tier'):
+                    _it['tier'] = x.get('tier')
+                if x.get('chan'):
+                    _it['chan'] = x.get('chan')
+                flash.append(_it)
             flash.sort(key=lambda y: (y['d'], y['sc']), reverse=True)
         except Exception as e:
             print('  ⚠ 速览读取失败：%s' % e)
@@ -1900,3 +1941,16 @@ for x in buyers[:10]:
 print('\n== 客户命中 TOP12 ==')
 for x in clients[:12]:
     print(f"  {x['n']:>3}条 {x['amt']:>7.2f}亿  {x['name'][:30]:<30} {x['rg']}")
+
+# ── F30 过滤自检输出（2026-11-05 第 2 批）──────────────────────────────
+# 只读统计。下一次全量重建（update_weekly.py）时，这段会把「命中哪条规则删了多少条」
+# 直接打进构建日志；要立刻看当前库的自检结果，跑 filter_audit.py（同样只读）。
+print('\n== 过滤自检 F30（本次构建 · 只读统计 · 不改数据）==')
+print('  原始 %d 条 → judge 纯噪声剔除 %d 条 / semantic_drop 判删剔除 %d 条 → 入库 %d 条'
+      % (len(D), _dropJudge[0], sum(_dropSem.values()), len(brief)))
+for _c, _n in _dropSem.most_common():
+    print('    %-5s %4d 条  %s' % (_c, _n, _dropSemWhy.get(_c, '')[:52]))
+if _keepGuard:
+    print('  护栏保住（未删）：' + ' / '.join('%s %d 条' % (k, v) for k, v in _keepGuard.most_common()))
+print('  ⚠ 自检 ≠ 删除清单：当前库历史条目按用户裁决留库，本脚本不执行任何删除。')
+print('  ⚠ 唯一规则源 biz_rules.py；护栏 W/W2/W3/W4 先判，12 条删除规则全启用。')

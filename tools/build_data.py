@@ -2,8 +2,14 @@
 """数据清洗 + 重分类 + 融合引擎
 把「老版1383条」与「新一轮检索272条」统一到一套对齐公司主业的分类规则下。
 """
-import json, re, os, hashlib
+import json, re, os, hashlib, sys
 from collections import Counter, defaultdict
+
+# 开工必读（2026-11-05 用户要求）：清洗/分类/去重/分级会直接决定哪些条目进库，
+# 口径不清就分类 = 往①投放库里灌垃圾。规则只在 biz_rules.py 定义，这里不另写判据。
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from preflight import require_briefing
+require_briefing('build_data.py')
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(ROOT, 'raw')

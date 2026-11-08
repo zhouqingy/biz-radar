@@ -148,13 +148,47 @@ jobs:
       # 产出 raw/oversea_flash.json → build_web.py 的 _OVS_FLASH → data.news.js 的
       #   overseaFlash 键 → 海外页签「出海速览」视图。这一步失败时旧文件仍在，
       #   页面显示上次的结果（速览本身允许有几天的滞后，不像招标公告那样要求 T+1）。
-      - name: 3.9) 海外速览 · 公众号线索采集
+      # 3.9) 海外速览（2026-11-08 换主通道，§5.52）
+      #   搜狗微信搜索对机房 IP 已封死：本机直连 weixin.sogou.com 得到
+      #   302 → /antispider/?antip=wx_sh2，任何关键词 0 条。CI 的 Azure IP 更早就在
+      #   黑名单里 —— 这就是「8 天还是 11 条」的根因，不是关键词不够。
+      #   现在两条腿：
+      #     A 自动 oversea_sources.py  直连印尼商报 / 国复咨询 / 我的钢铁（服务端渲染、无需登录）
+      #     B 人工 oversea_manual.py   用户投喂的公众号链接（raw/oversea_manual.json）
+      #   都不碰 semantic_drop / pick_odi，口径仍只有一份。
+      - name: 3.9a) 海外速览 · 公开源自动采集
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          if [ -f oversea_sources.py ]; then
+            python oversea_sources.py || echo "::warning::公开源采集失败，沿用上次结果"
+          else
+            echo "::warning::oversea_sources.py 不存在，跳过"
+          fi
+
+      - name: 3.9b) 海外速览 · 人工投喂公众号链接
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          if [ -f oversea_manual.py ]; then
+            python oversea_manual.py || echo "::warning::人工投喂通道失败"
+          else
+            echo "::warning::oversea_manual.py 不存在，跳过"
+          fi
+
+      # 3.9c) 搜狗通道保留但降级：默认不跑，仓库变量 SOGOU_OVERSEA=1 时才跑。
+      #   留着的理由：它抓到的历史条目还有线索价值，代码不删；
+      #   不默认跑的理由：机房 IP 必被封，白跑 10 分钟还可能把 job 拖超时。
+      - name: 3.9c) 海外速览 · 搜狗通道（默认跳过）
+        if: vars.SOGOU_OVERSEA == '1'
         working-directory: tools
         continue-on-error: true
         timeout-minutes: 12
         run: |
           if [ -f mine_oversea_wechat.py ]; then
-            python mine_oversea_wechat.py || echo "::warning::海外速览采集失败，沿用上次结果"
+            python mine_oversea_wechat.py || echo "::warning::搜狗通道失败，沿用上次结果"
           else
             echo "::warning::mine_oversea_wechat.py 不存在，跳过"
           fi
@@ -347,9 +381,13 @@ jobs:
           # tools/raw 里只提补采改过的省份文件：fill_amount.py / fill_missing.py 把
           # 金额、中标单位直接写回 raw/<省>.json，不提交就等于每轮白抓。
           # 只点名 4 个文件，避免把 tools/raw 下的缓存、日志、验证码图（很杂）一起带上去。
+          # 2026-11-08 §5.52：外加海外速览两个数据文件 —— 采集完不提交 = 白抓，
+          # 「8 天还是 11 条」就是这类问题的另一种表现。
           git add -A '*.js' '*.html' 'merged.snapshot.json' \
                   'tools/raw/jiangsu.json' 'tools/raw/zhejiang.json' \
-                  'tools/raw/anhui.json' 'tools/raw/shanghai.json' ':!tools/*.py'
+                  'tools/raw/anhui.json' 'tools/raw/shanghai.json' \
+                  'tools/raw/oversea_flash.json' 'tools/raw/oversea_manual.json' \
+                  ':!tools/*.py'
 
           if git diff --staged --quiet; then
             echo "没有变化，跳过提交"
