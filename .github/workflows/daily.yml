@@ -237,15 +237,21 @@ jobs:
           BIZ_OUT: ${{ github.workspace }}
           BIZ_SITE: ${{ github.workspace }}
         run: |
-          # 2026-11-08：build_plan_forecast.py 从来没有入库（仓库里 404），
-          # 这一步一直靠 continue-on-error 静默失败，data.plan.js 因此从未在 CI 里更新过。
-          # 先把调用改成「存在才跑」，把真相打进日志，别再假装成功。
-          if [ -f build_plan_forecast.py ]; then
-            python build_plan_forecast.py
-          else
-            echo "⚠ build_plan_forecast.py 不在 tools/ 下（仓库 404），本步跳过；"
-            echo "  data.plan.js 沿用仓库里上一版，属于已知缺陷，等阶段③一起补。"
+          # 2026-11-08 23:0x 补真：这一步此前一直是假的 —— build_plan_forecast.py
+          # 从来没进过仓库（404），靠 continue-on-error 静默跳过，data.plan.js
+          # 在 CI 里一次都没更新过（线上那份是本地手工产的 11-02 版，124 条）。
+          # 现在脚本 + 输入清单（40 KB xlsx）都入库了；本地与 CI 两种目录结构
+          # 都实测过，产出的 data.plan.js 与线上现役版逐字节相同（124 条 / 80 KB）。
+          # 缺文件时打 error annotation（页面会黄条提示），但仍不阻断整轮更新。
+          if [ ! -f build_plan_forecast.py ]; then
+            echo "::error::tools/build_plan_forecast.py 缺失，规划前瞻本轮不更新"
+            exit 1
           fi
+          if [ ! -f "../规划资料-2026-2030/江浙沪皖供热规划可做项目清单.xlsx" ]; then
+            echo "::error::规划清单 xlsx 缺失（仓库 规划资料-2026-2030/），规划前瞻本轮不更新"
+            exit 1
+          fi
+          python build_plan_forecast.py
 
       - name: 5) 检查产物
         run: |
