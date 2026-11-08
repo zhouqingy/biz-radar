@@ -1209,6 +1209,12 @@ a.ovf-t:hover{color:var(--brand);text-decoration:underline}
 .rival-dw{margin-left:6px;font-size:11px;padding:1px 7px;border-radius:4px;border:1px solid #0f766e;
   background:#f0fdfa;color:#0f766e;cursor:pointer;line-height:1.6;vertical-align:1px;white-space:nowrap}
 .rival-dw:hover{background:#0f766e;color:#fff}
+/* §5.49 三页边界提示条：一行灰底小字，不抢视线 */
+.a-bound549{margin:0 0 10px;padding:8px 11px;border-radius:8px;background:#f5f7fa;
+  border:1px solid var(--line);font-size:12px;color:var(--tx2);line-height:1.75}
+.a-bound549 b{color:var(--tx)}
+.a-bound549 a{color:var(--brand);font-weight:600;text-decoration:none}
+.a-bound549 a:hover{text-decoration:underline}
 /* ══════ 原文跳转（2026-10-21 重写）══════
    用户要求「链接跳转即可」，不要 iframe 嵌套。原来的 .drawer / .rd-panel /
    .rd-frame 一整套样式已删除——点标题直接新标签打开原文，页面里不留任何嵌入容器。
@@ -1955,19 +1961,14 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
     <div class="t">本周变化</div>
     <div class="go">打开汇报视图 →</div>
   </div>
-  <div class="a-ph a-ph-live" id="aPhFocus" style="border-style:solid">
-    <span class="a-tag">实时</span><b>重点关注 · 实时</b>
-    <div id="aPhFocusBody"></div>
-    <div class="a-ph-t" data-act="aPhJump" data-tab="p-items">去「找商机」→</div>
-  </div>
-  <div class="a-ph a-ph-live" id="aPhDetail" style="border-style:solid">
-    <span class="a-tag">字段</span><b>项目详情画像</b>
-    <div id="aPhDetailBody"></div>
-  </div>
-  <div class="a-ph a-ph-live" id="aPhChange" style="border-style:solid">
-    <span class="a-tag">F31</span><b>本周变化 · 时间线</b>
-    <div id="aPhChangeBody"></div>
-  </div>
+  <!-- §5.49（2026-11-08 用户授权「你先做吧」）右栏收口：原「重点关注·实时」
+       「项目详情画像」「本周变化·四类速览」三块已删，理由：
+       ① 三块在 9 个页签里全部固定显示、不随页签变化，等于把找商机的内容塞进每一页；
+       ② 「项目详情画像」在客户页 / 海外页点不出任何东西，是死占位（109px）；
+       ③ 本周变化左栏「本周变化」+ 顶栏「周报」已有入口，右栏是第三遍重复；
+       ④ 重点关注三项指标（1119 / 98 / 21）与左栏「项目情况 1119」、统计卡重复。
+       画像改为「点项目卡 → 居中弹窗」（复用 openPjDetail），不再常驻占位。
+       右栏只剩「金属价格行情」——全站唯一行情入口，非重复项。 -->
 
 </aside>
 
@@ -2204,11 +2205,10 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
       <div class="frow" style="padding:0 0 10px"><label>业务类别</label><div class="chips" id="f-cat"></div></div>
       <div class="hint" style="margin-bottom:10px">按我司业务口径划分：<b style="color:#a85c10">能源类</b>=火电/煤气发电/余热发电/热电联产/储能等能源清洁高效利用主线；<b style="color:#14713a">环保类</b>=废水、废气（脱硫脱硝除尘）、固废与土壤修复主线；<b style="color:#1053c9">综合类</b>=两条线都做、都可能正面撞上。</div>
       <div class="cgrid" id="rivalGrid"></div>
-      <!-- 评标公示里露面的单位（2026-11-03）——
-           本库建档的竞争对手是人工整理的，但评标公示里大量投标单位从来没进过名单，
-           它们照样在抢同一批标。原来挂在「按战绩排序」那块下面，
-           2026-11-03 那块下线，挪到这里 —— 和「谁在抢我们的标」是同一个语境。 -->
-      <div id="cpfNewBox"></div>
+      <!-- §5.49：原「评标公示里露面的其他投标单位 N 家」整块已删。
+           理由：这批是未建档陪标单位，点进去只有业绩列表、没有任何可操作动作；
+           用户 11-08 复核时再次点名「这块我不需要」。数据仍在 data.candperf.js，
+           不删数据、只删展示；需要时可由档案弹层「同业深度档案」查。 -->
     </div>
 
     <div id="rPartnerBox" style="display:none">
@@ -2228,11 +2228,14 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
          数据源 data.news.js 的 overseas(94) / overseaOdi(23)，都是②业绩·动向类线索，
          只读聚合、不回流①投放库；②反推①必须再过①过滤（底稿 §5.5）。
          国别按原文并列，「印尼」「印度尼西亚」两种写法不擅自合并。 -->
-    <details id="ovChain" style="margin:0 0 12px;border:1px solid var(--line);border-radius:9px;background:#fbfcfe;padding:0 12px 10px">
-      <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2);padding:9px 0">
-        出海链路 · 配套切口 · 国别备案
-        <span id="ocCnt" style="font-weight:400;color:var(--tx3)"></span>
-        <span style="font-weight:400;color:var(--tx3);font-size:11.5px">（动向线索，只读统计）</span>
+    <!-- §5.49：原 51px 折叠条压成一行小字。内容是「三档计数 + 关键词轮换说明」，
+         属于看之前先知道「这里怎么算的」，占 51px 首屏不值。details 保留，
+         点这一行仍是展开，数据不变。 -->
+    <details id="ovChain" style="margin:0 0 8px;border:1px solid var(--line);border-radius:8px;background:#fbfcfe;padding:0 10px">
+      <summary style="cursor:pointer;font-size:12px;font-weight:400;color:var(--tx3);padding:4px 0;line-height:1.45">
+        出海链路怎么看 · 配套切口 · 国别备案
+        <span id="ocCnt" style="color:var(--tx3)"></span>
+        <span style="color:var(--tx3);font-size:11.5px">· 动向线索，只读统计，点开看口径</span>
       </summary>
       <div class="hint" style="margin:8px 0 10px">
         <b>看业主是谁</b>：中资企业去海外建厂，配套自备电厂 / 动力岛 / 余热发电 / 海水淡化，这些配套才是我们的活。
@@ -2386,6 +2389,16 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
       <span class="lv A">A</span> 与主业相关但信息较粗；
       <span class="lv B">B</span> 仅作背景参考。点标题直达原文。
       <b style="color:#d4380d">本页不计入商机库主表，仅供发现线索，需人工核实。</b>
+    </div>
+    <!-- §5.49：三页边界写清楚，免得同一件事在三处找。
+         判据是「情报对象」：对手在干什么 / 海外用能配套 / 全国建厂信号。 -->
+    <div class="a-bound549">
+      <b>本页只管「对手在干什么」</b>：竞对官网与微信深度稿，谁中标、谁出海、谁开工。
+      海外用能配套线索（中资出海建厂 → 自备电厂 / 动力岛 / 余热发电 / 海水淡化）在
+      <a href="javascript:void(0)" data-act549="goOverseas">「海外」页</a>；
+      全国新闻里的建厂 / 扩产信号（比挂公告早 6~18 个月）在
+      <a href="javascript:void(0)" data-act549="goTrend">「行业动态 · 政策档」</a>。
+      <span style="color:var(--tx3)">三处不重复，各有边界；②反推①仍须再过①过滤。</span>
     </div>
     <div class="frow" style="padding:0 0 10px"><label>筛选</label><div class="chips" id="f-dg"></div></div>
     <div class="news" id="dgGrid"></div>
@@ -5179,11 +5192,25 @@ function aPhDetail(x){
     'rel="noopener" style="color:inherit;text-decoration:none">公告原文 ↗</a></div>';
   box.innerHTML=h;
 }
+/* §5.49 边界条跳转：按 TABS 的 id 查索引，不写死 goTab(数字)。
+   ⚠ 这段必须留在 <script> 里——第一次写补丁时误插进 <style>，
+   CSS 解析器遇到 document.addEventListener 就把后面所有规则全丢了。 */
+document.addEventListener('click',function(e){
+  var b=(e.target&&e.target.closest)?e.target.closest('[data-act549]'):null;
+  if(!b)return;
+  e.preventDefault();
+  var act=b.getAttribute('data-act549');
+  var id=act==='goOverseas'?'p-overseas':(act==='goTrend'?'p-trend':'');
+  if(!id)return;
+  var T=window.TABS||[],idx=-1;
+  for(var i=0;i<T.length;i++){if(T[i]&&T[i][0]===id){idx=i;break;}}
+  if(idx<0)return;
+  if(typeof window.goTab==='function')window.goTab(idx);
+  var m=document.getElementById('aMain'); if(m)m.scrollTop=0;
+});
 function aPhInit(){
-  aPhFocus(); aPhChange(); aPhDetail(null);
-  if(!window.DATA_CHANGES&&typeof need==='function'){
-    try{need('changes',function(){aPhFocus();aPhChange();});}catch(e){}
-  }
+  /* §5.49：右栏三块已删。函数定义保留（aPhDetail 被点卡片弹窗复用），
+     取不到节点即 return，不会抛错。 */
 }
 /* 左栏跳转 / 右栏动作：全部走 data-act 委托，不写 inline onclick */
 document.addEventListener('click',function(e){
@@ -5193,20 +5220,11 @@ document.addEventListener('click',function(e){
   if(a==='aPhJump'){aPhGo(b.getAttribute('data-tab'),b.getAttribute('data-fold')||'');return;}
   if(a==='aPhWeek'){var w=document.getElementById('btnWeek');if(w)w.click();return;}
 });
-/* 点卡片填右栏画像：不侵入 openPjDetail；点到 <a>（原文 / 附件 / 跟进）时不更新 */
-document.addEventListener('click',function(e){
-  if(!e.target||!e.target.closest)return;
-  if(e.target.closest('a'))return;
-  var c=e.target.closest('.pj[data-pjid]'); if(!c)return;
-  var id=c.getAttribute('data-pjid'), L=window.items||[], x=null;
-  for(var i=0;i<L.length;i++){if(L[i].id===id){x=L[i];break;}}
-  aPhDetail(x);
-});
+/* §5.49：原「点卡片填右栏画像」已删（右栏无画像块）。点卡片统一走
+   openPjDetail 居中弹窗，见文件后段 .pj[data-pjid] 委托。 */
 /* items 全量与 changes 模块都可能晚到，补齐后重算；不落盘、不存快照 */
 try{aPhInit()}catch(err){console.warn('[aPhInit]',err)}
-try{if(typeof loadAllItems==='function')loadAllItems(function(){
-  try{aPhFocus();aPhChange()}catch(err){console.warn('[aPhRefresh]',err)}});}catch(err){}
-setTimeout(function(){try{aPhFocus();aPhChange()}catch(err){console.warn('[aPhLate]',err)}},2200);
+/* §5.49：右栏已无 aPhFocus / aPhChange 节点，去掉这三处定时重绘 */
 
 /* 展开折叠区才拉对应模块：toggle 不冒泡，用捕获阶段委托。
    首屏不加载政策档 / 行业动态明细，不影响首屏时间。need 自带缓存，重复展开不会重复请求。 */
@@ -5625,6 +5643,8 @@ function renderCompetitors(){
 var KINDNAME={design:'设计院',epc:'总包·施工',equip:'设备',energy:'能源投资运营',
   other:'其他',pro:'监理·造价·审计'};
 function renderCpfNew(){
+  /* §5.49：60 家展示块已从 DOM 删除，box 恒为 null，此处直接返回。
+     完整原实现保留在下方，需要恢复时只改这一行。 */
   var box=el('cpfNewBox'); if(!box) return;
   var db=(window.DATA_CANDPERF||{}).db||{}, arr=[];
   Object.keys(db).forEach(function(k){
@@ -5676,6 +5696,7 @@ function renderCpfNew(){
   box.innerHTML=h;
 }
 document.addEventListener('click',function(e){
+  /* §5.49：60 家块已删，此委托保留但实际不会命中（无 data-cpfname 节点生成） */
   var c=(e.target&&e.target.closest)?e.target.closest('[data-cpfname]'):null;
   if(!c) return;
   var nm=c.getAttribute('data-cpfname');
@@ -6454,12 +6475,17 @@ function openPjDetail(x){
     '</div>';
   openUniProf(x.t||'', sub, h);
 }
-/* 事件委托：点到卡片本体（非 a/button）就弹详情 */
+/* 事件委托：点到卡片本体（非 a/button）就弹详情
+   §5.49：从「只认 #grid」扩到「任何带 data-pjid 的 .pj」。右栏画像块删掉后，
+   弹窗成了唯一的详情出口，不能只对首屏那 24 张卡生效。 */
 document.addEventListener('click',function(e){
-  var c=(e.target&&e.target.closest)?e.target.closest('#grid .pj'):null;
+  if(!e.target||!e.target.closest) return;
+  var c=e.target.closest('.pj[data-pjid]');
   if(!c) return;
-  if(e.target.closest('a,button,details,summary,[data-act]')) return;
-  var x=window._pjMap&&window._pjMap[c.getAttribute('data-pjid')];
+  if(e.target.closest('a,button,details,summary,[data-act],input,select,textarea')) return;
+  var pid=c.getAttribute('data-pjid');
+  var x=(window._pjMap&&window._pjMap[pid])||null;
+  if(!x){var L=window.items||[];for(var i=0;i<L.length;i++){if(L[i]&&L[i].id===pid){x=L[i];break;}}}
   if(x) openPjDetail(x);
 });
 
@@ -11694,13 +11720,31 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
           setInterval(syncFltN545,1500);
 
           /* 2) 主区 4 个工作台 → 一个大「项目情况」折叠。
-                内层任一 details 被 open 时自动开外层，保证右栏「跟进台」速览卡
-                （data-fold="followFold" → aPhGo）仍可达。 */
+                §5.49：入口只留左栏「项目情况 ▾」5 个子项；这条 51px 折叠条
+                不再占首屏，改为「点左栏子项时自动显形」的隐藏载体（aWorkFold549）。 */
           var FOLD545=['funnelFold','subFold','followFold','lossFold'];
           var pf=document.getElementById('projFold545');
           document.addEventListener('toggle',function(e){
             if(pf&&FOLD545.indexOf(e.target.id)>=0&&e.target.open)pf.open=true;
           },true);
+          /* §5.49 工作台入口只留左栏：
+             把这条 51px 折叠条从首屏摘掉（display:none），但 DOM 保留 ——
+             里面 4 个 details 是工作台唯一载体，左栏点「商机漏斗 / 我的订阅词 /
+             我的跟进台 / 丢标复盘」时再临时显形并展开对应那一块。
+             这样首屏少 51px，而工作台一个都没少。 */
+          if(pf){
+            pf.setAttribute('data-fold549','hidden');
+            pf.style.display='none';
+            window.aWorkFold549=function(id){
+              if(!pf)return;
+              pf.setAttribute('data-fold549','shown');
+              pf.style.display='';
+              pf.open=true;
+              var t=document.getElementById(id);
+              if(t){t.open=true;setTimeout(function(){
+                try{t.scrollIntoView({block:'start'})}catch(e){}} ,180);}
+            };
+          }
 
           /* 3) 左栏第一项 → 「项目情况 ▾」父项 + 5 个子项。
                 点父项文字仍走原 jumpTo → 找商机；箭头才展开子菜单。 */
@@ -11744,6 +11788,8 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
             }
             var map={funnel:'funnelFold',sub:'subFold',follow:'followFold',loss:'lossFold'};
             var id=map[k]; if(!id)return;
+            /* §5.49：走 aWorkFold549，临时显形折叠载体并展开对应工作台 */
+            if(typeof window.aWorkFold549==='function'){window.aWorkFold549(id);return;}
             var p=document.getElementById('projFold545'); if(p)p.open=true;
             var tgt=document.getElementById(id);
             if(tgt){tgt.open=true;setTimeout(function(){
