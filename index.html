@@ -5142,6 +5142,192 @@ function aPhTabIdx(id){
   for(var i=0;i<window.TABS.length;i++){if(window.TABS[i]&&window.TABS[i][0]===id)return i;}
   return -1;
 }
+/* ══════════════ §5.50 · 每页导出自己的数据（2026-11-08）══════════════
+   问题（用户 15:07 实测提出）：顶栏「导出 CSV」原来 aCsv→click('btnCsv')→LAST，
+   LAST 恒为①投放库的筛选结果。在同业页点导出，拿到的是 636 行商机数据，
+   同业内容 0 条；连①库自己的搜索也不跟。
+   改法：按当前页签分派，每页导出自己的表头与数据，并**跟随该页的筛选/搜索**。
+   只读 window.D / window.items / 本页检索词，不新增任何筛选判据、不落盘。 */
+function ex550(){
+  var W=window, D=W.D||{};
+  var i=(function(){var t=W.F&&W.F.tab;return typeof t==='number'?t:0;})();
+  var tid=(W.TABS&&W.TABS[i])?W.TABS[i][0]:'p-items';
+  var KW=(function(){var p=document.getElementById(tid);var b=p?p.querySelector('.a-tabq'):null;
+    var q=b?b.querySelector('input'):null;return q?String(q.value||'').trim():'';})();
+
+  function low(s){return String(s==null?'':s).toLowerCase();}
+  function hit(o,fields){
+    if(!KW)return true;
+    var t=fields.map(function(k){return low(o[k]);}).join(' ');
+    return t.indexOf(KW.toLowerCase())>=0;
+  }
+  function cell(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';}
+  function save(rows,head,name,tip){
+    if(!rows.length){toast550('本页按当前条件没有可导出的数据'+(KW?'（搜索「'+KW+'」）':''));return;}
+    var csv='\ufeff'+[head.map(cell).join(',')].concat(
+      rows.map(function(r){return r.map(cell).join(',');})).join('\r\n');
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+    a.download=name; a.click();
+    toast550('已导出 '+name+' · '+rows.length+' 条'+(tip?'｜'+tip:''));
+  }
+  function stamp(){var m=W.meta||(D.meta)||{};return m.updated||'';}
+
+  /* ── 找商机：①投放库。走原 btnCsv（=LAST，当前 tab 聚合标签内的结果），
+        与改造前的行为完全一致，只是现在明确写在「找商机」这一页。 ── */
+  if(tid==='p-items'){
+    var b=document.getElementById('btnCsv');
+    if(b){b.click();toast550('已导出①投放库（当前「全部/能投/已出结果」标签内的结果）');return;}
+  }
+
+  /* ── 同业与伙伴：竞争实力榜 + 联合体伙伴榜，两个都导（本页就是一个页签两个榜） ── */
+  if(tid==='p-rival'){
+    var head=['榜单','单位名称','业务类别','类型','城市','强度','命中次数','中标统计','近期动态','原文链接'];
+    var out=[];
+    ['competitors','partners'].forEach(function(k){
+      var arr=D[k]||[];
+      arr.forEach(function(x){
+        if(!hit(x,['name','cat','type','city','strength','recent','hits','wStat']))return;
+        out.push([k==='competitors'?'竞争实力榜':'联合体伙伴榜',
+          x.name,x.cat,x.type,x.city,x.strength,
+          (x.hits==null?'':x.hits),x.wStat,x.recent,x.url]);
+      });
+    });
+    save(out,head,'商机雷达_同业与伙伴_'+(stamp()||'')+'.csv',
+      '竞争实力榜 '+(D.competitors||[]).length+' 家 / 联合体伙伴榜 '+(D.partners||[]).length+' 家');
+    return;
+  }
+
+  /* ── 客户与业主：clients ── */
+  if(tid==='p-client'){
+    var head2=['客户/业主','分组','优先级','地区','关联项目数','金额(亿)','最新动态','海外基地','命中词','为什么值得跟'];
+    var arr2=(D.clients||[]).filter(function(x){
+      return hit(x,['name','grp','pri','rg','why','kw','latest','abroad']);});
+    save(arr2.map(function(x){
+      return [x.name,x.grp,x.pri,x.rg,(x.n==null?'':x.n),(x.amt==null?'':x.amt),
+        x.latest,x.abroad,x.kw,x.why];}),head2,
+      '商机雷达_客户与业主_'+(stamp()||'')+'.csv','共 '+(D.clients||[]).length+' 家');
+    return;
+  }
+
+  /* ── 海外：项目线索 + 已备案（公众号速览是标题流，不导出） ── */
+  if(tid==='p-overseas'){
+    var head3=['来源视图','业主/主体','国别','分组','项目名称','动作','关注档','切口','切口说明','日期','金额(亿美元)','说明/含义','原文'];
+    var out3=[];
+    (D.overseas||[]).forEach(function(x){
+      if(!hit(x,['name','grp','kw','title','desc','cut','cutWhy','date']))return;
+      out3.push(['项目线索',x.name,'',x.grp,x.title,'', '',x.cut,x.cutWhy,x.date,'',x.desc,x.url]);
+    });
+    (D.overseaOdi||[]).forEach(function(x){
+      if(!hit(x,['own','geo','nm','why','act','deal']))return;
+      out3.push(['已备案',x.own,x.geo,'',x.nm,x.act,x.tier,'','',x.d,'',x.why,'']);
+    });
+    save(out3,head3,'商机雷达_海外_'+(stamp()||'')+'.csv',
+      '项目线索 '+(D.overseas||[]).length+' 条 / 已备案 '+(D.overseaOdi||[]).length+' 条');
+    return;
+  }
+
+  /* ── 行业动态 · 政策档：业务信号趋势（trends）── */
+  if(tid==='p-trend'){
+    var head4=['标题','日期','分类','来源','摘要','原文'];
+    var arr4=(D.trends||[]).filter(function(x){return hit(x,['title','tag','desc','source','date']);});
+    save(arr4.map(function(x){return [x.title,x.date,x.tag,x.source,x.desc,x.url];}),head4,
+      '商机雷达_行业动态_'+(stamp()||'')+'.csv','新闻池 '+(D.trends||[]).length+' 条');
+    return;
+  }
+
+  /* ── 情报精选：竞对官网情报 + 微信快讯流 ── */
+  if(tid==='p-wechat'){
+    var head5=['来源','等级','分类','日期','标题','来源单位','原文'];
+    var out5=[];
+    var dg=(D.digest&&D.digest.items)||[];
+    dg.forEach(function(x){
+      if(!hit(x,['t','tag','level','src','d']))return;
+      out5.push(['竞对官网',x.level,x.tag,x.d,x.t,x.src,x.url]);
+    });
+    var wx=(D.wechat&&D.wechat.items)||[];
+    wx.forEach(function(x){
+      if(!hit(x,['t','d']))return;
+      out5.push(['微信快讯','','',x.d,x.t,'',x.url]);
+    });
+    save(out5,head5,'商机雷达_情报精选_'+(stamp()||'')+'.csv',
+      '竞对官网 '+dg.length+' 条 / 微信快讯 '+wx.length+' 条');
+    return;
+  }
+
+  /* ── 招标平台 · 来源清单 ── */
+  if(tid==='p-plat'){
+    var head6=['平台名称','级别','覆盖范围','更新频率','累计条数','网址'];
+    var arr6=(D.platforms||[]).filter(function(x){return hit(x,['name','level','cover','freq']);});
+    save(arr6.map(function(x){return [x.name,x.level,x.cover,x.freq,x.cnt,x.url];}),head6,
+      '商机雷达_招标平台_'+(stamp()||'')+'.csv','共 '+(D.platforms||[]).length+' 个平台');
+    return;
+  }
+
+  /* ── 规划前瞻：DATA_PLAN.cols 列式 ── */
+  if(tid==='p-plan'){
+    var P=W.DATA_PLAN||{}, C=P.cols||{}, N=P.n||0;
+    var head7=['编号','省份','城市','区域','项目名称','业主','建设内容','性质','承包模式','投资额(亿)','阶段','规划依据','原文','关注点','业务标签','优先级','评分'];
+    var rows7=[];
+    for(var r=0;r<N;r++){
+      var o={id:C.id&&C.id[r],p:C.p&&C.p[r],c:C.c&&C.c[r],d:C.d&&C.d[r],n:C.n&&C.n[r],
+             b:C.b&&C.b[r],ct:C.ct&&C.ct[r],k:C.k&&C.k[r],e:C.e&&C.e[r],a:C.a&&C.a[r],
+             st:C.st&&C.st[r],src:C.src&&C.src[r],u:C.u&&C.u[r],lk:C.lk&&C.lk[r],
+             ea:C.ea&&C.ea[r],g:C.g&&C.g[r],sc:C.sc&&C.sc[r]};
+      if(!hit(o,['n','b','c','p','ct','ea','lk']))continue;
+      rows7.push([o.id,o.p,o.c,o.d,o.n,o.b,o.ct,o.k,o.e,o.a,o.st,o.src,o.u,o.lk,o.ea,o.g,o.sc]);
+    }
+    save(rows7,head7,'商机雷达_规划前瞻_'+(stamp()||'')+'.csv','规划项目 '+N+' 条');
+    return;
+  }
+
+  /* ── 口径与帮助：无可导出的业务数据 ── */
+  toast550('本页是口径说明，没有可导出的数据表');
+}
+function toast550(msg){
+  var t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('on');
+  clearTimeout(toast550._t);
+  toast550._t=setTimeout(function(){t.classList.remove('on');},2600);
+}
+
+/* §5.50 · 顶栏按钮按页显隐（用户 15:07：顶栏那一排选项不应该在每页都出现）
+   规则按「这个按钮服务谁」来定，不是按页签编号写死：
+     筛选 7 类      只在「找商机」有筛选器 → 只在 p-items 显示
+     导出 CSV       每页都能导自己的 → 全站显示，但文案变成本页条数
+     周报           服务①库的周变化 → 只在 p-items 显示（左栏「本周变化」已删） */
+function syncTop550(){
+  var W=window, i=(W.F&&W.F.tab)||0;
+  var tid=(W.TABS&&W.TABS[i])?W.TABS[i][0]:'p-items';
+  var f=document.getElementById('aFilter'), c=document.getElementById('aCsv'),
+      w=document.getElementById('aWeek');
+  if(f)f.style.display=(tid==='p-items')?'':'none';
+  if(w)w.style.display=(tid==='p-items')?'':'none';
+  if(c){
+    c.style.display='';
+    var D=W.D||{}, n=0, label='导出 CSV';
+    if(tid==='p-items'){n=(W.items||[]).length;label='导出 CSV';}
+    else if(tid==='p-rival'){n=(D.competitors||[]).length+(D.partners||[]).length;label='导出同业 '+n;}
+    else if(tid==='p-client'){n=(D.clients||[]).length;label='导出客户 '+n;}
+    else if(tid==='p-overseas'){n=(D.overseas||[]).length+(D.overseaOdi||[]).length;label='导出海外 '+n;}
+    else if(tid==='p-trend'){n=(D.trends||[]).length;label='导出动态 '+n;}
+    else if(tid==='p-wechat'){n=((D.digest&&D.digest.items)||[]).length+((D.wechat&&D.wechat.items)||[]).length;label='导出情报 '+n;}
+    else if(tid==='p-plat'){n=(D.platforms||[]).length;label='导出平台 '+n;}
+    else if(tid==='p-plan'){n=(W.DATA_PLAN||{}).n||0;label='导出规划 '+n;}
+    else{label='导出 CSV';c.style.opacity='.45';c.title='本页（口径说明）没有可导出的数据表';}
+    if(tid!=='p-help'){c.style.opacity='';}
+    c.textContent=label;
+    c.title='导出当前页签的数据（跟随本页的筛选与搜索）';
+  }
+}
+document.addEventListener('click',function(e){
+  var b=(e.target&&e.target.closest)?e.target.closest('#aNavList .a-ni,#aMore .a-ni'):null;
+  if(!b)return;
+  setTimeout(syncTop550,60);
+});
+window.addEventListener('hashchange',function(){setTimeout(syncTop550,60);});
+setTimeout(syncTop550,600);setTimeout(syncTop550,2000);setTimeout(syncTop550,5000);
 function aPhGo(id,openFold){
   var i=aPhTabIdx(id); if(i<0)return;
   if(typeof window.goTab==='function')window.goTab(i);
@@ -11114,7 +11300,7 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
       if(hw){
         var top=document.createElement('div'); top.className='a-top';
         top.innerHTML='<div class="a-qbox"><span class="a-qscope" id="aQScope">找商机</span></div>'+
-          '<button id="aFilter">筛选 · 7 类 <em id="aFltN"></em>⌄</button><button id="aCsv" title="导出①投放/商机库的当前筛选结果；这是全库动作，不随页签变化">导出 CSV</button>'+
+          '<button id="aFilter">筛选 · 7 类 <em id="aFltN"></em>⌄</button><button id="aCsv" title="导出当前页签的数据（跟随本页的筛选与搜索）">导出 CSV</button>'+
           '<button class="a-pri" id="aWeek">周报</button>'+
           '<div class="a-who"><span class="org">江浙沪皖 ▾</span>'+
           '<span class="scope">江浙沪皖 · 全部档位</span>'+
@@ -11225,7 +11411,10 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         ['海外机会',           3,  ''],
         ['情报 · 动态 · 精选', 5,  ''],
         ['行业动态 · 政策档',  4,  'polFold'],
-        ['本周变化',          -1,  'week'],
+        /* §5.50（2026-11-08）：原 ['本周变化', -1, 'week'] 已删。
+           它与顶栏「周报」是同一个 data-act="week"，点开就是同一个弹窗；
+           周报正文第一节本来就是「〇、本周变化（四类）」。删的是导航项，
+           jumpTo() 的 week 分支与周报弹窗一行未动。 */
         ['招标平台 · 来源清单',6,  ''],
         ['口径与帮助',         7,  '']
       ];
@@ -11311,7 +11500,7 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
           main.scrollTop=0;
         }else{var b=document.getElementById('fToggle'); if(b)b.click();}
       };
-      var ac=document.getElementById('aCsv'); if(ac)ac.onclick=click('btnCsv');
+      var ac=document.getElementById('aCsv'); if(ac)ac.onclick=function(){ex550();};
       var aw=document.getElementById('aWeek'); if(aw)aw.onclick=click('btnWeek');
       var wk=document.getElementById('aWk'); if(wk)wk.onclick=click('btnWeek');
 
