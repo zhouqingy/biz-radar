@@ -11523,6 +11523,17 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
       }
       function init546(){
         try{
+          /* data.org.js 线上 1.1MB 首次约 20s；期间 renderCompetitors() 可能在
+             D.competitors 未到位时被调用 → 控制台 TypeError + 空白列表。
+             只在运行时包一层空数据保护，业务函数本体一个字节都不改；
+             need('org') 的回调到位后会自己 mergeMod + renderPanel 重画。 */
+          var _rc546=window.renderCompetitors;
+          if(typeof _rc546==='function'){
+            window.renderCompetitors=function(){
+              if(!(window.D&&window.D.competitors))return;
+              return _rc546.apply(this,arguments);
+            };
+          }
           syncFltBtn546();
           window.addEventListener('hashchange',function(){setTimeout(syncFltBtn546,20);});
           if(typeof nl!=='undefined'&&nl)nl.addEventListener('click',function(){setTimeout(syncFltBtn546,30);});
