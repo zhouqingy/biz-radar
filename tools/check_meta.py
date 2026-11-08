@@ -14,7 +14,27 @@ import os
 import re
 import sys
 
-SITE = '/workspace/biz-radar'
+# 站点产物所在目录。三种环境（2026-11-08 修：原来写死 /workspace/biz-radar，
+# 在 GitHub Actions 里那个路径根本不存在 → 每天跑到第 5 步 FileNotFoundError → 红叉）：
+#   · 本地沙箱        → /workspace/biz-radar（脚本上一级再套一层 biz-radar）
+#   · GitHub Actions  → BIZ_SITE=${github.workspace}（脚本上一级就是仓库根）
+# 判据一律以「目录里有 data.core.js」为准，不猜环境。
+def _site_dir():
+    here = os.path.dirname(os.path.abspath(__file__))
+    up = os.path.dirname(here)
+    cands = []
+    if os.environ.get('BIZ_SITE'):
+        cands.append(os.environ['BIZ_SITE'])
+    if os.environ.get('BIZ_OUT'):
+        cands.append(os.environ['BIZ_OUT'])
+    cands += [up, os.path.join(up, 'biz-radar'), '/workspace/biz-radar']
+    for c in cands:
+        if os.path.isfile(os.path.join(c, 'data.core.js')):
+            return c
+    raise SystemExit('找不到站点产物目录（data.core.js）；已试: %s' % cands)
+
+
+SITE = _site_dir()
 
 
 def load_js(p):
