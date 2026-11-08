@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232b6cb0'/%3E%3Ccircle cx='50' cy='50' r='26' fill='none' stroke='%23fff' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='8' fill='%23fff'/%3E%3C/svg%3E">
-<title>商机雷达 · 都市环保</title>
+<title>商机雷达 · 江浙沪皖</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -1907,7 +1907,7 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
 
 <aside id="aNav">
   <div class="a-brand">商机雷达 <em>V3.0</em></div>
-  <div class="a-brand2">都市环保 · 江浙沪皖</div>
+  <div class="a-brand2">江浙沪皖 · 能源商机监测</div>
   <div class="a-navlist" id="aNavList"></div>
   <div class="a-sep">功能位 · 已接入（第 4 批 4a）</div>
   <div class="a-ph a-ph-live" data-act="aPhJump" data-tab="p-client" style="cursor:pointer"
@@ -1974,6 +1974,8 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
          不写任何筛选判据。⚠ 阶段分布是「库里公告类型的现状分布」，
          不是同一批项目随时间推进的漏斗；状态来自 st 字段原值，不自造阶段名。
          数字全部展开时实时算，页面不存快照。 -->
+    <details id="projFold545" class="a-projfold545">
+      <summary>项目情况 · 4 个工作台<span>点左栏「项目情况 ▾」子项直达，也可直接展开</span></summary>
     <details id="funnelFold" style="margin:0 0 12px;border:1px solid var(--line);border-radius:9px;background:#fbfcfe;padding:0 12px 10px">
       <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2);padding:9px 0">
         商机漏斗 · 三档与阶段分布 · 未来 14 天截标
@@ -2067,6 +2069,7 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
         <span style="font-size:11.5px;color:var(--tx3)">同一项目重复记录 = 覆盖，不产生重复行</span>
       </div>
       <pre id="lsText" style="display:none;white-space:pre-wrap;font-size:11.5px;line-height:1.7;background:#fff;border:1px solid var(--line);border-radius:7px;padding:9px 11px;margin-top:10px"></pre>
+    </details>
     </details>
     <div class="wares" id="wares"></div>
     <div class="swim" id="swim" style="display:none"></div>
@@ -5247,7 +5250,7 @@ function buildWeekly(){
   var day=new Date(),today=day.toISOString().slice(0,10);
   function dnum(s){var p=s.split('-');return (+p[0])*10000+(+p[1])*100+(+p[2])}
   var td=dnum(today);
-  br('【都市环保 · 江浙沪皖商机周报】数据截至 '+meta.updated+'（生成于 '+today+'）');
+  br('【江浙沪皖商机周报】数据截至 '+meta.updated+'（生成于 '+today+'）');
   br('数据范围：四地公共资源交易/在线审批平台 + 重点客户采购平台 + 行业媒体，共 '+meta.total+' 条入库');
   br('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   /* 〇、本周变化（F31 · 2026-11-05 第 2 批）
@@ -10805,7 +10808,7 @@ function boot_main(){
   }
   /* 2026-11-04 用户：「商机雷达下的都市环保，中冶南方那个给删了」。
      括号里的中冶南方是集团名，对外看板没必要带，去掉。 */
-  el('subTitle').innerHTML='都市环保 EPC 商机监测 · 江浙沪皖四地 · 数据更新 '+
+  el('subTitle').innerHTML='EPC 商机监测 · 江浙沪皖四地 · 数据更新 '+
     _stamp+' · 入库 '+meta.total+' 条（原始抓取 '+meta.rawTotal+' 条，剔纯噪声 '+(meta.dropped||0)+' 条） · '+D.platforms.length+' 个平台来源'+
     (meta.dataAsOf?' · 公告截止 '+meta.dataAsOf:'')+
     (_lag>1?'<b class="stale-badge" title="最新一条公告已经是 '+_lag+' 天前，说明采集没跑通">⚠ '+_lag+' 天没有新公告</b>':'');
@@ -11000,6 +11003,34 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
 /* 中间不再重复列 13 品种价格（右栏「金属价格行情」是唯一价格表） */
 #aMain #p-trend #mtGrid{display:none!important}
 </style>
+<style id="aSkinCss545">
+/* §5.45 视图层：项目情况合组 / 统计卡摘要 / 筛选徽标。只加样式，不改原有规则。 */
+.a-exp545{float:right;font-size:11px;color:var(--tx3);padding:0 5px;cursor:pointer;user-select:none}
+.a-exp545:hover{color:var(--brand)}
+.a-subgrp545{margin:2px 0 8px;padding:3px 0 3px 9px;border-left:2px solid var(--line);
+  background:rgba(255,255,255,.55)}
+.a-sub545{display:flex;align-items:center;gap:6px;padding:5px 8px;font-size:11.5px;
+  color:var(--tx2);cursor:pointer;border-radius:4px;white-space:nowrap}
+.a-sub545:hover,.a-sub545.on{background:#e8f1ff;color:#1053c9;font-weight:700}
+.a-sub545 em{font-style:normal;font-size:10px;color:var(--tx3);font-weight:400}
+.a-projfold545{border:1px solid var(--line);border-radius:9px;background:#fbfcfe;
+  padding:0 12px 10px;margin:0 0 12px}
+.a-projfold545>summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2);
+  padding:9px 0;list-style:none}
+.a-projfold545>summary::-webkit-details-marker{display:none}
+.a-projfold545>summary>span{font-weight:400;color:var(--tx3);font-size:11.5px;margin-left:8px}
+.a-projfold545>details{margin-top:8px}
+.a-kpifold545{border:1px solid var(--line);border-radius:9px;background:#fff;
+  padding:0 12px 10px;margin:0 0 12px}
+.a-kpifold545>summary{cursor:pointer;font-size:12.5px;color:var(--tx2);padding:9px 0;list-style:none}
+.a-kpifold545>summary::-webkit-details-marker{display:none}
+.a-kpifold545>summary b{color:var(--brand);margin-right:8px}
+.a-kpifold545>summary em{font-style:normal;color:var(--tx3);font-size:11px;margin-left:8px}
+.a-kpifold545>summary::after{content:' \2304';float:right;color:var(--tx3)}
+.a-kpifold545[open]>summary::after{content:' \2303'}
+.a-kpifold545 #kpis{margin:6px 0 2px}
+#aFltN{font-style:normal;color:#1053c9;font-weight:700;margin-left:2px}
+</style>
 <script id="aSkinJs">
 (function(){
   function boot(){
@@ -11018,11 +11049,11 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         var top=document.createElement('div'); top.className='a-top';
         top.innerHTML='<div class="a-qbox"><span class="a-qscope" id="aQScope">找商机</span>'+
           '<input class="a-q" id="aQ" placeholder="搜项目 / 业主 / 中标单位（①投放库）"></div>'+
-          '<button id="aFilter">筛选</button><button id="aCsv">导出 CSV</button>'+
+          '<button id="aFilter">筛选 · 7 类 <em id="aFltN"></em>⌄</button><button id="aCsv">导出 CSV</button>'+
           '<button class="a-pri" id="aWeek">周报</button>'+
-          '<div class="a-who"><span class="org">都市环保 ▾</span>'+
+          '<div class="a-who"><span class="org">江浙沪皖 ▾</span>'+
           '<span class="scope">江浙沪皖 · 全部档位</span>'+
-          '<span class="av">赵</span><span><b>赵工</b><small>市场部 · 编辑</small></span>'+
+          '<span class="av">管</span><span><b>管理员</b><small>系统管理</small></span>'+
           '<span class="a-slot">登录位</span>'+
           '<span class="a-opt">'+
             '<button id="aOpt" title="界面主题与字号">◐ 外观</button>'+
@@ -11508,6 +11539,103 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
           try{mo.observe(document.body,{childList:true,subtree:true});}catch(e){}
         }catch(err){console.error('[544]',err);}
       }
+      /* ===== §5.45 视图层改造（只动显示；数据 / 口径 / TABS / goTab 一行不动） ===== */
+      function toggleSub545(){
+        var s=document.getElementById('aProjSub545'); if(!s)return;
+        var show=(s.style.display==='none');
+        s.style.display=show?'block':'none';
+        var ar=document.querySelector('.a-exp545');
+        if(ar){ar.textContent=show?'▴':'▾';ar.title=show?'收起项目情况':'展开项目情况';}
+      }
+      function init545(){
+        try{
+          /* 1) 顶栏筛选按钮：复用业务 JS 已有的 _fOnCount()，不另造筛选判据 */
+          function syncFltN545(){
+            var em=document.getElementById('aFltN'); if(!em)return;
+            var n=(typeof window._fOnCount==='function')?window._fOnCount():0;
+            em.textContent=n?('· '+n):'';
+          }
+          syncFltN545();
+          document.addEventListener('click',function(ev){
+            setTimeout(syncFltN545,80);
+            var ph=ev.target.closest&&ev.target.closest('[data-act="aPhJump"]');
+            if(ph&&pf){var fid=ph.getAttribute('data-fold');
+              if(fid&&FOLD545.indexOf(fid)>=0)pf.open=true;}
+          },true);
+          document.addEventListener('input',function(){setTimeout(syncFltN545,80)},true);
+          setInterval(syncFltN545,1500);
+
+          /* 2) 主区 4 个工作台 → 一个大「项目情况」折叠。
+                内层任一 details 被 open 时自动开外层，保证右栏「跟进台」速览卡
+                （data-fold="followFold" → aPhGo）仍可达。 */
+          var FOLD545=['funnelFold','subFold','followFold','lossFold'];
+          var pf=document.getElementById('projFold545');
+          document.addEventListener('toggle',function(e){
+            if(pf&&FOLD545.indexOf(e.target.id)>=0&&e.target.open)pf.open=true;
+          },true);
+
+          /* 3) 左栏第一项 → 「项目情况 ▾」父项 + 5 个子项。
+                点父项文字仍走原 jumpTo → 找商机；箭头才展开子菜单。 */
+          var nl=document.getElementById('aNavList');
+          if(nl){
+            var first=nl.querySelector('.a-ni[data-i="0"]');
+            if(first){
+              var sp=first.querySelector('span'); if(sp)sp.textContent='项目情况';
+              var ar=document.createElement('span');
+              ar.className='a-exp545'; ar.textContent='▾'; ar.title='展开项目情况';
+              ar.onclick=function(ev){ev.stopPropagation();toggleSub545();};
+              first.appendChild(ar);
+              var sub=document.createElement('div');
+              sub.className='a-subgrp545'; sub.id='aProjSub545'; sub.style.display='none';
+              sub.innerHTML=[
+                ['items','找商机','①投放库'],
+                ['funnel','商机漏斗','只读统计'],
+                ['sub','我的订阅词','本机'],
+                ['follow','我的跟进台','本机'],
+                ['loss','丢标复盘','本机']
+              ].map(function(v){
+                return '<div class="a-sub545" data-sub="'+v[0]+'"><span>'+v[1]+'</span><em>'+v[2]+'</em></div>';
+              }).join('');
+              first.parentNode.insertBefore(sub,first.nextSibling);
+            }
+          }
+          document.addEventListener('click',function(ev){
+            var d=ev.target.closest&&ev.target.closest('.a-sub545');
+            if(!d)return;
+            ev.stopPropagation(); ev.preventDefault();
+            var k=d.getAttribute('data-sub');
+            if(typeof window.goTab==='function')window.goTab(0);
+            [].forEach.call(document.querySelectorAll('.a-sub545'),
+              function(x){x.classList.remove('on')});
+            d.classList.add('on');
+            if(k==='items'){
+              var p=document.getElementById('projFold545'); if(p)p.open=false;
+              var w=document.getElementById('wares');
+              if(w&&w.scrollIntoView)try{w.scrollIntoView({block:'start'})}catch(e){}
+              return;
+            }
+            var map={funnel:'funnelFold',sub:'subFold',follow:'followFold',loss:'lossFold'};
+            var id=map[k]; if(!id)return;
+            var p=document.getElementById('projFold545'); if(p)p.open=true;
+            var tgt=document.getElementById(id);
+            if(tgt){tgt.open=true;setTimeout(function(){
+              try{tgt.scrollIntoView({block:'start'})}catch(e){}},180);}
+          },true);
+
+          /* 4) 9 格统计卡 → 收成一行摘要，移到「项目情况」下方 / 标签栏上方。
+                只搬 DOM 容器，不重建、不写死任何数字；KPI 内容仍由业务 JS 填。 */
+          var kp=document.getElementById('kpis'), wa=document.getElementById('wares');
+          if(kp&&wa&&!document.getElementById('kpiFold545')){
+            var d=document.createElement('details');
+            d.id='kpiFold545'; d.className='a-kpifold545';
+            var sm=document.createElement('summary');
+            sm.innerHTML='<b>数据概览</b>点开看 9 项指标 <em>数字来自 data.core.js</em>';
+            d.appendChild(sm);
+            wa.parentNode.insertBefore(d,wa);
+            d.appendChild(kp);
+          }
+        }catch(e){console.warn('[545]',e)}
+      }
       function shorten(){
         SHORT.forEach(function(p){
           [].forEach.call(document.querySelectorAll(p[0]),function(e){
@@ -11519,6 +11647,7 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
       }
       shorten();
       init544();
+      init545();
 
       // 分块数据载完后刷新左导航计数；业务 JS 会重填 #tSigTip，这里再压一次文案
       setTimeout(function(){
