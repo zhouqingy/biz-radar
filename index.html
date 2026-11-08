@@ -1,11 +1,23 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="a-booting">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232b6cb0'/%3E%3Ccircle cx='50' cy='50' r='26' fill='none' stroke='%23fff' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='8' fill='%23fff'/%3E%3C/svg%3E">
 <title>商机雷达 · 江浙沪皖</title>
 <style>
+/* ══ §5.48 · 启动期（防止「先看到一版陌生界面再跳成正常界面」）════════════
+   aSkinJs 的 boot() 会把 body 里的 .hd / .wrap 搬进 #aMain，组装成新版三栏。
+   但搬运发生在 window.load 之后（线上要等 HTML 750KB + 数据文件，可能好几秒），
+   这段时间 .hd / .wrap 在 body 里是正常显示的 —— 用户看到的就是「旧版页面」，
+   然后突然整体变成新版。这才是每次打开都像「登录页跳转」的真原因。
+   处理：启动期用 html.a-booting 把这两块藏起来，搬完立刻移除 class 自动显示；
+   同时给空的 #aMain 一块骨架，避免白屏。 */
+html.a-booting body > .hd,html.a-booting body > .wrap{display:none!important}
+#aMain:empty{min-height:420px;border-radius:12px;margin:12px 0;
+  background:linear-gradient(90deg,#f1f4f8 25%,#e7ecf3 37%,#f1f4f8 63%);
+  background-size:400% 100%;animation:sk548 1.3s ease-in-out infinite}
+@keyframes sk548{0%{background-position:100% 50%}100%{background-position:0 50%}}
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   /* 2026-10-21 视觉重做：降低饱和度、拉开层级。
@@ -1906,6 +1918,12 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
 </style>
 
 <aside id="aNav">
+  <style>
+    /* §5.48：aNavList 由 JS 渲染；渲染完成前（:empty）把静态占位与「第 4 批 4a」入口卡藏掉，
+       否则首屏会先闪一版旧左栏再跳成 9 项，看起来像「登录页跳转」。 */
+    #aNavList:empty ~ .a-sep{display:none!important}
+    #aNavList:empty ~ .a-ph{display:none!important}
+  </style>
   <div class="a-brand">商机雷达 <em>V3.0</em></div>
   <div class="a-brand2">江浙沪皖 · 能源商机监测</div>
   <div class="a-navlist" id="aNavList"></div>
@@ -10962,16 +10980,30 @@ function boot_main(){
 </style>
 <style id="aSkinCss544">
 /* §5.44 · 每个 tab 的页内检索条 */
-.a-tabq{display:flex;align-items:center;gap:8px;margin:0 0 12px;padding:7px 10px;
-  border:1px solid var(--line);border-radius:4px;background:transparent}
-.a-tabq label{font-size:11.5px;color:var(--tx3);white-space:nowrap}
-.a-tabq input{flex:1;min-width:110px;border:1px solid var(--line);border-radius:3px;
-  padding:5px 9px;font-size:12.5px;background:transparent;color:var(--tx)}
-.a-tabq .a-tabqn{font-size:11px;color:var(--tx3);white-space:nowrap}
+.a-tabq{display:flex;align-items:center;gap:8px;margin:0 0 14px;padding:0;
+  border:0;background:transparent;position:relative}
+.a-tabq label{display:none}                       /* 「本页检索」四字已由放大镜图标代替 */
+.a-tabq-in{position:relative;flex:1;min-width:110px;display:flex;align-items:center}
+.a-tabq input{flex:1;min-width:0;width:100%;height:38px;
+  border:1px solid #d8e0e9;border-radius:9px;
+  padding:0 40px 0 38px;font-size:14px;line-height:38px;
+  background:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='7' cy='7' r='5' fill='none' stroke='%238b97a6' stroke-width='1.7'/%3E%3Cpath d='M11 11l3.2 3.2' stroke='%238b97a6' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat 13px center/16px 16px, var(--card);
+  color:var(--tx);outline:none;transition:border-color .15s,box-shadow .15s}
+.a-tabq input::placeholder{color:#9aa6b5}
+.a-tabq input:focus{border-color:#2f6fd0;box-shadow:0 0 0 3px rgba(47,111,208,.12)}
+.a-tabq .a-tabqn{font-size:12.5px;color:#4a5a6b;background:#eef2f7;border-radius:7px;
+  padding:5px 10px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.a-tabq .a-tabqn:empty{display:none}
+.a-tabq .a-tabq-x{position:absolute;right:8px;top:50%;margin-top:-13px;
+  width:26px;height:26px;line-height:1;border:0;border-radius:50%;
+  background:transparent;color:#94a2b3;font-size:17px;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;padding:0;z-index:3}
+.a-tabq .a-tabq-x:hover{background:#eef2f7;color:#3d4b5c}
+.a-tabq-in input:placeholder-shown ~ .a-tabq-x{opacity:0;pointer-events:none}
 /* 顶栏搜索作用域徽标 */
 .a-qbox{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
-.a-qscope{font-size:11px;color:#1053c9;background:#e8f1ff;border:1px solid #cfe0ff;
-  border-radius:3px;padding:3px 7px;white-space:nowrap}
+.a-qscope{font-size:12.5px;color:var(--ink2);font-weight:700;white-space:nowrap}
+.a-qscope::before{content:'当前页 · ';font-weight:400;color:var(--tx3)}
 .a-qbox .a-q{flex:1;min-width:0}
 /* 序号：CSS counter，零 DOM 结构改动，动态重建自动重排 */
 table:not([data-a-skip="1"]) tbody{counter-reset:aRow544}
@@ -10989,8 +11021,8 @@ table:not([data-a-skip="1"]) thead>tr>th:first-child::before{content:'#';
 .cgrid>div:not(.grpt)::before,#grid>div:not(.grpt)::before,
 #sigGrid>div:not(.grpt)::before,#wxGrid>div:not(.grpt)::before,
 .plgrid>.pl::before,#newsGrid>div:not(.grpt)::before{content:counter(aCard544);
-  float:left;min-width:18px;margin:1px 9px 0 0;text-align:right;
-  color:var(--tx2);font-size:12px;font-weight:600}
+  float:left;min-width:22px;margin:1px 10px 0 0;text-align:right;
+  color:var(--tx);font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums}
 /* 规划中占位（内部滚动，不撑爆左栏） */
 .a-plangrp{max-height:230px;overflow:auto;padding:2px 8px}
 .a-planitem{font-size:11px;color:var(--tx3);padding:3px 2px;line-height:1.5;cursor:default}
@@ -11037,6 +11069,8 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
 </style>
 <script id="aSkinJs">
 (function(){
+  /* §5.48 兜底：boot 万一抛错，3 秒后强制解除启动期隐藏，绝不把用户留在白屏 */
+  setTimeout(function(){document.documentElement.classList.remove('a-booting');},3000);
   function boot(){
     try{
       var main=document.getElementById('aMain');
@@ -11046,13 +11080,14 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
       // 搬 DOM（移动节点不会丢事件监听），老业务逻辑一行不改
       if(hd)main.appendChild(hd);
       if(wrap)main.appendChild(wrap);
+      // 搬完就解除启动期隐藏（此时 .hd/.wrap 已不在 body 下，规则本来也匹配不到了）
+      document.documentElement.classList.remove('a-booting');
 
       // 顶栏行：搜索 / 动作 / 用户位
       var hw=hd&&hd.querySelector('.wrap');
       if(hw){
         var top=document.createElement('div'); top.className='a-top';
-        top.innerHTML='<div class="a-qbox"><span class="a-qscope" id="aQScope">找商机</span>'+
-          '<input class="a-q" id="aQ" placeholder="搜项目 / 业主 / 中标单位（①投放库）"></div>'+
+        top.innerHTML='<div class="a-qbox"><span class="a-qscope" id="aQScope">找商机</span></div>'+
           '<button id="aFilter">筛选 · 7 类 <em id="aFltN"></em>⌄</button><button id="aCsv">导出 CSV</button>'+
           '<button class="a-pri" id="aWeek">周报</button>'+
           '<div class="a-who"><span class="org">江浙沪皖 ▾</span>'+
@@ -11233,12 +11268,13 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
       }
 
       // 新顶栏控件 → 复用原逻辑
-      var aq=document.getElementById('aQ'), oldq=document.getElementById('q');
-      if(aq)aq.addEventListener('input',function(){
-        if(oldq){oldq.value=aq.value;}
-        if(window.F){window.F.q=aq.value.trim();window.F.page=1;}
-        if(typeof window.render==='function')window.render();
-      });
+      // §5.48（2026-11-08）：顶栏那个「搜索框」已移除。
+      // 原因：它是个假全局 —— 监听里直接写 F.q 再调 window.render()，
+      //       而 render() 只渲染「找商机」。所以在同业/客户等页输入一个字，
+      //       框里显示得跟本页有关，回车后却只改了找商机那一页的数据。
+      // 现在搜索只有一处：每个 tab 自己的页内检索条（各自独立状态、只作用于本页）。
+      // 保留 aq=null，下面所有 if(aq) 判断自然跳过，不改业务函数。
+      var aq=null, oldq=document.getElementById('q');
       function click(id){return function(){var b=document.getElementById(id);if(b)b.click();};}
       var af=document.getElementById('aFilter'); if(af)af.onclick=function(){
         var fb=document.getElementById('fbar');
@@ -11357,6 +11393,16 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         var sc=SCOPE544[i]||SCOPE544[0];
         var bx=box544(i),inp=bx?bx.querySelector('input'):null;
         if(inp&&inp.value!==v)inp.value=v;
+        /* §5.48：①库（找商机）走原站 F.q + render()。
+           原来这里把值写进隐藏的 #q 再 dispatch input ——但 #q 由
+           `#aMain .fbar .srch-top{display:none!important}` 藏掉后就没有任何监听，
+           写它等于没写，所以「找商机」这一页的页内检索一直是失效的。
+           走 F.q 的好处：分页数、命中总数、卡片重排全由原业务 JS 算，不自己造判据。 */
+        if(sc.fwd==='q'){
+          if(window.F){window.F.q=(v||'').trim();window.F.page=1;}
+          if(typeof window.render==='function')window.render();
+          return;
+        }
         if(sc.fwd){
           var dst=document.getElementById(sc.fwd);
           if(dst){dst.value=v;try{dst.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
@@ -11380,6 +11426,8 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         var bx=box544(i),inp=bx?bx.querySelector('input'):null;
         if(inp)inp.value='';
         if(bx){var cc=bx.querySelector('.a-tabqn');if(cc)cc.textContent='';}
+        if(i===0&&window.F){window.F.q='';window.F.page=1;
+          if(typeof window.render==='function')window.render();}
         if(aq)aq.value='';
       }
       function scope544(i){
@@ -11439,15 +11487,17 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
           var pn=document.getElementById(tb[0]);if(!pn||pn.querySelector('.a-tabq'))return;
           var sc=SCOPE544[i]||SCOPE544[0];
           var bx=document.createElement('div');bx.className='a-tabq';
-          bx.innerHTML='<label>本页检索</label><input type="text" data-tq="'+i+'" placeholder="'+sc.ph+'">'+
-                       '<span class="a-tabqn"></span>';
+          bx.innerHTML='<label>本页检索</label><span class="a-tabq-in">'+
+                       '<input type="text" data-tq="'+i+'" placeholder="'+sc.ph+'">'+
+                       '<button class="a-tabq-x" type="button" title="清空本页检索">×</button>'+
+                       '</span><span class="a-tabqn"></span>';
           pn.insertBefore(bx,pn.firstChild);
           var inp=bx.querySelector('input');
           inp.addEventListener('input',function(){
-            var v=inp.value;
-            if(aq&&aq.value!==v)aq.value=v;
-            apply544(i,v);
+            apply544(i,inp.value);
           });
+          var xb=bx.querySelector('.a-tabq-x');
+          if(xb)xb.onclick=function(){clear544(i);inp.value='';inp.focus();};
         });
         // 2) 更多入口：删与「行业动态 · 政策档」重复的行业动态；规划中 15 项占位
         if(more){
@@ -11569,7 +11619,10 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
           var prev=curTab544();
           window.addEventListener('hashchange',function(){
             var i=curTab544();
-            if(prev!==i){clear544(prev);prev=i;}
+            /* §5.48：原来这里 clear544(prev) —— 切走就把上一页的搜索词抹掉。
+               用户要的是「每页各自记住自己的词，互不串」：
+               在 A 页打的字不出现在 B 页，切回 A 页它还在。所以只记住下标，不清空。 */
+            if(prev!==i){prev=i;}
             scope544(i);syncNav544();
             setTimeout(num544,80);
             if(4===i)setTimeout(sigNote544,150);
@@ -11725,9 +11778,11 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
     window.addEventListener('load',bootOnce);
     // 外部字体/行情资源常拖住 load（国内访问尤其明显），加两级兜底；
     // bootOnce 幂等，boot() 里搬 DOM 的动作绝不会执行两次。
+    /* §5.48：原来是 DOMContentLoaded 后还等 600ms —— 加上 load 本身可能等好几秒，
+       用户盯着旧版页面看半天才变新版。DOM 结构一就绪就组装，数据部分本来就有兜底刷新。 */
     if(document.readyState==='loading')
-      document.addEventListener('DOMContentLoaded',function(){setTimeout(bootOnce,600);});
-    else setTimeout(bootOnce,600);
+      document.addEventListener('DOMContentLoaded',bootOnce);
+    else bootOnce();
     setTimeout(bootOnce,2500);
   }
 })();
