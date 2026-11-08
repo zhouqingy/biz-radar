@@ -11431,9 +11431,12 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         var p=document.getElementById('p-items');
         var rb=p?p.querySelector('.rb-main'):null;
         var m=rb?(rb.textContent||'').match(/命中\s*(\d+)\s*条/):null;
-        var tot=((window.D&&window.D.meta)||{}).total;
-        tot=(typeof tot==='number')?tot:'—';
-        cc.textContent=m?('命中 '+m[1]+' / '+tot):('命中 0 / '+tot);
+        /* 三个来源依次兜底：首屏数据未到位时别再写一个「/ —」出来 */
+        var tot=(window.D&&window.D.meta&&window.D.meta.total)
+             ||(window.DATA_CORE&&window.DATA_CORE.meta&&window.DATA_CORE.meta.total)
+             ||(window.meta&&window.meta.total)||0;
+        var hit=m?m[1]:'0';
+        cc.textContent=tot?('命中 '+hit+' / '+tot):('命中 '+hit+' 条');
       }
       function clear544(i){
         var sc=SCOPE544[i]||SCOPE544[0];
