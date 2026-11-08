@@ -11088,7 +11088,7 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
       if(hw){
         var top=document.createElement('div'); top.className='a-top';
         top.innerHTML='<div class="a-qbox"><span class="a-qscope" id="aQScope">找商机</span></div>'+
-          '<button id="aFilter">筛选 · 7 类 <em id="aFltN"></em>⌄</button><button id="aCsv">导出 CSV</button>'+
+          '<button id="aFilter">筛选 · 7 类 <em id="aFltN"></em>⌄</button><button id="aCsv" title="导出①投放/商机库的当前筛选结果；这是全库动作，不随页签变化">导出 CSV</button>'+
           '<button class="a-pri" id="aWeek">周报</button>'+
           '<div class="a-who"><span class="org">江浙沪皖 ▾</span>'+
           '<span class="scope">江浙沪皖 · 全部档位</span>'+
@@ -11401,6 +11401,8 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         if(sc.fwd==='q'){
           if(window.F){window.F.q=(v||'').trim();window.F.page=1;}
           if(typeof window.render==='function')window.render();
+          syncQn548(i);
+          setTimeout(function(){syncQn548(i);},40);
           return;
         }
         if(sc.fwd){
@@ -11416,6 +11418,22 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
           var r=filter544(i,v);
           if(bx){var cc=bx.querySelector('.a-tabqn');if(cc)cc.textContent=r.on?('命中 '+r.hit+' / '+r.total):'';}
         }
+      }
+      /* §5.48：①库搜索后，把命中数写回搜索框右侧。
+         数值直接取原站自己在列表上方渲染的「命中 N 条」，不另算一套口径；
+         搜「中国」这种高频词会命中几十条，一页仍是 24 张卡，
+         不显示数字的话用户会以为「没过滤」。 */
+      function syncQn548(i){
+        var bx=box544(i); if(!bx)return;
+        var cc=bx.querySelector('.a-tabqn'); if(!cc)return;
+        var q=((window.F||{}).q||'').trim();
+        if(!q){cc.textContent='';return;}
+        var p=document.getElementById('p-items');
+        var rb=p?p.querySelector('.rb-main'):null;
+        var m=rb?(rb.textContent||'').match(/命中\s*(\d+)\s*条/):null;
+        var tot=((window.D&&window.D.meta)||{}).total;
+        tot=(typeof tot==='number')?tot:'—';
+        cc.textContent=m?('命中 '+m[1]+' / '+tot):('命中 0 / '+tot);
       }
       function clear544(i){
         var sc=SCOPE544[i]||SCOPE544[0];
@@ -11563,7 +11581,11 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         var q=inp?(inp.value||'').trim():'';
         var sc=SCOPE544[i]||SCOPE544[0];
         var cc=bx?bx.querySelector('.a-tabqn'):null;
-        if(!q||!sc.cards){if(cc)cc.textContent='';return;}
+        if(!q){if(cc)cc.textContent='';return;}
+        /* §5.48：①库不是 DOM 隐藏式过滤（走 render 重建），这里不能清空命中数，
+           否则每次重渲染都被抹掉。交给 syncQn548 从原站自己的「命中 N 条」取。 */
+        if(sc.fwd==='q'){syncQn548(i);return;}
+        if(!sc.cards){if(cc)cc.textContent='';return;}
         var r=filter544(i,q);
         if(cc)cc.textContent=r.on?('命中 '+r.hit+' / '+r.total):'';
       }
