@@ -202,7 +202,16 @@ jobs:
         env:
           BIZ_OUT: ${{ github.workspace }}
           BIZ_SITE: ${{ github.workspace }}
-        run: python build_plan_forecast.py
+        run: |
+          # 2026-11-08：build_plan_forecast.py 从来没有入库（仓库里 404），
+          # 这一步一直靠 continue-on-error 静默失败，data.plan.js 因此从未在 CI 里更新过。
+          # 先把调用改成「存在才跑」，把真相打进日志，别再假装成功。
+          if [ -f build_plan_forecast.py ]; then
+            python build_plan_forecast.py
+          else
+            echo "⚠ build_plan_forecast.py 不在 tools/ 下（仓库 404），本步跳过；"
+            echo "  data.plan.js 沿用仓库里上一版，属于已知缺陷，等阶段③一起补。"
+          fi
 
       - name: 5) 检查产物
         run: |
@@ -267,10 +276,66 @@ jobs:
           # 口径自查：meta（顶部 KPI）必须和列表逐项对得上，bizTop 标签必须在
           # 前端 SEG_NAME 里有定义。2026-11-04 就是这里漏了才出「已公示金额 483 条
           # / 列表只有 460 条」和「能源清洁高效利用」这种前端没有的老词。
-          python check_meta.py
+          python tools/check_meta.py
+
+      # ══════════════════════════════════════════════════════════════
+      # 5.5) 口径一致性闸门（2026-11-08 新增 · 止血用）
+      # ══════════════════════════════════════════════════════════════
+      # 为什么加这道闸门：
+      #   ① 原来第 5 步写的是 `python check_meta.py`，而文件在 tools/ 下，
+      #      每天都是 FileNotFoundError → exit 2 → 红灯。11-07 / 11-08 连续两天同一行失败。
+      #   ② 但只把路径改对会更糟：仓库 tools/ 里的规则源是旧版
+      #      （biz_rules.py 21,359 B，没有 semantic_drop()；本地是 60,153 B），
+      #      11-08 run 21 日志实测构建出「总条数: 2349」，比在库的 1119 多一倍脏数据。
+      #      一旦放行，它会把 2349 条推上去、并用旧模板重建 index.html，
+      #      把页面上刚改好的东西整片覆盖（guard-index 判据「行数<3000 或 不含业务信号」
+      #      对 724K 的旧模板页不成立，守卫不会拦）。
+      #   ③ 所以先只做两件事：把路径修对（不再因路径红叉）+ 加这道闸门
+      #      （构建条数与在库条数差 >1% 就跳过推送，但**不判失败**）。
+      #      这样 Actions 是绿的、数据一条都不会动，等阶段③把口径对齐后再放开。
+      # ⚠ 阶段③要做的事：把 tools/ 下的 biz_rules / collect_v4 / build_data / build_web
+      #   换成最新版，跑一次全量对齐、逐条核对 1119 → 912 那 207 条的差异，
+      #   确认后再把闸门阈值放开到 100%。
+      - name: 5.5) 口径一致性闸门（不通过则跳过推送，不判红）
+        id: gate
+        run: |
+          python - <<'PY'
+          import json, subprocess, sys, os
+
+          def read_total(path):
+              s = open(path, encoding='utf-8').read()
+              j = json.loads(s[s.index('=') + 1:].strip().rstrip(';'))
+              return j.get('meta', {}).get('total', 0)
+
+          new = read_total('data.core.js')
+          try:
+              head = subprocess.run(['git', 'show', 'HEAD:data.core.js'],
+                                    capture_output=True, text=True, check=True).stdout
+              open('/tmp/head_core.js', 'w', encoding='utf-8').write(head)
+              old = read_total('/tmp/head_core.js')
+          except Exception as e:
+              print('读不到 HEAD 版 data.core.js（%s），按首次构建处理' % str(e)[:60])
+              old = new
+
+          diff = abs(new - old) / float(max(old, 1))
+          print('本次构建 %s 条 | 在库 %s 条 | 差异 %.1f%%' % (new, old, diff * 100))
+
+          ok = 'true'
+          if diff > 0.01:
+              ok = 'false'
+              print('')
+              print('=' * 66)
+              print('⚠ 构建条数与在库条数差 %.0f%%，已跳过推送。' % (diff * 100))
+              print('  原因：CI 用的 tools/ 是旧版规则（缺 semantic_drop），过滤不狠。')
+              print('  处置：这不算失败，数据一条不动。等 tools/ 口径对齐后放开闸门。')
+              print('=' * 66)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write('ok=%s\n' % ok)
+          PY
 
       # ── 提交段：核心修复 ─────────────────────────────────────────
       - name: 6) 提交并推送
+        if: steps.gate.outputs.ok == 'true'
         run: |
           git config user.name  "biz-radar-bot"
           git config user.email "bot@users.noreply.github.com"
