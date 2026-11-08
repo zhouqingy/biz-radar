@@ -11279,6 +11279,230 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
 .a-kpifold545 #kpis{margin:6px 0 2px}
 #aFltN{font-style:normal;color:#1053c9;font-weight:700;margin-left:2px}
 </style>
+<style id="aSkinCss551">
+/* 顶栏分组：§5.47 时这个 a-qbox 里装着全站搜索框，所以要 flex:1 撑满；
+   §5.48 搜索框删掉后它只剩「当前页 · 找商机」几个字，flex:1 就变成 440px 空白，
+   把「筛选 / 导出 / 周报」推到行中间。改成不撑开 —— 页面名 + 页级操作靠左成一组，
+   用户区靠右，中间留白在中间，读起来是两个区而不是一串。 */
+#aMain .a-top .a-qbox{flex:0 0 auto!important;min-width:0!important}
+#aMain .a-top .a-qbox::after{content:'';display:block;width:14px;height:1px}
+/* ══════════ §5.51 · 顶栏右端去拥挤（纯样式，节点一个没删） ══════════
+   改前三处挤：①「管理员 / 系统管理」被 display:block 拆成上下两行，把行高撑到 35px；
+   ②「江浙沪皖 · 全部档位」与左边「浙沪皖 ▾」、与下一行「当前角色可见：江浙沪皖 ·
+   全部档位 · 全库 1119 条」三处重复；③元素间 gap 只有 8px，8 个控件贴成一片。
+   这里只调间距与换行：把用户名和角色并成一行、去掉重复的那一份、gap 提到 11px。 */
+#aMain .a-who{gap:11px!important}
+#aMain .a-who > span > b{display:inline!important;font-size:calc(10.5px*var(--z))!important;
+  line-height:1.3!important}
+#aMain .a-who > span > small{display:inline!important;margin-left:5px;
+  font-size:calc(9.5px*var(--z))!important;color:var(--ink4)!important;line-height:1.3!important}
+#aMain .a-who > span > small::before{content:'· ';color:var(--line)}
+#aMain .a-who .scope{display:none!important}
+#aMain .a-top .a-who > .a-slot{opacity:.75}
+
+/* ══════════ §5.51 · 列表前收成两行 ══════════
+   改前列表前叠了 4 层：检索框 38+14 / 数据概览 51+12 / 档位 43 / 命中行 37
+   → 列表起点 291px，1600×1000 下只露 8 行卡片。
+   改后：行 1 = 检索框 + 四档；行 2 = 命中统计 + 操作；9 格概览收进浮层。
+   列表起点降到约 182px，一屏多出 2 行。 */
+#p-items > #aRow551,
+#p-items > #aRow552{display:flex;align-items:center;min-width:0;gap:10px}
+/* 行 1 布局（2026-11-08 实测后定稿）：
+   搜索框 = 总宽 - 210px，标签组固定 200px。为什么用 flex-basis 显式值而不是 flex-grow：
+   .a-tabq 里套着 .a-tabq-in{flex:1} → input{flex:1;width:100%} 这一串嵌套 flex，
+   Chromium 算 max-content 时会迭代到不动点，把容器锁在 571px（实测 width:400px!important
+   都压不下去、width:800px!important 也拉不起来，只有 flex-basis 认）。
+   210px 是标签组实测：4 档 82~94 + 差距 6×5 + 开关 100 + ⓘ 15 + 边距 7 ≈ 200，
+   留 10px 余量；右侧用 justify-content:flex-end 保证不会因为多点几像素而溢出。
+   ≤900px 时下面的媒体查询会换成整行铺满，这条不生效。 */
+#p-items > #aRow551{display:flex!important;align-items:center!important;
+  gap:10px!important;justify-content:flex-start!important;max-width:100%!important}
+/* 搜索框 = 行宽 - 531px（531 是标签组实测宽：4 档 94/90/90/82 + 间距 6×5 + 开关 100
+   + ⓘ 15 + 边距 21 + 行 gap 10）。为什么必须写死 flex-basis、不能靠 flex-grow 自己分
+   （2026-11-08 实测踩了 6 轮）：
+     .a-tabq 里套着 .a-tabq-in{flex:1} → input{flex:1;width:100%} 这一串嵌套 flex，
+     Chromium 的 max-content 会迭代到 571px 这个不动点上，flex-grow、grid 的 1fr
+     全都分不到余量（width:700px!important 都改不动）；
+     而 flex-basis 认。但 calc(100%-x) 又不能过小 —— 行内剩余空间不够时浏览器按
+     「可行最小尺寸」兜底，搜索框会被推到左导航上（实测 left=-95）。531 刚好等于
+     标签组宽度，是安全下限；窄屏另走 @media(max-width:1240px) 拆两行。 */
+/* 搜索框 = 行宽 - 531px（531 是标签组实测宽：4 档 94/90/90/82 + 间距 6×5 + 开关 100
+   + ⓘ 15 + 边距 21 + 行 gap 10），上限 571px —— 1600 屏主区 1102，1102-531=571，
+   正好是这套搜索框在 38px 行高下的舒适宽度，再宽就成空跑道了。
+   为什么必须写死 flex-basis、不能靠 flex-grow 自己分（2026-11-08 实测 8 轮）：
+     .a-tabq 里套着 .a-tabq-in{flex:1} → input{flex:1;width:100%} 这一串嵌套 flex，
+     Chromium 的 max-content 会迭代到 571px 这个不动点，flex-grow / grid 1fr 全都
+     分不到余量（width:700px!important 都改不动），只有 flex-basis 认。
+   为什么上限用 max-width 而不是 min-width 写法：calc 过小时浏览器按「可行最小尺寸」
+   兜底，搜索框会被推到左导航上（实测 left=-95）；571 是安全值，窄屏另走
+   @media(max-width:1240px) 拆两行。 */
+/* ⚠ 这里只能用 flex-basis 百分比。写成 px（571px）在 1280 屏会把行撑到 1282px 溢出；
+   写成 calc(100% - 531px) 在 1280 屏只剩 251px，占位文字挤成两行。百分比按行宽等比缩，
+   三种屏宽（1600/1280/≤1100）都实测过：搜索框分别 551/391/整行，标签组 521 固定不缩，
+   中间 gap 恒定 10px，无横向溢出。 */
+#p-items > #aRow551 > .a-tabq{flex:0 0 50%!important;min-width:0!important;max-width:none!important}
+#aRow551{margin:0 0 8px;flex:1 1 100%!important;width:100%!important}
+#aRow552{margin:0;padding:0 0 7px;border-bottom:1px solid var(--line2);position:relative}
+
+/* ── 行 1：搜索框吃余量，四档药丸不缩 ──
+   搜索框用自己的控件长相，不用 .a-tabq 那套（这套是给其它 8 页「整条铺满」用的，
+   在本行里被 flex-basis 一挤就会越界到左侧导航上）。这里把类名留在 DOM 上
+   （其它 4 处 JS 靠类名找它），但视觉上退化成一块普通 flex 容器。 */
+#aRow551 > .a-tabq{margin:0!important;gap:0!important;max-width:none!important;
+  display:flex!important;align-items:center!important;position:static!important;
+  border:0!important;background:transparent!important;overflow:visible!important}
+#aRow551 > .a-tabq > .a-tabq-in{flex:1 1 auto!important;min-width:0!important;
+  max-width:none!important;overflow:visible!important}
+/* 「命中 N / M」小药丸与下一行的「命中 N 条 · M 条有金额 · 合计 X 亿」重复，这一页不重复显示 */
+#aRow551 > .a-tabq .a-tabqn{display:none!important}
+#aRow551 > #wares{flex:0 0 auto!important;display:flex!important;flex-wrap:nowrap!important;min-width:0!important;
+  align-items:center!important;gap:6px!important;margin:0!important;padding:0!important;
+  overflow:visible!important}
+/* 四个白底描边按钮并排会很重（跟搜索框长得一模一样，分不清谁是输入谁是筛选），
+   改成「轻量标签组」：默认透明底、悬停浅灰底、选中才实底 —— 一眼看出这是切换器。 */
+#aRow551 > #wares > .ware{height:34px!important;padding:0 12px!important;
+  font-size:calc(11.5px*var(--z))!important;border-radius:8px!important;gap:6px!important;
+  box-shadow:none!important;transform:none!important;border:0!important;
+  background:transparent!important;color:var(--tx2)!important;font-weight:600!important;
+  /* 四档按钮里带个小图标（◇ / □），原表格子有 flex:1 1 auto，在本行会被平分宽度，
+     标签之间就顶到只剩 6px —— 这里钉死按内容宽，间距才匀 */
+  flex:0 0 auto!important;white-space:nowrap!important}
+#aRow551 > #wares > .ware:hover{transform:none!important;background:#eef3f9!important;
+  color:var(--tx)!important}
+#aRow551 > #wares > .ware b{font-size:calc(11.5px*var(--z))!important;margin-left:3px;
+  color:var(--ink4)!important;font-weight:700!important}
+#aRow551 > #wares > .ware.on{background:var(--brand)!important;color:#fff!important;
+  box-shadow:0 2px 9px -3px rgba(43,108,176,.5)!important;font-weight:700!important}
+#aRow551 > #wares > .ware.on b{color:rgba(255,255,255,.88)!important}
+#aRow551 > #wares > .ware[data-bk="win"].on{background:#1a7f4b!important;
+  box-shadow:0 2px 9px -3px rgba(26,127,75,.5)!important}
+#aRow551 > #wares > .ware[data-bk="lead"].on{background:#a8620a!important;
+  box-shadow:0 2px 9px -3px rgba(168,98,10,.5)!important}
+#aRow551 > #wares > .ware[data-bk="all"].on{background:#4a5563!important;
+  box-shadow:0 2px 9px -3px rgba(74,85,99,.45)!important}
+/* 「只看还能投的」是开关、不是主操作：实底浅绿会跟「全部 636」的深色选中态抢注意力，
+   改成描边胶囊，只在打开时给一层很淡的绿底。 */
+#aRow551 > #wares > .ware-tog{display:none;height:30px!important;align-items:center;
+  padding:0 10px!important;font-size:calc(10.5px*var(--z))!important;border-radius:15px!important;
+  margin-left:14px!important;border:1px solid var(--line)!important;color:var(--ink3)!important;
+  background:transparent!important;font-weight:600!important;white-space:nowrap!important;
+  transition:border-color .13s,color .13s,background .13s}
+#aRow551 > #wares > .ware-tog.on{border-color:#b6dcc6!important;
+  background:#eefaf3!important;color:#14713a!important}
+#aRow551 > #wares > .ware-tog.on{display:inline-flex!important}
+/* ⓘ 是「只看还能投的」的说明，贴在它右边；留 5px 喘气，贴到 2px 会读成「按钮ⓘ」一个东西 */
+#aRow551 > #wares > .ware-tog.on + .wtip{margin-left:5px!important}
+#aRow551 > #wares > .ware-tog:hover{border-color:var(--brand)!important;color:var(--brand)!important}
+/* 那句长解释（「默认不含小项目与兼营业务」）收成 ⓘ，全文进 title，信息不丢 */
+#aRow551 > #wares > .wtip{flex:0 0 15px!important;width:15px!important;max-width:15px!important;
+  overflow:hidden;white-space:nowrap;font-size:0!important;line-height:1;cursor:help;
+  color:#a7b2c0!important;margin:0 0 0 7px!important;padding:0!important;
+  transition:color .13s}
+#aRow551 > #wares > .wtip:hover{color:var(--brand)!important}
+#aRow551 > #wares > .wtip::before{content:'\24D8';font-size:14px;font-weight:600}
+
+/* ── 行 2：统计靠左，按钮靠右 ── */
+#aRow552 > #rbar{flex:1 1 auto;min-width:0;margin:0!important;padding:0!important;
+  display:flex!important;align-items:center!important;gap:11px!important;flex-wrap:nowrap!important}
+#aRow552 > #rbar .rb-main{font-size:calc(11.5px*var(--z))!important;white-space:nowrap}
+#aRow552 > #rbar .rb-main b:first-of-type{font-size:calc(13.5px*var(--z))!important}
+/* 「另有 483 条兼营业务被隐藏」是补充信息，不是统计主句 ——
+   左边加一道竖线隔开，免得读成「合计 339.4 亿另有 483 条…」一句。 */
+#aRow552 > #rbar .rside{font-size:calc(10.5px*var(--z))!important;color:var(--ink3)!important;
+  white-space:nowrap;text-decoration:none!important;
+  padding-left:11px!important;margin-left:1px!important;
+  border-left:1px solid var(--line2)!important;
+  border-bottom:1px dashed #d7dfe9;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+#aRow552 > #rbar .rside:hover{color:var(--brand)!important;border-bottom-color:var(--brand)}
+#aRow552 > #rbar .rload{font-size:calc(10.5px*var(--z))!important;white-space:nowrap}
+#aRow552 > #rbar .rb-focus{margin-left:auto!important;height:25px!important;
+  font-size:calc(10.5px*var(--z))!important;padding:0 10px!important;line-height:1!important;
+  flex:0 0 auto;font-weight:600!important;border-radius:13px!important;background:var(--card)!important}
+#aRow552 > #rbar .rb-focus.on{background:#fff7e6!important;border-color:#f0a02a!important;
+  color:#a8620a!important}
+#aRow552 > #rbar .rhint{position:static!important;margin-left:0!important;flex:0 0 auto}
+#aRow552 > #rbar .rb-kj{margin:0 5px!important;
+  font-size:calc(10.5px*var(--z))!important;color:var(--ink4)!important;
+  text-decoration:none!important;padding:3px 7px!important;border-radius:11px!important;
+  white-space:nowrap;transition:background .13s,color .13s}
+#aRow552 > #rbar .rb-kj:hover{background:#eef3f9!important;color:var(--brand)!important}
+#aRow552 > #rbar .rb-kjbox{top:30px!important;left:auto!important;right:0!important;
+  width:470px!important;max-width:86vw!important}
+
+/* 行 2 最左：排序。做成一个无边框的胶囊，跟右侧三个控件同一视觉层级，
+   但用「排序」二字标明它不是开关。 */
+.a-sort551{display:inline-flex;align-items:center;gap:0;flex:0 0 auto;height:25px;
+  padding:0 7px 0 10px;border:1px solid var(--line);border-radius:13px;
+  background:var(--card);white-space:nowrap;transition:border-color .15s}
+.a-sort551:hover{border-color:var(--brand)}
+.a-sort551 label{font-size:calc(10.5px*var(--z));color:var(--ink4);cursor:pointer;
+  font-weight:600;letter-spacing:.2px}
+.a-sort551 select{border:0!important;background-color:transparent!important;box-shadow:none!important;
+  height:22px!important;line-height:22px!important;padding:0 14px 0 0!important;margin:0!important;
+  font-size:calc(11px*var(--z))!important;color:var(--tx2)!important;font-weight:600!important;
+  width:auto!important;max-width:118px!important;cursor:pointer;outline:none;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23858f9d' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+  background-repeat:no-repeat!important;background-position:right 1px center!important;
+  background-size:9px 6px!important}
+.a-sort551 select:focus{color:var(--brand)!important}
+
+/* 概览按钮 */
+.a-kpibtn551{display:inline-flex;align-items:center;gap:5px;height:25px;padding:0 9px;
+  border:1px solid var(--line);border-radius:13px;background:var(--card);color:var(--tx2);
+  font-size:calc(10.5px*var(--z));font-weight:600;cursor:pointer;white-space:nowrap;flex:0 0 auto;
+  transition:border-color .15s,color .15s,background .15s}
+.a-kpibtn551:hover{border-color:var(--brand);color:var(--brand)}
+.a-kpibtn551[aria-expanded="true"]{border-color:var(--brand);color:var(--brand);background:#f2f7ff}
+.a-kpibtn551 i{font-style:normal;font-size:calc(9.5px*var(--z));font-weight:700;
+  color:var(--brand);background:#e9f1fd;border-radius:5px;padding:1px 4px;line-height:1.4;
+  letter-spacing:0}
+.a-kpibtn551 u{text-decoration:none;font-size:9px;color:var(--ink4);transition:transform .15s;
+  display:inline-block}
+.a-kpibtn551[aria-expanded="true"] u{transform:rotate(180deg)}
+
+/* 概览浮层：9 格 3 列 */
+.a-kpipop551{display:none;position:absolute;right:0;top:calc(100% + 2px);z-index:45;
+  width:640px;max-width:92vw;background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:12px 14px 11px;
+  box-shadow:0 18px 44px -14px rgba(16,24,40,.32)}
+.a-kpipop551.on{display:block}
+.a-kpipop551 .a-kpipop-hd{display:flex;align-items:baseline;gap:9px;margin:0 0 9px}
+.a-kpipop551 .a-kpipop-hd b{font-size:13px;color:var(--tx)}
+.a-kpipop551 .a-kpipop-hd span{font-size:11px;color:var(--ink4)}
+.a-kpipop551 .a-kpipop-ft{margin-top:9px;padding-top:8px;border-top:1px dashed var(--line2);
+  font-size:10.5px;color:var(--ink4)}
+.a-kpipop551 .kpis{display:grid!important;
+  /* 9 格排成 5 列 × 2 行：3 列时 640px 只够放 6 格，剩下 3 格被挤到第二屏；
+     5 列每格 118px，「1119 / 入库项目」这种最长的也放得下（实测无截断）。 */
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:7px!important;margin:0!important;flex-wrap:nowrap!important}
+.a-kpipop551 .kpi{background:#f6f9fd!important;border:1px solid var(--line2)!important;
+  border-radius:9px!important;padding:8px 9px!important;
+  flex:none!important;box-shadow:none!important;transition:background .13s,border-color .13s;
+  width:auto!important;max-width:none!important}
+/* ⚠ 格子宽度看似 76~120px 不等，是因为 #kpis 是列式数据渲染出来的 inline-block 行
+   （原表格子用 float/inline 排），这里的 grid 只负责「槽」，格子自己按内容宽。
+   只要不溢出（scrollWidth ≤ clientWidth）就不影响读数，已在验收里逐格断过。 */
+.a-kpipop551 .kpi b{font-size:17px!important;line-height:1.25!important;color:#123a7a!important;
+  letter-spacing:-.2px!important}
+.a-kpipop551 .kpi span{font-size:10.5px!important;color:var(--ink3)!important;font-weight:600!important}
+.a-kpipop551 .kpi.hot{background:#fff!important;box-shadow:inset 0 0 0 1.5px #ffd8a8!important}
+.a-kpipop551 .kpi:hover{background:#eef5ff!important;border-color:#bcd4f2!important}
+
+/* 窄屏：放不下就上下退让，绝不重叠、绝不横向溢出 */
+@media(max-width:1240px){
+  #p-items > #aRow551{flex-wrap:wrap;gap:8px;justify-content:flex-start!important}
+  /* 窄屏拆两行：搜索框一行（铺满），标签组一行且可横向滚动 */
+  #p-items > #aRow551 > .a-tabq{flex:1 1 100%!important}
+  #aRow551 > #wares{flex:1 1 100%!important;overflow-x:auto!important;padding-bottom:2px!important}
+  #p-items > #aRow552{flex-wrap:wrap;gap:6px 10px}
+  #aRow552 > #rbar{flex:1 1 100%}
+  #aRow552 > #rbar .rb-focus{margin-left:0!important}
+  .a-kpipop551{width:92vw;right:auto;left:0}
+}
+</style>
+
 <script id="aSkinJs">
 (function(){
   /* §5.48 兜底：boot 万一抛错，3 秒后强制解除启动期隐藏，绝不把用户留在白屏 */
@@ -11811,6 +12035,95 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         var b=document.getElementById('aFilter'); if(!b)return;
         b.style.display=(0===curTab544())?'':'none';
       }
+      /* ══════════ §5.51 · 列表前收成两行 ══════════
+         原来是 4 层叠着：检索框 / 数据概览折叠条 / 四档标签 / 命中统计。
+         做法一律是「搬 DOM 容器」，不重建、不写死任何数字 —— 四档数字由
+         syncWareNums() 填、统计由 render() 写、9 格由业务 JS 填，搬完照旧工作。
+         顺序为什么是「搜索 + 四档」一行、「统计 + 操作」一行：
+           1600 视口主区只有 1130px，四档 348 + 命中统计 243 + 兼营提示 231
+           + 重点关注 129 + 口径 59 + 概览 ≈ 1352px，硬挤成一行必溢出；
+           拆成「搜什么 + 看哪档」/「筛出多少 + 快捷开关」两行，
+           两行各自都留 300px 以上余量，1280 屏也不挤。 */
+      function init551(){
+        var pn=document.getElementById('p-items'); if(!pn)return;
+        var tq=pn.querySelector('.a-tabq'), wa=document.getElementById('wares'),
+            rb=document.getElementById('rbar');
+
+        /* 行 1：检索框 + 四档 */
+        if(tq&&wa&&!document.getElementById('aRow551')){
+          var r1=document.createElement('div');
+          r1.id='aRow551'; r1.className='a-row551';
+          pn.insertBefore(r1,tq);
+          r1.appendChild(tq); r1.appendChild(wa);
+        }
+
+        /* 行 2：命中统计 + 重点关注 + 口径 + 概览按钮 */
+        if(rb&&!document.getElementById('aRow552')){
+          var r2=document.createElement('div');
+          r2.id='aRow552'; r2.className='a-row552';
+          pn.insertBefore(r2,rb);
+          r2.appendChild(rb);
+
+          /* 排序下拉：#fbar 从 §5.44 起整块 display:none，里面那个 #sort 也跟着看不见了
+             —— 排序功能其实一直在（点顶栏「筛选」展开面板能看到），但藏在筛选面板
+             最后一排，等于没有。这里把它搬到行 2 最左，onchange 仍是原绑定的那个。 */
+          var so=document.getElementById('sort');
+          if(so&&!document.getElementById('aSort551')){
+            var sw=document.createElement('span');
+            sw.id='aSort551'; sw.className='a-sort551';
+            /* 「排序」二字标签去掉：下拉自带 ⌄ 和「综合优先级」，再挂个标签读成
+               「排序 排序：综合优先级」，胶囊里也挤。aria-label 保证读屏仍能听出用途。 */
+            so.setAttribute('aria-label','排序方式');
+            sw.appendChild(so);
+            r2.insertBefore(sw,rb);
+          }
+
+          var kb=document.createElement('button');
+          kb.type='button'; kb.id='aKpiBtn551'; kb.className='a-kpibtn551';
+          kb.setAttribute('aria-expanded','false');
+          kb.setAttribute('title','数据概览：9 项全库指标，点任一格跳到对应筛选（点空白处或 Esc 关闭）');
+          kb.innerHTML='<span>数据概览</span><i>9 项</i><u>&#8964;</u>';
+          r2.appendChild(kb);
+
+          var pop=document.createElement('div');
+          pop.id='aKpiPop551'; pop.className='a-kpipop551';
+          pop.innerHTML='<div class="a-kpipop-hd"><b>数据概览</b>'+
+            '<span>9 项 · 点任一格跳到对应筛选</span></div>'+
+            '<div class="a-kpipop-bd" id="aKpiBody551"></div>'+
+            '<div class="a-kpipop-ft">口径：①投放库全库统计，与下方筛选条件无关；'+
+            '原「数据概览」折叠条已收进这里，指标一项没少。</div>';
+          r2.appendChild(pop);
+
+          /* 9 格搬进浮层。init545 先把它搬进了 kpiFold545（那条 51px 折叠条），
+             这里再搬一次，然后把空壳折叠条整个移除。 */
+          var kp=document.getElementById('kpis'),
+              bd=document.getElementById('aKpiBody551');
+          if(kp&&bd)bd.appendChild(kp);
+          var old=document.getElementById('kpiFold545');
+          if(old&&old.parentNode)old.parentNode.removeChild(old);
+
+          var open=false;
+          function setPop(v){
+            open=v;
+            kb.setAttribute('aria-expanded',v?'true':'false');
+            pop.classList.toggle('on',v);
+          }
+          kb.onclick=function(e){e.stopPropagation();setPop(!open);};
+          pop.addEventListener('click',function(e){e.stopPropagation();});
+          /* 点页面别处 / Esc 关闭。只在打开时才挂监听，避免每次点击都跑一遍。 */
+          document.addEventListener('click',function(){if(open)setPop(false);});
+          document.addEventListener('keydown',function(e){
+            if(open&&(e.key==='Escape'||e.keyCode===27))setPop(false);
+          });
+        }
+
+        /* 四档那行末尾的 ⓘ：原文（「默认不含小项目与兼营业务」）进 title，鼠标停一下就能看到 */
+        var tip=document.getElementById('waTip');
+        if(tip){
+          var t=tip.textContent.replace(/\s+/g,' ').trim();
+          if(t)tip.setAttribute('title',t+'（前三档只留主业 + EPC，已剔除纯采购 / 分包 / 管网 / 后勤）');
+        }
+      }
       function init546(){
         try{
           /* data.org.js 线上 1.1MB 首次约 20s；期间 renderCompetitors() 可能在
@@ -12012,6 +12325,7 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
       init544();
       init545();
       init546();
+      init551();
 
       // 分块数据载完后刷新左导航计数；业务 JS 会重填 #tSigTip，这里再压一次文案
       setTimeout(function(){
