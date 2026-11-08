@@ -10977,16 +10977,20 @@ function boot_main(){
 table:not([data-a-skip="1"]) tbody{counter-reset:aRow544}
 table:not([data-a-skip="1"]) tbody>tr{counter-increment:aRow544}
 table:not([data-a-skip="1"]) tbody>tr>td:first-child::before{content:counter(aRow544);
-  float:left;width:20px;margin-right:6px;text-align:right;color:var(--tx3);
-  font-size:10.5px;font-weight:400}
+  float:left;width:22px;margin-right:7px;text-align:right;color:var(--tx2);
+  font-size:12px;font-weight:600}
 table:not([data-a-skip="1"]) thead>tr>th:first-child::before{content:'#';
-  float:left;width:20px;margin-right:6px;text-align:right;color:var(--tx3);
-  font-size:10.5px;font-weight:400}
+  float:left;width:22px;margin-right:7px;text-align:right;color:var(--tx2);
+  font-size:12px;font-weight:600}
 .cgrid,#grid,#sigGrid,#wxGrid,.plgrid,#newsGrid{counter-reset:aCard544}
-.cgrid>div,#grid>div,#sigGrid>div,#wxGrid>div,.plgrid>.pl,#newsGrid>div{counter-increment:aCard544}
-.cgrid>div::before,#grid>div::before,#sigGrid>div::before,#wxGrid>div::before,
-.plgrid>.pl::before,#newsGrid>div::before{content:counter(aCard544);float:left;
-  margin:2px 8px 0 0;color:var(--tx3);font-size:10.5px;font-weight:400}
+/* 分组标题 .grpt 不占号，列表项从 1 连续 */
+.cgrid>div:not(.grpt),#grid>div:not(.grpt),#sigGrid>div:not(.grpt),
+#wxGrid>div:not(.grpt),.plgrid>.pl,#newsGrid>div:not(.grpt){counter-increment:aCard544}
+.cgrid>div:not(.grpt)::before,#grid>div:not(.grpt)::before,
+#sigGrid>div:not(.grpt)::before,#wxGrid>div:not(.grpt)::before,
+.plgrid>.pl::before,#newsGrid>div:not(.grpt)::before{content:counter(aCard544);
+  float:left;min-width:18px;margin:1px 9px 0 0;text-align:right;
+  color:var(--tx2);font-size:12px;font-weight:600}
 /* 规划中占位（内部滚动，不撑爆左栏） */
 .a-plangrp{max-height:230px;overflow:auto;padding:2px 8px}
 .a-planitem{font-size:11px;color:var(--tx3);padding:3px 2px;line-height:1.5;cursor:default}
@@ -11342,9 +11346,9 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         var ns=all.filter(function(n){return !all.some(function(m){return m!==n&&m.contains(n);});});
         var qq=(q||'').trim().toLowerCase(),hit=0;
         ns.forEach(function(n){
-          if(n.dataset.aDisp0===undefined)n.dataset.aDisp0=n.style.display||'';
           var ok=!qq||((n.textContent||'').toLowerCase().indexOf(qq)>=0);
-          n.style.display=ok?n.dataset.aDisp0:'none';
+          if(ok)n.style.removeProperty('display');
+          else n.style.setProperty('display','none','important');
           if(ok)hit++;
         });
         return{hit:qq?hit:0,total:ns.length,on:!!qq};
@@ -11503,6 +11507,41 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         }
         syncNav544();scope544(curTab544());num544();
       }
+      /* ===== §5.46：页内检索防冲掉 / 非①库筛选摆设 / 序号见 CSS ===== */
+      function replay546(){
+        var i=curTab544(), bx=box544(i), inp=bx?bx.querySelector('input'):null;
+        var q=inp?(inp.value||'').trim():'';
+        var sc=SCOPE544[i]||SCOPE544[0];
+        var cc=bx?bx.querySelector('.a-tabqn'):null;
+        if(!q||!sc.cards){if(cc)cc.textContent='';return;}
+        var r=filter544(i,q);
+        if(cc)cc.textContent=r.on?('命中 '+r.hit+' / '+r.total):'';
+      }
+      function syncFltBtn546(){
+        var b=document.getElementById('aFilter'); if(!b)return;
+        b.style.display=(0===curTab544())?'':'none';
+      }
+      function init546(){
+        try{
+          syncFltBtn546();
+          window.addEventListener('hashchange',function(){setTimeout(syncFltBtn546,20);});
+          if(typeof nl!=='undefined'&&nl)nl.addEventListener('click',function(){setTimeout(syncFltBtn546,30);});
+          /* 只听 childList：DOM 重建会清掉 inline display，重放当前 tab 的检索词。
+             不监听 attributes，否则自己改 style 会自触发死循环。 */
+          var mo546=new MutationObserver(function(ms){
+            var need=false;
+            for(var k=0;k<ms.length;k++){
+              if(ms[k].type==='childList'&&(ms[k].addedNodes.length||ms[k].removedNodes.length)){need=true;break;}
+            }
+            if(need)setTimeout(replay546,0);
+          });
+          try{
+            [].forEach.call(document.querySelectorAll('.panel'),function(p){
+              mo546.observe(p,{childList:true,subtree:true});
+            });
+          }catch(e){}
+        }catch(err){console.error('[546]',err);}
+      }
       function init544(){
         try{
           inject544();
@@ -11629,7 +11668,7 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
             var d=document.createElement('details');
             d.id='kpiFold545'; d.className='a-kpifold545';
             var sm=document.createElement('summary');
-            sm.innerHTML='<b>数据概览</b>点开看 9 项指标 <em>数字来自 data.core.js</em>';
+            sm.innerHTML='<b>数据概览</b>点开看 9 项指标';
             d.appendChild(sm);
             wa.parentNode.insertBefore(d,wa);
             d.appendChild(kp);
@@ -11648,6 +11687,7 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
       shorten();
       init544();
       init545();
+      init546();
 
       // 分块数据载完后刷新左导航计数；业务 JS 会重填 #tSigTip，这里再压一次文案
       setTimeout(function(){
