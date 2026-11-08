@@ -25,6 +25,15 @@ on:
   schedule:
     - cron: '20 23 * * *'
   workflow_dispatch:
+  # 2026-11-08 补：让「立刻跑一次」不必依赖网页点按钮。
+  # 原因：沙箱里的 token 只有 contents 权限、没有 actions:write，
+  # POST /actions/workflows/daily.yml/dispatches 一律 403
+  # （实测 "Resource not accessible by personal access token"）。
+  # 而 POST /repos/{o}/{r}/dispatches 走的是 contents:write，能通。
+  # 用法：curl -X POST .../dispatches -d '{"event_type":"manual-run"}'
+  # 只影响触发方式，不改任何步骤与口径。
+  repository_dispatch:
+    types: [manual-run]
 
 permissions:
   contents: write
