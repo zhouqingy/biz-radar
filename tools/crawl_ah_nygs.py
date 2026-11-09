@@ -442,9 +442,46 @@ def main():
 
     fn = os.path.join(EARLY_DIR, 'ah-nygs-latest.json')
     os.makedirs(EARLY_DIR, exist_ok=True)
+
+    # ⚠ 2026-11-09 修（run 42547196725 事故）：
+    #   这一步原来无条件覆盖写盘。省站列表接口当天返回空/改版时，本轮抓到 0 条，
+    #   就直接把 58 条历史冲成 []（仓库文件只剩 2 字节），构建后安徽节能审查类
+    #   条目整片消失 —— 线上 912 → 842，掉掉的 88 条里有 58 条是这个原因。
+    # 改两条：
+    #   ① latest 的语义是「累积全量」，不是「本轮结果」→ 与旧文件合并、按
+    #      url / (业主,标题) 双键去重；
+    #   ② 本轮 0 条完全不写盘，只打警告（保留旧文件，宁可少更新也不能清零）。
+    old = []
+    if os.path.exists(fn):
+        try:
+            old = json.load(open(fn, encoding='utf-8')) or []
+            if isinstance(old, dict):
+                old = old.get('items') or []
+        except Exception as e:
+            print('⚠ 旧文件解析失败（%s），按空处理' % e)
+            old = []
+
+    if not ded:
+        print('\n⚠ 本轮抓到 0 条（省站列表可能改版/限流），保留旧文件 %d 条，不覆盖' % len(old))
+        print('  文件未改动 → %s' % fn)
+        return
+
+    merged, seen_url, seen_bt = [], set(), set()
+    for r in list(ded) + list(old):
+        u = r.get('url')
+        bt = (r.get('buyer'), r.get('t'))
+        if (u and u in seen_url) or bt in seen_bt:
+            continue
+        if u:
+            seen_url.add(u)
+        seen_bt.add(bt)
+        merged.append(r)
+    merged.sort(key=lambda x: x.get('d') or '', reverse=True)
+
     if not a.dry:
-        json.dump(ded, open(fn, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-    print('\n写出 %d 条%s → %s' % (len(ded), '（--dry 未写盘）' if a.dry else '', fn))
+        json.dump(merged, open(fn, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
+    print('\n写出 %d 条（本轮 %d + 旧文件 %d，合并去重）%s → %s'
+          % (len(merged), len(ded), len(old), '（--dry 未写盘）' if a.dry else '', fn))
     for r in ded:
         print('  %s | %-4s | %-26s | %-9s | %-9s | %s' %
               (r['d'], r['city'] or '-', (r['buyer'] or '?')[:26],
