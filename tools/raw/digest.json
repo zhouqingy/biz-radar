@@ -1,7 +1,25 @@
 {
- "updated": "2026-11-04 07:37",
- "n_src": 13,
+ "updated": "2026-11-09 10:05",
+ "n_src": 14,
  "items": [
+  {
+   "t": "投产！西非最大生物质电站",
+   "url": "http://www.intl.ceec.net.cn/art/2026/11/9/art_55165_2515132.html",
+   "d": "2026-11-09",
+   "src": "中国能源建设集团国际工程有限公司",
+   "srcKind": "官网",
+   "tag": "开工投产",
+   "level": "A"
+  },
+  {
+   "t": "中电工程网站：浙江院联合总承包的中煤岱山鱼山电厂项目2号机组并网",
+   "url": "http://www.zepdi.ceec.net.cn/art/2026/11/6/art_17583_2528843.html",
+   "d": "2026-11-06",
+   "src": "中国能源建设集团浙江省电力设计院有限公司（中国能建浙江院）",
+   "srcKind": "官网",
+   "tag": "开工投产",
+   "level": "A"
+  },
   {
    "t": "中国能建江苏院中标云海新能源重卡光储充设计项目",
    "url": "http://www.jspdi.ceec.net.cn/art/2026/11/4/art_8540_2528770.html",
@@ -36,15 +54,6 @@
    "src": "中国能源建设集团浙江省电力设计院有限公司（中国能建浙江院）",
    "srcKind": "官网",
    "tag": "开工投产",
-   "level": "A"
-  },
-  {
-   "t": "中国能建网站：中国能建总承包建设的中煤岱山鱼山电厂项目1号机组投运",
-   "url": "http://www.zepdi.ceec.net.cn/art/2026/10/26/art_17583_2528747.html",
-   "d": "2026-10-26",
-   "src": "中国能源建设集团浙江省电力设计院有限公司（中国能建浙江院）",
-   "srcKind": "官网",
-   "tag": "行业动向",
    "level": "A"
   },
   {
@@ -216,15 +225,6 @@
    "src": "中冶华天工程技术有限公司",
    "srcKind": "官网",
    "tag": "开工投产",
-   "level": "S"
-  },
-  {
-   "t": "10.87亿！中城乡生态联合体中标河南洛阳偃师200MW/800MWh储能电站EPC项目 [详细]",
-   "url": "https://www.chinaxdsb.com/article/86926.html",
-   "d": "",
-   "src": "申能环境科技有限公司",
-   "srcKind": "官网",
-   "tag": "中标签约",
    "level": "S"
   },
   {
@@ -435,6 +435,33 @@
    "level": "A"
   },
   {
+   "t": "关于收到“金安区乡镇污水处理设施建设及运行EPC+O项目”中标通知书的公告",
+   "url": "https://www.gzep.com.cn/display.php?id=507",
+   "d": "",
+   "src": "中节能国祯工程有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "预中标蒙城县主城区污水厂网一体化PPP项目公告",
+   "url": "https://www.gzep.com.cn/display.php?id=293",
+   "d": "",
+   "src": "中节能国祯工程有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "关于收到合肥市胡大郢污水处理厂PPP项目中标通知书的公告",
+   "url": "https://www.gzep.com.cn/display.php?id=296",
+   "d": "",
+   "src": "中节能国祯工程有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
    "t": "宁夏中卫并网光伏电站",
    "url": "https://www.enfi.com.cn/ppef/jdxm/201711/t20171116_23194.html",
    "d": "",
@@ -453,21 +480,30 @@
    "level": "A"
   },
   {
-   "t": "四川南充市生活垃圾焚烧发电厂超低排放技术改造项目EPC总承包招标",
-   "url": "https://www.chinaxdsb.com/article/86939.html",
-   "d": "",
-   "src": "申能环境科技有限公司",
-   "srcKind": "官网",
-   "tag": "行业动向",
-   "level": "A"
-  },
-  {
-   "t": "1.24亿电袋除尘器采购：三强争夺，紫金龙净预中标 [详细]",
-   "url": "https://www.chinaxdsb.com/article/86945.html",
+   "t": "9.25亿！中机建设中标阿斯塔纳能源生态园项目EPC总承包 9.25亿！中机建设中标阿斯塔纳能源生态园项目EPC总承包",
+   "url": "https://www.chinaxdsb.com/article/87296.html",
    "d": "",
    "src": "申能环境科技有限公司",
    "srcKind": "官网",
    "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "附中标一览！3380万国能龙源环保又中标了",
+   "url": "https://www.chinaxdsb.com/article/87290.html",
+   "d": "",
+   "src": "申能环境科技有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "漯河市生活垃圾焚烧发电厂配套蒸汽管网项目正式投产运行",
+   "url": "https://www.chinaxdsb.com/article/87299.html",
+   "d": "",
+   "src": "申能环境科技有限公司",
+   "srcKind": "官网",
+   "tag": "开工投产",
    "level": "A"
   },
   {
