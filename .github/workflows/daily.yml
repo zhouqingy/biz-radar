@@ -310,8 +310,27 @@ jobs:
           total = meta.get('total', 0)
           print('总条数: %s | 数据日期: %s | 金额覆盖: %s'
                 % (total, meta.get('dataAsOf'), meta.get('withAmt')))
-          if total < 1000:
-              print('条数异常，疑似采集失败，本次不提交')
+          # 2026-11-09 改：原来是绝对阈值 1000。库里 11-08 瘦身到 912 后，这个阈值
+          # 永远为真 —— 11-09 手动跑就卡在这里（746 < 1000），白跑 22 分钟，数据一条没推。
+          # 改成与「构建前那一版」比：git show HEAD:data.core.js 取触发时的 core，
+          # 掉超过 25% 才判异常。条数整体升降都不会误报，真出事故才拦。
+          try:
+              import subprocess
+              _prev = subprocess.run(['git', 'show', 'HEAD:data.core.js'],
+                                     capture_output=True, text=True, timeout=60).stdout
+              _pm = json.loads(_prev[_prev.index('=') + 1:].strip().rstrip(';'))['meta']
+              prev_total = int(_pm.get('total') or 0)
+          except Exception as _e:
+              prev_total = 0
+              print('⚠ 读不到上一版 total（%s），退回绝对下限 700' % _e)
+          if prev_total:
+              drop = (prev_total - total) / float(prev_total)
+              print('与上一版对比: %s → %s（变化 %+.1f%%）' % (prev_total, total, -drop * 100))
+              if drop > 0.25:
+                  print('条数比上一版少 %.0f%%，疑似采集失败，本次不提交' % (drop * 100))
+                  sys.exit(1)
+          elif total < 700:
+              print('条数异常（绝对下限 700），本次不提交')
               sys.exit(1)
           # 海外动态也检查一下：这批是人工维护的，被冲掉说明 raw 源没读到
           try:
@@ -413,6 +432,8 @@ jobs:
                   'tools/raw/jiangsu.json' 'tools/raw/zhejiang.json' \
                   'tools/raw/anhui.json' 'tools/raw/shanghai.json' \
                   'tools/raw/oversea_flash.json' 'tools/raw/oversea_manual.json' \
+                  'tools/raw/weekly' 'tools/raw/early' \
+                  ':!tools/raw/weekly/_audit' ':!tools/raw/early/_off' ':!*.bak_amt' \
                   ':!tools/*.py'
 
           if git diff --staged --quiet; then
