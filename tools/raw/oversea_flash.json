@@ -1,7 +1,22 @@
 {
- "updated": "2026-11-11 03:10",
- "n": 24,
+ "updated": "2026-11-12 04:12",
+ "n": 25,
  "items": [
+  {
+   "title": "东南亚资讯 | 泰国批准关于噪音、散热、分区及冷却的数据中心新规",
+   "url": "https://news.goalfore.cn/latest/detail/107483.html",
+   "summary": "今年前九月泰国吸引超500亿美元投资申请，七成涉AI。 据称，有超过 110 家申请方提出了总计超过 30,000 兆瓦的用电申请，但“其中仅有约四分之一或更少的企业具备真实的投资计划”。",
+   "date": "2026-11-12",
+   "datetime": "2026-11-12 00:00",
+   "src": "国复咨询",
+   "kw": "auto:国复咨询",
+   "sc": 6,
+   "tier": "A",
+   "tierwhy": "业务层级=datactr（备案口径未覆盖）",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "auto"
+  },
   {
    "title": "晶科能源签约意大利151.63MW飞虎3地面电站订单",
    "url": "https://news.goalfore.cn/latest/detail/107355.html",
