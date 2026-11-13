@@ -241,6 +241,39 @@ jobs:
             echo "::warning::mine_oversea_wechat.py 不存在，跳过"
           fi
 
+      # ★ 2026-11-13 新增：北极星电力网行业资讯。
+      #   mine_bjx.py 和它产出的 raw/bjx_news.json 早就写好了，但从来没有任何工作流调用，
+      #   文件停在 10-20、行业动态最后一条是 10-15 —— 用户问「最近信息在更新吗」时
+      #   发现资讯板块断粮一个月。这一步只抓、只写 raw/bjx_news.json，
+      #   并入 trends 是 build_web.py 第 1287 行已有的逻辑（只收 30 天内、标题前 34 字去重）。
+      - name: 3.9d) 行业资讯 · 北极星电力网
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          python mine_bjx.py || echo "::warning::北极星采集失败，沿用上次 raw/bjx_news.json"
+
+      # ★ 2026-11-13 新增：投资在线审批平台（浙江 / 江苏）。
+      #   这是「招标之前 3~12 个月」最早的一档信号：项目过审批时就有名字和事项，
+      #   等招标公告出来对手已经在里面了。四个脚本 11-04 就写好了，但从没接进流程，
+      #   ①库里「投资在线」190 条一直是 legacy_D 的老数据（最新 2026-09-23）。
+      #   三段串起来：
+      #     crawl_invest.py        抓（与已有文件合并，不冲历史）
+      #     build_invest_matched.py 按项目名聚合 + 反查商机库（2026-11-13 补的缺失环节）
+      #     pick_invest.py          分 A/B/C/弃，只留 B（已到核准/施工许可、库内还没公告）
+      #     merge_invest_pick.py    B 档写进 raw/{省}.json（2026-11-13 补的缺失环节）
+      #   合规性：写进去的条目仍要过 build_data 的 judge()/semantic_drop()，
+      #   污水厂、纯设备这类会在构建时被剔掉，不在这一步另造判据。
+      - name: 3.10) 投资在线审批平台（招标前信号）
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          python crawl_invest.py --days 45 --pages 3 || echo "::warning::投资在线采集失败，沿用上次 invest_zj/js"
+          python build_invest_matched.py || echo "::warning::投资数据聚合失败，本轮跳过"
+          python pick_invest.py || echo "::warning::投资分档失败，本轮跳过"
+          python merge_invest_pick.py || echo "::warning::投资线索并入失败，本轮跳过"
+
       # ── 构建段：不允许失败 ────────────────────────────────────────
       # 注意 tools/raw/oversea_extra.json 必须在仓库里（人工补录的巴淡岛等
       # 情报就存在这）。它不在的话 build_web 只打一行 WARN 继续跑，
@@ -477,6 +510,8 @@ jobs:
                   'tools/raw/anhui.json' 'tools/raw/shanghai.json' \
                   'tools/raw/oversea_flash.json' 'tools/raw/oversea_manual.json' \
                   'tools/raw/weekly' 'tools/raw/early' \
+                  'tools/raw/bjx_news.json' 'tools/raw/invest_zj.json' \
+                  'tools/raw/invest_js.json' 'tools/raw/invest_pick.json' \
                   ':!tools/raw/weekly/_audit' ':!tools/raw/early/_off' ':!*.bak_amt' \
                   ':!tools/*.py'
 

@@ -18,6 +18,7 @@ import json
 import os
 import re
 import sys
+import time
 
 import openpyxl
 
@@ -84,6 +85,7 @@ PIPE_KW = ('热网', '管网', '蒸汽管道', '供热管道', '换热站', '热
 # 来源类型 → 「提前量」徽标文字。和商机库 early 字段同一套 vocabulary。
 EARLY_MAP = {
     '规划已批复': '规划批复',
+    '规划批复': '规划批复',
     '报批/公示中': '供热规划',
     '已核准/备案': '发改委核准',
     '前期论证': '规划论证',
@@ -168,6 +170,50 @@ def main():
         d = dict(zip(hdr, r))
         rows.append(d)
 
+    # ── 2026-11-13 追加：把每日 3.6 抓到的省发改委规划批复并进来 ──────────
+    # 原来只吃这一份 xlsx（2026-11-02 版），所以 data.plan.js 的 gen 一直停在 11-02，
+    # 明明 tools/raw/early/plan-fgw-latest.json 每天在更新（3.6，江苏 41 条），却从来没进页面。
+    # 用户 2026-11-13 17:08 授权「一起接上」。
+    # 去重按「去掉括号后的项目名」双向包含，和 xlsx 已有的 124 条完全不重叠（实测 0 重叠 / 41 新增）。
+    _fgw_n = 0
+    _fgw_path = os.path.join(_HERE, 'raw', 'early', 'plan-fgw-latest.json')
+    try:
+        _fw = json.load(open(_fgw_path, encoding='utf-8'))
+        if isinstance(_fw, dict):
+            _fw = _fw.get('items') or []
+        _norm = lambda x: re.sub(r'[\s·、,，。（）()]', '', re.sub(r'[（(][^）)]*[）)]', '', str(x or '')))
+        _have = [_norm(str(r['项目名称'] or '')) for r in rows]
+        for x in _fw:
+            _t = str(x.get('t') or '').strip()
+            if not _t:
+                continue
+            _k = _norm(_t)
+            if any(_k == a or (len(_k) >= 8 and len(a) >= 8 and (_k in a or a in _k)) for a in _have):
+                continue
+            _have.append(_k)
+            rows.append({
+                '省': x.get('rg') or '',
+                '市': x.get('city') or '',
+                '区县/片区': '',
+                '项目名称': _t,
+                '业主': x.get('buyer') or '',
+                '建设内容与规模': x.get('snip') or '',
+                '项目类型': '规划批复',
+                '阶段（2026-11 实况）': '规划批复',
+                '投资额(亿元)': None,
+                '我们的切入方式': '',
+                '原文依据': x.get('p') or '省发改委·规划批复',
+                '批复依据（文号/日期）': (x.get('d') or ''),
+                '来源链接': x.get('url') or '',
+                '能进不能进（排他性说明）': '',
+            })
+            _fgw_n += 1
+        print('规划批复并入 %d 条（源 %s）' % (_fgw_n, os.path.basename(_fgw_path)))
+    except FileNotFoundError:
+        print('⚠ 未找到 %s，规划前瞻只出 xlsx 那部分' % _fgw_path)
+    except Exception as _e:
+        print('⚠ 规划批复并入失败（%s），继续用 xlsx' % str(_e)[:60])
+
     cols = {k: [] for k in ('id', 'p', 'c', 'd', 'n', 'b', 'ct', 'k', 'e',
                             'a', 'st', 'src', 'doc', 'u', 'lk', 'ea', 'g', 'sc', 'pp', 'cl')}
 
@@ -236,13 +282,14 @@ def main():
     n_pipe = sum(cols['pp'])
     data = {
         'n': len(rows),
-        'gen': '2026-11-02',
+        'gen': time.strftime('%Y-%m-%d'),
         'cols': cols,
         'meta': {
             'pipe': n_pipe,
             'core': len(rows) - n_pipe,
             'amt': round(sum(cols['a'][i] or 0 for i in range(len(rows))), 2),
             'src': '各地热电联产/供热规划正文 25 份 + 省发改委规划批复原文',
+            'fgw': _fgw_n,
         },
     }
     js = 'window.DATA_PLAN=' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';'
