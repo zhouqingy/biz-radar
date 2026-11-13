@@ -2488,19 +2488,19 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
       <div class="rulebox" style="margin-top:12px">
         <h4>数据血缘 · 这些数字从哪来</h4>
         <ul>
-          <li><b>采集 → 过滤 → 入库</b>：原始公告 <b>3905</b> 条 → <code>semantic_drop()</code> 判删 <b>2786</b> 条 → <b>①投放 / 商机库 1119</b> 条（列式三块 77 + 461 + 581）。数字由本脚本实时读 <code>data.core.js · meta</code> 与三块 <code>n</code>，不是手填。</li>
-          <li><b>②业绩 / 动向库 4589 条</b>：rivalperf 452 家 / 2846 条，candperf 79 家 / 186 条，org 各单位库 1557 条。按单位聚合，看业主招过什么标、谁中标、跟谁合作最多，<b>不是①库的 1119 条</b>；②反推①要再过①过滤。</li>
-          <li><b>规则源唯一</b>：<code>biz-radar-tools/biz_rules.py</code>，采集端与构建端调同一份。来源平台 <b>57</b> 个（招标平台页签）、规划前瞻 124 条、行情历史 13 个品种、政策档 837 号 + 49 号令 + 5 部配套规定。</li>
+          <li><b>采集 → 过滤 → 入库</b>：原始公告 <b>4038</b> 条 → <code>semantic_drop()</code> 判删 <b>3065</b> 条 → <b>①投放 / 商机库 973</b> 条（列式三块 57 + 447 + 469）。数字由本脚本实时读 <code>data.core.js · meta</code> 与三块 <code>n</code>，不是手填。</li>
+          <li><b>②业绩 / 动向库 4634 条</b>：rivalperf 452 家 / 2847 条，candperf 79 家 / 186 条，org 各单位库 1601 条。按单位聚合，看业主招过什么标、谁中标、跟谁合作最多，<b>不是①库的 973 条</b>；②反推①要再过①过滤。</li>
+          <li><b>规则源唯一</b>：<code>biz-radar-tools/biz_rules.py</code>，采集端与构建端调同一份。来源平台 <b>56</b> 个（招标平台页签）、规划前瞻 165 条、行情历史 13 个品种、政策档 837 号 + 49 号令 + 5 部配套规定。</li>
           <li><b>每次更新全量重跑</b>：<code>update_weekly.py</code> 重建全部模块，处理「今天招标 → 明天出结果」的实时状态变化与漏项；更新后重跑本体检，本区块自动刷新。</li>
         </ul>
-        <h4>数据质量体检 · 自动快照（2026-11-06 11:16）</h4>
+        <h4>数据质量体检 · 自动快照（2026-11-13 19:44）</h4>
         <ul>
-          <li><b>23 项检查 / 阻断错误 0 / 需关注 2</b>。①库 1119 行 × 31 列；ID 唯一、<code>order</code> 与 <code>ext</code> 索引合法、<code>w</code> 与金额 ≥1 亿逐条一致（<code>w=1 98 / w=0 1021</code>）。</li>
-          <li><b>中标情况看两个库</b>：①库中标类公告 389 条，带原文链接 <b>389/389</b>（点开自己看，不用另做中标采集）；带中标单位字段 220 条，其余 169 条主体在②库。</li>
-          <li><b>字段完整率最低 5 列</b>：nw 1.9%、expect 2.4%、linkbad 3.3%、w 8.8%、iv 14.4% —— 这些是稀疏字段，空值属正常，不是数据缺失。</li>
+          <li><b>23 项检查 / 阻断错误 0 / 需关注 3</b>。①库 973 行 × 31 列；ID 唯一、<code>order</code> 与 <code>ext</code> 索引合法、<code>w</code> 与金额 ≥1 亿逐条一致（<code>w=1 71 / w=0 902</code>）。</li>
+          <li><b>中标情况看两个库</b>：①库中标类公告 318 条，带原文链接 <b>318/318</b>（点开自己看，不用另做中标采集）；带中标单位字段 153 条，其余 165 条主体在②库。</li>
+          <li><b>字段完整率最低 5 列</b>：nw 0.0%、linkbad 2.2%、expect 2.6%、w 7.3%、amtTxt 13.1% —— 这些是稀疏字段，空值属正常，不是数据缺失。</li>
         </ul>
-        <p style="font-size:12.5px;color:var(--tx3);margin:8px 0 4px"><b>需关注 2 项（只报不改）</b>：改主数据要先给逐条清单并等确认，本脚本一条数据都不动。</p>
-        <ul style="font-size:12.5px"><li><b>url 无占位/假链接</b>：异常 1 条：P5bb5f589 https://www.toutiao.com/a7668xxxx/</li><li><b>发布日期 d 格式</b>：异常 2 条：P5bb5f589（2026-04）盐城联鑫钢铁煤气资源综合利用热电升级改造项目配套标段(煤气管网/；P38a2d7bc（2026-08）铜陵有色金冠铜业分公司奥炉电收尘器</li></ul>
+        <p style="font-size:12.5px;color:var(--tx3);margin:8px 0 4px"><b>需关注 3 项（只报不改）</b>：改主数据要先给逐条清单并等确认，本脚本一条数据都不动。</p>
+        <ul style="font-size:12.5px"><li><b>url 无占位/假链接</b>：异常 1 条：P5bb5f589 https://www.toutiao.com/a7668xxxx/</li><li><b>发布日期 d 格式</b>：异常 2 条：P5bb5f589（2026-04）盐城联鑫钢铁煤气资源综合利用热电升级改造项目配套标段(煤气管网/；P38a2d7bc（2026-08）铜陵有色金冠铜业分公司奥炉电收尘器</li><li><b>关注档 watch 与 w 列一致</b>：watch.amt=1.0，w=1 实际 71 条</li></ul>
         <p style="font-size:12px;color:var(--tx3);margin:8px 0 0">本区块由 <code>biz-radar-tools/healthcheck.py</code> 每次体检后自动重写（只替换两行注释之间，页面其余字节不动）；完整 23 项明细见 <code>/workspace/数据质量体检.html</code> 与 <code>数据质量体检.json</code>。加 <code>--no-sync</code> 可关闭同步。</p>
       </div>
     <!-- HEALTH_SNAPSHOT_END -->
