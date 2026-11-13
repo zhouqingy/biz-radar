@@ -58,6 +58,11 @@ SITES = {
         'host': 'https://jsggzy.jszwfw.gov.cn',
         'plat': '江苏省公共资源交易平台',
         'level': '省级',
+        # 2026-11-13 实测：江苏站单页上限从 50 降到 10。rn=15/18/19 一律返回
+        # {"msg":"请求条数 rn 超过最大允许值: <N>","status":"error"}，rn=10 正常出 10 条。
+        # 不设这个值就会用默认 50，整站每个关键词都被拒 —— 11-09 起连续 5 天
+        # 「江苏 ✗ 整站失败（rn 超过最大允许值: 50）」，库一条没进，CI 全绿。
+        'rnMax': 10,
     },
     '浙江': {
         'api': 'https://ggzy.zj.gov.cn/inteligentsearch/rest/esinteligentsearch/getFullTextDataNew',

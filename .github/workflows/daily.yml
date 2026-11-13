@@ -68,6 +68,30 @@ jobs:
           # 规划前瞻照样不更新，等于白补。
           pip install requests beautifulsoup4 lxml openpyxl
 
+      # ── 0) 源站 DNS 预检（2026-11-13 新增）────────────────────────────
+      # 11-10~11-13 CI 连续全绿但零新增。沙箱直连实测四站都正常
+      # （浙江 2213 条 / 合肥 2377 条 / 常州 10 条 / 江苏 rn=10 出 10 条），
+      # 而 runner 上浙江拿到的是被替换成 attack.jinxibei.com 的 HTML、
+      # 合肥直接 getaddrinfo 失败 —— 属 runner 出口 DNS，不是脚本 bug。
+      # 这里只做预检 + 尝试换公共 DNS，不阻断流程；换不成打 warning 留证据。
+      - name: 0) 源站 DNS 预检
+        continue-on-error: true
+        run: |
+          HOSTS="jsggzy.jszwfw.gov.cn ggzy.zj.gov.cn ggzy.hefei.gov.cn ggzy.changzhou.gov.cn"
+          bad=0
+          for h in $HOSTS; do
+            ip=$(getent ahostsv4 "$h" 2>/dev/null | awk 'NR==1{print $1}')
+            if [ -n "$ip" ]; then echo "OK   $h → $ip"; else echo "::warning::$h 解析失败"; bad=$((bad+1)); fi
+          done
+          if [ "$bad" -gt 0 ]; then
+            echo "→ $bad 个域名解析失败，切换公共 DNS 重试"
+            sudo sh -c 'printf "nameserver 223.5.5.5\nnameserver 119.29.29.29\nnameserver 1.1.1.1\n" > /etc/resolv.conf' || true
+            for h in $HOSTS; do
+              ip=$(getent ahostsv4 "$h" 2>/dev/null | awk 'NR==1{print $1}')
+              if [ -n "$ip" ]; then echo "OK(切换后) $h → $ip"; else echo "::warning::切换 DNS 后 $h 仍解析失败"; fi
+            done
+          fi
+
       # ── 采集段：允许失败 ──────────────────────────────────────────
       # 这一段最慢也最不稳（外部站点限流、超时）。它失败不代表构建失败——
       # 手头已有的数据照样能重建出一版站点，总比整个 job 挂掉、站点停在
@@ -78,8 +102,18 @@ jobs:
         continue-on-error: true
         timeout-minutes: 30
         run: |
+          set -o pipefail
+          # 2026-11-13：加 tee + 统计。11-10~11-13 连续 4 天「全绿但零新增」，
+          # 就是因为这步整站失败被 continue-on-error 吞掉，而后面没有任何一处
+          # 关心「本轮到底新增了几条」。这里只把两个数字写进 GITHUB_ENV，
+          # 由最后的「7) 采集健康判定」决定是否标红；采集的失败容忍度不变。
           python collect_v4.py --days 3 --perkw 80 \
-            --sites 江苏,浙江,合肥,苏州,常州 --merge
+            --sites 江苏,浙江,合肥,苏州,常州 --merge 2>&1 | tee /tmp/crawl.log
+          _add=$(grep -o '合计新增 [0-9]* 条' /tmp/crawl.log | tail -1 | grep -o '[0-9]\+' | head -1)
+          _fail=$(grep -c '✗ 整站失败' /tmp/crawl.log || true)
+          echo "CRAWL_ADDED=${_add:-0}" >> "$GITHUB_ENV"
+          echo "CRAWL_FAILED=${_fail:-0}" >> "$GITHUB_ENV"
+          echo "本轮采集：新增 ${_add:-0} 条 · 整站失败 ${_fail:-0} 站"
 
       - name: 2) 详情页扫描
         working-directory: tools
@@ -348,6 +382,15 @@ jobs:
           # 口径自查：meta（顶部 KPI）必须和列表逐项对得上，bizTop 标签必须在
           # 前端 SEG_NAME 里有定义。2026-11-04 就是这里漏了才出「已公示金额 483 条
           # / 列表只有 460 条」和「能源清洁高效利用」这种前端没有的老词。
+          # 2026-11-13：顺带把 meta 关键值导出，给最后的采集健康判定用。
+          python - <<'PY' >> "$GITHUB_ENV"
+          import json
+          s = open('data.core.js', encoding='utf-8').read()
+          m = json.loads(s[s.index('=') + 1:].strip().rstrip(';')).get('meta', {})
+          print('META_TOTAL=%s' % (m.get('total') or 0))
+          print('META_NEW=%s' % (m.get('new') or 0))
+          print('META_ASOF=%s' % (m.get('dataAsOf') or 'unknown'))
+          PY
           python tools/check_meta.py
 
       # ══════════════════════════════════════════════════════════════
@@ -463,3 +506,26 @@ jobs:
           done
           echo "两次推送均失败"
           exit 1
+
+      # ══════════════════════════════════════════════════════════════
+      # 7) 采集健康判定（2026-11-13 新增 · 防「全绿但零新增」）
+      # ══════════════════════════════════════════════════════════════
+      # 11-09~11-13 连续 5 天：run 全 success，但 data.core.js 的 total 一直 900、
+      # rawTotal 一直 3874、new 一直 0。采集端 5 站 4 站整站失败，每天抓 0 条，
+      # 用旧 raw 重建出一模一样的产物，所以「没掉条」也永远不会报错。
+      # 这道判定放在推送之后：能推的数据照推，但只要「整站失败 >= 3 且本轮新增 0 条」
+      # 就判红，让 GitHub 的失败邮件真的响一次。
+      - name: 7) 采集健康判定（只标红，不回滚已推数据）
+        if: always()
+        run: |
+          echo "本轮采集新增: ${CRAWL_ADDED:-?} 条 | 整站失败: ${CRAWL_FAILED:-?} 站"
+          echo "库内条数: ${META_TOTAL:-?} | 数据日期: ${META_ASOF:-?} | meta.new: ${META_NEW:-?}"
+          if [ "${CRAWL_FAILED:-0}" -ge 3 ] && [ "${CRAWL_ADDED:-0}" -eq 0 ]; then
+            echo "::error::采集实质失效：${CRAWL_FAILED} 站整站失败、本轮新增 0 条，库里仍是旧数据"
+            echo "::error::先看本 run 的「0) 源站 DNS 预检」与「1) 采集」日志，再查 collect_v4.py 的站点 rnMax"
+            exit 1
+          fi
+          if [ "${CRAWL_FAILED:-0}" -ge 3 ]; then
+            echo "::warning::${CRAWL_FAILED} 站整站失败，但本轮仍有 ${CRAWL_ADDED} 条新增"
+          fi
+          echo "采集健康判定通过"
