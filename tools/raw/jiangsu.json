@@ -8967,7 +8967,7 @@
 "city": "",
 "rg": "江苏",
 "st": "招标公告",
-"buyer": "",
+"buyer": "连云港瑞驰投资集团有限公司",
 "win": "",
 "amt": null,
 "amtTxt": "",
@@ -8979,14 +8979,24 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-13",
+"shell": 0,
+"files": [],
+"origin": {
+"n": "ggzy.lyg.gov.cn",
+"u": "http://ggzy.lyg.gov.cn/lygweb/jump.html?infoid=0b73fbff-b3e5-42f2-a796-734b15b679d2"
+},
+"agc": "江苏志诚工程咨询管理有限公司",
+"contact": "李英杰",
+"phone": "18352808925"
 },
 {
 "t": "盐城清能灌东85MW渔光互补光伏项目施工总承包定标结果公示",
 "city": "",
 "rg": "江苏",
 "st": "其他公告",
-"buyer": "",
+"buyer": "盐城市国兴新能源有限公司",
 "win": "",
 "amt": null,
 "amtTxt": "",
@@ -8998,14 +9008,21 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-13",
+"shell": 0,
+"files": [],
+"origin": {
+"n": "ycggzy.jszwfw.gov.cn",
+"u": "https://ycggzy.jszwfw.gov.cn/detail?code=2c9e98cca18f662f01a190923d1b333e&title=交易信息&type=1&subTitle=建设工程"
+}
 },
 {
 "t": "新能源汽车先进部件产业基地项目",
 "city": "",
 "rg": "江苏",
 "st": "其他公告",
-"buyer": "",
+"buyer": "扬州维思德建设机械有限公司",
 "win": "",
 "amt": null,
 "amtTxt": "",
@@ -9017,15 +9034,18 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-13",
+"shell": 0,
+"files": []
 },
 {
 "t": "宜兴市新建镇全域土地综合整治项目-生态保护修复工程勘察设计-中标结果公告",
 "city": "",
 "rg": "江苏",
 "st": "中标结果公示",
-"buyer": "",
-"win": "",
+"buyer": "宜兴市泓益诚农业科技有限公司",
+"win": "江苏省太湖水利规划设计研究院有限公司",
 "amt": null,
 "amtTxt": "",
 "d": "2026-11-10",
@@ -9036,7 +9056,14 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-13",
+"shell": 0,
+"files": [],
+"origin": {
+"n": "ggzyjy.wuxi.gov.cn",
+"u": "http://ggzyjy.wuxi.gov.cn/wxsggzyjyzxzl/jyxx/slgc/index.shtml?6e052186-a3ad-4e62-8c69-db1b399cb83b"
+}
 },
 {
 "t": "太仓市兴禾科技产业发展有限公司新建新能源汽车线控底盘系统项目施工总承包中标结果公告",
@@ -9045,7 +9072,7 @@
 "st": "中标结果公示",
 "buyer": "",
 "win": "",
-"amt": null,
+"amt": 145094074.12,
 "amtTxt": "",
 "d": "2026-11-10",
 "dl": null,
@@ -9055,7 +9082,16 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-13",
+"shell": 0,
+"files": [],
+"origin": {
+"n": "218.4.45.172:8086",
+"u": "http://218.4.45.172:8086/jumpDetail.html?infoid=58afa129-432c-41a3-8035-29bb83dc9c9f"
+},
+"amtY": 1.4509,
+"amtSrc": "候选人报价表"
 },
 {
 "t": "无锡市联普新能源有限公司废旧电缆一批",
@@ -9074,7 +9110,14 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-13",
+"shell": 0,
+"files": [],
+"origin": {
+"n": "www.wxcq.com.cn",
+"u": "http://www.wxcq.com.cn/wuxicq/"
+}
 },
 {
 "t": "兴化市临城街道60MW渔光互补光伏发电项目",
@@ -10269,6 +10312,25 @@
 "url": "",
 "mode": "",
 "snip": "已核准 · 最近办结 2026-05-19 · 常州市发改委",
+"attach": "",
+"platLevel": "省级",
+"srcType": "official"
+},
+{
+"t": "工业污水厂东侧道路（东定路-澄山路）",
+"city": "",
+"rg": "江苏",
+"st": "立项公示",
+"buyer": "工业污水厂",
+"win": "",
+"amt": null,
+"amtTxt": "",
+"d": "2026-11-12",
+"dl": null,
+"p": "江苏投资在线审批平台",
+"url": "",
+"mode": "",
+"snip": "已拿建设工程规划许可 · 最近办结 2026-11-12 · 江阴高新技术产业开发区管理委员会",
 "attach": "",
 "platLevel": "省级",
 "srcType": "official"
