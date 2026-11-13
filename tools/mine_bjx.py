@@ -14,7 +14,37 @@
 
 输出：raw/bjx_news.json  {updated, items:[{t,url,src,cat,d}]}
 """
-import os, re, json, time, gzip, urllib.request, urllib.parse
+import os, re, json, time, gzip, sys, urllib.request, urllib.parse
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from _atomic import atomic_dump, safe_load
+except ImportError:  # _atomic.py 尚未同步到远端时退化，保证脚本本身仍能跑
+    import json as _j
+
+    def atomic_dump(obj, path, indent=None, ensure_ascii=False):
+        d = os.path.dirname(os.path.abspath(path))
+        if d and not os.path.isdir(d):
+            os.makedirs(d, exist_ok=True)
+        tmp = path + '.tmp'
+        with open(tmp, 'w', encoding='utf-8') as f:
+            _j.dump(obj, f, ensure_ascii=ensure_ascii, indent=indent)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+        return path
+
+    def safe_load(path, default=None, label=''):
+        if not os.path.exists(path):
+            return default, True
+        try:
+            with open(path, encoding='utf-8') as f:
+                return _j.load(f), True
+        except Exception as e:
+            print('[FATAL] %s 读取失败：%s（%d 字节）'
+                  % (label or os.path.basename(path), e, os.path.getsize(path)))
+            return default, False
+
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(ROOT, 'raw')
@@ -111,12 +141,62 @@ def main():
         stat[cat] = '%d 条' % n
         time.sleep(0.6)
 
-    json.dump({'updated': time.strftime('%Y-%m-%d %H:%M'), 'items': items},
-              open(OUT, 'w', encoding='utf-8'), ensure_ascii=False)
+    # ── 并集合并（2026-11-13 修静默丢项）──────────────────────────────
+    # 原来这里直接覆盖写：某天某个频道抓少了、或者首页改版只返回一半，
+    # 旧新闻就被永久抹掉，而且不报错。实测出现过「本地 196 / 远端 200，
+    # 各自都有对方没有的条目」——谁后写谁赢，先写的全丢。
+    # 现在改成：旧 ∪ 新，按 url 去重（无 url 退回标题前 34 字），只裁掉 120 天前的。
+    old, ok = safe_load(OUT, {}, 'bjx_news.json')
+    old_items = (old.get('items') or []) if isinstance(old, dict) else []
+    if not ok:
+        print('[WARN] 旧 bjx_news.json 读不出来，本轮以新抓结果为准（旧文件已保留为 .bad）')
+        try:
+            os.replace(OUT, OUT + '.bad')
+        except OSError:
+            pass
+        old_items = []
+
+    def _key(x):
+        u = (x.get('url') or '').strip()
+        return u if u else (x.get('t') or '')[:34]
+
+    merged, seen2 = [], set()
+    # 先放旧的（历史优先），再放新的（补充）；同一 key 以新抓的为准（标题/日期可能更新）
+    for x in items:
+        k = _key(x)
+        if k in seen2:
+            continue
+        seen2.add(k)
+        merged.append(x)
+    add_old = 0
+    for x in old_items:
+        k = _key(x)
+        if k in seen2:
+            continue
+        seen2.add(k)
+        merged.append(x)
+        add_old += 1
+
+    # 只保留近 120 天，避免文件无限膨胀
+    cut = (time.strftime('%Y-%m-%d', time.localtime(time.time() - 120 * 86400)))
+    before = len(merged)
+    merged = [x for x in merged if not x.get('d') or x['d'] >= cut]
+    dropped = before - len(merged)
+
+    atomic_dump({'updated': time.strftime('%Y-%m-%d %H:%M'), 'items': merged}, OUT)
+
     print('北极星采集：')
     for k, v in stat.items():
         print('   %-8s %s' % (k, v))
-    print('合计 %d 条 → %s' % (len(items), OUT))
+    print('新抓 %d 条 · 从旧文件补回 %d 条 · 裁掉 120 天前 %d 条 → 合计 %d 条'
+          % (len(items), add_old, dropped, len(merged)))
+
+    # 抓取骤降告警：新抓条数不到旧文件六成，多半是改版或被拦，必须喊出来
+    if old_items and len(items) < len(old_items) * 0.6:
+        print('[WARN] 本轮新抓 %d 条，仅为旧文件 %d 条的 %.0f%%。'
+              % (len(items), len(old_items), 100.0 * len(items) / len(old_items)))
+        print('       已用并集保底，但采集通道很可能出问题了，请查 CHANS 是否被改版。')
+    print('→ %s' % OUT)
 
 
 if __name__ == '__main__':

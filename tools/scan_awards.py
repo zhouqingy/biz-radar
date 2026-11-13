@@ -41,6 +41,36 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from _atomic import atomic_dump, safe_load
+except ImportError:  # _atomic.py 尚未同步到远端时退化，保证脚本本身仍能跑
+    import json as _j
+
+    def atomic_dump(obj, path, indent=None, ensure_ascii=False):
+        d = os.path.dirname(os.path.abspath(path))
+        if d and not os.path.isdir(d):
+            os.makedirs(d, exist_ok=True)
+        tmp = path + '.tmp'
+        with open(tmp, 'w', encoding='utf-8') as f:
+            _j.dump(obj, f, ensure_ascii=ensure_ascii, indent=indent)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+        return path
+
+    def safe_load(path, default=None, label=''):
+        if not os.path.exists(path):
+            return default, True
+        try:
+            with open(path, encoding='utf-8') as f:
+                return _j.load(f), True
+        except Exception as e:
+            print('[FATAL] %s 读取失败：%s（%d 字节）'
+                  % (label or os.path.basename(path), e, os.path.getsize(path)))
+            return default, False
+
+
 BASE = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(BASE, 'raw')
 OUT = os.path.join(RAW, 'award_index.json')
@@ -1081,9 +1111,15 @@ def main():
             if m > 12:
                 y, m = y + 1, 1
 
-    old = {}
-    if os.path.exists(OUT):
-        old = json.load(open(OUT, encoding='utf-8'))
+    old, ok = safe_load(OUT, {}, 'award_index.json')
+    if not ok:
+        # 这里绝对不能「用空索引继续」：那等于把已有历史全部清空重建，
+        # 而本轮只扫近几个月，剩下的永久丢失。宁可这一步失败，等人修。
+        print('[ABORT] award_index.json 已损坏。继续跑会清空历史索引，已停止。')
+        print('        修复：python3 guard_sources.py --fix award_index')
+        sys.exit(1)
+    if not isinstance(old, dict):
+        old = {}
     recs = old.get('records') or {}
 
     if args.zj_only or args.sh_only or args.ah_only:
@@ -1102,8 +1138,7 @@ def main():
                          'rank': r.get('rank')}
         print('  %s 累计 %d 条' % (ym, len(recs)), flush=True)
         # 每扫完一个月就落盘，避免长跑中断全丢
-        json.dump({'updated': time.strftime('%Y-%m-%d %H:%M:%S'), 'records': recs},
-                  open(OUT, 'w', encoding='utf-8'), ensure_ascii=False)
+        atomic_dump({'updated': time.strftime('%Y-%m-%d %H:%M:%S'), 'records': recs}, OUT)
 
     if args.zj or args.zj_only:
         print('\n== 浙江站（赛道关键词）==', flush=True)
@@ -1143,8 +1178,7 @@ def main():
                          'amt': r['amt'], 'price': r['price'], 'rank': r.get('rank')}
         print('  安徽并入 %d 条，索引共 %d 条' % (len(got), len(recs)), flush=True)
 
-    json.dump({'updated': time.strftime('%Y-%m-%d %H:%M:%S'), 'records': recs},
-              open(OUT, 'w', encoding='utf-8'), ensure_ascii=False)
+    atomic_dump({'updated': time.strftime('%Y-%m-%d %H:%M:%S'), 'records': recs}, OUT)
 
     # 统计：有多少家单位被反查到
     wins = {}

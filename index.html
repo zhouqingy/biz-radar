@@ -589,6 +589,78 @@ a.ovf-t:hover{color:var(--brand);text-decoration:underline}
 
 .ovfoot{font-size:11.5px;color:var(--tx3);margin-top:10px;line-height:1.7}
 .pnote{font-size:11.5px;color:#8a6100;background:#fffbf0;border-left:2px solid #f0d9a8;padding:5px 8px;margin-top:6px;border-radius:0 5px 5px 0;line-height:1.6}
+
+/* ── 按单位聚合（2026-11-13）──────────────────────────────────────
+   起因：用户问「项目线索里面一家单位就一条线索吗？已备案里面一家单位就只备案了一次吗？
+   有多的都找出来，如果太多影响观看了，可以做成弹窗」。
+   实测：项目线索 78 条落在 37 家单位上，23 家有 2 条以上（青山 5 条、华友 4 条…）。
+   原来一条一行平铺，同一家散在表格各处，看不出「这家到底出了几件事、走到哪一步」。
+   现在改成：一行一家，列里给「条数 + 最近一次 + 阶段进度」，点行弹层看全部。 */
+.ovgrp-n{display:inline-block;min-width:17px;height:17px;line-height:17px;text-align:center;
+  border-radius:9px;background:#e8f0fb;color:#1a4f8a;font-size:10.5px;font-weight:800;
+  margin-left:4px;padding:0 5px;vertical-align:1px}
+.ovgrp-n.one{background:#f1f4f8;color:#8a94a3}
+tr.ovg-row{cursor:pointer}
+tr.ovg-row:hover td{background:#f7fbff}
+/* 阶段进度条：签约 → 备案 → 开工 → 投产。灰底，点亮的段用品牌色 */
+.ovstg{display:inline-flex;align-items:center;gap:0}
+.ovstg i{display:block;width:15px;height:6px;border-radius:3px;background:#dde3ec;margin-right:2px}
+.ovstg i.on{background:#2e7d5b}
+.ovstg em{font-style:normal;font-size:11px;color:#5a6572;margin-left:5px;white-space:nowrap}
+.ovstg em.none{color:var(--tx3)}
+.ovt-last{font-size:11.5px;color:var(--tx3);margin-top:3px;line-height:1.55}
+.ovt-last b{color:var(--tx2);font-weight:600}
+
+/* 弹层：单位全部记录 */
+.ovmask{position:fixed;inset:0;background:rgba(15,26,42,.42);z-index:900;
+  display:flex;align-items:center;justify-content:center;padding:24px;animation:ovfade .14s ease}
+@keyframes ovfade{from{opacity:0}to{opacity:1}}
+.ovsheet{background:#fff;border-radius:14px;box-shadow:0 18px 54px rgba(12,22,38,.28);
+  width:min(960px,96vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.ovsheet-h{padding:16px 20px 13px;border-bottom:1px solid var(--line);display:flex;
+  align-items:flex-start;gap:12px}
+.ovsheet-h .t{font-size:16px;font-weight:800;color:var(--tx1);line-height:1.45;flex:1}
+.ovsheet-h .t small{display:block;font-size:11.5px;font-weight:400;color:var(--tx3);margin-top:4px;line-height:1.6}
+.ovsheet-x{border:0;background:#f1f4f8;color:#66707d;width:28px;height:28px;border-radius:8px;
+  cursor:pointer;font-size:15px;line-height:1;flex:none}
+.ovsheet-x:hover{background:#e4e9f0;color:var(--tx1)}
+.ovsheet-b{padding:14px 20px 18px;overflow:auto}
+.ovsheet-b::-webkit-scrollbar{width:9px}
+.ovsheet-b::-webkit-scrollbar-thumb{background:#cfd7e2;border-radius:5px}
+/* 弹层内的时间轴：一竖线串起这家单位的所有动作 */
+.ovtl{position:relative;padding-left:22px}
+.ovtl:before{content:'';position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:#e3e9f1}
+.ovtl-i{position:relative;padding:0 0 15px}
+.ovtl-i:last-child{padding-bottom:2px}
+.ovtl-i:before{content:'';position:absolute;left:-20px;top:5px;width:9px;height:9px;
+  border-radius:50%;background:#fff;border:2px solid #b9c6d8}
+.ovtl-i.on:before{border-color:#2e7d5b;background:#2e7d5b}
+.ovtl-d{font-size:11.5px;color:var(--tx3);font-weight:600;letter-spacing:.2px}
+.ovtl-t{font-size:13px;color:var(--tx1);font-weight:700;line-height:1.6;margin:2px 0 4px}
+.ovtl-t a{color:var(--tx1);text-decoration:none}
+.ovtl-t a:hover{color:var(--brand);text-decoration:underline}
+.ovtl-m{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:4px}
+.ovtl-p{font-size:12px;color:var(--tx2);line-height:1.72}
+
+/* 市场与政策：按主体聚合的卡片 */
+.ovpol{display:grid;grid-template-columns:repeat(auto-fit,minmax(392px,1fr));gap:12px}
+.ovpol-c{background:#fff;border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.ovpol-h{padding:12px 15px;display:flex;align-items:center;gap:9px;cursor:pointer;
+  background:#fbfcfe;border-bottom:1px solid var(--el-bd3)}
+.ovpol-h:hover{background:#f5f9ff}
+.ovpol-h .nm{font-size:13.5px;font-weight:800;color:var(--tx1);flex:1;line-height:1.5}
+.ovpol-h .geo{font-size:11px;color:#1a4f8a;background:#eaf2fb;border-radius:4px;padding:1px 6px;white-space:nowrap}
+.ovpol-b{padding:11px 15px 14px}
+.ovpol-l{list-style:none;margin:0;padding:0}
+.ovpol-l li{padding:8px 0;border-top:1px dashed #e6ebf2;font-size:12.5px;line-height:1.7;color:var(--tx2)}
+.ovpol-l li:first-child{border-top:0;padding-top:0}
+.ovpol-l .tt{color:var(--tx1);font-weight:700}
+.ovpol-l .tt a{color:var(--tx1);text-decoration:none}
+.ovpol-l .tt a:hover{color:var(--brand);text-decoration:underline}
+.ovpol-l .dd{font-size:11.5px;color:var(--tx3);margin-top:2px}
+.ovpol-more{width:100%;border:0;background:#f4f7fb;color:#3a5a80;font-size:12px;
+  padding:8px;cursor:pointer;border-top:1px solid var(--el-bd3);font-family:inherit}
+.ovpol-more:hover{background:#e9f1fa}
 .kpirow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 .kpirow .kpi{background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 14px;min-width:130px;flex:1 1 130px;display:flex;flex-direction:column;gap:2px}
 .kpirow .kpi b{font-size:19px;font-weight:800;color:var(--tx1);line-height:1.2;letter-spacing:-.4px}
@@ -6973,6 +7045,84 @@ function ovRenderFlash(d) {
 function ovToggleKw() { ovKwOpen = !ovKwOpen; renderOverseas(); }
 
 /* ── 视图 2：项目线索（新闻来源，人工确认过）────────────────────── */
+/* ── 视图 2：项目线索（按「单位」聚合，一家一行）────────────────────
+   2026-11-13 改：原来一条线索一行，同一家单位（如青山 5 条、华友 4 条）
+   散在表格各处，看不出「这家一共出了几件事、走到哪一步」。
+   现在默认按单位归并，列里给条数、最近动态、阶段进度；点行弹层看全部记录。 */
+var ovClueOpen = '';   // 当前弹层展示的单位名；'' = 关闭
+
+/* 阶段识别：只认能落到流程上的词，认不出就返回 -1（不猜）
+   ⚠ 判断顺序很重要：「已投产」要先于「计划投产」检查，
+   否则「计划年底前投产」会被当成已经投产（华友 Pomalaa 实测踩过）。
+   所以每条都先排除未来时态（计划/拟/将/预计/力争/目标/有望/待），再认既成事实。 */
+var OV_STAGES = ['签约', '备案', '开工', '投产'];
+var OV_FUTURE = /计划|拟|将于|预计|力争|目标|有望|待|争取|预期|将于|将于/;
+
+function ovStage(t) {
+  var s = String(t || '');
+  /* 拆成分句，逐句判断：一句话里可能前半句是计划、后半句是已完工 */
+  var segs = s.split(/[，。；、,;]/);
+  var best = -1;
+  for (var i = 0; i < segs.length; i++) {
+    var g = segs[i];
+    var fut = OV_FUTURE.test(g);
+    var v = -1;
+    if (/已(投产|达产|商运|并网|投运)|建成投产|正式投产|投产成功|全部投运|全面达产|点火成功|满产/.test(g)) v = 3;
+    else if (/开工|奠基|破土|首根|吊装|进场施工|封顶/.test(g)) v = 2;
+    else if (!fut && /投产|达产|满产|量产|点火|并网|商运|投运/.test(g)) v = 3;
+    else if (!fut && /施工|在建|建设有序推进|推进中|设备调试|试生产|设备安装/.test(g)) v = 2;
+    else if (/备案|核准|获批|证书|审批通过|ODI 获批|取得.{0,6}证书/.test(g)) v = 1;
+    else if (/签约|签署|备忘录|谅解|框架协议|中标|合同|交割|收购|投资协议/.test(g)) v = 0;
+    /* 「新建 / 建设 / 扩建 / 拟投资」= 已决定要建，但还没到开工。
+       这一档必须放在最后兜底：它太宽，先判会吃掉备案和签约。 */
+    else if (/新建|建设|扩建|扩产|拟投资|投资建设|二期|三期/.test(g)) v = 1;
+    if (v > best) best = v;
+  }
+  return best;
+}
+/* 把一家单位的所有记录合成一条汇总 */
+function ovGroupClue(L) {
+  var map = {}, arr2 = [];
+  L.forEach(function (o) {
+    var k = o.name || '（未标单位）';
+    if (!map[k]) { map[k] = { name: k, rows: [], geo: o._geo, grp: o.grp || '', cut: o.cut || '' }; arr2.push(map[k]); }
+    map[k].rows.push(o);
+  });
+  arr2.forEach(function (g) {
+    g.rows.sort(function (a, b) { return (a.date || '') < (b.date || '') ? -1 : 1; });
+    g.n = g.rows.length;
+    g.last = g.rows[g.n - 1];
+    g.first = g.rows[0];
+    /* 阶段判定：从最新一条往回找，取第一个能认出来的。
+       原来的做法是「全部记录里最靠后的一步」，看起来更保守，但实测会失真 ——
+       华友「Pomalaa 推进中」被判成投产，只因为更早有一条提到「投产」。
+       阶段应该反映「现在走到哪」，所以从最近一条往回找最新可辨识的状态。 */
+    g.stage = -1;
+    for (var _i = g.rows.length - 1; _i >= 0; _i--) {
+      var _v = ovStage(g.rows[_i].title);
+      if (_v >= 0) { g.stage = _v; break; }
+    }
+    /* 全程都认不出时，用更宽的兜底词再试一遍（收入、产能、订单这类也算在推进） */
+    if (g.stage < 0) {
+      for (var _j = g.rows.length - 1; _j >= 0; _j--) {
+        if (/产能|收入|营收|订单|扩产|达产|产量|出口|发运|供地|土地|设备调试/.test(g.rows[_j].title || '')) {
+          g.stage = 2; break;
+        }
+      }
+    }
+    /* 国别用出现最多的那个，避免同名单位被标错 */
+    var gc = {};
+    g.rows.forEach(function (r) { gc[r._geo] = (gc[r._geo] || 0) + 1; });
+    g.geo = Object.keys(gc).sort(function (a, b) { return gc[b] - gc[a]; })[0];
+  });
+  /* 排序：条数多的在前，同条数按最近日期 */
+  arr2.sort(function (a, b) {
+    if (b.n !== a.n) return b.n - a.n;
+    return (b.last.date || '') > (a.last.date || '') ? 1 : -1;
+  });
+  return arr2;
+}
+
 function ovRenderClue(d) {
   var b = el('ovBoxClue'); if (!b) return;
   var L = d.clue;
@@ -6980,17 +7130,24 @@ function ovRenderClue(d) {
   L.forEach(function (o) {
     if (!o._geo) o._geo = ovGeo((o.title || '') + ' ' + (o.desc || '').slice(0, 120)) || '未标';
   });
+  var G = ovGroupClue(L);
+
   var geoN = {};
-  L.forEach(function (o) { geoN[o._geo] = (geoN[o._geo] || 0) + 1; });
+  G.forEach(function (g) { geoN[g.geo] = (geoN[g.geo] || 0) + 1; });
   var geos = Object.keys(geoN).sort(function (a, c) { return geoN[c] - geoN[a]; });
 
   var h = '<div class="ovnote">来自新闻、公告的早期信号，<b>每条都对应到具体业主</b>。' +
-    '确定性低于「已备案」——签约阶段的项目可能黄，跟进前先核实。</div>';
+    '确定性低于「已备案」——签约阶段的项目可能黄，跟进前先核实。' +
+    '<div style="margin-top:7px;padding-top:7px;border-top:1px dashed #b9d4f0">' +
+    '<b>' + G.length + ' 家单位共 ' + L.length + ' 条线索</b>（' +
+    G.filter(function (g) { return g.n > 1; }).length + ' 家有 2 条以上）。' +
+    '默认按单位归并，<b>点任意一行</b>可看这家单位的全部记录与推进过程。</div></div>';
 
-  var rest = L.filter(function (o) {
-    if (ovClueGeo && o._geo !== ovClueGeo) return false;
+  var rest = G.filter(function (g) {
+    if (ovClueGeo && g.geo !== ovClueGeo) return false;
     if (ovClueKw) {
-      var s = (o.name || '') + (o.title || '') + (o.desc || '');
+      var s = g.name;
+      g.rows.forEach(function (r) { s += (r.title || '') + (r.desc || ''); });
       if (s.indexOf(ovClueKw) < 0) return false;
     }
     return true;
@@ -7001,13 +7158,14 @@ function ovRenderClue(d) {
      一个筛选条吃掉 90px，正是用户说的「臃肿」。 */
   h += '<div class="ovfbar">';
   h += '<select id="ovFGeo" class="ovsel">' +
-    '<option value="">全部国家（' + L.length + '）</option>' +
+    '<option value="">全部国家（' + G.length + '）</option>' +
     geos.map(function (g) {
       return '<option value="' + esc(g) + '"' + (ovClueGeo === g ? ' selected' : '') + '>' +
         esc(g) + '（' + geoN[g] + '）</option>';
     }).join('') + '</select>';
   h += '<input id="ovKw" class="ovinput" placeholder="搜业主 / 项目关键词" value="' + esc(ovClueKw) + '">';
-  h += '<span class="ovfb-n">当前 ' + rest.length + ' 条</span>';
+  h += '<span class="ovfb-n">当前 ' + rest.length + ' 家 / ' +
+    rest.reduce(function (a, g) { return a + g.n; }, 0) + ' 条</span>';
   h += '</div>';
 
   if (!rest.length) {
@@ -7016,37 +7174,41 @@ function ovRenderClue(d) {
   }
 
   h += '<table class="pf-table ovtbl"><colgroup>' +
-    '<col style="width:16%"><col style="width:8%"><col style="width:40%">' +
-    '<col style="width:9%"><col style="width:10%"><col style="width:9%">' +
+    '<col style="width:24%"><col style="width:7%"><col style="width:33%">' +
+    '<col style="width:17%"><col style="width:11%"><col style="width:8%">' +
     '</colgroup><thead><tr>' +
-    '<th>业主</th><th>国家</th><th>项目 / 动态</th><th>类型</th><th>切口</th>' +
-    '<th style="text-align:right">日期</th></tr></thead><tbody>';
+    '<th>业主 / 单位</th><th>国家</th><th>最近动态</th><th>推进阶段</th>' +
+    '<th>切口</th><th style="text-align:right">最近日期</th></tr></thead><tbody>';
 
-  rest.forEach(function (o) {
-    /* 表格里只放短标签（海水淡化 / 自备电站·动力岛 / 余热回收），
-       完整的 cutWhy 塞进 title 悬停看。
-       cutMeta 会优先返回 cutWhy 的前 20 字，那是给卡片用的长句（「360MW 燃机自备电站
-       已在项目本体里。」），放进 10% 宽的列里会把整行撑成两行高。 */
+  rest.forEach(function (g) {
+    var o = g.last;
     var m = cutMeta(o);
-    /* opp（机会池）和 ''（看不出）都不是真正的切口 —— 旧版把「看不出」也当成一个
-       可筛选项，结果详情里一半的标签是「机会池」，等于没说。表格里这类一律留空，
-       只保留能落到具体工艺的那五种。 */
     var mt = (o.cut && o.cut !== 'opp') ? ((CUT_META[o.cut] || {}).t || '') : '';
-    var tg = (o.tag || '').replace(/^海外/, '') || '动态';
-    var ds = String(o.desc || '');
-    h += '<tr' + (o.url ? ' class="pf-row-link" data-u="' + esc(o.url) + '" title="点开看新闻原文"' : '') + '>' +
-      '<td class="ovt-own">' + esc(o.name || '—') + '</td>' +
-      '<td class="ovt-geo">' + esc(o._geo) + '</td>' +
-      '<td class="p"><b>' + esc(o.title || '') + '</b>' +
-      (ds ? '<div class="ovt-desc ovt-clamp">' + esc(ds.slice(0, 120)) + (ds.length > 120 ? '…' : '') + '</div>' : '') + '</td>' +
-      '<td>' + esc(tg) + '</td>' +
-      '<td>' + (mt ? '<span class="ovcut" style="background:' + m.bg + ';color:' + m.c + '" title="' + esc(m.tip) + '">' + esc(mt) + '</span>' : '<span class="ovdim">—</span>') + '</td>' +
+    /* 一家单位多个切口时取最近那条的；为空则留空 */
+    var ds = String(o.title || '');
+    /* 阶段进度条 */
+    var stg = '<span class="ovstg">';
+    for (var i = 0; i < 4; i++) stg += '<i class="' + (g.stage >= i ? 'on' : '') + '"></i>';
+    stg += '<em class="' + (g.stage < 0 ? 'none' : '') + '">' +
+      (g.stage < 0 ? '未识别' : OV_STAGES[g.stage]) + '</em></span>';
+    h += '<tr class="ovg-row pf-row-link" data-g="' + esc(g.name) + '">' +
+      '<td class="ovt-own"><b>' + esc(g.name) + '</b>' +
+      (g.n > 1 ? '<span class="ovgrp-n" title="这家单位有 ' + g.n + ' 条线索，点开看全部">' + g.n + '</span>'
+        : '<span class="ovgrp-n one">1</span>') +
+      (g.grp ? '<div class="ovt-last">' + esc(g.grp) + '</div>' : '') + '</td>' +
+      '<td class="ovt-geo">' + esc(g.geo) + '</td>' +
+      '<td class="p"><b>' + esc(ds) + '</b>' +
+      (g.n > 1 ? '<div class="ovt-last">首次 <b>' + esc(g.first.date || '') + '</b>｜共 ' +
+        g.n + ' 条，点开看全过程</div>' : '') + '</td>' +
+      '<td>' + stg + '</td>' +
+      '<td>' + (mt ? '<span class="ovcut" style="background:' + m.bg + ';color:' + m.c +
+        '" title="' + esc(m.tip) + '">' + esc(mt) + '</span>' : '<span class="ovdim">—</span>') + '</td>' +
       '<td class="d" style="text-align:right">' + esc(o.date || '') + '</td>' +
       '</tr>';
   });
   h += '</tbody></table>';
-  h += '<div class="ovfoot">共 ' + L.length + ' 条线索，当前筛选出 ' + rest.length + ' 条。' +
-    '点任意一行可打开原文。</div>';
+  h += '<div class="ovfoot">共 ' + G.length + ' 家单位 / ' + L.length + ' 条线索，当前筛选出 ' +
+    rest.length + ' 家。<b>点任意一行</b>看这家单位的全部记录（含原文链接）。</div>';
   b.innerHTML = h;
   ovBindClue();
 }
@@ -7070,10 +7232,80 @@ function ovBindClue() {
   }
   var box = el('ovBoxClue');
   if (box) box.onclick = function (e) {
-    var tr = e.target.closest('tr.pf-row-link');
-    if (tr && tr.dataset.u) window.open(tr.dataset.u, '_blank', 'noopener');
+    var tr = e.target.closest('tr.ovg-row');
+    if (tr && tr.dataset.g) { openOvUnit(tr.dataset.g); }
   };
 }
+
+/* ── 单位弹层：一家的全部记录，按时间轴排 ─────────────────────────── */
+function openOvUnit(name) {
+  var d = ovData();
+  var rows = [];
+  (d.clue || []).forEach(function (o) {
+    if ((o.name || '（未标单位）') === name) { o._kind = 'clue'; rows.push(o); }
+  });
+  /* 已备案里同名的主体也并进来 —— 用户问的就是「一家是不是只备案一次」，
+     把两组信息放在一起，才能看出「先签约、后备案、再开工」的完整链条 */
+  (d.odi || []).forEach(function (o) {
+    if ((o.own || '') === name) { o._kind = 'odi'; rows.push(o); }
+  });
+  rows.sort(function (a, b) { return (a.date || a.d || '') < (b.date || b.d || '') ? -1 : 1; });
+
+  var h = '<div class="ovsheet-h"><div class="t">' + esc(name) +
+    '<small>共 ' + rows.length + ' 条记录（线索 ' +
+    rows.filter(function (r) { return r._kind === 'clue'; }).length + ' · 备案 ' +
+    rows.filter(function (r) { return r._kind === 'odi'; }).length +
+    '）· 按时间正序，最后一条是最近进展</small></div>' +
+    '<button class="ovsheet-x" onclick="closeOvUnit()" title="关闭">✕</button></div>';
+  h += '<div class="ovsheet-b"><div class="ovtl">';
+  rows.forEach(function (r, i) {
+    var isLast = (i === rows.length - 1);
+    var dt = r.date || r.d || '';
+    if (r._kind === 'odi') {
+      h += '<div class="ovtl-i' + (isLast ? ' on' : '') + '">' +
+        '<div class="ovtl-d">' + esc(dt) + ' · 已备案</div>' +
+        '<div class="ovtl-t">' + esc(r.nm || '') + '</div>' +
+        '<div class="ovtl-m">' +
+        (r.geo ? '<span class="ovcut" style="background:#eaf2fb;color:#1a4f8a">' + esc(r.geo) + '</span>' : '') +
+        (r.act ? '<span class="ovdim">' + esc(r.act) + '</span>' : '') +
+        (r.mt ? '<span class="ovdim">申报金额 ' + esc(r.mt) + '</span>' : '') +
+        '</div>' +
+        (r.why ? '<div class="ovtl-p">' + esc(String(r.why).replace(/^[^：]*：/, '')) + '</div>' : '') +
+        '</div>';
+    } else {
+      var st = ovStage(r.title);
+      h += '<div class="ovtl-i' + (isLast ? ' on' : '') + '">' +
+        '<div class="ovtl-d">' + esc(dt) +
+        (st >= 0 ? ' · ' + OV_STAGES[st] : '') +
+        (r._geo ? ' · ' + esc(r._geo) : '') + '</div>' +
+        '<div class="ovtl-t">' + (r.url
+          ? '<a href="' + esc(r.url) + '" target="_blank" rel="noopener">' + esc(r.title || '') + ' ↗</a>'
+          : esc(r.title || '')) + '</div>' +
+        (r.cutWhy ? '<div class="ovtl-m"><span class="ovdim">切口</span> ' +
+          esc(r.cutWhy) + '</div>' : '') +
+        (r.desc ? '<div class="ovtl-p">' + esc(String(r.desc).slice(0, 300)) +
+          (String(r.desc).length > 300 ? '…' : '') + '</div>' : '') +
+        '</div>';
+    }
+  });
+  h += '</div></div>';
+
+  var old = el('ovMask');
+  if (old) old.parentNode.removeChild(old);
+  var mk = document.createElement('div');
+  mk.id = 'ovMask';
+  mk.className = 'ovmask';
+  mk.innerHTML = '<div class="ovsheet" role="dialog" aria-modal="true">' + h + '</div>';
+  mk.onclick = function (e) { if (e.target === mk) closeOvUnit(); };
+  document.body.appendChild(mk);
+}
+function closeOvUnit() {
+  var m = el('ovMask');
+  if (m) m.parentNode.removeChild(m);
+}
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeOvUnit();
+});
 
 /* ── 视图 3：已备案（政府登记）──────────────────────────────────── */
 function ovRenderOdi(d) {
@@ -7100,10 +7332,23 @@ function ovRenderOdi(d) {
 
   var S = L.filter(function (x) { return x.tier === 'S'; });
   var A = L.filter(function (x) { return x.tier === 'A'; });
+  /* 按投资主体聚合：实测 23 条落在 22 家主体上，只有伟明环保 2 条。
+     单条时行为与原来完全一致；多家时给角标 + 可点开看全部。 */
+  var OC = {};
+  L.forEach(function (x) { var k = x.own || '（未标主体）'; (OC[k] = OC[k] || []).push(x); });
+  var nMulti = Object.keys(OC).filter(function (k) { return OC[k].length > 1; }).length;
+
   h += '<div class="ovsum">' +
     '<span><i><b>' + S.length + '</b>直接相关</i><em>工程本体就是我们的活</em></span>' +
     '<span><i><b>' + A.length + '</b>潜在客户</i><em>客户行业在海外建厂，厂里必配电水热</em></span>' +
     '<span><i><b>' + L.length + '</b>合计</i><em>筛后入库，不是备案总量</em></span>' +
+    '</div>';
+
+  h += '<div class="ovfoot" style="margin:-4px 0 10px">' +
+    '共 <b>' + Object.keys(OC).length + ' 家主体 / ' + L.length + ' 条备案</b>' +
+    (nMulti ? '（' + nMulti + ' 家有多次备案，行首角标标了次数，点开看全部）' : '') +
+    '。<b>一家单位可以多次备案</b>——每次新设子公司、增资、并购都是一条独立备案。' +
+    '本视图只收录<b>筛后与主业相关的</b>，不是备案总量（浙江全库远大于此）。' +
     '</div>';
 
   h += '<table class="pf-table ovtbl"><colgroup>' +
@@ -7142,8 +7387,11 @@ function ovRenderOdi(d) {
        放进 9% 宽的列里会折成两行。这里只在前端做短标签，不改数据。 */
     var actTxt = ({ '新设子公司/机构': '新设', '绿地建厂': '绿地建厂',
                     '增资扩股': '增资', '并购': '并购' })[x.act] || x.act || '—';
-    h += '<tr>' +
-      '<td class="ovt-own">' + esc(own || '—') + '</td>' +
+    var cnt = (OC[x.own || '（未标主体）'] || []).length;
+    h += '<tr' + (cnt > 1 ? ' class="ovg-row pf-row-link" data-g="' + esc(x.own || '') + '"' : '') + '>' +
+      '<td class="ovt-own">' + esc(own || '—') +
+      (cnt > 1 ? '<span class="ovgrp-n" title="这家主体有 ' + cnt + ' 条备案，点开看全部">' + cnt + '</span>' : '') +
+      '</td>' +
       '<td class="ovt-geo">' + esc(x.geo || '—') + '</td>' +
       '<td class="p"><b>' + esc(nm) + '</b>' +
       (x.mt ? '<div class="ovt-desc">申报金额 ' + esc(x.mt) + '</div>' : '') + '</td>' +
@@ -7155,11 +7403,26 @@ function ovRenderOdi(d) {
   h += '</tbody></table>';
   h += '<div class="ovfoot">备案号可在浙江政务服务网核验（项目代码在数据里）。' +
     '金额只有' + L.filter(function (x) { return x.mt; }).length + '条写在项目名里——' +
-    '详情页接口返回 500，拿不到，所以大部分显示为空，不做假数据填充。</div>';
+    '详情页接口返回 500，拿不到，所以大部分显示为空，不做假数据填充。' +
+    (nMulti ? '<br><b>点带角标的行</b>可看该主体的全部备案记录。' : '') + '</div>';
   b.innerHTML = h;
+  /* 已备案行点击 → 同一个单位弹层（它会把线索 + 备案合并展示） */
+  var box0 = el('ovBoxOdi');
+  if (box0) box0.onclick = function (e) {
+    var tr = e.target.closest('tr.ovg-row');
+    if (tr && tr.dataset.g) openOvUnit(tr.dataset.g);
+  };
 }
 
 /* ── 视图 4：市场与政策 ─────────────────────────────────────────── */
+/* ── 视图 4：市场与政策 ─────────────────────────────────────
+   2026-11-13 改：原来一条一张卡片平铺，5 条散在网格里。实测 5 条落在 3 家主体上
+   （BP Batam 2 条、PT PLN Batam 2 条）。同一主体的话放在一起读才有意义 ——
+   「它先说要建淡化厂、后说产能缺口」，两条连起来才是完整判断。
+   现在按主体聚合：头顶给主体 + 国别 + 条数，正文列该主体的全部条目，
+   条目多的折起，点「展开其余 N 条」。 */
+var ovPolOpen = {};   // 主体 → 是否展开全部
+
 function ovRenderEnv(d) {
   var b = el('ovBoxEnv'); if (!b) return;
   var L = d.env;
@@ -7169,23 +7432,79 @@ function ovRenderEnv(d) {
     h += '<div class="empty">暂时没有新的市场/政策条目。</div>';
     b.innerHTML = h; return;
   }
-  h += '<div class="ovcards">';
+
+  /* 按主体归并 */
+  var G = {}, order = [];
   L.forEach(function (o) {
-    var m = cutMeta(o);
-    h += '<div class="ovc">' +
-      '<div class="ovc-t">' + (o.url
-        ? '<a href="' + esc(o.url) + '" target="_blank" rel="noopener">' + esc(o.title || '') + ' ↗</a>'
-        : esc(o.title || '')) + '</div>' +
-      (o.desc ? '<div class="ovc-m">' + esc(o.desc) + '</div>' : '') +
-      '<div class="ovc-f">' +
-      (m.t ? '<span class="ovcut" style="background:' + m.bg + ';color:' + m.c + '">' + esc(m.t) + '</span>' : '') +
-      '<span class="ovdim">' + esc(o.name || '') + '</span>' +
-      '<span class="ovdim">' + esc(o.tag || '') + '</span>' +
-      '<span class="ovdim" style="margin-left:auto">' + esc(o.date || '') + '</span>' +
-      '</div></div>';
+    var k = o.name || '（未标主体）';
+    if (!G[k]) { G[k] = { name: k, rows: [], geo: '' }; order.push(G[k]); }
+    G[k].rows.push(o);
+  });
+  order.forEach(function (g) {
+    g.rows.sort(function (a, c) { return (a.date || '') < (c.date || '') ? -1 : 1; });
+    g.n = g.rows.length;
+    g.last = g.rows[g.n - 1].date || '';
+    /* 国别从标题里认一个，认不出留空 */
+    var gc = {};
+    g.rows.forEach(function (r) {
+      var gg = ovGeo((r.title || '') + ' ' + (r.desc || '').slice(0, 80));
+      if (gg) gc[gg] = (gc[gg] || 0) + 1;
+    });
+    g.geo = Object.keys(gc).sort(function (a, c) { return gc[c] - gc[a]; })[0] || '';
+  });
+  order.sort(function (a, c) {
+    if (c.n !== a.n) return c.n - a.n;
+    return (c.last || '') > (a.last || '') ? 1 : -1;
+  });
+
+  var nMulti = order.filter(function (g) { return g.n > 1; }).length;
+  h += '<div class="ovfoot" style="margin:-4px 0 10px">' +
+    '共 <b>' + order.length + ' 个主体 / ' + L.length + ' 条</b>' +
+    (nMulti ? '（' + nMulti + ' 个主体有多条，按主体归在一起看更清楚）' : '') + '。</div>';
+
+  h += '<div class="ovpol">';
+  order.forEach(function (g, gi) {
+    var open = !!ovPolOpen[g.name];
+    var show = open ? g.rows : g.rows.slice(-2);   // 折起时只显示最近 2 条
+    var rest = g.n - show.length;
+
+    h += '<div class="ovpol-c">' +
+      '<div class="ovpol-h">' +
+      '<span class="nm">' + esc(g.name) + '</span>' +
+      (g.geo ? '<span class="geo">' + esc(g.geo) + '</span>' : '') +
+      '<span class="ovgrp-n' + (g.n > 1 ? '' : ' one') + '">' + g.n + '</span>' +
+      '</div><div class="ovpol-b"><ul class="ovpol-l">';
+
+    show.forEach(function (o) {
+      var m = cutMeta(o);
+      h += '<li>' +
+        '<div class="tt">' + (o.url
+          ? '<a href="' + esc(o.url) + '" target="_blank" rel="noopener">' + esc(o.title || '') + ' ↗</a>'
+          : esc(o.title || '')) + '</div>' +
+        (o.desc ? '<div class="ovpol-l-d" style="font-size:12px;color:var(--tx2);line-height:1.72;margin-top:3px">' +
+          esc(String(o.desc).slice(0, 190)) + (String(o.desc).length > 190 ? '…' : '') + '</div>' : '') +
+        '<div class="dd">' +
+        (m.t ? '<span class="ovcut" style="background:' + m.bg + ';color:' + m.c + ';margin-right:6px">' + esc(m.t) + '</span>' : '') +
+        (o.tag ? esc(o.tag) + ' · ' : '') + esc(o.date || '') +
+        '</div></li>';
+    });
+    h += '</ul>';
+    if (rest > 0) {
+      h += '<button class="ovpol-more" onclick="ovPolToggle(' + gi + ')">展开其余 ' + rest + ' 条 ▾</button>';
+    } else if (open && g.n > 2) {
+      h += '<button class="ovpol-more" onclick="ovPolToggle(' + gi + ')">收起 ▴</button>';
+    }
+    h += '</div></div>';
   });
   h += '</div>';
   b.innerHTML = h;
+  window._ovPolOrder = order;
+}
+function ovPolToggle(gi) {
+  var o = window._ovPolOrder && window._ovPolOrder[gi];
+  if (!o) return;
+  ovPolOpen[o.name] = !ovPolOpen[o.name];
+  renderOverseas();
 }
 
 /* ── 绑定 ──────────────────────────────────────────────────────── */
