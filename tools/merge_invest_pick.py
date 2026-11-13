@@ -74,6 +74,12 @@ def main():
         have = {(norm(x.get('t')), (x.get('d') or '')[:10]) for x in old}
         # 同一项目可能已用别的日期进过库，再补一层纯名字比对，避免「同一项目两条」
         have_name = {norm(x.get('t')) for x in old}
+        # 2026-11-13 修：init 由「整次运行一次」改成「每省一次」。
+        # 原来 init=0 在循环外，江苏把 added 加到 1 之后，浙江也从这个 1 开始累，
+        # 于是第二个省的日志打出「1082 → 1083（新增 1）」这种假数字，
+        # 合计也会多算。只影响日志、不影响写库，但日志是排查的第一手证据，
+        # 不能是错的。
+        init = len(old)
         added = 0
         for x in rows:
             name = (x.get('name') or '').strip()
@@ -101,7 +107,7 @@ def main():
         if added:
             json.dump(old, open(p, 'w', encoding='utf-8'), ensure_ascii=False, indent=0)
         grand += added
-        print('  [merge] %-6s %s: %d → %d（新增 %d）' % (prov, fn, len(old) - added, len(old), added))
+        print('  [merge] %-6s %s: %d → %d（新增 %d）' % (prov, fn, init, len(old), added))
     print('合计新增 %d 条' % grand)
     return 0
 

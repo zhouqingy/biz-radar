@@ -74,6 +74,34 @@ jobs:
       # 而 runner 上浙江拿到的是被替换成 attack.jinxibei.com 的 HTML、
       # 合肥直接 getaddrinfo 失败 —— 属 runner 出口 DNS，不是脚本 bug。
       # 这里只做预检 + 尝试换公共 DNS，不阻断流程；换不成打 warning 留证据。
+      # ── 0.5) 开工通知（可选）──────────────────────────────────────────
+      # 为什么要这一步：用户在意的不是「跑没跑」，是「今天有没有新东西」。
+      # 跑一次 30~50 分钟，全靠自己去点网页看，等于每天都得问一句「更新了吗」。
+      # 这里在开工时先发一封「已开工」，结束时（末尾「8) 收工通知」）再发一封
+      # 「今天新增 N 条 / 失败 M 站」，用户只收邮件，不用点开 Actions。
+      #
+      # 为什么用 IMAP APPEND 写草稿箱，而不是 SMTP 发信：
+      #   · SMTP 要另配发信服务器和授权码，新浪/QQ 现在基本都关了个性化 SMTP；
+      #   · IMAP 用同一个邮箱的授权码就行，APPEND 到「草稿箱」的邮件在客户端里
+      #     直接可见、可点发送，也不会被反垃圾拦（它压根没走发送通道）。
+      #   · 一个 Secret 同时供「开工」和「收工」两处用，不重复配。
+      #
+      # 没配 Secret 时整步跳过（if 判空），不影响既有流程一行。
+      - name: 0.5) 开工通知（未配 MAIL_* 则跳过）
+        if: always()
+        continue-on-error: true
+        env:
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          MAIL_HOST: ${{ secrets.MAIL_HOST }}
+        run: |
+          if [ -z "$MAIL_USER" ] || [ -z "$MAIL_PASS" ]; then
+            echo "未配置 MAIL_USER / MAIL_PASS，跳过通知（不影响采集）"
+            exit 0
+          fi
+          cd tools
+          python mail_notify.py --stage start || echo "::warning::开工通知失败（不影响采集）"
+
       - name: 0) 源站 DNS 预检
         continue-on-error: true
         run: |
@@ -424,6 +452,16 @@ jobs:
           print('META_TOTAL=%s' % (m.get('total') or 0))
           print('META_NEW=%s' % (m.get('new') or 0))
           print('META_ASOF=%s' % (m.get('dataAsOf') or 'unknown'))
+          print('META_AMT=%s' % (m.get('amtSum') or 0))
+          print('META_INV=%s' % (m.get('invSum') or 0))
+          # 规划前瞻也带一个条数出来 —— 4.7 是 continue-on-error，失败时
+          # 会静默沿用上一份，邮件里「规划前瞻 0 条」就是最直接的警报。
+          try:
+              _ps = open('data.plan.js', encoding='utf-8').read()
+              _pj = json.loads(_ps[_ps.index('=') + 1:].strip().rstrip(';'))
+              print('PLAN_N=%s' % (_pj.get('n') or 0))
+          except Exception:
+              print('PLAN_N=0')
           PY
           python tools/check_meta.py
 
@@ -570,3 +608,33 @@ jobs:
             echo "::warning::$F 站整站失败，但本轮仍有 $A 条新增"
           fi
           echo "采集健康判定通过"
+          # 把结论写成一行摘要，交给下一步「8) 收工通知」直接引用，
+          # 免得邮件脚本再解析一遍日志（解析口径一分叉就会说两种话）。
+          if [ "$F" -ge 3 ] && [ "$A" -eq 0 ]; then
+            echo "HEALTH_NOTE=❌ 采集实质失效：$F 站整站失败、新增 0 条，库里仍是旧数据" >> "$GITHUB_ENV"
+          elif [ "$F" -ge 3 ]; then
+            echo "HEALTH_NOTE=⚠ $F 站整站失败，但仍有 $A 条新增" >> "$GITHUB_ENV"
+          elif [ "$A" -eq 0 ]; then
+            echo "HEALTH_NOTE=ℹ 本轮没有新公告（站点全通，属正常静默）" >> "$GITHUB_ENV"
+          else
+            echo "HEALTH_NOTE=✅ $A 条新增、$F 站失败" >> "$GITHUB_ENV"
+          fi
+
+      # ── 8) 收工通知（可选）────────────────────────────────────────────
+      # 与 0.5 对称：一封「开工」，一封「收工 + 今天新增多少」。
+      # 口径数字全部来自前面步骤写进 GITHUB_ENV 的变量，这里只做搬运，
+      # 不重新算 —— 页面上的数字一律来自脚本，通知也一样。
+      - name: 8) 收工通知（未配 MAIL_* 则跳过）
+        if: always()
+        continue-on-error: true
+        env:
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          MAIL_HOST: ${{ secrets.MAIL_HOST }}
+        run: |
+          if [ -z "$MAIL_USER" ] || [ -z "$MAIL_PASS" ]; then
+            echo "未配置 MAIL_USER / MAIL_PASS，跳过通知（不影响采集）"
+            exit 0
+          fi
+          cd tools
+          python mail_notify.py --stage end || echo "::warning::收工通知失败（不影响已推数据）"
