@@ -108,7 +108,8 @@ jobs:
           # 关心「本轮到底新增了几条」。这里只把两个数字写进 GITHUB_ENV，
           # 由最后的「7) 采集健康判定」决定是否标红；采集的失败容忍度不变。
           python collect_v4.py --days 3 --perkw 80 \
-            --sites 江苏,浙江,合肥,苏州,常州 --merge 2>&1 | tee /tmp/crawl.log
+            --sites 江苏,浙江,合肥,苏州,常州 --merge 2>&1 | tee /tmp/crawl.log \
+            || echo "::warning::collect_v4 非零退出（日志已完整落在 /tmp/crawl.log），继续做统计"
           _add=$(grep -o '合计新增 [0-9]* 条' /tmp/crawl.log | tail -1 | grep -o '[0-9]\+' | head -1)
           _fail=$(grep -c '✗ 整站失败' /tmp/crawl.log || true)
           echo "CRAWL_ADDED=${_add:-0}" >> "$GITHUB_ENV"
@@ -518,14 +519,19 @@ jobs:
       - name: 7) 采集健康判定（只标红，不回滚已推数据）
         if: always()
         run: |
-          echo "本轮采集新增: ${CRAWL_ADDED:-?} 条 | 整站失败: ${CRAWL_FAILED:-?} 站"
+          # 取不到值（前序步骤没跑完）时按 0 处理，避免 `[ "?" -ge 3 ]` 这种
+          # integer expression expected 让判断悄悄失效 —— 那等于又一道假绿。
+          A="${CRAWL_ADDED:-0}"; F="${CRAWL_FAILED:-0}"
+          case "$A" in ''|*[!0-9]*) A=0;; esac
+          case "$F" in ''|*[!0-9]*) F=0;; esac
+          echo "本轮采集新增: $A 条 | 整站失败: $F 站"
           echo "库内条数: ${META_TOTAL:-?} | 数据日期: ${META_ASOF:-?} | meta.new: ${META_NEW:-?}"
-          if [ "${CRAWL_FAILED:-0}" -ge 3 ] && [ "${CRAWL_ADDED:-0}" -eq 0 ]; then
-            echo "::error::采集实质失效：${CRAWL_FAILED} 站整站失败、本轮新增 0 条，库里仍是旧数据"
+          if [ "$F" -ge 3 ] && [ "$A" -eq 0 ]; then
+            echo "::error::采集实质失效：$F 站整站失败、本轮新增 0 条，库里仍是旧数据"
             echo "::error::先看本 run 的「0) 源站 DNS 预检」与「1) 采集」日志，再查 collect_v4.py 的站点 rnMax"
             exit 1
           fi
-          if [ "${CRAWL_FAILED:-0}" -ge 3 ]; then
-            echo "::warning::${CRAWL_FAILED} 站整站失败，但本轮仍有 ${CRAWL_ADDED} 条新增"
+          if [ "$F" -ge 3 ]; then
+            echo "::warning::$F 站整站失败，但本轮仍有 $A 条新增"
           fi
           echo "采集健康判定通过"
