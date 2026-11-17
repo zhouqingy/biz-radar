@@ -650,7 +650,7 @@ for i, (k, r) in enumerate(merged.items()):
         _t = (r.get('amtTxt') or '')
         # ① 文本字眼最可靠
         if any(k in _t for k in ('总投资', '投资总额', '投资估算', '估算总投资',
-                                 '项目投资', '投资额')):
+                                 '项目投资', '投资额', '投资')):
             r['amtKind'] = 'inv'
         # ② 文本没提，就看阶段。立项公示 / 招标计划阶段的金额几乎必然是投资额 ——
         #    这两阶段连中标人都没有，哪来的中标价。抽查发现安徽省发改委的
@@ -679,6 +679,25 @@ json.dump(sorted({r['id'] for r in out}),
           open(SEEN_FILE, 'w', encoding='utf-8'), ensure_ascii=False)
 _nnew = sum(1 for r in out if r['_new'])
 print('\n新增判定：上一版基线 %d 条 → 本轮真新增 %d 条' % (len(seen_prev), _nnew))
+
+# ============ 6.6 buyer 兜底（2026-11-16 §5.60）====================
+# 各采集分支对 detail.buyer / snip 的处理不统一：部分分支 merged 里
+# buyer 为空，只在 snip 里留了「招标人：X」。构建端 judge 与页面
+# 「客户与业主」列都读 buyer 字段，空了业主就显示不出来。
+# 这里统一兜底一次（按优先级：buyer > detail.buyer > snip 抽取）。
+_rx_buyer = re.compile(r'招标人[名称名]??[:：]\s*([\u4e00-\u9fa5A-Za-z0-9（）()]{4,30})')
+_nbf = 0
+for r in out:
+    if r.get('buyer'):
+        continue
+    b = ((r.get('detail') or {}).get('buyer') or '').strip()
+    if not b:
+        m = _rx_buyer.search(r.get('snip') or '')
+        b = m.group(1).strip() if m else ''
+    if b:
+        r['buyer'] = b
+        _nbf += 1
+print('buyer 兜底：补 %d 条' % _nbf)
 
 out.sort(key=lambda x: (-x['score'], x['d']), reverse=False)
 out.sort(key=lambda x: x['score'], reverse=True)
