@@ -216,7 +216,7 @@ SOURCES = [('印尼商报', src_shangbao), ('国复咨询', src_goalfore), ('我
 
 def main():
     dry = '--dry' in sys.argv
-    days = 7
+    days = 14   # 2026-11-18 从 7 放宽：海螺印尼垃圾焚烧（10-22 发布）就是被 7 天窗口挤掉的
     for i, a in enumerate(sys.argv):
         if a == '--days' and i + 1 < len(sys.argv):
             days = int(sys.argv[i + 1])
