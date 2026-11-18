@@ -1147,6 +1147,11 @@ tr.ovg-row:hover td{background:#f7fbff}
 .rulebox code{background:#f2f4f8;padding:1px 6px;border-radius:5px;font-size:12px;color:var(--red)}
 
 /* ---- 金属仪表盘 ---- */
+/* 2026-11-18 扩到 20 品种，右栏按组渲染：组标题占一行，组内网格 */
+.mcat-h{font-size:10.5px;font-weight:800;color:#7a818c;letter-spacing:.5px;
+  margin:10px 0 6px;padding-left:2px;display:flex;align-items:center;gap:6px}
+.mcat-h::after{content:'';flex:1;height:1px;background:var(--line)}
+.mcat-h:first-child{margin-top:0}
 .mtgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
 .mt{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;position:relative;overflow:hidden}
 .mt::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--brand)}
@@ -1712,6 +1717,10 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
 .a-mr .a-mtrend{font-style:normal;font-size:calc(8.5px*var(--z));color:var(--ink4);
   flex:0 0 auto;white-space:nowrap;opacity:.75}
 .a-mr:hover .a-mtrend{color:var(--brand);opacity:1}
+/* 2026-11-18 扩 20 品种：右栏行情表分组标题（有色/黑色系/能源/光伏/酸化工） */
+.a-mg-h{font-size:calc(9px*var(--z));font-weight:800;letter-spacing:.5px;color:var(--ink4);
+  padding:7px 10px 3px;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:5px}
+.a-mg-h::after{content:'';flex:1;height:1px;background:var(--line2)}
 /* 老行情条搬进右栏后隐藏：右栏已用 DATA_CORE 自渲染 13 行，且每行直接可点开走势图，
    再留一份 mstrip 会出现两套重复价格。 */
 #aSide #mstrip{display:none!important}
@@ -2523,7 +2532,7 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
         <li><b>找商机</b>：能投的标 / 已出结果 / 立项线索三个档；顶部统计卡可直接点进对应泳道；<code>NEW</code> 是本轮首次入库。</li>
         <li><b>看谁中了标</b>：①库中标类公告 <b>389 条全部带原文链接</b>，点开自己看（华光环保、龙净这类不用另做采集）；中标情况的主体在<b>②库</b>，按单位聚合在「同业与伙伴 / 客户与业主」。</li>
         <li><b>查资质</b>：伙伴档案里点「四库一平台 ↗」跳住建部自己查；详情页要人机验证，本库不编资质证书号。</li>
-        <li><b>海外 / 政策 / 行情</b>：海外信号跟踪出海业主与备案线索；政策档见 <code>data.policy.js</code>（837 号 / 49 号令 + 5 部配套规定）；右侧当日有色行情 + 13 个品种过往曲线。</li>
+        <li><b>海外 / 政策 / 行情</b>：海外信号跟踪出海业主与备案线索；政策档见 <code>data.policy.js</code>（837 号 / 49 号令 + 5 部配套规定）；右侧当日行情 + 20 个品种过往曲线。</li>
         <li><b>拿不准就回查</b>：完整口径与更新机制在下方折叠区；事实与裁决底稿是 <code>/workspace/00-公司业务口径.md</code>，<b>口径一律以底稿为准</b>。</li>
       </ul>
     </div>
@@ -2564,16 +2573,16 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
       <div class="rulebox" style="margin-top:12px">
         <h4>数据血缘 · 这些数字从哪来</h4>
         <ul>
-          <li><b>采集 → 过滤 → 入库</b>：原始公告 <b>4044</b> 条 → <code>semantic_drop()</code> 判删 <b>3060</b> 条 → <b>①投放 / 商机库 984</b> 条（列式三块 60 + 423 + 501）。数字由本脚本实时读 <code>data.core.js · meta</code> 与三块 <code>n</code>，不是手填。</li>
-          <li><b>②业绩 / 动向库 4642 条</b>：rivalperf 452 家 / 2850 条，candperf 79 家 / 186 条，org 各单位库 1606 条。按单位聚合，看业主招过什么标、谁中标、跟谁合作最多，<b>不是①库的 984 条</b>；②反推①要再过①过滤。</li>
-          <li><b>规则源唯一</b>：<code>biz-radar-tools/biz_rules.py</code>，采集端与构建端调同一份。来源平台 <b>56</b> 个（招标平台页签）、规划前瞻 165 条、行情历史 13 个品种、政策档 837 号 + 49 号令 + 5 部配套规定。</li>
+          <li><b>采集 → 过滤 → 入库</b>：原始公告 <b>4046</b> 条 → <code>semantic_drop()</code> 判删 <b>3061</b> 条 → <b>①投放 / 商机库 985</b> 条（列式三块 60 + 423 + 502）。数字由本脚本实时读 <code>data.core.js · meta</code> 与三块 <code>n</code>，不是手填。</li>
+          <li><b>②业绩 / 动向库 4642 条</b>：rivalperf 452 家 / 2850 条，candperf 79 家 / 186 条，org 各单位库 1606 条。按单位聚合，看业主招过什么标、谁中标、跟谁合作最多，<b>不是①库的 985 条</b>；②反推①要再过①过滤。</li>
+          <li><b>规则源唯一</b>：<code>biz-radar-tools/biz_rules.py</code>，采集端与构建端调同一份。来源平台 <b>56</b> 个（招标平台页签）、规划前瞻 165 条、行情历史 20 个品种、政策档 837 号 + 49 号令 + 5 部配套规定。</li>
           <li><b>每次更新全量重跑</b>：<code>update_weekly.py</code> 重建全部模块，处理「今天招标 → 明天出结果」的实时状态变化与漏项；更新后重跑本体检，本区块自动刷新。</li>
         </ul>
-        <h4>数据质量体检 · 自动快照（2026-11-17 11:30）</h4>
+        <h4>数据质量体检 · 自动快照（2026-11-18 16:06）</h4>
         <ul>
-          <li><b>24 项检查 / 阻断错误 0 / 需关注 3</b>。①库 984 行 × 31 列；ID 唯一、<code>order</code> 与 <code>ext</code> 索引合法、<code>w</code> 与金额 ≥1 亿逐条一致（<code>w=1 74 / w=0 910</code>）。</li>
-          <li><b>中标情况看两个库</b>：①库中标类公告 322 条，带原文链接 <b>322/322</b>（点开自己看，不用另做中标采集）；带中标单位字段 157 条，其余 165 条主体在②库。</li>
-          <li><b>字段完整率最低 5 列</b>：nw 0.0%、linkbad 2.1%、expect 2.5%、w 7.5%、amtTxt 13.3% —— 这些是稀疏字段，空值属正常，不是数据缺失。</li>
+          <li><b>24 项检查 / 阻断错误 0 / 需关注 3</b>。①库 985 行 × 31 列；ID 唯一、<code>order</code> 与 <code>ext</code> 索引合法、<code>w</code> 与金额 ≥1 亿逐条一致（<code>w=1 74 / w=0 911</code>）。</li>
+          <li><b>中标情况看两个库</b>：①库中标类公告 323 条，带原文链接 <b>323/323</b>（点开自己看，不用另做中标采集）；带中标单位字段 157 条，其余 166 条主体在②库。</li>
+          <li><b>字段完整率最低 5 列</b>：nw 0.1%、linkbad 2.1%、expect 2.5%、w 7.5%、amtTxt 13.3% —— 这些是稀疏字段，空值属正常，不是数据缺失。</li>
         </ul>
         <p style="font-size:12.5px;color:var(--tx3);margin:8px 0 4px"><b>需关注 3 项（只报不改）</b>：改主数据要先给逐条清单并等确认，本脚本一条数据都不动。</p>
         <ul style="font-size:12.5px"><li><b>url 无占位/假链接</b>：异常 1 条：P5bb5f589 https://www.toutiao.com/a7668xxxx/</li><li><b>发布日期 d 格式</b>：异常 2 条：P5bb5f589（2026-04）盐城联鑫钢铁煤气资源综合利用热电升级改造项目配套标段(煤气管网/；P38a2d7bc（2026-08）铜陵有色金冠铜业分公司奥炉电收尘器</li><li><b>关注档 watch 与 w 列一致</b>：watch.amt=1.0，w=1 实际 74 条</li></ul>
@@ -2659,7 +2668,7 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
         <li><b>① 自动（默认）</b>：已配置三个定时任务，由系统按计划自动执行，<b>不需要人工发命令、也不需要开着电脑或客户端</b>——
           <br>· 每天 16:10：检索四地新项目 + <b>提前量信号</b>（发改委核准/备案、招标计划预公告、环评公示、技改备案、重大项目清单、上市公告、<b>地方热电联产规划批复</b>）+ 客户海外动态 + 行业政策，增量入库后<b>挖掘 A/B 级项目的新单位</b>、合并新增单位、<b>补厚档案过薄的单位</b>，全量重建并发布
           <br>· 每天 16:40：微信线索采集（竞对喜报 + 行业动态），严格校验后并入竞对档案与「微信线索」池（<b>不再塞进本页行业动态</b>，避免两处重复）
-          <br>· 工作日 16:05：刷新 13 个金属期货收盘价并发布（项目数据不变）
+          <br>· 工作日 16:05：刷新 18 个期货收盘价与 2 个现货基准价并发布（项目数据不变）
         </li>
         <li><b>② 人工触发</b>：随时说一句「更新商机数据」即可，我会立即跑一遍完整流程</li>
         <li><b>③ 自己跑脚本</b>：在 <code>/workspace/biz-radar-tools/</code> 下执行 <code>python3.11 update_weekly.py</code>（<code>--no-publish</code> 只重建不发布，<code>--check</code> 只做体检）</li>
@@ -2672,7 +2681,7 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
       </ul>
       <h4>五、各模块口径补充</h4>
       <ul>
-        <li><b>当日有色行情</b>（页顶蓝条 + 行业动态页）：13 个期货品种价格，来源上期所公开行情，<b>每个工作日收盘 16:05 自动刷新一次</b>，页面显示的是最近一次抓取的价格与时刻；抓取失败自动沿用上一次成功快照并保留原日期，不会显示假数据</li>
+        <li><b>当日有色行情</b>（页顶蓝条 + 行业动态页）：18 个期货 + 2 个现货（硫磺/硫酸，生意社基准价）品种价格，期货来源上期所等公开行情、现货来源生意社，<b>每个工作日收盘 16:05 自动刷新一次</b>，页面显示的是最近一次抓取的价格与时刻；抓取失败自动沿用上一次成功快照并保留原日期，不会显示假数据</li>
         <li><b>为什么不做成逐秒实时</b>：页面是纯静态页，浏览器直连行情源会被拒绝——新浪 <code>hq.sinajs.cn</code> 校验 Referer、东方财富 <code>push2</code> 不支持跨域、腾讯 <code>qt.gtimg.cn</code> 不提供国内期货代码，三个源都实测过，无一可用。因此改为服务端定时抓取，<b>最多滞后约 3 小时</b>；做投标决策看的是趋势与量级，这个精度足够，若要逐笔盯盘请直接看行情软件</li>
         <li><b>合作生态</b>：按「设计院补资质 + 施工单位补资源 + 当地关系」逻辑收录 30 家潜在联合体伙伴，全部附 2025-2026 年真实业绩佐证；其中东华、中机一院、煤炭院、浙江城建煤气热电院等在「竞争对手」里同时带 <b>竞合双身份</b> 标——同业竞争但可联合投标</li>
         <li><b>海外信号</b>：跟踪 44 家客户的境外矿山/园区/扩产动态，按与「用能用电+海水淡化」业务的相关度排序，前 4 条放大展示；筛选条可按行业过滤</li>
@@ -2713,8 +2722,8 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
   </div>
 </div>
 
-<script src="data.core.js?v=202611180502"></script>
-<script src="data.items.js?v=202611180502"></script>
+<script src="data.core.js?v=202611181608"></script>
+<script src="data.items.js?v=202611181608"></script>
 <script src="data.metalhist.js?v=202611041941"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
@@ -2782,7 +2791,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611180502';
+var VER='?v=202611181608';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -7526,20 +7535,45 @@ function ovPolToggle(gi) {
   };
 })();
 
-/* ==================== 金属仪表盘 ==================== */
-var MBLACK={RB:1,HC:1,'I':1,JM:1};
+/* ==================== 金属仪表盘 ====================
+   2026-11-18 扩品种（用户拍板）：13 → 20 个，右栏按 grp 分组渲染。
+   顺序即显示顺序：有色 → 黑色系 → 能源 → 光伏 → 酸化工。
+   旧数据没有 grp 字段时按 MBLACK 兜底（黑色系/有色），不会丢品种。 */
+var MGRP_ORDER=['有色','黑色系','能源','光伏','酸化工'];
+var MBLACK={RB:1,HC:1,'I':1,JM:1,J:1};
+function mgrpOf(m){
+  if(m.grp) return m.grp;
+  return MBLACK[m.code]?'黑色系':'有色';
+}
 function renderMetals(){
   var M=D.metals||{}; var its=M.items||[];
     el('mtDate').textContent=(M.at?('抓取时间 '+(M.updated||'')+' '+M.at+' · ') : (M.updated?('价格日期 '+M.updated+' · '):''))
-      +'每个工作日收盘 16:05 自动刷新，数据来自上期所公开行情';
-  el('mtGrid').innerHTML=its.map(function(m){
-    var cls=m.chg>0?'up':(m.chg<0?'down':'');
-    var arrow=m.chg>0?'▲':(m.chg<0?'▼':'—');
-    return '<div class="mt '+cls+'"><div class="mn">'+esc(m.name)+
-      '<span class="mcat">'+(MBLACK[m.code]?'黑色系':'有色')+'</span></div>'+
-      '<div class="mp">'+formatNum(m.price)+'<span class="mu">'+esc(m.unit)+'</span>'+
-      '<span class="mc">'+arrow+' '+sign_abs(m)+'</span></div>'+
-      '<div class="mh">'+esc(m.hint)+'</div></div>'}).join('');
+      +'期货为收盘价（上期所等公开行情）· 现货为生意社基准价 · 每个工作日 16:05 自动刷新';
+  var byG={}; its.forEach(function(m){ (byG[mgrpOf(m)]=byG[mgrpOf(m)]||[]).push(m); });
+  var html='';
+  MGRP_ORDER.forEach(function(g){
+    var arr=byG[g]; if(!arr||!arr.length) return; delete byG[g];
+    html+='<div class="mcat-h">'+g+'</div>'+
+      arr.map(function(m){
+      var cls=m.chg>0?'up':(m.chg<0?'down':'');
+      var arrow=m.chg>0?'▲':(m.chg<0?'▼':'—');
+      return '<div class="mt '+cls+'"><div class="mn">'+esc(m.name)+'</div>'+
+        '<div class="mp">'+formatNum(m.price)+'<span class="mu">'+esc(m.unit)+'</span>'+
+        '<span class="mc">'+arrow+' '+sign_abs(m)+'</span></div>'+
+        '<div class="mh">'+esc(m.hint)+'</div></div>'}).join('');
+  });
+  /* 兜底：万一出现分组字典之外的 grp，照样渲染不丢数据 */
+  Object.keys(byG).sort().forEach(function(g){
+    html+='<div class="mcat-h">'+esc(g)+'</div>'+
+      byG[g].map(function(m){
+      var cls=m.chg>0?'up':(m.chg<0?'down':'');
+      var arrow=m.chg>0?'▲':(m.chg<0?'▼':'—');
+      return '<div class="mt '+cls+'"><div class="mn">'+esc(m.name)+'</div>'+
+        '<div class="mp">'+formatNum(m.price)+'<span class="mu">'+esc(m.unit)+'</span>'+
+        '<span class="mc">'+arrow+' '+sign_abs(m)+'</span></div>'+
+        '<div class="mh">'+esc(m.hint)+'</div></div>'}).join('');
+  });
+  el('mtGrid').innerHTML=html;
 }
 function sign_abs(m){return (m.chg>0?'+':'')+Math.abs(m.chg)+'%'}
 function formatNum(n){return n>=10000?Math.round(n).toLocaleString('en-US'):n}
@@ -7549,7 +7583,6 @@ function mhNum(n){ return Math.round(n).toLocaleString('en-US') }
 function renderMStrip(){
   var its=(D.metals&&D.metals.items)||[];
   if(!its.length){el('mstrip').style.display='none';return}
-  var BLACK={RB:1,HC:1,'I':1,JM:1};
   function card(m){
     var c=m.chg>0?'up':(m.chg<0?'dn':'');
     /* 2026-10-30：整格可点，点开近 30/90 天走势（品种代码进 openMetalHist） */
@@ -7559,23 +7592,31 @@ function renderMStrip(){
       '<span class="r2"><span class="u">'+esc(m.unit)+'</span>'+
       '<span class="c '+c+'">'+(m.chg>0?'▲ +':(m.chg<0?'▼ ':'— '))+Math.abs(m.chg)+'%</span></span></span>';
   }
-  var nf=its.filter(function(m){return !BLACK[m.code]}), bk=its.filter(function(m){return BLACK[m.code]});
+  /* 2026-11-18：与右栏同款分组（有色→黑色系→能源→光伏→酸化工），现货品种也有迷你走势 */
+  var byG={}; its.forEach(function(m){ (byG[mgrpOf(m)]=byG[mgrpOf(m)]||[]).push(m); });
   var lab='当日行情'+(D.metals.updated?' · '+esc(D.metals.updated).slice(5):'');
   var tail;
   if(D.metals.at){ tail='<b style="color:#8ef0b4">'+esc(D.metals.updated||'')+' '+esc(D.metals.at)+'</b> 抓取'; }
   else if(D.metals.updated){ tail=esc(D.metals.updated)+' 行情'; }
   else tail='';
-  tail+=' · 每个工作日收盘 16:05 自动刷新';
+  tail+=' · 每个工作日 16:05 自动刷新 · 点品种看历史走势';
+  var body='';
+  MGRP_ORDER.forEach(function(g){
+    var arr=byG[g]; if(!arr||!arr.length) return; delete byG[g];
+    body+='<span class="sep"></span><span class="mslab">'+g+'</span>'+arr.map(card).join('');
+  });
+  Object.keys(byG).sort().forEach(function(g){
+    body+='<span class="sep"></span><span class="mslab">'+esc(g)+'</span>'+byG[g].map(card).join('');
+  });
   el('mstrip').innerHTML='<span class="mslab">'+lab+'</span>'+
-    nf.map(card).join('')+
-    (bk.length?'<span class="sep"></span><span class="mslab">黑色系</span>'+bk.map(card).join(''):'')+
+    body+
     '<span class="dt">'+tail+'</span>';
 }
 
 /* ==================== 历史价格走势（2026-10-30） ====================
    点页顶行情条任意一格 → 弹出该品种的折线图，可切 1月/3月/1年/5年/全部。
 
-   数据：data.metalhist.js（按需加载，约 250KB，13 个品种）
+   数据：data.metalhist.js（按需加载，约 333KB，20 个品种）
       结构 {updated, src, note, s:{CU:{n,u,sym,start,end,cnt,df,d:[],p:[]}}}
       d 的编码分两段：df 之前是月末采样，存完整 'YYYY-MM-DD'；
       df 之后是近 5 年逐日，存 'MMDD'，年份靠 end 倒推（跨年时月份变大就退一年）。
@@ -7646,7 +7687,8 @@ function mhPaint(){
 
   var body;
   if(idx.length<2){
-    body='<div class="mh-load">这个区间内历史数据不足（该品种上市较晚）。</div>';
+    body='<div class="mh-load">'+(s.sym?'这个区间内历史数据不足（该品种上市较晚）。'
+        :'现货价格自 '+esc(s.start||'')+' 起每日记录（生意社基准价），曲线随每日更新逐渐成形。')+'</div>';
   }else{
     body=mhChart(dates,px,idx,curD);
   }
@@ -7671,10 +7713,14 @@ function mhPaint(){
     body+
     '<div class="mh-facts">'+mhFacts(dates,px,idx,cur)+'</div>'+
     '<div class="mh-note">'+
+      (s.sym?
       '<b>怎么看</b>：这条线是期货主力连续合约的收盘价，反映的是原材料市场价，'+
       '不等于你手上某个项目的投标报价——中间还隔着加工费、运费、品牌溢价。'+
       '真正有用的是<b>方向</b>：涨得急的品种，报价时要留调价条款的余地，'+
-      '锁价期越长越吃亏。'+
+      '锁价期越长越吃亏。'
+      :'<b>怎么看</b>：这条线是生意社现货基准价（非期货），硫磺/硫酸是冶炼'+
+      '脱硫-烟气制酸环节的原料与副产品价格：酸价跌 → 印尼镍湿法(HPAL)酸耗'+
+      '成本下降、配套供汽需求 ↑，但客户烟气制酸的副产品收入同步缩水。')+
     '</div>'+
   '</div>';
 }
@@ -11518,7 +11564,7 @@ function boot_main(){
   font-size:calc(8px*var(--z));color:var(--ink4)}
 #aMk .a-mr b{flex:0 0 48px;text-align:right;white-space:nowrap;
   font-size:calc(10px*var(--z))!important}
-/* 涨跌幅必须单行：+0.19% 换行会把行高从 26px 撑到 38px，13 个品种装不下 */
+/* 涨跌幅必须单行：+0.19% 换行会把行高从 26px 撑到 38px，20 个品种装不下 */
 #aMk .a-mr i{flex:0 0 48px!important;min-width:0!important;white-space:nowrap!important;
   font-size:calc(9px*var(--z))!important}
 #aMk .a-spark{flex:0 0 30px;width:30px;height:14px;display:block}
@@ -11895,7 +11941,7 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
       // ──────────────────────────────────────────────────────────────
       // 当日行情 → 金属价格行情（用户 2026-11-06 截图指定样式）
       // 数据只有两处、都是站里现成的：
-      //   · 当日价 / 涨跌幅：data.core.js 的 DATA_CORE.metals.items（13 品种）
+      //   · 当日价 / 涨跌幅：data.core.js 的 DATA_CORE.metals.items（20 品种）
       //   · 迷你走势：data.metalhist.js 的 DATA_METALHIST.s[code].p（按需加载）
       // 不新造字段、不写死数字；点品种仍走原站 openMetalHist()。
       // ──────────────────────────────────────────────────────────────
@@ -11911,16 +11957,29 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         var es=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(ch){
           return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch];});};
         var fmt=function(n){try{return Number(n).toLocaleString('zh-CN',{maximumFractionDigits:2});}catch(e){return n;}};
-        // 涨跌汇总：从 13 个品种实时算，不写死
+        // 涨跌汇总：从 20 个品种实时算，不写死
         var nUp=0,nDn=0,nFl=0;
         arr.forEach(function(it){var v=Number(it.chg);if(v>0)nUp++;else if(v<0)nDn++;else nFl++;});
         var sm=document.getElementById('aMkSum');
         if(sm)sm.textContent=(upd?('更新 '+upd+' · '):'')+'共 '+arr.length+' 个品种';
+        /* 2026-11-18 扩到 20 品种：按组渲染（有色→黑色系→能源→光伏→酸化工），
+           组间插分组标题行。旧数据没有 grp 字段时按 code 兜底（黑色系词表）。 */
+        var MBLK={RB:1,HC:1,'I':1,JM:1,J:1};
+        var GORD=['有色','黑色系','能源','光伏','酸化工'];
+        function grpOf(it){
+          if(it.grp) return it.grp;
+          return MBLK[it.code]?'黑色系':'有色';
+        }
+        var byG={}; arr.forEach(function(it){ (byG[grpOf(it)]=byG[grpOf(it)]||[]).push(it); });
         var rows='<div class="a-mksum"><span>上涨 <b style="color:var(--up)">'+nUp+'</b></span>'+
           '<span>下跌 <b style="color:var(--dn)">'+nDn+'</b></span>'+
           '<span>平盘 <b>'+nFl+'</b></span>'+
           '<em>点任一品种 → 看历史曲线 ↗</em></div>';
-        rows+=arr.map(function(it){
+        var htmlParts=[];
+        function grpRow(g){
+          htmlParts.push('<div class="a-mg-h">'+es(g)+'</div>');
+        }
+        function itemRow(it){
           var chg=it.chg, isUp=Number(chg)>0, col=isUp?'var(--up)':'var(--dn)';
           var pct=(chg==null||isNaN(Number(chg)))?'—':((isUp?'+':'')+Number(chg).toFixed(2)+'%');
           return '<div class="a-mr" data-code="'+es(it.code||'')+'" title="点开看 '+es(it.name)+' 历史走势 ›">'+
@@ -11929,7 +11988,15 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
             '<i style="color:'+col+'">'+pct+'</i>'+
             '<svg class="a-spark" data-spark="'+es(it.code||'')+'" viewBox="0 0 32 14" preserveAspectRatio="none" aria-label="迷你走势"></svg>'+
             '</div>';
-        }).join('');
+        }
+        GORD.forEach(function(g){
+          var a=byG[g]; if(!a||!a.length) return; delete byG[g];
+          grpRow(g); a.forEach(function(it){ htmlParts.push(itemRow(it)); });
+        });
+        Object.keys(byG).sort().forEach(function(g){
+          grpRow(g); byG[g].forEach(function(it){ htmlParts.push(itemRow(it)); });
+        });
+        rows+=htmlParts.join('');
         if(mkb)mkb.insertAdjacentHTML('afterbegin',rows||'<div class="a-mr"><span>行情数据载入中…</span></div>');
         // 点品种行 → 复用原站 openMetalHist（近1月/3月/1年/5年/全部 + SVG 折线图），一行不改
         if(mkb)mkb.addEventListener('click',function(ev){
@@ -12323,7 +12390,7 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         var mt=document.getElementById('mtGrid');
         if(mt){
           var note=document.createElement('div');note.className='a-mknote';
-          note.innerHTML='13 个品种的当日价格、涨跌幅与迷你走势在右栏「金属价格行情」'+
+          note.innerHTML='20 个品种的当日价格、涨跌幅与迷你走势在右栏「金属价格行情」'+
             '（点品种可看历史曲线）；这里只保留业务解读，不重复列价格。';
           mt.parentNode.insertBefore(note,mt);
         }
