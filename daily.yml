@@ -1,0 +1,695 @@
+name: 商机雷达每日更新
+
+# ══════════════════════════════════════════════════════════════════════
+# 2026-10-22 三处修复（对照运行 #2 的实际失败日志）
+# ══════════════════════════════════════════════════════════════════════
+# 失败原因不是超时，是最后一步 git push 被拒：
+#
+#   ! [rejected] main -> main (fetch first)
+#   error: failed to push some refs
+#
+# 因为 checkout 用的是 fetch-depth: 1 + 默认浅克隆，等到 30 分钟跑完，
+# 本地早已落后于远端（期间我自己 publish_gh.py 按文件推过好几次，
+# 每次都是一个新提交）。本地 base 对不上，git 直接拒绝。
+#
+# 修复三件套：
+#   ① fetch-depth: 0        取完整历史，pull --rebase 才有东西可 rebase
+#   ② 提交前 pull --rebase   把远端的提交接上，再推
+#   ③ 去掉 job 级 55 分钟总超时，改成只给采集步骤限时
+#      ——原来「采集近 3 天」占了 30 分钟中的大部分，把 55 分钟的
+#      job 额度吃到只剩 25 分钟给后面，一旦网络慢就是整 job 被杀。
+#      但采集本身允许失败（continue-on-error），不该让它拖垮整个 job。
+# ══════════════════════════════════════════════════════════════════════
+
+on:
+  schedule:
+    - cron: '20 23 * * *'
+  workflow_dispatch:
+  # 2026-11-08 补：让「立刻跑一次」不必依赖网页点按钮。
+  # 原因：沙箱里的 token 只有 contents 权限、没有 actions:write，
+  # POST /actions/workflows/daily.yml/dispatches 一律 403
+  # （实测 "Resource not accessible by personal access token"）。
+  # 而 POST /repos/{o}/{r}/dispatches 走的是 contents:write，能通。
+  # 用法：curl -X POST .../dispatches -d '{"event_type":"manual-run"}'
+  # 只影响触发方式，不改任何步骤与口径。
+  repository_dispatch:
+    types: [manual-run]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+        with:
+          # 必须是 0（完整历史）。写成 1 的话下面 pull --rebase 会失败：
+          # 「fatal: refusing to merge unrelated histories」或直接 rebase 不动。
+          fetch-depth: 0
+
+      - name: 装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 装依赖
+        run: |
+          python -m pip install --upgrade pip
+          # openpyxl 2026-11-08 补：4.7 的 build_plan_forecast.py 要读
+          # 规划资料/江浙沪皖供热规划可做项目清单.xlsx。少这一行时 4.7 会在
+          # import 处 ModuleNotFoundError，靠 continue-on-error 又不红 ——
+          # 规划前瞻照样不更新，等于白补。
+          pip install requests beautifulsoup4 lxml openpyxl
+
+      # ── 0) 源站 DNS 预检（2026-11-13 新增）────────────────────────────
+      # 11-10~11-13 CI 连续全绿但零新增。沙箱直连实测四站都正常
+      # （浙江 2213 条 / 合肥 2377 条 / 常州 10 条 / 江苏 rn=10 出 10 条），
+      # 而 runner 上浙江拿到的是被替换成 attack.jinxibei.com 的 HTML、
+      # 合肥直接 getaddrinfo 失败 —— 属 runner 出口 DNS，不是脚本 bug。
+      # 这里只做预检 + 尝试换公共 DNS，不阻断流程；换不成打 warning 留证据。
+      # ── 0.5) 开工通知（可选）──────────────────────────────────────────
+      # 为什么要这一步：用户在意的不是「跑没跑」，是「今天有没有新东西」。
+      # 跑一次 30~50 分钟，全靠自己去点网页看，等于每天都得问一句「更新了吗」。
+      # 这里在开工时先发一封「已开工」，结束时（末尾「8) 收工通知」）再发一封
+      # 「今天新增 N 条 / 失败 M 站」，用户只收邮件，不用点开 Actions。
+      #
+      # 为什么用 IMAP APPEND 写草稿箱，而不是 SMTP 发信：
+      #   · SMTP 要另配发信服务器和授权码，新浪/QQ 现在基本都关了个性化 SMTP；
+      #   · IMAP 用同一个邮箱的授权码就行，APPEND 到「草稿箱」的邮件在客户端里
+      #     直接可见、可点发送，也不会被反垃圾拦（它压根没走发送通道）。
+      #   · 一个 Secret 同时供「开工」和「收工」两处用，不重复配。
+      #
+      # 没配 Secret 时整步跳过（if 判空），不影响既有流程一行。
+      - name: 0.5) 开工通知（未配 MAIL_* 则跳过）
+        if: always()
+        continue-on-error: true
+        env:
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          MAIL_HOST: ${{ secrets.MAIL_HOST }}
+        run: |
+          if [ -z "$MAIL_USER" ] || [ -z "$MAIL_PASS" ]; then
+            echo "未配置 MAIL_USER / MAIL_PASS，跳过通知（不影响采集）"
+            exit 0
+          fi
+          cd tools
+          python mail_notify.py --stage start || echo "::warning::开工通知失败（不影响采集）"
+
+      - name: 0) 源站 DNS 预检
+        continue-on-error: true
+        run: |
+          HOSTS="jsggzy.jszwfw.gov.cn ggzy.zj.gov.cn ggzy.hefei.gov.cn ggzy.changzhou.gov.cn"
+          bad=0
+          for h in $HOSTS; do
+            ip=$(getent ahostsv4 "$h" 2>/dev/null | awk 'NR==1{print $1}')
+            if [ -n "$ip" ]; then echo "OK   $h → $ip"; else echo "::warning::$h 解析失败"; bad=$((bad+1)); fi
+          done
+          if [ "$bad" -gt 0 ]; then
+            echo "→ $bad 个域名解析失败，切换公共 DNS 重试"
+            sudo sh -c 'printf "nameserver 223.5.5.5\nnameserver 119.29.29.29\nnameserver 1.1.1.1\n" > /etc/resolv.conf' || true
+            for h in $HOSTS; do
+              ip=$(getent ahostsv4 "$h" 2>/dev/null | awk 'NR==1{print $1}')
+              if [ -n "$ip" ]; then echo "OK(切换后) $h → $ip"; else echo "::warning::切换 DNS 后 $h 仍解析失败"; fi
+            done
+          fi
+
+      # ── 采集段：允许失败 ──────────────────────────────────────────
+      # 这一段最慢也最不稳（外部站点限流、超时）。它失败不代表构建失败——
+      # 手头已有的数据照样能重建出一版站点，总比整个 job 挂掉、站点停在
+      # 昨天要好。所以 continue-on-error + 单独限时。
+      - name: 1) 采集近 3 天
+        id: crawl
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 30
+        run: |
+          set -o pipefail
+          # 2026-11-13：加 tee + 统计。11-10~11-13 连续 4 天「全绿但零新增」，
+          # 就是因为这步整站失败被 continue-on-error 吞掉，而后面没有任何一处
+          # 关心「本轮到底新增了几条」。这里只把两个数字写进 GITHUB_ENV，
+          # 由最后的「7) 采集健康判定」决定是否标红；采集的失败容忍度不变。
+          python collect_v4.py --days 3 --perkw 80 \
+            --sites 江苏,浙江,合肥,苏州,常州 --merge 2>&1 | tee /tmp/crawl.log \
+            || echo "::warning::collect_v4 非零退出（日志已完整落在 /tmp/crawl.log），继续做统计"
+          _add=$(grep -o '合计新增 [0-9]* 条' /tmp/crawl.log | tail -1 | grep -o '[0-9]\+' | head -1)
+          _fail=$(grep -c '✗ 整站失败' /tmp/crawl.log || true)
+          echo "CRAWL_ADDED=${_add:-0}" >> "$GITHUB_ENV"
+          echo "CRAWL_FAILED=${_fail:-0}" >> "$GITHUB_ENV"
+          echo "本轮采集：新增 ${_add:-0} 条 · 整站失败 ${_fail:-0} 站"
+
+      - name: 2) 详情页扫描
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          python scan_detail.py --all --days 7 --limit 120 --sleep 0.1 --workers 8
+
+      - name: 3) 补缺失字段
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 12
+        run: |
+          python fill_missing.py --limit 80 --sleep 0.1 --workers 8
+
+      # ★ 2026-11-04 新增：专补金额。为什么单开一步而不用 fill_missing：
+      #   fill_missing 按「最缺的优先」排队，缺中标单位的永远排在缺金额的前面，
+      #   金额覆盖率就一直卡在 17%。单开一步只补金额，一轮能补四百多条。
+      #   命中率靠 detail_fields 的两条新规则：浙江站中标候选人页的**表格型报价**
+      #   （单位名\n7,289,582.00元）和政府采购页的「定标/成交结果: XX（1041459.00元）」。
+      #   补上来的口径是 win（中标价），和项目总投资分开存。
+      - name: 3.5) 专补金额
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 15
+        run: |
+          python fill_amount.py --all --workers 12
+
+      # ★ 2026-10-27 新增：省发改委对各地市「十五五」热电联产 / 资源综合利用发电
+      #   规划的**批复**。正文是 HTML 纯文本（不用解 PDF），且直接点名企业和项目方向，
+      #   比核准更早、比招标公告早 1~3 年，是立项线索层最稀缺的提前量。
+      #   产出 raw/early/plan-fgw-latest.json → build_data.py 的 EARLY_SRC 已映射成「立项公示」。
+      - name: 3.6) 省发改委热电联产/资源综合利用规划批复
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 15
+        run: |
+          python crawl_fgw_plan.py
+
+      # ★ 2026-10-27 新增：浙江全省各县市的热电联产规划只在「征求公众意见」公示，
+      #   正文不点名企业，干货（谁是热源点业主、装几台炉）全在附件《规划（报批稿）》
+      #   PDF 里。plan_pdf_auto.py 下载 PDF → pdftotext → 抽热源点清单，
+      #   再由 conv_plan_pdf.py 转成 raw/early/ 入库格式。
+      #   ⚠ 依赖 poppler-utils（pdftotext）。ubuntu-latest 镜像自带，装一下是双保险。
+      #   ⚠ 已经提取过的 key 会跳过（不覆盖人工校对过的版本），要重跑加 --force。
+      - name: 3.7) 规划 PDF 自动提取（热源点清单）
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 25
+        run: |
+          which pdftotext || (sudo apt-get update -qq && sudo apt-get install -y poppler-utils) || true
+          python plan_pdf_auto.py
+          python conv_plan_pdf.py
+
+      # ★ 2026-10-28 新增：安徽线。市县级规划站点全是空壳（芜湖不通、马鞍山/安庆栏目
+      #   空壳、铜陵栏目里全是人大会议决定、宣城列表 ajax 渲染失败），所以改走省级通道：
+      #   省发改委「企业投资项目核准」+「节能审查」+「项目公示」三个栏目，异步列表接口
+      #   直接 curl 可拿 JSON。节能审查正文最肥——项目代码（区划码定位城市）、总投资、
+      #   装机、技术方案全都写在里面，是项目级一手信息。
+      #   产出 raw/early/ah-nygs-latest.json（early='热电规划' → 立项线索层）。
+      - name: 3.8) 安徽省发改委·项目核准与节能审查
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          python crawl_ah_nygs.py
+
+      # ★ 2026-11-04 新增：海外速览（公众号线索）。用户原话：
+      #   「先跑 3~5 天再进行日更吧」——所以这一步带着 continue-on-error 上线，
+      #   前 5 天只当观察期，跑挂了不影响主链路，也不会污染 data.news.js
+      #   （写不进去 build_web 就只读到旧的 raw/oversea_flash.json）。
+      #
+      # 为什么单独一步而不是并进 1) 采集：搜狗微信是**按累计请求次数**限流的。
+      #   实测 31 个词一口气跑 → 有效 1 条，之后连常见词都返回 0，等 75 秒还不恢复。
+      #   所以 mine_oversea_wechat.py 内部把词分成 A/B/C 三组，按「年内第几天 % 3」
+      #   每天只跑一组（约 10 个词），三天轮一遍。
+      #   ⚠ 别为了「今天多抓点」把 KW_GROUPS 合并：那是把 IP 往冷宫里送。
+      #
+      # 产出 raw/oversea_flash.json → build_web.py 的 _OVS_FLASH → data.news.js 的
+      #   overseaFlash 键 → 海外页签「出海速览」视图。这一步失败时旧文件仍在，
+      #   页面显示上次的结果（速览本身允许有几天的滞后，不像招标公告那样要求 T+1）。
+      # 3.9) 海外速览（2026-11-08 换主通道，§5.52）
+      #   搜狗微信搜索对机房 IP 已封死：本机直连 weixin.sogou.com 得到
+      #   302 → /antispider/?antip=wx_sh2，任何关键词 0 条。CI 的 Azure IP 更早就在
+      #   黑名单里 —— 这就是「8 天还是 11 条」的根因，不是关键词不够。
+      #   现在两条腿：
+      #     A 自动 oversea_sources.py  直连印尼商报 / 国复咨询 / 我的钢铁（服务端渲染、无需登录）
+      #     B 人工 oversea_manual.py   用户投喂的公众号链接（raw/oversea_manual.json）
+      #   都不碰 semantic_drop / pick_odi，口径仍只有一份。
+      - name: 3.9a) 海外速览 · 公开源自动采集
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          if [ -f oversea_sources.py ]; then
+            python oversea_sources.py || echo "::warning::公开源采集失败，沿用上次结果"
+          else
+            echo "::warning::oversea_sources.py 不存在，跳过"
+          fi
+
+      - name: 3.9b) 海外速览 · 人工投喂公众号链接
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          if [ -f oversea_manual.py ]; then
+            python oversea_manual.py || echo "::warning::人工投喂通道失败"
+          else
+            echo "::warning::oversea_manual.py 不存在，跳过"
+          fi
+
+      # 3.9c) 搜狗通道（2026-11-18 改为每天尝试、失败无害）：
+      #   机房 IP 大概率被搜狗限流，但不是每天 100% 封 —— 每天试一次，
+      #   失败 continue-on-error 沿用上次结果，成功就白赚公众号覆盖。
+      #   沙箱侧另有每日定时任务兜底（沙箱 IP 没被封，见 automation 任务「出海速览每日采集」）。
+      - name: 3.9c) 海外速览 · 搜狗通道（每天尝试）
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 12
+        run: |
+          if [ -f mine_oversea_wechat.py ]; then
+            python mine_oversea_wechat.py || echo "::warning::搜狗通道失败，沿用上次结果"
+          else
+            echo "::warning::mine_oversea_wechat.py 不存在，跳过"
+          fi
+
+      # ★ 2026-11-13 新增：北极星电力网行业资讯。
+      #   mine_bjx.py 和它产出的 raw/bjx_news.json 早就写好了，但从来没有任何工作流调用，
+      #   文件停在 10-20、行业动态最后一条是 10-15 —— 用户问「最近信息在更新吗」时
+      #   发现资讯板块断粮一个月。这一步只抓、只写 raw/bjx_news.json，
+      #   并入 trends 是 build_web.py 第 1287 行已有的逻辑（只收 30 天内、标题前 34 字去重）。
+      - name: 3.9d) 行业资讯 · 北极星电力网
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          python mine_bjx.py || echo "::warning::北极星采集失败，沿用上次 raw/bjx_news.json"
+
+      # ★ 2026-11-13 新增：投资在线审批平台（浙江 / 江苏）。
+      #   这是「招标之前 3~12 个月」最早的一档信号：项目过审批时就有名字和事项，
+      #   等招标公告出来对手已经在里面了。四个脚本 11-04 就写好了，但从没接进流程，
+      #   ①库里「投资在线」190 条一直是 legacy_D 的老数据（最新 2026-09-23）。
+      #   三段串起来：
+      #     crawl_invest.py        抓（与已有文件合并，不冲历史）
+      #     build_invest_matched.py 按项目名聚合 + 反查商机库（2026-11-13 补的缺失环节）
+      #     pick_invest.py          分 A/B/C/弃，只留 B（已到核准/施工许可、库内还没公告）
+      #     merge_invest_pick.py    B 档写进 raw/{省}.json（2026-11-13 补的缺失环节）
+      #   合规性：写进去的条目仍要过 build_data 的 judge()/semantic_drop()，
+      #   污水厂、纯设备这类会在构建时被剔掉，不在这一步另造判据。
+      - name: 3.10) 投资在线审批平台（招标前信号）
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          python crawl_invest.py --days 45 --pages 3 || echo "::warning::投资在线采集失败，沿用上次 invest_zj/js"
+          python build_invest_matched.py || echo "::warning::投资数据聚合失败，本轮跳过"
+          python pick_invest.py || echo "::warning::投资分档失败，本轮跳过"
+          python merge_invest_pick.py || echo "::warning::投资线索并入失败，本轮跳过"
+
+      # ── 构建段：不允许失败 ────────────────────────────────────────
+      # 注意 tools/raw/oversea_extra.json 必须在仓库里（人工补录的巴淡岛等
+      # 情报就存在这）。它不在的话 build_web 只打一行 WARN 继续跑，
+      # 站点看着正常、那批情报静默消失——比报错更难查。
+      # ★ 2026-11-13 新增：源数据完整性守卫。
+      #   起因：收尾时发现 raw/award_index.json 只有 2,969,384 B、json.load 直接报
+      #   unexpected end of data（远端完整 4,755,508 B / 9,281 条），
+      #   以及 bjx_news.json 两端各有一批独有条目被静默覆盖 —— 全绿跑完、没人报警。
+      #   这一步在重建之前把关：JSON 不能解析、或条数比基线塌了，直接判红停流程，
+      #   绝不用坏数据去重建、把污染带进 ①库。
+      - name: 3.95) 源数据完整性守卫（坏了就停，不许带病重建）
+        working-directory: tools
+        run: |
+          # guard_sources.py 未同步到仓库时跳过，避免半推状态把每日流程搞红
+          if [ ! -f guard_sources.py ]; then
+            echo "guard_sources.py 尚未入库，本步跳过（本地已就绪，等推送）"
+            exit 0
+          fi
+          python guard_sources.py
+          rc=$?
+          if [ $rc -ne 0 ]; then
+            echo ""
+            echo "================================================================"
+            echo "❌ 源数据已损坏或条数塌陷，已停止流程（不重建、不推送）。"
+            echo "   自愈：python guard_sources.py --fix <文件名>"
+            echo "================================================================"
+            exit $rc
+          fi
+
+      - name: 4) 重建数据（第一轮）
+        working-directory: tools
+        env:
+          BIZ_OUT: ${{ github.workspace }}
+        run: |
+          python build_data.py
+          python clean_data.py
+          python build_web.py
+
+      - name: 4.5) 生成业主关系图谱
+        working-directory: tools
+        env:
+          BIZ_OUT: ${{ github.workspace }}
+        run: python build_owner_graph.py
+
+      - name: 4.6) 重建数据（第二轮）
+        working-directory: tools
+        env:
+          BIZ_OUT: ${{ github.workspace }}
+        run: python build_web.py
+
+      # ★ 2026-11-02 新增：规划前瞻模块（一级页签「规划前瞻」）。
+      #   为什么单独一步、为什么放最后：
+      #     ① 它的输入不是采集来的**公告**，是人工整理好的《江浙沪皖供热规划可做项目清单.xlsx》
+      #        （规划正文 PDF 自动提取 → 人工校核后落成这张表）。这张表在仓库根目录下
+      #        规划资料-2026-2030/ 里，跟着仓库走，所以 CI 里读得到。
+      #     ② 它**不走** build_web.py：那套是招投标流的口径（有招标文件才算），
+      #        规划期项目塞进去会把「本库 N 个项目」算成招采记录。
+      #     ③ 必须放在 4.6 之后 —— 4.6 会重写 core/org/news 等所有 data.*.js，
+      #        虽然它不碰 data.plan.js，但先构建再生成，顺序上更安全，出问题一眼能定位。
+      #   ⚠ 允许失败（continue-on-error）：xlsx 没更新 / 格式变动时，
+      #     宁可让规划页停在上一次的版本，也不能拖垮整个每日更新。
+      - name: 4.7) 生成规划前瞻（独立模块，不进商机库）
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          BIZ_OUT: ${{ github.workspace }}
+          BIZ_SITE: ${{ github.workspace }}
+        run: |
+          # 2026-11-08 23:0x 补真：这一步此前一直是假的 —— build_plan_forecast.py
+          # 从来没进过仓库（404），靠 continue-on-error 静默跳过，data.plan.js
+          # 在 CI 里一次都没更新过（线上那份是本地手工产的 11-02 版，124 条）。
+          # 现在脚本 + 输入清单（40 KB xlsx）都入库了；本地与 CI 两种目录结构
+          # 都实测过，产出的 data.plan.js 与线上现役版逐字节相同（124 条 / 80 KB）。
+          # 缺文件时打 error annotation（页面会黄条提示），但仍不阻断整轮更新。
+          if [ ! -f build_plan_forecast.py ]; then
+            echo "::error::tools/build_plan_forecast.py 缺失，规划前瞻本轮不更新"
+            exit 1
+          fi
+          if [ ! -f "../规划资料-2026-2030/江浙沪皖供热规划可做项目清单.xlsx" ]; then
+            echo "::error::规划清单 xlsx 缺失（仓库 规划资料-2026-2030/），规划前瞻本轮不更新"
+            exit 1
+          fi
+          python build_plan_forecast.py
+
+      - name: 5) 检查产物
+        run: |
+          ls -lh --time-style=+%H:%M data*.js index.html 2>/dev/null | awk '{print $5, $6, $7}'
+          # ── 速查快照体检（2026-10-29）────────────────────────────────
+          # data.entprobe.js 是「按企业名定向检索」的人工产物，不在采集链里，
+          # 也不由 build_web.py 生成 —— 它只在发布清单里被手推。
+          # 缺了它页面不报错、不白屏，只是企业画像底部的「全网业绩速查」静默消失。
+          # 所以这里必须打一行明确日志，否则出了问题谁都看不出来。
+          if [ -f data.entprobe.js ]; then
+            echo "速查快照: $(du -h data.entprobe.js | cut -f1) · $(grep -o '"updated":"[^"]*"' data.entprobe.js | head -1)"
+          else
+            echo "⚠ 速查快照 data.entprobe.js 不在仓库里 —— 线上企业画像会缺「全网业绩速查」这一段"
+          fi
+          # ── 规划前瞻体检（2026-11-02）────────────────────────────────
+          # data.plan.js 由 4.7 生成，那一步是 continue-on-error 的：
+          # 生成失败不会中断 job，但会**静默**留下上一次的文件（或者干脆没有）。
+          # 这里必须查条数，否则线上「规划前瞻」页签空了都没人知道。
+          if [ -f data.plan.js ]; then
+            echo "规划前瞻: $(du -h data.plan.js | cut -f1)"
+          else
+            echo "⚠ 规划前瞻 data.plan.js 不在仓库里 —— 线上「规划前瞻」页签会是空面板"
+          fi
+          python - <<'PY'
+          import json
+          try:
+              s = open('data.plan.js', encoding='utf-8').read()
+              j = json.loads(s[s.index('=') + 1:].strip().rstrip(';'))
+              n = j.get('n', 0)
+              m = j.get('meta', {})
+              print('规划前瞻: %s 条 | 热网类 %s | 主业类 %s | 投资 %s 亿'
+                    % (n, m.get('pipe'), m.get('core'), m.get('amt')))
+              if n < 100:
+                  print('⚠ 规划前瞻条数异常（应 >= 100），检查规划资料-2026-2030/ 下的 xlsx')
+          except FileNotFoundError:
+              print('data.plan.js 不存在，跳过规划校验')
+          PY
+          python - <<'PY'
+          import json, sys
+          s = open('data.core.js', encoding='utf-8').read()
+          m = json.loads(s[s.index('=') + 1:].strip().rstrip(';'))
+          meta = m.get('meta', {})
+          total = meta.get('total', 0)
+          print('总条数: %s | 数据日期: %s | 金额覆盖: %s'
+                % (total, meta.get('dataAsOf'), meta.get('withAmt')))
+          # 2026-11-09 改：原来是绝对阈值 1000。库里 11-08 瘦身到 912 后，这个阈值
+          # 永远为真 —— 11-09 手动跑就卡在这里（746 < 1000），白跑 22 分钟，数据一条没推。
+          # 改成与「构建前那一版」比：git show HEAD:data.core.js 取触发时的 core，
+          # 掉超过 25% 才判异常。条数整体升降都不会误报，真出事故才拦。
+          try:
+              import subprocess
+              _prev = subprocess.run(['git', 'show', 'HEAD:data.core.js'],
+                                     capture_output=True, text=True, timeout=60).stdout
+              _pm = json.loads(_prev[_prev.index('=') + 1:].strip().rstrip(';'))['meta']
+              prev_total = int(_pm.get('total') or 0)
+          except Exception as _e:
+              prev_total = 0
+              print('⚠ 读不到上一版 total（%s），退回绝对下限 700' % _e)
+          if prev_total:
+              drop = (prev_total - total) / float(prev_total)
+              print('与上一版对比: %s → %s（变化 %+.1f%%）' % (prev_total, total, -drop * 100))
+              if drop > 0.25:
+                  print('条数比上一版少 %.0f%%，疑似采集失败，本次不提交' % (drop * 100))
+                  sys.exit(1)
+          elif total < 700:
+              print('条数异常（绝对下限 700），本次不提交')
+              sys.exit(1)
+          # 海外动态也检查一下：这批是人工维护的，被冲掉说明 raw 源没读到
+          try:
+              n = open('data.news.js', encoding='utf-8').read()
+              j = json.loads(n[n.index('=') + 1:].strip().rstrip(';'))
+              ov = len(j.get('overseas') or [])
+              print('海外动态: %s 条' % ov)
+              if ov < 80:
+                  print('海外动态异常（应 >= 80），疑似 raw/oversea_extra.json 未读到')
+                  sys.exit(1)
+          except FileNotFoundError:
+              print('data.news.js 不存在，跳过海外校验')
+          print('自检通过')
+          PY
+          # 口径自查：meta（顶部 KPI）必须和列表逐项对得上，bizTop 标签必须在
+          # 前端 SEG_NAME 里有定义。2026-11-04 就是这里漏了才出「已公示金额 483 条
+          # / 列表只有 460 条」和「能源清洁高效利用」这种前端没有的老词。
+          # 2026-11-13：顺带把 meta 关键值导出，给最后的采集健康判定用。
+          python - <<'PY' >> "$GITHUB_ENV"
+          import json
+          s = open('data.core.js', encoding='utf-8').read()
+          m = json.loads(s[s.index('=') + 1:].strip().rstrip(';')).get('meta', {})
+          print('META_TOTAL=%s' % (m.get('total') or 0))
+          print('META_NEW=%s' % (m.get('new') or 0))
+          print('META_ASOF=%s' % (m.get('dataAsOf') or 'unknown'))
+          print('META_AMT=%s' % (m.get('amtSum') or 0))
+          print('META_INV=%s' % (m.get('invSum') or 0))
+          # 规划前瞻也带一个条数出来 —— 4.7 是 continue-on-error，失败时
+          # 会静默沿用上一份，邮件里「规划前瞻 0 条」就是最直接的警报。
+          try:
+              _ps = open('data.plan.js', encoding='utf-8').read()
+              _pj = json.loads(_ps[_ps.index('=') + 1:].strip().rstrip(';'))
+              print('PLAN_N=%s' % (_pj.get('n') or 0))
+          except Exception:
+              print('PLAN_N=0')
+          PY
+          python tools/check_meta.py
+
+      # ══════════════════════════════════════════════════════════════
+      # 5.5) 口径一致性闸门（2026-11-08 新增 · 止血用）
+      # ══════════════════════════════════════════════════════════════
+      # 为什么加这道闸门：
+      #   ① 原来第 5 步写的是 `python check_meta.py`，而文件在 tools/ 下，
+      #      每天都是 FileNotFoundError → exit 2 → 红灯。11-07 / 11-08 连续两天同一行失败。
+      #   ② 但只把路径改对会更糟：仓库 tools/ 里的规则源是旧版
+      #      （biz_rules.py 21,359 B，没有 semantic_drop()；本地是 60,153 B），
+      #      11-08 run 21 日志实测构建出「总条数: 2349」，比在库的 1119 多一倍脏数据。
+      #      一旦放行，它会把 2349 条推上去、并用旧模板重建 index.html，
+      #      把页面上刚改好的东西整片覆盖（guard-index 判据「行数<3000 或 不含业务信号」
+      #      对 724K 的旧模板页不成立，守卫不会拦）。
+      #   ③ 所以先只做两件事：把路径修对（不再因路径红叉）+ 加这道闸门
+      #      （构建条数与在库条数差 >1% 就跳过推送，但**不判失败**）。
+      #      这样 Actions 是绿的、数据一条都不会动，等阶段③把口径对齐后再放开。
+      # ⚠ 阶段③要做的事：把 tools/ 下的 biz_rules / collect_v4 / build_data / build_web
+      #   换成最新版，跑一次全量对齐、逐条核对 1119 → 912 那 207 条的差异，
+      #   确认后再把闸门阈值放开到 100%。
+      - name: 5.5) 口径一致性闸门（不通过则跳过推送，不判红）
+        id: gate
+        run: |
+          python - <<'PY'
+          import json, subprocess, sys, os
+
+          def read_total(path):
+              s = open(path, encoding='utf-8').read()
+              j = json.loads(s[s.index('=') + 1:].strip().rstrip(';'))
+              return j.get('meta', {}).get('total', 0)
+
+          new = read_total('data.core.js')
+          try:
+              head = subprocess.run(['git', 'show', 'HEAD:data.core.js'],
+                                    capture_output=True, text=True, check=True).stdout
+              open('/tmp/head_core.js', 'w', encoding='utf-8').write(head)
+              old = read_total('/tmp/head_core.js')
+          except Exception as e:
+              print('读不到 HEAD 版 data.core.js（%s），按首次构建处理' % str(e)[:60])
+              old = new
+
+          diff = abs(new - old) / float(max(old, 1))
+          print('本次构建 %s 条 | 在库 %s 条 | 差异 %.1f%%' % (new, old, diff * 100))
+
+          # 2026-11-08 22:55 用户裁决「页面已经确定了，可以更新数据了」→ 放开闸门。
+          # 原来的逻辑：构建条数与在库条数差 >1% 就跳过推送（阶段③止血用）。
+          # 现在 tools/ 已与本地口径完全一致（biz_rules 60153B 等逐字节相同），
+          # 全量重建 3905 → judge 剔 1109 → semantic_drop 剔 1884 → 入库 912，
+          # 且这 912 条与线上 core 的 meta.total 逐字节一致。
+          # 阈值放到 50%：正常重建不会触发；只有「规则源跑偏、条数爆掉/塌掉」
+          # 这类事故才会拦住，仍然不判红（数据一条不动，等人工看）。
+          ok = 'true'
+          if diff > 0.50:
+              ok = 'false'
+              print('')
+              print('=' * 66)
+              print('⚠ 构建条数与在库条数差 %.0f%%，超过 50%% 安全线，已跳过推送。' % (diff * 100))
+              print('  原因：条数变化过大，通常是规则源跑偏或 raw 源异常。')
+              print('  处置：这不算失败，数据一条不动。人工核对后再决定是否手动推送。')
+              print('=' * 66)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write('ok=%s\n' % ok)
+          PY
+
+      # ── 提交段：核心修复 ─────────────────────────────────────────
+      # ★ 2026-11-13 新增：重建纵向闸门。
+      #   起因：run 32 全绿跑完，线上 973 → 947 条、总投资 247.4 → 48.0 亿，
+      #   没有任何一步变红 —— 5.5 的闸门只看「本次构建 vs 在库」的比值，
+      #   两次一起错就发现不了。这一步拿重建结果去比一个固定的历史基线
+      #   （raw/.guard_baseline.json），任何一项跌超阈值就判红、不推送。
+      - name: 5.6) 重建纵向闸门（比历史基线，倒退则判红不推送）
+        id: rebuild_gate
+        working-directory: tools
+        run: |
+          if [ ! -f guard_sources.py ]; then
+            echo "guard_sources.py 尚未入库，本步跳过"
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          set +e
+          python guard_sources.py --rebuild
+          rc=$?
+          set -e
+          if [ $rc -ne 0 ]; then
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo ""
+            echo "================================================================"
+            echo "❌ 重建结果比历史基线倒退，已拦下，不推送。"
+            echo "   最常见原因：某一批源数据没进来（省级重大项目名单 / bjx 资讯），"
+            echo "   或某个采集步骤静默失败。先看上面标 FAIL 的那一项。"
+            echo "================================================================"
+            exit $rc
+          fi
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: 6) 提交并推送
+        if: steps.gate.outputs.ok == 'true' && steps.rebuild_gate.outputs.ok == 'true'
+        run: |
+          git config user.name  "biz-radar-bot"
+          git config user.email "bot@users.noreply.github.com"
+
+          # 只提交站点产物。:!tools 排除工具目录——脚本不该被机器人的
+          # 自动更新覆盖掉（否则我这边改一次就被冲一次）。
+          # merged.snapshot.json 是两个「不采集」工作流（metals / digest）的构建输入，
+          # 必须跟数据一起刷新，否则它们永远拿旧快照重建、把数据回滚。
+          # tools/raw 里只提补采改过的省份文件：fill_amount.py / fill_missing.py 把
+          # 金额、中标单位直接写回 raw/<省>.json，不提交就等于每轮白抓。
+          # 只点名 4 个文件，避免把 tools/raw 下的缓存、日志、验证码图（很杂）一起带上去。
+          # 2026-11-08 §5.52：外加海外速览两个数据文件 —— 采集完不提交 = 白抓，
+          # 「8 天还是 11 条」就是这类问题的另一种表现。
+          git add -A '*.js' '*.html' 'merged.snapshot.json' \
+                  'tools/raw/jiangsu.json' 'tools/raw/zhejiang.json' \
+                  'tools/raw/anhui.json' 'tools/raw/shanghai.json' \
+                  'tools/raw/oversea_flash.json' 'tools/raw/oversea_manual.json' \
+                  'tools/raw/weekly' 'tools/raw/early' \
+                  'tools/raw/bjx_news.json' 'tools/raw/invest_zj.json' \
+                  'tools/raw/invest_js.json' 'tools/raw/invest_pick.json' \
+                  ':!tools/raw/weekly/_audit' ':!tools/raw/early/_off' ':!*.bak_amt' \
+                  ':!tools/*.py'
+
+          if git diff --staged --quiet; then
+            echo "没有变化，跳过提交"
+            exit 0
+          fi
+
+          git commit -m "自动更新 $(date -u '+%Y-%m-%d %H:%M') UTC"
+
+          # 把远端的新提交接上再推。用 rebase 不用 merge：
+          # 产物文件与远端冲突时 rebase 保本地（我们的这版是刚构建的，更新）。
+          git -c rebase.autoStash=true pull --rebase --strategy-option=ours origin main || {
+            echo "rebase 失败，改用合并策略"
+            git rebase --abort 2>/dev/null || true
+            git pull --no-rebase --strategy-option=ours origin main
+          }
+
+          # 推两次：第一次可能又被抢先，重试一次基本能过
+          for i in 1 2; do
+            if git push; then
+              echo "推送成功（第 $i 次尝试）"
+              exit 0
+            fi
+            echo "第 $i 次推送被拒，拉取后重试"
+            git pull --rebase --strategy-option=ours origin main || true
+            sleep 5
+          done
+          echo "两次推送均失败"
+          exit 1
+
+      # ══════════════════════════════════════════════════════════════
+      # 7) 采集健康判定（2026-11-13 新增 · 防「全绿但零新增」）
+      # ══════════════════════════════════════════════════════════════
+      # 11-09~11-13 连续 5 天：run 全 success，但 data.core.js 的 total 一直 900、
+      # rawTotal 一直 3874、new 一直 0。采集端 5 站 4 站整站失败，每天抓 0 条，
+      # 用旧 raw 重建出一模一样的产物，所以「没掉条」也永远不会报错。
+      # 这道判定放在推送之后：能推的数据照推，但只要「整站失败 >= 3 且本轮新增 0 条」
+      # 就判红，让 GitHub 的失败邮件真的响一次。
+      - name: 7) 采集健康判定（只标红，不回滚已推数据）
+        if: always()
+        run: |
+          # 取不到值（前序步骤没跑完）时按 0 处理，避免 `[ "?" -ge 3 ]` 这种
+          # integer expression expected 让判断悄悄失效 —— 那等于又一道假绿。
+          A="${CRAWL_ADDED:-0}"; F="${CRAWL_FAILED:-0}"
+          case "$A" in ''|*[!0-9]*) A=0;; esac
+          case "$F" in ''|*[!0-9]*) F=0;; esac
+          echo "本轮采集新增: $A 条 | 整站失败: $F 站"
+          echo "库内条数: ${META_TOTAL:-?} | 数据日期: ${META_ASOF:-?} | meta.new: ${META_NEW:-?}"
+          if [ "$F" -ge 3 ] && [ "$A" -eq 0 ]; then
+            echo "::error::采集实质失效：$F 站整站失败、本轮新增 0 条，库里仍是旧数据"
+            echo "::error::先看本 run 的「0) 源站 DNS 预检」与「1) 采集」日志，再查 collect_v4.py 的站点 rnMax"
+            exit 1
+          fi
+          if [ "$F" -ge 3 ]; then
+            echo "::warning::$F 站整站失败，但本轮仍有 $A 条新增"
+          fi
+          echo "采集健康判定通过"
+          # 把结论写成一行摘要，交给下一步「8) 收工通知」直接引用，
+          # 免得邮件脚本再解析一遍日志（解析口径一分叉就会说两种话）。
+          if [ "$F" -ge 3 ] && [ "$A" -eq 0 ]; then
+            echo "HEALTH_NOTE=❌ 采集实质失效：$F 站整站失败、新增 0 条，库里仍是旧数据" >> "$GITHUB_ENV"
+          elif [ "$F" -ge 3 ]; then
+            echo "HEALTH_NOTE=⚠ $F 站整站失败，但仍有 $A 条新增" >> "$GITHUB_ENV"
+          elif [ "$A" -eq 0 ]; then
+            echo "HEALTH_NOTE=ℹ 本轮没有新公告（站点全通，属正常静默）" >> "$GITHUB_ENV"
+          else
+            echo "HEALTH_NOTE=✅ $A 条新增、$F 站失败" >> "$GITHUB_ENV"
+          fi
+
+      # ── 8) 收工通知（可选）────────────────────────────────────────────
+      # 与 0.5 对称：一封「开工」，一封「收工 + 今天新增多少」。
+      # 口径数字全部来自前面步骤写进 GITHUB_ENV 的变量，这里只做搬运，
+      # 不重新算 —— 页面上的数字一律来自脚本，通知也一样。
+      - name: 8) 收工通知（未配 MAIL_* 则跳过）
+        if: always()
+        continue-on-error: true
+        env:
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          MAIL_HOST: ${{ secrets.MAIL_HOST }}
+        run: |
+          if [ -z "$MAIL_USER" ] || [ -z "$MAIL_PASS" ]; then
+            echo "未配置 MAIL_USER / MAIL_PASS，跳过通知（不影响采集）"
+            exit 0
+          fi
+          cd tools
+          python mail_notify.py --stage end || echo "::warning::收工通知失败（不影响已推数据）"
