@@ -1531,7 +1531,11 @@ def _load_oversea_extra():
                             'tier': x.get('tier') or '', 'why': x.get('why') or '',
                             'd': x.get('date') or '', 'usd': x.get('usd'),
                             'mt': x.get('moneyTxt') or '', 'deal': x.get('deal') or '',
-                            'code': x.get('code') or ''})
+                            'code': x.get('code') or '',
+                            # §5.71（2026-11-19 用户指出「已备案不能跳转」）：
+                            # 公示详情链接（tzxm itemList 反查 uuid+sendid 拼出），
+                            # 存量 23 条已回填 22 条；新数据由 crawl_invest 存 uuid 后可直拼
+                            'url': x.get('url') or ''})
             odi.sort(key=lambda y: y['d'], reverse=True)
         except Exception as e:
             print('  ⚠ 备案读取失败：%s' % e)
