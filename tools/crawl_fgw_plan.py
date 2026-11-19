@@ -48,7 +48,10 @@ FEEDS = [
      'https://fzggw.jiangsu.gov.cn/module/web/jpage/dataproxy.jsp'
      '?startrecord={a}&endrecord={b}&perpage=30&col=1&appid=1&webid=3'
      '&path=%2F&columnid=51012&unitid=394686&webname=&permissiontype=0',
-     'https://fzggw.jiangsu.gov.cn/col/col51012/index.html', 'js', 3),
+     # ⚠ 2026-10-28：原来是 3 页（269 条），结果苏州/常州/南通/扬州/连云港/宿迁
+     #   六市的规划批复全在第 4~10 页、一共 31 篇没捞上来。栏目实际有 886 条，
+     #   实测翻到 10 页刚好见底（第 11 页空）。
+     'https://fzggw.jiangsu.gov.cn/col/col51012/index.html', 'js', 10),
     # 浙江不发「批复」，只把这批规划的**报批稿公示**出来（省发改委「调查征集」栏目）。
     # 栏目页是空壳，列表由 JS 异步拉；真实接口是 jpaas-publish-server/front/page/build/unit
     # （浏览器渲染时抓到的 XHR，实测 curl 可直接调，返回 JSON，列表在 data.html 里）。
@@ -64,6 +67,17 @@ FEEDS = [
 # 只要规划类批复本身（不是配套通知、不是征求意见）
 WANT = re.compile(r'热电联产规划|资源综合利用.{0,6}发电规划|供热专项规划|热电联产.{0,8}规划|'
                   r'集中供热.{0,4}规划')
+# ⚠ 2026-10-28 用户拍板：只要 2026-2030 这一轮新规划，上一轮（2023-2025 / 2020-2025 /
+#   2018-2020…）一律不要——旧规划里的项目多半已经建完，对提前量没有意义。
+#   判定规则（按优先级）：
+#     ① 标题带「十五五」→ 新一轮（十五五 = 2026-2030）
+#     ② 标题带年份区间，起始年 >= 2025 → 新一轮（许 2025-2030，江山那份就是）
+#     ③ 带「十四五」「十三五」→ 旧
+#     ④ 一个年份标记都没有（如《仪征市热电联产规划》）→ 无法判定，保守丢掉
+NEW_ROUND = re.compile(r'十五五|(?:20(?:2[5-9]|[3-9]\d))[-—–~至]\s*20\d{2}')
+OLD_ROUND = re.compile(r'十四五|十三五|十五五?以外的|'
+                       r'20(?:1\d|2[0-4])[-—–~至]\s*20\d{2}')
+
 # 明显噪声：废止、评估、培训。
 # ⚠ 原来这里还有「征求意见」——浙江全省各县市的热电联产规划**只在征求公众意见这一环公开**
 #   （附规划报批稿全文），江苏那边正式批复的正文里才点名企业。把「征求意见」写进 SKIP
@@ -238,6 +252,11 @@ def crawl_list(rg, name, api_tpl, home, pk, pages=3):
         for x in got:
             t = x['t']
             if not WANT.search(t) or SKIP.search(t):
+                continue
+            # 只要 2026-2030 这一轮：先排除旧年份/旧五年计划，再要求命中新一轮标记。
+            # ⚠ 无年份标记的（如《仪征市热电联产规划》）按 NEW_ROUND 命不中 → 丢掉。
+            if OLD_ROUND.search(t) or not NEW_ROUND.search(t):
+                print('    · 跳过旧版规划：%s' % t[:56])
                 continue
             if t[:34] in seen:
                 continue
