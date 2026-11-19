@@ -2389,26 +2389,29 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
 
   <!-- 5 行业动态 -->
   <div class="panel" id="p-trend">
-    <div class="sect">业务信号监测 <small>哪里有厂要建 · 这活我们能不能接</small></div>
-    <div class="hint" id="tSigTip" style="margin-bottom:10px"></div>
-    <div class="kpirow" id="tSigKpi"></div>
-    <div class="frow" style="padding:0 0 10px"><label>业务切口</label><div class="chips" id="f-sigseg"></div>
-      <label style="margin-left:14px">强度</label><div class="chips" id="f-siglvl"></div></div>
-    <div class="siggrid" id="sigGrid"></div>
+    <!-- §5.71（2026-11-19 用户拍板）：本页签只放政策与行业资讯（主位、直接展示）；
+         业务信号 + 项目动态整块收进「项目信号 · 按阶段」折叠条，点开才看。
+         此前信号区常驻页首、政策反而折叠，用户打开页签先看到 250 张项目卡片，被指「没有变化」。 -->
+    <div class="sect">行业动态与政策 <small>政策 · 行业资讯 · 不构成业务机会，作背景参考</small> <span id="newsCnt" style="font-weight:400;color:var(--tx3)"></span></div>
+    <div class="hint" id="wxTip" style="margin:0 0 8px"></div>
+    <div class="frow" style="padding:0 0 10px"><label>分类</label><div class="chips" id="f-tg"></div></div>
+    <div class="news" id="newsGrid"></div>
+
+    <details id="sigFold" style="margin-top:18px;border-top:1px dashed var(--line);padding-top:12px">
+      <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2)">
+        项目信号 · 按阶段（已动土 / 已进程序 / 仅意向）<span id="sigFoldCnt" style="font-weight:400;color:var(--tx3)"></span>
+        <span style="font-weight:400;color:var(--tx3);font-size:11.5px">（业务信号 + 项目动态都按阶段归档，点开看）</span>
+      </summary>
+      <div class="hint" id="tSigTip" style="margin:10px 0"></div>
+      <div class="kpirow" id="tSigKpi"></div>
+      <div class="frow" style="padding:0 0 10px"><label>业务切口</label><div class="chips" id="f-sigseg"></div>
+        <label style="margin-left:14px">强度</label><div class="chips" id="f-siglvl"></div></div>
+      <div class="siggrid" id="sigGrid"></div>
+    </details>
 
     <div class="sect" style="margin-top:22px">下游景气仪表盘 · 有色金属与黑色系期货 <small id="mtDate"></small></div>
     <div class="hint" style="margin-bottom:8px">金属价格是客户扩产意愿与项目造价的先行指标：镍/铝/氧化铝走强 → 印尼/几内亚冶炼扩张与自备电厂需求上升；铜价直接影响电缆/电机设备成本；螺/卷/矿/焦煤反映钢厂利润与技改意愿。价格在每次数据更新时刷新，非盘中实时。</div>
     <div class="mtgrid" id="mtGrid"></div>
-
-    <details style="margin-top:18px;border-top:1px dashed var(--line);padding-top:12px">
-      <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2)">
-        行业动态与政策 <small style="font-weight:400;color:var(--tx3)">（只放政策与行业资讯 · 项目条目已按阶段归入上方信号档）</small> <span id="newsCnt" style="font-weight:400;color:var(--tx3)"></span>
-        <span style="font-weight:400;color:var(--tx3);font-size:11.5px">（不构成业务机会，作背景参考；点开才看）</span>
-      </summary>
-      <div class="hint" id="wxTip" style="margin:10px 0 8px"></div>
-      <div class="frow" style="padding:0 0 10px"><label>分类</label><div class="chips" id="f-tg"></div></div>
-      <div class="news" id="newsGrid"></div>
-    </details>
 
     <!-- P1 需求 2 · 历史趋势与波动（2026-11-06）：只读扫 data.news.js 的 trends（带 date），
          按发布月聚合成热度曲线 + 结构变化。不新增采集、不落盘快照、不改主数据、不碰 TABS。
@@ -2722,8 +2725,8 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
   </div>
 </div>
 
-<script src="data.core.js?v=202611191630"></script>
-<script src="data.items.js?v=202611191630"></script>
+<script src="data.core.js?v=202611191702"></script>
+<script src="data.items.js?v=202611191702"></script>
 <script src="data.metalhist.js?v=202611041941"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
@@ -2791,7 +2794,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611191630';
+var VER='?v=202611191702';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -4588,18 +4591,23 @@ function renderPolicy(q){
     top.innerHTML='逐条原文均摘自官方发布页，<b>biz / 业务判断是结合本库业务做的判断，不是政策原文</b>。'+
       '查证 '+(P.meta.checked||P.gen||'')+'。⚠ '+(P.meta.transition||'');
   }
-  /* 分组顺序按首次出现，保持「总览→主法规→逐条→配套→资金链→判断→时间线→更正」 */
+  /* 分组顺序按首次出现，保持「总览→主法规→逐条→配套→资金链→判断→时间线→更正」
+     §5.71（用户拍板「太长了拖动久」）：每组各包一层折叠、默认收起；
+     检索命中时自动展开，保证检索体验不变。 */
   var groups=[],seen={};
   hit.forEach(function(x){ if(!seen[x.g]){seen[x.g]=1;groups.push(x.g)} });
   var html=groups.map(function(g){
     var sub=hit.filter(function(x){return x.g===g});
-    return '<div class="sect" style="margin-top:14px">'+esc(g)+' <small>'+sub.length+' 条</small></div>'+
+    return '<details class="polgrp"'+(qq?' open':'')+
+      ' style="margin-top:10px;border:1px solid var(--line);border-radius:9px;background:#fbfcfe;padding:0 12px 8px">'+
+      '<summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2);padding:9px 0">'+
+        esc(g)+' <small style="font-weight:400;color:var(--tx3)">'+sub.length+' 条</small></summary>'+
       '<div class="polgrid">'+sub.map(function(x){
         return '<div class="polc"><div class="pol-h"><span class="pol-tag">'+esc(g.split(' · ')[0])+'</span>'+
           '<b>'+esc(x.t)+'</b></div><div class="pol-l">'+x.body+'</div>'+
           (x.url&&/^https?:/.test(x.url)?'<div class="pol-l"><a href="'+esc(x.url)+'" target="_blank" rel="noopener">官方原文 ↗</a></div>':'')+
         '</div>';
-      }).join('')+'</div>';
+      }).join('')+'</div></details>';
   }).join('');
   wrap.innerHTML=html||'<div class="empty">没有命中「'+esc(q||'')+'」的条款，换个关键词（如「跨境资金」「第十四条」「备案」）试试。</div>';
 }
@@ -7045,10 +7053,8 @@ function ovRenderFlash(d) {
   h += '<ul class="ovfl">';
   L.forEach(function (x) {
     var ti = esc(x.t || '');
-    /* 2026-11-19 E档（§5.70）：tier=E = 企业海外动向（具体企业+建厂动作，主档未过）→
-       灰标「企业动向」，区别于 S/A 主档。内联灰字，不动皮肤样式类。
-       B档「行业动态」按用户指示已撤（§5.69→§5.70）。 */
-    var bTag = x.tier === 'E' ? '<span style="display:inline-block;margin-right:5px;padding:0 4px;border-radius:3px;font-size:11px;line-height:16px;vertical-align:1px;background:#f0f1f3;color:#8a919e;border:1px solid #e2e4e8">企业动向</span>' : '';
+    /* §5.71（用户拍板）：灰底色块太丑，改标题后浅灰小字后缀，几乎无感 */
+    var bTag = x.tier === 'E' ? '<span style="color:#a6adb8;font-size:12px"> · 企业动向</span>' : '';
     h += '<li class="ovf">' +
       '<span class="ovf-d">' + esc((x.d || '').slice(5)) + '</span>' +
       '<span class="ovf-b">' + bTag +
@@ -7415,7 +7421,13 @@ function ovRenderOdi(d) {
       (cnt > 1 ? '<span class="ovgrp-n" title="这家主体有 ' + cnt + ' 条备案，点开看全部">' + cnt + '</span>' : '') +
       '</td>' +
       '<td class="ovt-geo">' + esc(x.geo || '—') + '</td>' +
-      '<td class="p"><b>' + esc(nm) + '</b>' +
+      '<td class="p"><b>' +
+      /* §5.71（用户指出「已备案不能跳转」）：有公示详情链的直接跳（存量 22/23 已反查补上）；
+         补不到的（走「新设企业」渠道无公示详情，如巨力越南）退回公示列表页人工搜。 */
+      (function(){
+        var u = x.url || 'https://tzxm.zjzwfw.gov.cn/tzxmweb/zwtpages/resultsPublicity/notice_of_publicity_new.html';
+        return '<a href="' + esc(u) + '" target="_blank" rel="noopener" style="color:inherit" title="打开备案公示页">' + esc(nm) + ' ↗</a>';
+      })() + '</b>' +
       (x.mt ? '<div class="ovt-desc">申报金额 ' + esc(x.mt) + '</div>' : '') + '</td>' +
       '<td class="ovt-act">' + esc(actTxt) + '</td>' +
       '<td>' + badge + (x.why ? '<div class="ovt-desc ovt-one">' + esc(x.why.replace(/^[^：]*：/, '')) + '</div>' : '') + '</td>' +
@@ -11279,7 +11291,11 @@ function renderTrends(){
       '<div class="kpi"><b>'+byLvl.strong+'</b><span>已动土 / 已投产</span></div>'+
       '<div class="kpi"><b>'+byLvl.mid+'</b><span>已进程序（可提前介入）</span></div>'+
       '<div class="kpi"><b>'+sigs.filter(function(j){return j.oversea}).length+'</b><span>海外</span></div>'+
-      '<div class="kpi"><b>'+polNews.length+'</b><span>政策与行业动态（非项目）</span></div>';
+      '<div class="kpi"><b>'+projs.length+'</b><span>项目动态（按阶段混排）</span></div>';
+    /* §5.71：折叠条 summary 上直接给阶段计数，不点开也知道有多少 */
+    var sf=el('sigFoldCnt');
+    if(sf) sf.textContent='· 已动土 '+byLvl.strong+' · 已进程序 '+byLvl.mid+
+      ' · 仅意向 '+byLvl.weak+'（业务信号 '+sigs.length+' + 项目动态 '+projs.length+'）';
   }
 
   /* 说明条：把「为什么只有 3 条」讲明白，这是数据现状不是功能缺陷 */
@@ -11296,10 +11312,9 @@ function renderTrends(){
       '<b>怎么算「信号」</b>：①建厂/扩产动作（开工/投产/核准/环评/中标）'+
       ' ②我们的业务切口（有色冶炼·电解铝·水泥窑余热·数据中心·自备电厂…）③具体项目实体，'+
       '三者缺一不可；政策方案、设备采购、人事股价一律不算。'+
-      '当前 <b style="color:#d4380d">'+sigs.length+' 条</b>，覆盖 '+segN+' 个业务方向。'+
-      '另从行业资讯里按阶段归档了 <b>'+projs.length+' 条项目动态</b>（审批批复/工程进展类，'+
-      '标题没有标准动作词但确有项目实体），与信号同档展示、带灰色「项目动态」标；'+
-      '政策文件与行业资讯留在下方折叠区。';
+      '当前 <b style="color:#d4380d">'+sigs.length+' 条</b>，覆盖 '+segN+' 个业务方向；'+
+      '项目动态 '+projs.length+' 条按同一阶段混排（带灰标）。'+
+      '政策与行业资讯在本页签<b>顶部主区</b>（§5.71 已搬）。';
   }
 
   // 信号区（含项目动态混排：sig 与 proj 同档，proj 卡片带灰标）
