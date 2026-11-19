@@ -136,7 +136,7 @@ jobs:
           # 关心「本轮到底新增了几条」。这里只把两个数字写进 GITHUB_ENV，
           # 由最后的「7) 采集健康判定」决定是否标红；采集的失败容忍度不变。
           python collect_v4.py --days 3 --perkw 80 \
-            --sites 江苏,浙江,合肥,苏州,常州 --merge 2>&1 | tee /tmp/crawl.log \
+            --sites 江苏,浙江,合肥,苏州,常州,安庆 --merge 2>&1 | tee /tmp/crawl.log \
             || echo "::warning::collect_v4 非零退出（日志已完整落在 /tmp/crawl.log），继续做统计"
           _add=$(grep -o '合计新增 [0-9]* 条' /tmp/crawl.log | tail -1 | grep -o '[0-9]\+' | head -1)
           _fail=$(grep -c '✗ 整站失败' /tmp/crawl.log || true)
