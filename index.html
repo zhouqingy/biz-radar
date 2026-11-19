@@ -2402,7 +2402,7 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
 
     <details style="margin-top:18px;border-top:1px dashed var(--line);padding-top:12px">
       <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2)">
-        行业动态与政策 <span id="newsCnt" style="font-weight:400;color:var(--tx3)"></span>
+        行业动态与政策 <small style="font-weight:400;color:var(--tx3)">（只放政策与行业资讯 · 项目条目已按阶段归入上方信号档）</small> <span id="newsCnt" style="font-weight:400;color:var(--tx3)"></span>
         <span style="font-weight:400;color:var(--tx3);font-size:11.5px">（不构成业务机会，作背景参考；点开才看）</span>
       </summary>
       <div class="hint" id="wxTip" style="margin:10px 0 8px"></div>
@@ -11184,11 +11184,83 @@ function sigJudge(n){
   return r;
 }
 
+/* ── 项目动态二次归档（2026-11-19 用户指令：「行业动态政策档只放政策动态，项目按阶段归位」）──
+   普通动态（非信号）里混着两类条目：政策/行业资讯，和「有业务切口/是工程项目
+   但标题没有标准动作词」的项目条目（如发改委审批流的「XX热电联产项目」——
+   desc 里全是节能审查/环评批复/施工许可，标题反而干净）。
+   projJudge 把项目条目从普通动态里拎出来，按可推断的阶段归进
+   已动土(strong)/已进程序(mid)/仅意向(weak) 三档，与信号同档混排（卡片带
+   「项目动态」灰标区分）。政策与纯行业资讯留在「政策与行业动态」折叠区。
+   ⚠ sig 判定（93 条信号）一个字没动 —— 后端 signal.py 的一致性不受影响；
+     本层是纯前端展示归档，不改变「是/不是信号」的口径。 */
+var PROJ_ENG = ['火电','煤电','燃煤发电','燃气发电','超超临界','超低排放','脱硫','脱硝',
+  '废水','污水','锅炉','汽轮机','发电机组','输变电','变电站','热网','供热','供汽',
+  '垃圾焚烧','生物质','光伏','储能','风电场','水电','抽水蓄能','海洋能','氢能'];
+var PROJ_STRONG = ['开工','动工','奠基','土建施工','点火','投产','试生产','达产','建成',
+  '竣工验收','并网发电','首台机组','吊装','首吊','水压试验','吹管','试运行','并网',
+  '施工到顶','浇筑','开钻','转体','投运','移交生产','首根'];
+var PROJ_MID = ['环评','环境影响评价','受理','公示','拟建','新建','扩建','技改','立项',
+  '备案','核准','签约','协议','中标','EPC','总承包','招标','勘察设计','可行性研究','可研',
+  '获核准','批复','审批','节能审查','用地预审','中标通知书','续建'];
+var PROJ_EXCL = ['设备采购','系统采购','集中采购','物资采购','设备供货','光伏组件',
+  '风电整机','电池片','组件招标','人事','招聘','股价','涨停','减持','分红','财报',
+  '业绩预告','咨询服务','课题','中期评估','评估方案','专题研究','首台（套）','名单的公示',
+  '转为应急备用','推荐项目名单','拟将','入选','名单',
+  /* 2026-11-19 补：政策文件与行业统计误收防堵（复现实测 4 条） */
+  '印发','优选排序','竞争配置结果','碳达峰','碳中和','节能降碳','重点工作安排',
+  '三年行动','工作方案','行动计划','指导意见','全球能源监测','GEM'];
+function projJudge(n){
+  var title=n.title||'', desc=n.desc||'', text=title+' '+desc;
+  var r={proj:false,lvl:'',seg:'',segcn:'',why:''};
+  if(sigHas(title,PROJ_EXCL)) return r;                 // 货物/人事/名单/政策文件类
+  if(/约?\d+(\.\d+)?\s*GW/.test(title)) return r;       // 行业装机统计（约30GW/达274GW），非单项目
+  /* SIG_POLICY 层（配额分配方案/督察整改销号/规划纲要/十五五…）：命中即政策，
+     除非标题带明确项目动作豁免（项目获核准/开工/中标…）——2026-11-19 复现抓出
+     「碳排放配额分配方案」「督察整改销号」被「万吨」实体词误放进项目动态 */
+  if(sigHas(title,SIG_POLICY) && !sigHas(title,SIG_PROJ_EXEMPT)) return r;
+  if(sigHas(title,SIG_DOC) && !sigHas(title,SIG_PROJ_EXEMPT) && !sigHas(title,SIG_ENTITY))
+    return r;                                            // 纯政策文件
+  if(!sigHas(text,SIG_ENTITY)) return r;                 // 没有项目实体，是行业资讯
+  // 业务切口：优先 SIG_TECH（与信号同组），否则扩到主业工程词
+  var seg='', kw='';
+  for(var i=0;i<SIG_SEG_ORDER.length;i++){
+    var k=SIG_SEG_ORDER[i], h=sigHas(text,SIG_TECH[k]);
+    if(!h) continue;
+    if(k==='datactr' && !sigHas(text,SIG_DC_ENERGY)) continue;
+    seg=k; kw=h; break;
+  }
+  if(!seg){ var h2=sigHas(text,PROJ_ENG); if(!h2) return r; seg='eng'; kw=h2; }
+  r.seg=seg; r.segcn=(seg==='eng')?'能源环保工程':SIG_SEG_CN[seg];
+  // 阶段：标题+摘要里的动作词；审批流条目按审批类型推断
+  var lvl='', act='';
+  ['strong','mid','weak'].forEach(function(L){
+    if(lvl) return;
+    var ws=({strong:PROJ_STRONG,mid:PROJ_MID,weak:SIG_ACT.weak})[L];
+    var a=sigHas(text,ws); if(a){lvl=L; act=a;}
+  });
+  if(!lvl && /施工许可证/.test(text)){ lvl='strong'; act='施工许可证'; }
+  if(!lvl && /批复文号|审批事项|已过用地预审|最近办结/.test(text)){ lvl='mid'; act='审批批复'; }
+  if(!lvl) return r;                                     // 推不出阶段，留在政策与行业动态
+  r.proj=true; r.lvl=lvl;
+  var lvcn={strong:'已动土/已投产',mid:'已进程序',weak:'仅意向'}[lvl];
+  r.why='项目动态 · '+lvcn+' —— 依据「'+act+'」'+(r.seg!=='eng'?('，'+r.segcn):'');
+  return r;
+}
 var tTag=new Set(), tSig=new Set(), tLvl=new Set();
 function renderTrends(){
-  var all=(D.trends||[]).map(function(x){ var j=sigJudge(x); j.x=x; return j; });
+  var all=(D.trends||[]).map(function(x){ var j=sigJudge(x); j.x=x;
+    if(!j.sig){ var p=projJudge(x); j.proj=p.proj; j.lvl2=p.lvl; j.pseg=p.seg;
+      j.psegcn=p.segcn; j.pwhy=p.why;
+      /* 项目动态的档位/切口用 proj 的，信号档合并展示 */
+      if(p.proj){ j.lvl=p.lvl; j.seg=p.seg; j.segcn=p.segcn; } }
+    else { j.proj=false; }
+    return j; });
   var sigs=all.filter(function(j){return j.sig});
   var news=all.filter(function(j){return !j.sig});
+  /* 2026-11-19 用户指令：政策档只放政策动态，项目按阶段归位 ——
+     非信号条目拆成「项目动态」（归三档）与「政策与行业动态」（留折叠区） */
+  var projs=news.filter(function(j){return j.proj});
+  var polNews=news.filter(function(j){return !j.proj});
 
   /* KPI：先说清「有几条真信号」，再说「池子里有多少条」，
      避免用户以为 179 条都是机会。 */
@@ -11196,12 +11268,14 @@ function renderTrends(){
   if(kp){
     var byLvl={strong:0,mid:0,weak:0}, bySeg={};
     sigs.forEach(function(j){ byLvl[j.lvl]++; bySeg[j.segcn]=(bySeg[j.segcn]||0)+1 });
+    /* 项目动态并入三档计数（档里混排，卡片带灰标区分来源） */
+    projs.forEach(function(j){ byLvl[j.lvl]++; bySeg[j.segcn]=(bySeg[j.segcn]||0)+1 });
     kp.innerHTML=
       '<div class="kpi"><b>'+sigs.length+'</b><span>业务信号（可跟进）</span></div>'+
       '<div class="kpi"><b>'+byLvl.strong+'</b><span>已动土 / 已投产</span></div>'+
       '<div class="kpi"><b>'+byLvl.mid+'</b><span>已进程序（可提前介入）</span></div>'+
       '<div class="kpi"><b>'+sigs.filter(function(j){return j.oversea}).length+'</b><span>海外</span></div>'+
-      '<div class="kpi"><b>'+news.length+'</b><span>普通动态（不构成机会）</span></div>';
+      '<div class="kpi"><b>'+polNews.length+'</b><span>政策与行业动态（非项目）</span></div>';
   }
 
   /* 说明条：把「为什么只有 3 条」讲明白，这是数据现状不是功能缺陷 */
@@ -11218,11 +11292,15 @@ function renderTrends(){
       '<b>怎么算「信号」</b>：①建厂/扩产动作（开工/投产/核准/环评/中标）'+
       ' ②我们的业务切口（有色冶炼·电解铝·水泥窑余热·数据中心·自备电厂…）③具体项目实体，'+
       '三者缺一不可；政策方案、设备采购、人事股价一律不算。'+
-      '当前 <b style="color:#d4380d">'+sigs.length+' 条</b>，覆盖 '+segN+' 个业务方向。';
+      '当前 <b style="color:#d4380d">'+sigs.length+' 条</b>，覆盖 '+segN+' 个业务方向。'+
+      '另从行业资讯里按阶段归档了 <b>'+projs.length+' 条项目动态</b>（审批批复/工程进展类，'+
+      '标题没有标准动作词但确有项目实体），与信号同档展示、带灰色「项目动态」标；'+
+      '政策文件与行业资讯留在下方折叠区。';
   }
 
-  // 信号区
-  var sg=sigs.filter(function(j){
+  // 信号区（含项目动态混排：sig 与 proj 同档，proj 卡片带灰标）
+  var sg=all.filter(function(j){
+    if(!j.sig && !j.proj) return false;
     if(tSig.size && !tSig.has(j.seg)) return false;
     if(tLvl.size && !tLvl.has(j.lvl)) return false;
     return true;
@@ -11237,20 +11315,21 @@ function renderTrends(){
         '<div class="sig-h">'+
           '<span class="sig-lv" style="background:'+lvBg[0]+';color:'+lvBg[1]+'">'+lvTxt+'</span>'+
           '<span class="sig-seg">'+esc(j.segcn)+'</span>'+
-          (j.region.length?'<span class="sig-rg">'+esc(j.region.slice(0,2).join(' / '))+'</span>':'')+
+          (j.proj?'<span class="sig-lv" style="background:#f1f3f6;color:#6b7280">项目动态</span>':'')+
+          (j.region&&j.region.length?'<span class="sig-rg">'+esc(j.region.slice(0,2).join(' / '))+'</span>':'')+
           (j.oversea?'<span class="sig-ov">海外</span>':'')+
         '</div>'+
         '<h3>'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.title)+' ↗</a>':esc(x.title))+'</h3>'+
-        '<div class="sig-why">'+esc(j.why)+'</div>'+
+        '<div class="sig-why">'+esc(j.sig?j.why:(j.pwhy||j.why))+'</div>'+
         (x.desc?'<div class="sig-d">'+esc(x.desc)+'</div>':'')+
         '<div class="sig-f"><span>'+esc(x.source||'')+'</span><span>'+esc(x.date||'')+'</span></div>'+
       '</div>';
-    }).join('')||'<div class="empty">当前筛选下没有信号。'+
+    }).join('')||'<div class="empty">当前筛选下没有信号或项目动态。'+
       '<a href="javascript:void 0" onclick="tSig.clear();tLvl.clear();renderTrends()" style="color:#146edc">清空筛选看全部</a></div>';
   }
 
-  // 普通动态（默认折叠，点开才看）
-  var list=news.filter(function(j){return !tTag.size||tTag.has(j.x.tag)});
+  // 政策与行业动态（默认折叠，点开才看）——项目已按阶段归入上方三档
+  var list=polNews.filter(function(j){return !tTag.size||tTag.has(j.x.tag)});
   list.sort(function(a,b){return (b.x.date||'').localeCompare(a.x.date||'')});
   el('newsGrid').innerHTML=list.map(function(j){
     var x=j.x;
@@ -11260,7 +11339,7 @@ function renderTrends(){
       esc(x.title)+(x.url?' ↗</a>':'')+'</h3>'+
       '<div class="nd">'+esc(x.desc)+'</div>'+
       '<div class="ns"><span class="ntag '+cls+'">'+esc(x.tag)+'</span><span>'+esc(x.source)+'</span><span>'+esc(x.date)+'</span>'+
-      '<span class="nr" title="'+esc(j.why)+'">未判为信号：'+esc((j.why||'').slice(0,14))+'</span></div></div>'
+      '<span class="nr" title="'+esc(j.why)+'">非项目：'+esc((j.why||'').slice(0,14))+'</span></div></div>'
   }).join('');
   var cnt=el('newsCnt');
   if(cnt) cnt.textContent='· '+list.length+' 条';
@@ -11275,11 +11354,16 @@ el('f-tg').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
 /* 信号筛选：业务切口 + 强度。用 id 白名单单独绑，不要并入通用 chip 绑定
    （那边假定 chip 都对应 Set，这里两个 Set 名不同）。 */
 function buildSigFilter(){
-  var all=(D.trends||[]).map(sigJudge).filter(function(j){return j.sig});
+  var all=(D.trends||[]).map(function(x){ var j=sigJudge(x); j.x=x;
+    if(!j.sig){ var p=projJudge(x); if(p.proj){ j.proj=true; j.lvl=p.lvl; j.seg=p.seg; j.segcn=p.segcn; } }
+    return j; }).filter(function(j){return j.sig||j.proj});
   var sc={}; all.forEach(function(j){sc[j.seg]=(sc[j.seg]||0)+1});
   var lc={strong:0,mid:0,weak:0}; all.forEach(function(j){lc[j.lvl]++});
-  if(el('f-sigseg')) el('f-sigseg').innerHTML=SIG_SEG_ORDER.filter(function(k){return sc[k]}).map(function(k){
-    return '<span class="chip'+(tSig.has(k)?' on':'')+'" data-k="sigseg" data-v="'+k+'">'+SIG_SEG_CN[k]+'<em>'+sc[k]+'</em></span>'}).join('')
+  if(el('f-sigseg')) el('f-sigseg').innerHTML=Object.keys(sc).sort(function(a,b){
+      var ia=SIG_SEG_ORDER.indexOf(a), ib=SIG_SEG_ORDER.indexOf(b);
+      return (ia<0?99:ia)-(ib<0?99:ib); }).map(function(k){
+      var cn=(SIG_SEG_CN[k]||(k==='eng'?'能源环保工程':k));
+      return '<span class="chip'+(tSig.has(k)?' on':'')+'" data-k="sigseg" data-v="'+k+'">'+cn+'<em>'+sc[k]+'</em></span>'}).join('')
     ||'<span class="chip off" style="cursor:default;opacity:.6">暂无信号</span>';
   var LN={strong:'已动土/已投产',mid:'已进程序',weak:'仅意向'};
   if(el('f-siglvl')) el('f-siglvl').innerHTML=['strong','mid','weak'].filter(function(k){return lc[k]}).map(function(k){
