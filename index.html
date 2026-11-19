@@ -7045,9 +7045,12 @@ function ovRenderFlash(d) {
   h += '<ul class="ovfl">';
   L.forEach(function (x) {
     var ti = esc(x.t || '');
+    /* 2026-11-19 B档放宽（§5.69）：tier=B = 行业词命中但主档未过 → 灰标「行业动态」，
+       区别于 S/A 主档。内联灰字，不动皮肤样式类。 */
+    var bTag = x.tier === 'B' ? '<span style="display:inline-block;margin-right:5px;padding:0 4px;border-radius:3px;font-size:11px;line-height:16px;vertical-align:1px;background:#f0f1f3;color:#8a919e;border:1px solid #e2e4e8">行业动态</span>' : '';
     h += '<li class="ovf">' +
       '<span class="ovf-d">' + esc((x.d || '').slice(5)) + '</span>' +
-      '<span class="ovf-b">' +
+      '<span class="ovf-b">' + bTag +
       (x.u ? '<a href="' + esc(x.u) + '" target="_blank" rel="noopener" class="ovf-t">' + ti + '</a>'
         : '<span class="ovf-t">' + ti + '</span>') +
       (x.m ? '<span class="ovf-m">' + esc(x.m) + '</span>' : '') +
