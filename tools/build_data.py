@@ -284,7 +284,10 @@ def make_rec(x, prov):
             'city': (x.get('city') or '').strip() or guess_city(prov, (x.get('t') or '') + (x.get('snip') or '')),
             'st': norm_stage(x.get('st')),
             'buyer': (x.get('buyer') or '').strip(),
-            'win': (x.get('win') or '').strip(),
+            'win': (x.get('win') or (x.get('detail') or {}).get('win') or '').strip(),
+            # ↑ 2026-11-18 §5.62 兜底：部分渠道（如宝华 weekly 抓取）把中标人写在
+            #   detail.win，主字段 win 为空 —— 不读过来，马钢南区三期中冶赛迪联合体
+            #   这种关键信息永远进不了库。脏值由 6.7 兜底清洗统一拦截。
             'amt': parse_amt(x.get('amt')),
             # 金额口径：win=中标/成交/合同价，inv=项目总投资/投资估算。
             # 两者能差 3~10 倍，2026-11-04 用户确认必须分开，不能再混进一个「已公示金额」。
@@ -433,7 +436,9 @@ EARLY_SRC = {'发改委核准': '立项公示', '发改委备案': '立项公示
              '技改备案': '招标计划',   # 工信/经信技改项目备案：已定项目，距招标近
              '重大项目清单': '立项公示',
              '工信厅名单': '立项公示',   # 2026-10-27 省工信厅制造强省/产能置换名单：政府拟支持，确定要建
-             '热电规划': '立项公示'}   # 省市发改委热电联产/集中供热规划批复：比核准更早，点名未来热源点
+             '热电规划': '立项公示',   # 省市发改委热电联产/集中供热规划批复：比核准更早，点名未来热源点
+             '在线审批': '立项公示',   # 2026-11-19 tzxm_approve.py：浙/苏在线审批监管平台备案/核准/节能审查办结公示
+             '在线审批技改': '招标计划'}   # tzxm 技改备案：已定项目，距招标近（同「技改备案」口径）
 EARLY_DIR = os.path.join(RAW, 'early')
 if os.path.isdir(EARLY_DIR):
     ne = 0
@@ -698,6 +703,107 @@ for r in out:
         r['buyer'] = b
         _nbf += 1
 print('buyer 兜底：补 %d 条' % _nbf)
+
+# ============ 6.7 win 字段兜底清洗（2026-11-18 §5.61）================
+# 江苏公告评标办法条款「原则上为中标人。当排名第一的中标候选人放弃中标……」
+# 曾被详情页抽取层当成中标单位名抽进 detail.win，顺着 merged.json 流进
+# data.org.js 的画像卡（南通美亚 buyers/wins 被「原则上为中标人…」污染）。
+# 抽取层（detail_fields.py）已加拒绝词表；这里再兜底一次，历史脏数据
+# 不重爬也能洗干净。判定依据与抽取层同一份词表，不自造规则。
+_BAD_WIN = ('放弃中标', '不可抗力', '不能履行合同', '履约保证金',
+            '原则上为', '查实存在', '重新公示', '递补',
+            '按照招标文件', '排名第一的中标候选人', '评标办法')
+_nwc = 0
+for r in out:
+    w = r.get('win') or ''
+    if w and any(k in w for k in _BAD_WIN):
+        r['win'] = ''
+        _nwc += 1
+print('win 兜底清洗：清掉条款污染 %d 条' % _nwc)
+
+# ============ 6.8 立项线索状态推进（白名单版）+ 陈旧标记（2026-11-18 §5.62）====
+# 用户抓出两个长期挂「立项线索」的死线索：芜湖新兴 55MW（2020 年立项，实际
+# 早已投运）、马钢南区三期 145MW（2026-07 核准前公示，2026-11-03 中冶赛迪
+# 联合体中标）。根因：立项公示与后续招标/中标记录标题写法不同，key_of 按
+# 标题合成主键，两条永远不会被 5. 融合去重合并，线索就永远停在最初阶段。
+#
+# ⚠ 第一版曾实现「业主相容 + 标题 6-gram 重叠」全自动匹配，实测 181 条推进
+# 里大面积误配：「生活垃圾焚烧发电」「污水处理提质增效」等泛词跨项目撞车、
+# 同业主兄弟项目（南区三期 vs 北区三期）互推、同业主多个屋顶光伏互相顶替。
+# 立项线索的状态是给营销看的作战信息，推错比不推更害人 —— 按最高准则
+# 「不把垃圾灌进库」，自动文本匹配全部撤掉，改为两道安全机制：
+#
+#   ① 陈旧标记（全自动，安全）：st 仍在立项公示/招标计划且发布 >2 年 →
+#      stale=1。只影响显示（前端灰显置底+角标），不改 st、不写 hist、
+#      留库不删，符合 W 护栏口径。
+#   ② 白名单推进（人工核实后录入 raw/lead_advance.json）：每条写明线索
+#      标题关键串 + 后续公告 url，构建时在采集层找到对应记录，把阶段/
+#      日期/中标人写进线索的 hist 并推进 st。谁核实、什么时候核实的，
+#      白名单里留痕 —— 数字口径在 healthcheck 单列一节。
+#      新发现死线索 → 先人工查证同项目后续公告 → 加白名单 → 全量重建生效。
+from datetime import datetime as _dt
+
+def _days_ago(dstr):
+    try:
+        return (_dt.now().date() - _dt.strptime(dstr[:10], '%Y-%m-%d').date()).days
+    except Exception:
+        return 0
+
+_LEAD_STAGES = ('立项公示', '招标计划')
+
+# ── ② 白名单推进 ─────────────────────────────────────────────
+_ADV_FILE = os.path.join(RAW, 'lead_advance.json')
+_nadv = 0
+if os.path.exists(_ADV_FILE):
+    try:
+        _adv_items = json.load(open(_ADV_FILE, encoding='utf-8')).get('items') or []
+    except Exception as _e:
+        print('⚠ lead_advance.json 读失败，跳过白名单推进：', _e)
+        _adv_items = []
+    for _av in _adv_items:
+        _key = _av.get('lead') or ''
+        _furl = _av.get('follow_url') or ''
+        if not _key or not _furl:
+            continue
+        lead = next((r for r in out if _key in (r.get('t') or '')
+                     and r.get('st') in _LEAD_STAGES), None)
+        if lead is None:
+            continue        # 已推进过 / 已合并，幂等
+        # follow_url 命中主 url 或任一 hist 阶段都算（线索推进常发生在
+        # 「主记录还停在招标公告、新阶段挂在 hist 里」的场景）
+        fol = next((r for r in out
+                    if (r.get('url') or '') == _furl
+                    or any((h.get('url') or '') == _furl for h in (r.get('hist') or []))), None)
+        if fol is None:
+            print('  [推进] ⚠ 白名单后续公告不在采集层（没采到或 url 变了）：', _furl[:60])
+            continue
+        if STAGE_RANK.get(fol.get('st'), 0) <= STAGE_RANK.get(lead['st'], 0):
+            continue
+        _hk = (fol['st'], fol.get('d') or '', fol.get('url') or '')
+        lead.setdefault('hist', [])
+        if not any((h['st'], h['d'], h['url']) == _hk for h in lead['hist']):
+            lead['hist'].append({'st': fol['st'], 'd': fol.get('d') or '',
+                                 'url': fol.get('url') or '', 'p': fol.get('p') or '',
+                                 'win': fol.get('win') or '', 'amt': fol.get('amt')})
+        chain = [h['st'] for h in lead['hist']] + [lead['st']]
+        top = max(chain, key=lambda x: STAGE_RANK.get(x, 0))
+        lead['stages'] = sorted(set(chain), key=lambda x: STAGE_RANK.get(x, 0))
+        if top != '其他':
+            lead['st'] = top
+        if not lead.get('win') and fol.get('win'):
+            lead['win'] = fol['win']
+        lead['_adv'] = fol['t'][:40]
+        _nadv += 1
+        print('  [推进·白名单] %s… → %s（%s）' % (lead['t'][:36], fol['st'], fol['t'][:36]))
+print('线索白名单推进：%d 条（名单见 raw/lead_advance.json）' % _nadv)
+
+# ── ① 陈旧标记（全自动，只标不改）──────────────────────────
+_nstale = 0
+for r in out:
+    if r.get('st') in _LEAD_STAGES and _days_ago((r.get('d') or '')[:10]) > 730:
+        r['stale'] = 1
+        _nstale += 1
+print('陈旧标记：%d 条（stale=1，>2 年无推进，前端灰显置底，留库不删）' % _nstale)
 
 out.sort(key=lambda x: (-x['score'], x['d']), reverse=False)
 out.sort(key=lambda x: x['score'], reverse=True)
