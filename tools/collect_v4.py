@@ -104,11 +104,26 @@ SITES = {
         # 常州是区县级市，电力/环保标的本身很少，45 个关键词只命中 5 个、
         # 且多为 1~3 条。不是坏点，只是盘子小，留着当补充。
     },
+    # 2026-11-19 新增：安庆市公共资源交易服务网（用户点名接入）。
+    # 接口与省级站同构（Epoint inteligentsearch），但有两个站特性：
+    #   ① cnum 必须为空串 —— 传 '001' 时 ES 按不存在的分类树过滤，
+    #      「发电」近 10 天从 23 条缩成 1 条（不报错，静默丢 95% 数据）；
+    #   ② linkurl 只是裸 GUID，详情页 URL 要按
+    #      /jyxx/{渠道6位}/{渠道9位}/{YYYYMMDD}/{guid}.html 自拼（urlTpl）。
+    '安庆': {
+        'api': 'https://aqggzy.anqing.gov.cn/inteligentsearch/rest/esinteligentsearch/getFullTextDataNew',
+        'host': 'https://aqggzy.anqing.gov.cn',
+        'plat': '安庆市公共资源交易服务网',
+        'level': '市级', 'rg': '安徽',
+        'sort': '{"webdate":"0"}',
+        'cnum': '',
+        'urlTpl': '/jyxx/{cat6}/{cat}/{day}/{linkurl}.html',
+    },
     # 市级站要归到省：合肥归安徽
 }
 # 省份归属：市级站点按所属省写库
 PROV_OF = {'江苏': '江苏', '浙江': '浙江', '合肥': '安徽',
-           '苏州': '江苏', '常州': '江苏'}
+           '苏州': '江苏', '常州': '江苏', '安庆': '安徽'}
 
 # 关键词：精准优先。宽泛词（如光「污水」）会带出大量村级管网小工程，
 # 对设计院/EPC 毫无价值，一律换成带业务属性的组合词。
@@ -332,6 +347,9 @@ def fetch_site(name, cfg, sdt, edt, per_kw=200, pause=0.35):
         while got < per_kw:
             r = post(cfg['api'], mk(sdt=sdt, edt=edt, wd=kw, pn=page * rn,
                                     rn=str(rn), fields=fields,
+                                    # cnum 按站配置：安庆的 ES 没有分类树，
+                                    # 传默认 '001' 会静默把结果过滤掉 95%（2026-11-19 实测）
+                                    cnum=cfg.get('cnum', '001'),
                                     sort=cfg.get('sort', '{"infodatepx":"0"}')))
             if not r:
                 break
@@ -349,6 +367,12 @@ def fetch_site(name, cfg, sdt, edt, per_kw=200, pause=0.35):
                 if uid in seen:
                     continue
                 link = x.get('linkurl') or ''
+                if cfg.get('urlTpl'):
+                    # 安庆等站：linkurl 是裸 GUID，按模板自拼详情 URL
+                    cat = x.get('categorynum') or ''
+                    link = cfg['urlTpl'].format(
+                        cat6=cat[:6], cat=cat, day=(x.get('webdate') or x.get('infodate') or '')[:10].replace('-', ''),
+                        linkurl=link)
                 seen[uid] = {
                     'id': hashlib.md5((cfg['plat'] + uid).encode()).hexdigest()[:10],
                     't': title,
