@@ -2094,6 +2094,18 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
       <div id="fnSoon"></div>
       <div style="font-size:12px;font-weight:700;color:var(--tx2);margin:14px 0 6px">阶段历史记录（hist · 状态实时变化留痕）</div>
       <div id="fnHist"></div>
+
+      <!-- §5.72（2026-11-19 用户拍板）：项目动态从「行业动态·业务信号」迁到这里 ——
+           它们本质是项目推进情况（谁家开工/投产/获批），不是「哪里有厂要建」的信号。
+           数据仍来自 trends + projJudge 前端判定，只是渲染位置变了；折叠默认收起，
+           展开时才 need('news') 懒加载渲染。 -->
+      <details id="projNewsFold" style="margin:12px 0 4px;border:1px solid var(--line);border-radius:9px;background:#fff;padding:0 12px 8px">
+        <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2);padding:9px 0">
+          项目动态 · 按阶段（已动土 / 已进程序）<span id="pjCnt" style="font-weight:400;color:var(--tx3)"></span>
+          <span style="font-weight:400;color:var(--tx3);font-size:11.5px">（从行业资讯里按阶段归档的项目条目，点开才加载）</span>
+        </summary>
+        <div id="pjWrap"></div>
+      </details>
     </details>
 
     <!-- 第 4 批 4a 第二批 · F02 我的订阅词 / F04 我的跟进台（2026-11-06）
@@ -4593,9 +4605,31 @@ function renderPolicy(q){
   }
   /* 分组顺序按首次出现，保持「总览→主法规→逐条→配套→资金链→判断→时间线→更正」
      §5.71（用户拍板「太长了拖动久」）：每组各包一层折叠、默认收起；
-     检索命中时自动展开，保证检索体验不变。 */
+     检索命中时自动展开，保证检索体验不变。
+     §5.72（用户拍板「搞的好看一点」）：主法规/配套规定的竖排散行改成
+     「一句摘要 · 时间胶囊 · 键值两列」结构化排版；只改渲染，原文数据不动。 */
   var groups=[],seen={};
   hit.forEach(function(x){ if(!seen[x.g]){seen[x.g]=1;groups.push(x.g)} });
+  function polBodyHTML(g,x){
+    var body=x.body||'';
+    if(!/^(主法规|配套规定)/.test(g)||body.indexOf('<br>')<0)
+      return '<div class="pol-l">'+body+'</div>';
+    var rows=body.split('<br>').filter(Boolean), pills=[],kv=[],plain=[];
+    rows.forEach(function(ln){
+      ln=ln.replace(/^\s+|\s+$/g,''); if(!ln) return;
+      var m=ln.match(/^(公布|施行|状态)\s+(.*)$/);
+      if(m){ pills.push('<span style="display:inline-block;margin:0 6px 6px 0;padding:2px 10px;border-radius:20px;font-size:11.5px;background:#eef4fd;color:#1a56b0;border:1px solid #d3e2f7">'+m[1]+' '+esc(m[2])+'</span>'); return; }
+      m=ln.match(/^(依据|收录条文|通过|角色|关系)\s*[:：]?\s*(.*)$/);
+      if(m&&m[2]){ kv.push('<div style="display:flex;gap:10px;font-size:12.5px;line-height:1.7;padding:2px 0"><span style="flex:none;width:62px;color:#8a919e">'+m[1]+'</span><span style="color:#3c4450;flex:1">'+esc(m[2])+'</span></div>'); return; }
+      plain.push(ln);
+    });
+    var h='';
+    if(plain.length) h+='<div style="color:#5b6470;font-size:12.5px;line-height:1.8;margin-bottom:7px">'+
+      plain.map(function(s){return esc(s)}).join(' <span style="color:#c9ced6">·</span> ')+'</div>';
+    if(pills.length) h+='<div style="margin-bottom:7px">'+pills.join('')+'</div>';
+    h+=kv.join('');
+    return '<div class="pol-l">'+h+'</div>';
+  }
   var html=groups.map(function(g){
     var sub=hit.filter(function(x){return x.g===g});
     return '<details class="polgrp"'+(qq?' open':'')+
@@ -4604,8 +4638,8 @@ function renderPolicy(q){
         esc(g)+' <small style="font-weight:400;color:var(--tx3)">'+sub.length+' 条</small></summary>'+
       '<div class="polgrid">'+sub.map(function(x){
         return '<div class="polc"><div class="pol-h"><span class="pol-tag">'+esc(g.split(' · ')[0])+'</span>'+
-          '<b>'+esc(x.t)+'</b></div><div class="pol-l">'+x.body+'</div>'+
-          (x.url&&/^https?:/.test(x.url)?'<div class="pol-l"><a href="'+esc(x.url)+'" target="_blank" rel="noopener">官方原文 ↗</a></div>':'')+
+          '<b>'+esc(x.t)+'</b></div>'+ polBodyHTML(g,x) +
+          (x.url&&/^https?:/.test(x.url)?'<div style="text-align:right;margin-top:6px"><a href="'+esc(x.url)+'" target="_blank" rel="noopener" style="display:inline-block;padding:3px 12px;border-radius:6px;background:#146edc;color:#fff;font-size:12px;text-decoration:none">官方原文 ↗</a></div>':'')+
         '</div>';
       }).join('')+'</div></details>';
   }).join('');
@@ -11278,24 +11312,22 @@ function renderTrends(){
   var projs=news.filter(function(j){return j.proj});
   var polNews=news.filter(function(j){return !j.proj});
 
-  /* KPI：先说清「有几条真信号」，再说「池子里有多少条」，
-     避免用户以为 179 条都是机会。 */
+  /* KPI：先说清「有几条真信号」，再说「池子里有多少条」。
+     §5.72（用户拍板）：只统计真信号 —— 项目动态已迁「找商机 → 项目情况」工作台。 */
   var kp=el('tSigKpi');
   if(kp){
     var byLvl={strong:0,mid:0,weak:0}, bySeg={};
     sigs.forEach(function(j){ byLvl[j.lvl]++; bySeg[j.segcn]=(bySeg[j.segcn]||0)+1 });
-    /* 项目动态并入三档计数（档里混排，卡片带灰标区分来源） */
-    projs.forEach(function(j){ byLvl[j.lvl]++; bySeg[j.segcn]=(bySeg[j.segcn]||0)+1 });
     kp.innerHTML=
       '<div class="kpi"><b>'+sigs.length+'</b><span>业务信号（可跟进）</span></div>'+
       '<div class="kpi"><b>'+byLvl.strong+'</b><span>已动土 / 已投产</span></div>'+
       '<div class="kpi"><b>'+byLvl.mid+'</b><span>已进程序（可提前介入）</span></div>'+
       '<div class="kpi"><b>'+sigs.filter(function(j){return j.oversea}).length+'</b><span>海外</span></div>'+
-      '<div class="kpi"><b>'+projs.length+'</b><span>项目动态（按阶段混排）</span></div>';
-    /* §5.71：折叠条 summary 上直接给阶段计数，不点开也知道有多少 */
+      '<div class="kpi"><b>'+polNews.length+'</b><span>政策与行业动态（非项目）</span></div>';
+    /* §5.72：折叠条 summary 只报信号计数；项目动态计数在「项目情况」的折叠条上 */
     var sf=el('sigFoldCnt');
     if(sf) sf.textContent='· 已动土 '+byLvl.strong+' · 已进程序 '+byLvl.mid+
-      ' · 仅意向 '+byLvl.weak+'（业务信号 '+sigs.length+' + 项目动态 '+projs.length+'）';
+      ' · 仅意向 '+byLvl.weak+'（共 '+sigs.length+' 条；项目动态已迁「项目情况」工作台）';
   }
 
   /* 说明条：把「为什么只有 3 条」讲明白，这是数据现状不是功能缺陷 */
@@ -11317,9 +11349,9 @@ function renderTrends(){
       '政策与行业资讯在本页签<b>顶部主区</b>（§5.71 已搬）。';
   }
 
-  // 信号区（含项目动态混排：sig 与 proj 同档，proj 卡片带灰标）
+  // 信号区（§5.72：只渲染真信号；项目动态已迁「项目情况」工作台）
   var sg=all.filter(function(j){
-    if(!j.sig && !j.proj) return false;
+    if(!j.sig) return false;
     if(tSig.size && !tSig.has(j.seg)) return false;
     if(tLvl.size && !tLvl.has(j.lvl)) return false;
     return true;
@@ -11334,16 +11366,15 @@ function renderTrends(){
         '<div class="sig-h">'+
           '<span class="sig-lv" style="background:'+lvBg[0]+';color:'+lvBg[1]+'">'+lvTxt+'</span>'+
           '<span class="sig-seg">'+esc(j.segcn)+'</span>'+
-          (j.proj?'<span class="sig-lv" style="background:#f1f3f6;color:#6b7280">项目动态</span>':'')+
           (j.region&&j.region.length?'<span class="sig-rg">'+esc(j.region.slice(0,2).join(' / '))+'</span>':'')+
           (j.oversea?'<span class="sig-ov">海外</span>':'')+
         '</div>'+
         '<h3>'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.title)+' ↗</a>':esc(x.title))+'</h3>'+
-        '<div class="sig-why">'+esc(j.sig?j.why:(j.pwhy||j.why))+'</div>'+
+        '<div class="sig-why">'+esc(j.why)+'</div>'+
         (x.desc?'<div class="sig-d">'+esc(x.desc)+'</div>':'')+
         '<div class="sig-f"><span>'+esc(x.source||'')+'</span><span>'+esc(x.date||'')+'</span></div>'+
       '</div>';
-    }).join('')||'<div class="empty">当前筛选下没有信号或项目动态。'+
+    }).join('')||'<div class="empty">当前筛选下没有信号。'+
       '<a href="javascript:void 0" onclick="tSig.clear();tLvl.clear();renderTrends()" style="color:#146edc">清空筛选看全部</a></div>';
   }
 
@@ -11364,6 +11395,40 @@ function renderTrends(){
   if(cnt) cnt.textContent='· '+list.length+' 条';
 }
 function bySegOf(list){ var m={}; list.forEach(function(j){m[j.segcn]=1}); return m; }
+/* §5.72：项目动态渲染到「找商机 → 项目情况」工作台（projNewsFold 折叠展开时才算） */
+function pjNewsRender(){
+  var wrap=el('pjWrap'); if(!wrap) return;
+  if(!window.DATA_NEWS){ wrap.innerHTML='<div class="empty">行业动态模块尚未加载完，合上再展开一次即可。</div>'; return; }
+  var projs=(D.trends||[]).map(function(x){
+    var j=sigJudge(x); j.x=x; j.proj=false;
+    if(!j.sig){ var p=projJudge(x); if(p.proj){ j.proj=true; j.lvl=p.lvl; j.segcn=p.segcn; } }
+    return j; }).filter(function(j){return j.proj});
+  var strong=projs.filter(function(j){return j.lvl==='strong'});
+  var mid=projs.filter(function(j){return j.lvl==='mid'});
+  var cnt=el('pjCnt');
+  if(cnt) cnt.textContent='· 已动土 '+strong.length+' · 已进程序 '+mid.length;
+  function sec(name,L){
+    if(!L.length) return '';
+    return '<div style="font-size:12px;font-weight:700;color:var(--tx2);margin:10px 0 4px">'+name+' · '+L.length+' 条</div>'+
+      L.map(function(j){ var x=j.x;
+        return '<div style="padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px;line-height:1.6">'+
+          '<span style="color:#14713a;font-weight:600;margin-right:8px">'+esc((x.date||'').slice(5))+'</span>'+
+          (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.title)+' ↗</a>':esc(x.title))+
+          '<span style="color:#8a919e;font-size:11.5px;margin-left:8px">'+esc(x.source||'')+
+          (j.segcn?' · '+esc(j.segcn):'')+'</span>'+
+        '</div>'; }).join('');
+  }
+  wrap.innerHTML=(sec('已动土 / 已投产',strong)+sec('已进程序（可提前介入）',mid))||
+    '<div class="empty">暂无项目动态。</div>';
+}
+(function(){
+  var f=el('projNewsFold'); if(!f) return;
+  f.addEventListener('toggle',function(){
+    if(!f.open) return;
+    if(window.DATA_NEWS){ pjNewsRender(); }
+    else if(typeof need==='function'){ need('news',function(){ pjNewsRender(); }); }
+  });
+})();
 /* 行业动态的标签集合依赖 data.news.js（按需加载），放到 renderTrends 里建 */
 function buildTrendFilter(){
   chipsBox('f-tg',uniq(arr(D.trends).map(function(x){return x.tag})),null,'ttag');
@@ -11373,9 +11438,9 @@ el('f-tg').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
 /* 信号筛选：业务切口 + 强度。用 id 白名单单独绑，不要并入通用 chip 绑定
    （那边假定 chip 都对应 Set，这里两个 Set 名不同）。 */
 function buildSigFilter(){
-  var all=(D.trends||[]).map(function(x){ var j=sigJudge(x); j.x=x;
-    if(!j.sig){ var p=projJudge(x); if(p.proj){ j.proj=true; j.lvl=p.lvl; j.seg=p.seg; j.segcn=p.segcn; } }
-    return j; }).filter(function(j){return j.sig||j.proj});
+  /* §5.72：筛选 chips 只按真信号计数（项目动态迁走了） */
+  var all=(D.trends||[]).map(function(x){ var j=sigJudge(x); j.x=x; return j; })
+    .filter(function(j){return j.sig});
   var sc={}; all.forEach(function(j){sc[j.seg]=(sc[j.seg]||0)+1});
   var lc={strong:0,mid:0,weak:0}; all.forEach(function(j){lc[j.lvl]++});
   if(el('f-sigseg')) el('f-sigseg').innerHTML=Object.keys(sc).sort(function(a,b){
