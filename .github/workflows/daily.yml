@@ -136,7 +136,7 @@ jobs:
           # 关心「本轮到底新增了几条」。这里只把两个数字写进 GITHUB_ENV，
           # 由最后的「7) 采集健康判定」决定是否标红；采集的失败容忍度不变。
           python collect_v4.py --days 3 --perkw 80 \
-            --sites 江苏,浙江,合肥,苏州,常州 --merge 2>&1 | tee /tmp/crawl.log \
+            --sites 江苏,浙江,合肥,苏州,常州,安庆 --merge 2>&1 | tee /tmp/crawl.log \
             || echo "::warning::collect_v4 非零退出（日志已完整落在 /tmp/crawl.log），继续做统计"
           _add=$(grep -o '合计新增 [0-9]* 条' /tmp/crawl.log | tail -1 | grep -o '[0-9]\+' | head -1)
           _fail=$(grep -c '✗ 整站失败' /tmp/crawl.log || true)
@@ -224,7 +224,7 @@ jobs:
       # 产出 raw/oversea_flash.json → build_web.py 的 _OVS_FLASH → data.news.js 的
       #   overseaFlash 键 → 海外页签「出海速览」视图。这一步失败时旧文件仍在，
       #   页面显示上次的结果（速览本身允许有几天的滞后，不像招标公告那样要求 T+1）。
-      # 3.9) 海外速览（2026-11-08 换主通道，§5.52）
+      # 3.9a) 海外速览（2026-11-08 换主通道，§5.52）
       #   搜狗微信搜索对机房 IP 已封死：本机直连 weixin.sogou.com 得到
       #   302 → /antispider/?antip=wx_sh2，任何关键词 0 条。CI 的 Azure IP 更早就在
       #   黑名单里 —— 这就是「8 天还是 11 条」的根因，不是关键词不够。
@@ -254,11 +254,11 @@ jobs:
             echo "::warning::oversea_manual.py 不存在，跳过"
           fi
 
-      # 3.9c) 搜狗通道保留但降级：默认不跑，仓库变量 SOGOU_OVERSEA=1 时才跑。
-      #   留着的理由：它抓到的历史条目还有线索价值，代码不删；
-      #   不默认跑的理由：机房 IP 必被封，白跑 10 分钟还可能把 job 拖超时。
-      - name: 3.9c) 海外速览 · 搜狗通道（默认跳过）
-        if: vars.SOGOU_OVERSEA == '1'
+      # 3.9c) 搜狗通道（2026-11-18 改为每天尝试、失败无害）：
+      #   机房 IP 大概率被搜狗限流，但不是每天 100% 封 —— 每天试一次，
+      #   失败 continue-on-error 沿用上次结果，成功就白赚公众号覆盖。
+      #   沙箱侧另有每日定时任务兜底（沙箱 IP 没被封，见 automation 任务「出海速览每日采集」）。
+      - name: 3.9c) 海外速览 · 搜狗通道（每天尝试）
         working-directory: tools
         continue-on-error: true
         timeout-minutes: 12
@@ -301,6 +301,21 @@ jobs:
           python build_invest_matched.py || echo "::warning::投资数据聚合失败，本轮跳过"
           python pick_invest.py || echo "::warning::投资分档失败，本轮跳过"
           python merge_invest_pick.py || echo "::warning::投资线索并入失败，本轮跳过"
+
+      # ★ 2026-11-19 新增：浙/苏在线审批监管平台「办结公示」（tzxm_approve.py，§5.68）。
+      #   与 3.10 的 crawl_invest 互补：invest 走旧通道（legacy 文件、最新停在 09-23），
+      #   这里走两省平台 2026-11-19 实测的公开接口：
+      #     浙江 POST tzxm.zjzwfw.gov.cn/publicannouncement.do?method=itemList（免登录）
+      #     江苏 GET  tzxm.fzggw.jiangsu.gov.cn/portalopenPublicInformation.do?method=querybeianExamineAll
+      #   抓近 30 天备案/核准/节能审查办结公示 → raw/early/{zj,js}-tzxm-<date>.json，
+      #   build_data 的 EARLY_SRC 已映射：在线审批→立项公示、在线审批技改→招标计划。
+      #   过滤与采集同源：is_noise + semantic_drop（kw 级户用光伏/用户侧储能会被剔掉）。
+      - name: 3.10b) 浙/苏在线审批平台办结公示
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          python tzxm_approve.py --days 30 --maxpage 5 || echo "::warning::tzxm 办结公示采集失败，沿用上次结果"
 
       # ── 构建段：不允许失败 ────────────────────────────────────────
       # 注意 tools/raw/oversea_extra.json 必须在仓库里（人工补录的巴淡岛等
