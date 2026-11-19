@@ -2722,8 +2722,8 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
   </div>
 </div>
 
-<script src="data.core.js?v=202611191445"></script>
-<script src="data.items.js?v=202611191445"></script>
+<script src="data.core.js?v=202611191630"></script>
+<script src="data.items.js?v=202611191630"></script>
 <script src="data.metalhist.js?v=202611041941"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
@@ -2791,7 +2791,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611191445';
+var VER='?v=202611191630';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -7045,9 +7045,10 @@ function ovRenderFlash(d) {
   h += '<ul class="ovfl">';
   L.forEach(function (x) {
     var ti = esc(x.t || '');
-    /* 2026-11-19 B档放宽（§5.69）：tier=B = 行业词命中但主档未过 → 灰标「行业动态」，
-       区别于 S/A 主档。内联灰字，不动皮肤样式类。 */
-    var bTag = x.tier === 'B' ? '<span style="display:inline-block;margin-right:5px;padding:0 4px;border-radius:3px;font-size:11px;line-height:16px;vertical-align:1px;background:#f0f1f3;color:#8a919e;border:1px solid #e2e4e8">行业动态</span>' : '';
+    /* 2026-11-19 E档（§5.70）：tier=E = 企业海外动向（具体企业+建厂动作，主档未过）→
+       灰标「企业动向」，区别于 S/A 主档。内联灰字，不动皮肤样式类。
+       B档「行业动态」按用户指示已撤（§5.69→§5.70）。 */
+    var bTag = x.tier === 'E' ? '<span style="display:inline-block;margin-right:5px;padding:0 4px;border-radius:3px;font-size:11px;line-height:16px;vertical-align:1px;background:#f0f1f3;color:#8a919e;border:1px solid #e2e4e8">企业动向</span>' : '';
     h += '<li class="ovf">' +
       '<span class="ovf-d">' + esc((x.d || '').slice(5)) + '</span>' +
       '<span class="ovf-b">' + bTag +
