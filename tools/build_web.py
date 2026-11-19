@@ -173,19 +173,26 @@ import urllib.request, time
 RAW = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'raw')
 METALS_CACHE = os.path.join(RAW, 'metals_cache.json')
 def fetch_metals():
-    cfg = [('CU','沪铜','元/吨','电缆/电机/变压器成本直接项，是项目造价与报价的风向标'),
-           ('AL','沪铝','元/吨','电解铝新扩建（几内亚-印尼-新疆线）是自备电厂+余热利用大单来源'),
-           ('ZN','沪锌','元/吨','镀锌与压铸需求指标，锌价走强反映有色冶炼扩产意愿'),
-           ('PB','沪铅','元/吨','铅酸储能与冶炼景气参考，关注再生铅配套环保需求'),
-           ('NI','沪镍','元/吨','镍价走强 → 印尼/非洲镍冶炼扩产，海外用能需求 ↑；下跌则关注客户资本开支收缩'),
-           ('SN','沪锡','元/吨','焊料与高端制造用锡，价高代表电子/半导体链景气'),
-           ('AO','氧化铝','元/吨','电解铝核心原料，氧化铝新扩建项目是余热发电+废水零排放的大单来源'),
-           ('SS','不锈钢','元/吨','不锈钢利润=镍铁成本传导，钢厂技改/脱硝意愿先行指标'),
-           ('LC','碳酸锂','元/吨','锂价决定盐湖/锂云母项目景气度，直接影响储能配套投资意愿'),
-           ('RB','螺纹钢','元/吨','钢厂利润风向标：螺价走高 → 钢厂技改、环保与煤气发电投入意愿强'),
-           ('HC','热轧卷板','元/吨','制造业用钢景气度，板材厂资本开支与涂镀环保需求的先行指标'),
-           ('I','铁矿石','元/吨','钢厂成本大头，矿价坚挺说明钢厂生产积极，配套供电供汽需求稳定'),
-           ('JM','焦煤','元/吨','钢铁成本端+焦化配套：焦煤利润好 → 焦化废水/脱硫提标需求释放')]
+    # grp 分组（2026-11-18 用户拍板扩品种）：右栏按 有色/黑色系/能源/光伏/酸化工 分组渲染。
+    # 酸化工两个现货品种由 spot_100ppi.py 提供（生意社基准价），这里只列期货。
+    cfg = [('CU','沪铜','元/吨','有色','电缆/电机/变压器成本直接项，是项目造价与报价的风向标'),
+           ('AL','沪铝','元/吨','有色','电解铝新扩建（几内亚-印尼-新疆线）是自备电厂+余热利用大单来源'),
+           ('ZN','沪锌','元/吨','有色','镀锌与压铸需求指标，锌价走强反映有色冶炼扩产意愿'),
+           ('PB','沪铅','元/吨','有色','铅酸储能与冶炼景气参考，关注再生铅配套环保需求'),
+           ('NI','沪镍','元/吨','有色','镍价走强 → 印尼/非洲镍冶炼扩产，海外用能需求 ↑；下跌则关注客户资本开支收缩'),
+           ('SN','沪锡','元/吨','有色','焊料与高端制造用锡，价高代表电子/半导体链景气'),
+           ('AO','氧化铝','元/吨','有色','电解铝核心原料，氧化铝新扩建项目是余热发电+废水零排放的大单来源'),
+           ('SS','不锈钢','元/吨','有色','不锈钢利润=镍铁成本传导，钢厂技改/脱硝意愿先行指标'),
+           ('LC','碳酸锂','元/吨','有色','锂价决定盐湖/锂云母项目景气度，直接影响储能配套投资意愿'),
+           ('RB','螺纹钢','元/吨','黑色系','钢厂利润风向标：螺价走高 → 钢厂技改、环保与煤气发电投入意愿强'),
+           ('HC','热轧卷板','元/吨','黑色系','制造业用钢景气度，板材厂资本开支与涂镀环保需求的先行指标'),
+           ('I','铁矿石','元/吨','黑色系','钢厂成本大头，矿价坚挺说明钢厂生产积极，配套供电供汽需求稳定'),
+           ('JM','焦煤','元/吨','黑色系','钢铁成本端+焦化配套：焦煤利润好 → 焦化废水/脱硫提标需求释放'),
+           ('J','焦炭','元/吨','黑色系','焦化配套直接项：焦价=焦化利润，焦化废水/脱硫提标改造需求的先行指标'),
+           ('FU','燃料油','元/吨','能源','海外自备电厂燃料参考（印尼线），燃油电厂燃料成本与替代方案比价'),
+           ('SI','工业硅','元/吨','光伏','光伏组件上游原料，硅价 → 光伏项目投资意愿与 EPC 报价窗口'),
+           ('PS','多晶硅','元/吨','光伏','光伏组件成本核心，直接影响我们光伏+储能 EPC 的投标报价空间'),
+           ('AG','白银','元/吨','光伏','光伏银浆用量指标，银价高企侵蚀组件厂利润、影响光伏投资节奏')]
     UAS = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0']
@@ -203,13 +210,13 @@ def fetch_metals():
             if m and m.group(2):
                 rows[m.group(1)] = m.group(2).split(',')
         out = []
-        for code, name, unit, hint in cfg:
+        for code, name, unit, grp, hint in cfg:
             f = rows.get(code + '0')
             if not f or len(f) < 12: continue
             try:
                 price = float(f[8]); prev = float(f[10])
                 if price <= 0 or prev <= 0: continue
-                out.append({'code': code, 'name': name, 'unit': unit,
+                out.append({'code': code, 'name': name, 'unit': unit, 'grp': grp,
                             'price': price, 'chg': round((price / prev - 1) * 100, 2),
                             'date': f[17][:10] if len(f) > 17 else '', 'hint': hint})
             except (ValueError, IndexError): continue
@@ -218,6 +225,7 @@ def fetch_metals():
         try:
             out = try_once()
             if out:
+                _merge_spot(out)
                 try: json.dump(out, open(METALS_CACHE, 'w', encoding='utf-8'), ensure_ascii=False)
                 except Exception: pass
                 return out
@@ -229,6 +237,21 @@ def fetch_metals():
         return json.load(open(METALS_CACHE, encoding='utf-8'))
     print('[WARN] 金属行情为空，页面将不展示该模块')
     return []
+
+def _merge_spot(items):
+    """把硫磺/硫酸现货（生意社基准价，2026-11-18 用户拍板加）合并进行情列表。
+    实时抓失败时回退 spot_cache.json；两者都没有就只显示期货品种。"""
+    import spot_100ppi as _sp
+    try:
+        spot = _sp.fetch_spot(dry=False)
+    except Exception as e:
+        print('[WARN] 现货行情抓取失败: %r' % e)
+        spot = None
+    if not spot:
+        spot = _sp.load_cached()
+        if spot:
+            print('[WARN] 现货实时抓取不可用，回退上次成功快照')
+    items.extend(spot or [])
 
 METALS = fetch_metals()
 
@@ -414,6 +437,9 @@ for r in D:
         # linkbad=1 表示原文链接打不开（空壳站/登录墙），前端不给主按钮，改给搜索入口
         # 注意别用 dl：那个字段已经是「投标截止日」了
         'linkbad': 1 if (r.get('url') in LINKBAD) else 0,
+        # 2026-11-18 §5.62：>2 年无推进的死线索标 stale=1，前端灰显置底。
+        # 判定在 build_data 6.8（服务端口径红线），这里纯搬运。
+        'stale': 1 if r.get('stale') else None,
     }
     # 附件清单 + 原始发布平台 + 信源分级
     _f = r.get('files') or []
@@ -1656,7 +1682,9 @@ for _i, _x in enumerate(_its):
     for _k in ITEM_COLS:
         _cols[_k].append(_x.get(_k))
     # 稀疏字段：只记非空的，键是行号
-    for _k in ('hist', 'files', 'org', 'rp', 'sh'):
+    # 2026-11-18 补 stale：立项线索状态推进机制（§5.62）——>2 年无后续的
+    # 死线索标 stale=1，前端灰显置底。判定在服务端（口径红线），前端只读。
+    for _k in ('hist', 'files', 'org', 'rp', 'sh', 'stale'):
         _v = _x.get(_k)
         if _v:
             _ext.setdefault(_k, {})[str(_i)] = _v
