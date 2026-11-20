@@ -935,3 +935,42 @@ def equip_level_drop(title, amt=None):
     if '光储充' in t and (amt or 0) < 1.0e8:
         return '光储充小额（非拳头产品，<1亿不做）'
     return ''
+
+
+# ── 族级裁决（2026-11-20 第二批 §5.78）──────────────────────────
+# 用户原话：ABC全删；D完整焚烧发电EPC或体量大的留下；风电不做；纯光伏不做；
+#          海淡可做但国内没优势；发电余热利用的留下。
+FAM_BUILD_WORDS = ('产业园', '产业园', '园区', '基地', '实验室', '农民新村',
+                   '安置', '住宅', '人居', '校区', '公寓', '枢纽', '物流园',
+                   '科创', '城中村', '房建', '综合楼', '装饰', '内饰')
+FAM_WIND_WORDS = ('风电', '风力发电')
+FAM_PV_ONLY = ('光伏', '分布式光伏')
+FAM_PV_KEEP = ('储能', '源网荷储', '光储')      # 光伏+储能按「大储能」口径留
+
+
+def family_drop(title, amt=None):
+    """④组复核第二批族级裁决。返回原因或 ''。只在 judge 不可投的条目上叠加使用。"""
+    t = title or ''
+    # 风电不做（含风电场升压站配套）
+    if any(w in t for w in FAM_WIND_WORDS):
+        return '风电不做（用户裁决）'
+    # 纯光伏不做；光伏+储能/源网荷储 留
+    if any(w in t for w in FAM_PV_ONLY) and not any(w in t for w in FAM_PV_KEEP):
+        return '纯光伏不做（用户裁决）'
+    # 纯光伏不做；光伏+储能/源网荷储 留（优先于水务/海淡词，如「零碳水务光伏+储能电站」）
+    if any(w in t for w in FAM_PV_ONLY):
+        if any(w in t for w in FAM_PV_KEEP):
+            return ''            # 光伏+储能按「大储能」口径直接放行
+        return '纯光伏不做（用户裁决）'
+    # 国内海水淡化 / 引水水务（海外海淡才有优势）
+    if '海水淡化' in t or '引水' in t or '水务' in t or '水厂' in t:
+        return '国内海淡/水务（国内无优势，用户裁决）'
+
+    # 房建园区族
+    if any(w in t for w in FAM_BUILD_WORDS):
+        return '房建/园区/基地（非能源设施本体）'
+    # 垃圾焚烧：只留完整焚烧发电 EPC / 体量大的；超低排放技改/评价研究删
+    if '焚烧' in t or '炉排' in t:
+        if any(w in t for w in ('超低排放', '提标改造', '评价', '研究', '咨询')):
+            return '焚烧厂技改/咨询（只留完整焚烧发电EPC或大体量）'
+    return ''
