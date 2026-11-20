@@ -974,3 +974,28 @@ def family_drop(title, amt=None):
         if any(w in t for w in ('超低排放', '提标改造', '评价', '研究', '咨询')):
             return '焚烧厂技改/咨询（只留完整焚烧发电EPC或大体量）'
     return ''
+
+
+# ── 第三批复核（2026-11-20 §5.80 用户裁决）──────────────────────
+# 模式一「企业自备能源项目（标题无 EPC 字样）」留；模式二「政府节能审查/核准批复」留；
+# 模式三「小吨位锅炉/产业用房/厂区供水」删。返回 'keep'（强制视为主业）/'drop'（删）/''（交回原判定）。
+import re as _re4
+
+RESCUE_WORDS = ('余气', '余热', '瓦斯发电', '生物质掺烧', '掺烧耦合', '综合利用发电',
+                '超净排放', '超低排放', '余热回收', '余热发电', '节能报告', '核准的批复',
+                '节能审查', '能效提升', '热电联产', '集中供热', '垃圾焚烧发电')
+SMALL_BOILER = _re4.compile(r'(?<!\d)(\d{1,2})\s*(?:t/h|吨\s*/?\s*小时|吨/时)')
+
+
+def rescue_energy(title):
+    t = title or ''
+    # 模式三先判（优先删）
+    if '产业用房' in t or '供水项目' in t or '引水' in t:
+        return 'drop'
+    m = SMALL_BOILER.search(t)
+    if m and int(m.group(1)) <= 20:
+        return 'drop'                      # 小吨位（≤20t/h）锅炉安装，不是我们的单
+    # 模式一/二放行
+    if any(k in t for k in RESCUE_WORDS):
+        return 'keep'
+    return ''
