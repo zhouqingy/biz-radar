@@ -1092,6 +1092,32 @@ for _di in digest.get('items', []):
     _n2 += 1
 if _n2:
     print('微信深度稿海外项目并入 %d 条' % _n2)
+# ── §5.82（2026-11-20 用户要求「做成每日采集的」）──────────────────
+# 线索档案原本只吃每周一的 digest（微信稿），周中新签约（如海螺印尼四类新能源）
+# 要等一周才进档案。出海速览 oversea_flash.json 每日更新，把其中 S/A 档且命中
+# 已知业主别名的条目在这里并入线索档案（tag 按内容粗归），每日都有增量。
+try:
+    _ovf = json.load(open(os.path.join(ROOT, 'raw', 'oversea_flash.json'), encoding='utf-8'))
+    _ovf_items = _ovf.get('items', []) if isinstance(_ovf, dict) else []
+    _n3 = 0
+    for _fi in _ovf_items:
+        if _fi.get('tier') not in ('S', 'A'):
+            continue
+        _ft = _fi.get('t') or _fi.get('title') or ''
+        _hit3 = next((v for k, v in FIRM_ALIAS.items() if k in _ft), None)
+        if not _hit3 or _ft[:40] in _ovtitles:
+            continue
+        _tag3 = '海外建厂' if any(k in _ft for k in ('建厂', '扩产', '投产', '落地', '签约')) else '海外投资'
+        overseas.append({'name': _hit3, 'title': _ft, 'desc': (_fi.get('sum') or '')[:200],
+                         'date': _fi.get('d') or '', 'tag': _tag3, 'grp': '',
+                         'url': _fi.get('url', ''), 'rel': 6, 'src': _fi.get('src', '海外速览')})
+        _ovtitles.add(_ft[:40])
+        _n3 += 1
+    if _n3:
+        print('出海速览 S/A 并入线索档案 %d 条（每日增量）' % _n3)
+except Exception as _e:
+    print('[WARN] 速览并入线索跳过：', _e)
+
 # 2026-10-22 去重：同一条海外动态会从两个来源各进一次——
 #   ① 客户卡（clients 里的 abroad）② raw/oversea_extra.json 手工补录，
 #   两边 name 可能写成「海螺集团」和「安徽海螺集团有限责任公司」，标题一字不差。
