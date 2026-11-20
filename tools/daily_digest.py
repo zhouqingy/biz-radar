@@ -65,8 +65,13 @@ def new_biz(items, day=YDAY, n=12):
 
 
 def watch_changes(items, n=6):
-    """重点关注（w=1）项目的最新状态：title 里带金额≥1亿或 w 字段。"""
-    rows = [x for x in items if x.get('w') == 1 or x.get('w') == '1']
+    """重点关注（w=1）项目的最新状态。
+    ⚠ w 只是金额档（≥1亿），不是业务判定——①库里含房建市政等留库不删的非主业。
+    摘要必须再过 biz_rules.judge()（唯一规则源），只留能源主业、seg=other 剔除。
+    2026-11-20 用户质询修复：此前直接捞 w=1，把东南大学校区/职工公寓施工总承包捞进了邮件。"""
+    from biz_rules import judge
+    rows = [x for x in items if x.get('w') in (1, '1')
+            and judge(x.get('t'), x.get('snip') or '').get('investable')]
     rows.sort(key=lambda y: (y.get('d') or y.get('date') or ''), reverse=True)
     return rows[:n]
 
