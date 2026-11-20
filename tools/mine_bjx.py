@@ -94,10 +94,11 @@ def fetch(u, timeout=25):
 
 def extract(html, cat):
     """从列表页/首页抽取 (标题, 链接, 日期)"""
+    import html as _h   # §5.73：列表标题里的 HTML 实体（&amp; &nbsp;…）必须解码再入库
     out = []
     for m in re.finditer(r'<a[^>]+href="(https?://[^"]+)"[^>]*>\s*([^<]{8,80}?)\s*</a>', html):
         url, t = m.group(1), m.group(2).strip()
-        t = re.sub(r'\s+', ' ', t)
+        t = _h.unescape(re.sub(r'\s+', ' ', t))
         if len(t) < 8:
             continue
         if not any(k in t for k in BIZ):
