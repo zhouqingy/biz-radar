@@ -639,7 +639,7 @@ for i, (k, r) in enumerate(merged.items()):
     # 用户原话：「这完全不是我们的业务啊」「删除」。
     # ⚠ 只删 drop 原因明确的七类；「不在12个业务层级内」「非 EPC 类」两族
     #   混有真主业（长丰光伏/东阳热电联产被 judge 误判），不在本名单，逐条与用户复核。
-    from biz_rules import judge as _judge, equip_level_drop as _equip
+    from biz_rules import judge as _judge, equip_level_drop as _equip, family_drop as _fam
     _dp2 = _equip(r['t'], r.get('amt'))
     if _dp2:
         continue
@@ -650,6 +650,10 @@ for i, (k, r) in enumerate(merged.items()):
         if any(_dp.startswith(p) for p in (
                 '纯货物/后勤', '分包施工单项', '后期服务', '管网类',
                 '设备返厂/维修类', '兼营（分公司业务）', '纯施工总承包', '非能源工程')):
+            continue
+        # §5.78 族级裁决：只在 judge 不可投的条目上叠加，不碰可投主业
+        _dpf = _fam(r['t'], r.get('amt'))
+        if _dpf:
             continue
     # 城市全生命周期（出口A 口径）：只留跟我们业务相关的（A/B/C 级）。
     # 用户明确要求：找商机库是"只做我们能做的"，无关的 D 级
