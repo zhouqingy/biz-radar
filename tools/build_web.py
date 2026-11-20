@@ -1224,7 +1224,13 @@ else:
 print('dataAsOf=%s  来源=%s' % (_latest_weekly, _asof_from))
 
 # 行业动态先算出来，供「重点客户打通」复用（2026-10-20）
-TRENDS = ([t for t in IND.get('trends', [])
+# §5.73（2026-11-20）：兜底解码 HTML 实体——实测「中国中铁&amp;中国大唐」带 &amp; 上页面。
+# 采集端（mine_bjx.extract）已修，这里再兜一道，任何源漏网都到不了前端。
+import html as _html_unesc
+def _u(s):
+    return _html_unesc.unescape(s) if s and ('&' in s) else (s or '')
+TRENDS = ([{**t, 'title': _u(t.get('title')), 'desc': _u(t.get('desc'))}
+           for t in IND.get('trends', [])
            if '微信' not in (t.get('source') or '')
            and (t.get('tag') or '') != '微信快讯']
           + [{'title': d.get('t', ''), 'desc': d.get('sum', ''),
