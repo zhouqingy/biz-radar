@@ -421,6 +421,10 @@ button{font-family:inherit}
 .tg-mode{background:#fff8e1;color:#8a6100}
 .tg-new{background:#ffe0e0;color:#c0202a}
 .tg-early{background:linear-gradient(135deg,#0d9b6c,#12b981);color:#fff;font-weight:800;box-shadow:0 1px 4px rgba(13,155,108,.35)}
+/* 2026-11-18 §5.62 线索陈旧：灰显卡片 + 角标（判定在服务端 stale=1，前端只显示） */
+.tg-stale{background:#f2f4f7;color:#98a2b3;border:1px dashed #cbd5e1}
+.pj-stale{opacity:.55}
+.pj-stale .pj-t{color:#8b94a3}
 .tgo{background:#fff;border:1px dashed #d3d9e3;color:#7a818c}
 /* 元信息行（业主/中标/来源/预计招标）：业主名长短差很大，换行数 1~3 行都有。
    锁在 1~2 行之间（33~55px），超出的靠 overflow 吃掉，卡片高度不再被业主名绑架。 */
@@ -589,6 +593,78 @@ a.ovf-t:hover{color:var(--brand);text-decoration:underline}
 
 .ovfoot{font-size:11.5px;color:var(--tx3);margin-top:10px;line-height:1.7}
 .pnote{font-size:11.5px;color:#8a6100;background:#fffbf0;border-left:2px solid #f0d9a8;padding:5px 8px;margin-top:6px;border-radius:0 5px 5px 0;line-height:1.6}
+
+/* ── 按单位聚合（2026-11-13）──────────────────────────────────────
+   起因：用户问「项目线索里面一家单位就一条线索吗？已备案里面一家单位就只备案了一次吗？
+   有多的都找出来，如果太多影响观看了，可以做成弹窗」。
+   实测：项目线索 78 条落在 37 家单位上，23 家有 2 条以上（青山 5 条、华友 4 条…）。
+   原来一条一行平铺，同一家散在表格各处，看不出「这家到底出了几件事、走到哪一步」。
+   现在改成：一行一家，列里给「条数 + 最近一次 + 阶段进度」，点行弹层看全部。 */
+.ovgrp-n{display:inline-block;min-width:17px;height:17px;line-height:17px;text-align:center;
+  border-radius:9px;background:#e8f0fb;color:#1a4f8a;font-size:10.5px;font-weight:800;
+  margin-left:4px;padding:0 5px;vertical-align:1px}
+.ovgrp-n.one{background:#f1f4f8;color:#8a94a3}
+tr.ovg-row{cursor:pointer}
+tr.ovg-row:hover td{background:#f7fbff}
+/* 阶段进度条：签约 → 备案 → 开工 → 投产。灰底，点亮的段用品牌色 */
+.ovstg{display:inline-flex;align-items:center;gap:0}
+.ovstg i{display:block;width:15px;height:6px;border-radius:3px;background:#dde3ec;margin-right:2px}
+.ovstg i.on{background:#2e7d5b}
+.ovstg em{font-style:normal;font-size:11px;color:#5a6572;margin-left:5px;white-space:nowrap}
+.ovstg em.none{color:var(--tx3)}
+.ovt-last{font-size:11.5px;color:var(--tx3);margin-top:3px;line-height:1.55}
+.ovt-last b{color:var(--tx2);font-weight:600}
+
+/* 弹层：单位全部记录 */
+.ovmask{position:fixed;inset:0;background:rgba(15,26,42,.42);z-index:900;
+  display:flex;align-items:center;justify-content:center;padding:24px;animation:ovfade .14s ease}
+@keyframes ovfade{from{opacity:0}to{opacity:1}}
+.ovsheet{background:#fff;border-radius:14px;box-shadow:0 18px 54px rgba(12,22,38,.28);
+  width:min(960px,96vw);max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.ovsheet-h{padding:16px 20px 13px;border-bottom:1px solid var(--line);display:flex;
+  align-items:flex-start;gap:12px}
+.ovsheet-h .t{font-size:16px;font-weight:800;color:var(--tx1);line-height:1.45;flex:1}
+.ovsheet-h .t small{display:block;font-size:11.5px;font-weight:400;color:var(--tx3);margin-top:4px;line-height:1.6}
+.ovsheet-x{border:0;background:#f1f4f8;color:#66707d;width:28px;height:28px;border-radius:8px;
+  cursor:pointer;font-size:15px;line-height:1;flex:none}
+.ovsheet-x:hover{background:#e4e9f0;color:var(--tx1)}
+.ovsheet-b{padding:14px 20px 18px;overflow:auto}
+.ovsheet-b::-webkit-scrollbar{width:9px}
+.ovsheet-b::-webkit-scrollbar-thumb{background:#cfd7e2;border-radius:5px}
+/* 弹层内的时间轴：一竖线串起这家单位的所有动作 */
+.ovtl{position:relative;padding-left:22px}
+.ovtl:before{content:'';position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:#e3e9f1}
+.ovtl-i{position:relative;padding:0 0 15px}
+.ovtl-i:last-child{padding-bottom:2px}
+.ovtl-i:before{content:'';position:absolute;left:-20px;top:5px;width:9px;height:9px;
+  border-radius:50%;background:#fff;border:2px solid #b9c6d8}
+.ovtl-i.on:before{border-color:#2e7d5b;background:#2e7d5b}
+.ovtl-d{font-size:11.5px;color:var(--tx3);font-weight:600;letter-spacing:.2px}
+.ovtl-t{font-size:13px;color:var(--tx1);font-weight:700;line-height:1.6;margin:2px 0 4px}
+.ovtl-t a{color:var(--tx1);text-decoration:none}
+.ovtl-t a:hover{color:var(--brand);text-decoration:underline}
+.ovtl-m{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:4px}
+.ovtl-p{font-size:12px;color:var(--tx2);line-height:1.72}
+
+/* 市场与政策：按主体聚合的卡片 */
+.ovpol{display:grid;grid-template-columns:repeat(auto-fit,minmax(392px,1fr));gap:12px}
+.ovpol-c{background:#fff;border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.ovpol-h{padding:12px 15px;display:flex;align-items:center;gap:9px;cursor:pointer;
+  background:#fbfcfe;border-bottom:1px solid var(--el-bd3)}
+.ovpol-h:hover{background:#f5f9ff}
+.ovpol-h .nm{font-size:13.5px;font-weight:800;color:var(--tx1);flex:1;line-height:1.5}
+.ovpol-h .geo{font-size:11px;color:#1a4f8a;background:#eaf2fb;border-radius:4px;padding:1px 6px;white-space:nowrap}
+.ovpol-b{padding:11px 15px 14px}
+.ovpol-l{list-style:none;margin:0;padding:0}
+.ovpol-l li{padding:8px 0;border-top:1px dashed #e6ebf2;font-size:12.5px;line-height:1.7;color:var(--tx2)}
+.ovpol-l li:first-child{border-top:0;padding-top:0}
+.ovpol-l .tt{color:var(--tx1);font-weight:700}
+.ovpol-l .tt a{color:var(--tx1);text-decoration:none}
+.ovpol-l .tt a:hover{color:var(--brand);text-decoration:underline}
+.ovpol-l .dd{font-size:11.5px;color:var(--tx3);margin-top:2px}
+.ovpol-more{width:100%;border:0;background:#f4f7fb;color:#3a5a80;font-size:12px;
+  padding:8px;cursor:pointer;border-top:1px solid var(--el-bd3);font-family:inherit}
+.ovpol-more:hover{background:#e9f1fa}
 .kpirow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 .kpirow .kpi{background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 14px;min-width:130px;flex:1 1 130px;display:flex;flex-direction:column;gap:2px}
 .kpirow .kpi b{font-size:19px;font-weight:800;color:var(--tx1);line-height:1.2;letter-spacing:-.4px}
@@ -1071,6 +1147,11 @@ a.ovf-t:hover{color:var(--brand);text-decoration:underline}
 .rulebox code{background:#f2f4f8;padding:1px 6px;border-radius:5px;font-size:12px;color:var(--red)}
 
 /* ---- 金属仪表盘 ---- */
+/* 2026-11-18 扩到 20 品种，右栏按组渲染：组标题占一行，组内网格 */
+.mcat-h{font-size:10.5px;font-weight:800;color:#7a818c;letter-spacing:.5px;
+  margin:10px 0 6px;padding-left:2px;display:flex;align-items:center;gap:6px}
+.mcat-h::after{content:'';flex:1;height:1px;background:var(--line)}
+.mcat-h:first-child{margin-top:0}
 .mtgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
 .mt{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;position:relative;overflow:hidden}
 .mt::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--brand)}
@@ -1636,6 +1717,10 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
 .a-mr .a-mtrend{font-style:normal;font-size:calc(8.5px*var(--z));color:var(--ink4);
   flex:0 0 auto;white-space:nowrap;opacity:.75}
 .a-mr:hover .a-mtrend{color:var(--brand);opacity:1}
+/* 2026-11-18 扩 20 品种：右栏行情表分组标题（有色/黑色系/能源/光伏/酸化工） */
+.a-mg-h{font-size:calc(9px*var(--z));font-weight:800;letter-spacing:.5px;color:var(--ink4);
+  padding:7px 10px 3px;border-bottom:1px solid var(--line2);display:flex;align-items:center;gap:5px}
+.a-mg-h::after{content:'';flex:1;height:1px;background:var(--line2)}
 /* 老行情条搬进右栏后隐藏：右栏已用 DATA_CORE 自渲染 13 行，且每行直接可点开走势图，
    再留一份 mstrip 会出现两套重复价格。 */
 #aSide #mstrip{display:none!important}
@@ -2009,6 +2094,18 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
       <div id="fnSoon"></div>
       <div style="font-size:12px;font-weight:700;color:var(--tx2);margin:14px 0 6px">阶段历史记录（hist · 状态实时变化留痕）</div>
       <div id="fnHist"></div>
+
+      <!-- §5.72（2026-11-19 用户拍板）：项目动态从「行业动态·业务信号」迁到这里 ——
+           它们本质是项目推进情况（谁家开工/投产/获批），不是「哪里有厂要建」的信号。
+           数据仍来自 trends + projJudge 前端判定，只是渲染位置变了；折叠默认收起，
+           展开时才 need('news') 懒加载渲染。 -->
+      <details id="projNewsFold" style="margin:12px 0 4px;border:1px solid var(--line);border-radius:9px;background:#fff;padding:0 12px 8px">
+        <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2);padding:9px 0">
+          项目动态 · 按阶段（已动土 / 已进程序）<span id="pjCnt" style="font-weight:400;color:var(--tx3)"></span>
+          <span style="font-weight:400;color:var(--tx3);font-size:11.5px">（从行业资讯里按阶段归档的项目条目，点开才加载）</span>
+        </summary>
+        <div id="pjWrap"></div>
+      </details>
     </details>
 
     <!-- 第 4 批 4a 第二批 · F02 我的订阅词 / F04 我的跟进台（2026-11-06）
@@ -2304,26 +2401,29 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
 
   <!-- 5 行业动态 -->
   <div class="panel" id="p-trend">
-    <div class="sect">业务信号监测 <small>哪里有厂要建 · 这活我们能不能接</small></div>
-    <div class="hint" id="tSigTip" style="margin-bottom:10px"></div>
-    <div class="kpirow" id="tSigKpi"></div>
-    <div class="frow" style="padding:0 0 10px"><label>业务切口</label><div class="chips" id="f-sigseg"></div>
-      <label style="margin-left:14px">强度</label><div class="chips" id="f-siglvl"></div></div>
-    <div class="siggrid" id="sigGrid"></div>
+    <!-- §5.71（2026-11-19 用户拍板）：本页签只放政策与行业资讯（主位、直接展示）；
+         业务信号 + 项目动态整块收进「项目信号 · 按阶段」折叠条，点开才看。
+         此前信号区常驻页首、政策反而折叠，用户打开页签先看到 250 张项目卡片，被指「没有变化」。 -->
+    <div class="sect">行业动态与政策 <small>政策 · 行业资讯 · 不构成业务机会，作背景参考</small> <span id="newsCnt" style="font-weight:400;color:var(--tx3)"></span></div>
+    <div class="hint" id="wxTip" style="margin:0 0 8px"></div>
+    <div class="frow" style="padding:0 0 10px"><label>分类</label><div class="chips" id="f-tg"></div></div>
+    <div class="news" id="newsGrid"></div>
+
+    <details id="sigFold" style="margin-top:18px;border-top:1px dashed var(--line);padding-top:12px">
+      <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2)">
+        项目信号 · 按阶段（已动土 / 已进程序 / 仅意向）<span id="sigFoldCnt" style="font-weight:400;color:var(--tx3)"></span>
+        <span style="font-weight:400;color:var(--tx3);font-size:11.5px">（业务信号 + 项目动态都按阶段归档，点开看）</span>
+      </summary>
+      <div class="hint" id="tSigTip" style="margin:10px 0"></div>
+      <div class="kpirow" id="tSigKpi"></div>
+      <div class="frow" style="padding:0 0 10px"><label>业务切口</label><div class="chips" id="f-sigseg"></div>
+        <label style="margin-left:14px">强度</label><div class="chips" id="f-siglvl"></div></div>
+      <div class="siggrid" id="sigGrid"></div>
+    </details>
 
     <div class="sect" style="margin-top:22px">下游景气仪表盘 · 有色金属与黑色系期货 <small id="mtDate"></small></div>
     <div class="hint" style="margin-bottom:8px">金属价格是客户扩产意愿与项目造价的先行指标：镍/铝/氧化铝走强 → 印尼/几内亚冶炼扩张与自备电厂需求上升；铜价直接影响电缆/电机设备成本；螺/卷/矿/焦煤反映钢厂利润与技改意愿。价格在每次数据更新时刷新，非盘中实时。</div>
     <div class="mtgrid" id="mtGrid"></div>
-
-    <details style="margin-top:18px;border-top:1px dashed var(--line);padding-top:12px">
-      <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2)">
-        行业动态与政策 <span id="newsCnt" style="font-weight:400;color:var(--tx3)"></span>
-        <span style="font-weight:400;color:var(--tx3);font-size:11.5px">（不构成业务机会，作背景参考；点开才看）</span>
-      </summary>
-      <div class="hint" id="wxTip" style="margin:10px 0 8px"></div>
-      <div class="frow" style="padding:0 0 10px"><label>分类</label><div class="chips" id="f-tg"></div></div>
-      <div class="news" id="newsGrid"></div>
-    </details>
 
     <!-- P1 需求 2 · 历史趋势与波动（2026-11-06）：只读扫 data.news.js 的 trends（带 date），
          按发布月聚合成热度曲线 + 结构变化。不新增采集、不落盘快照、不改主数据、不碰 TABS。
@@ -2447,7 +2547,7 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
         <li><b>找商机</b>：能投的标 / 已出结果 / 立项线索三个档；顶部统计卡可直接点进对应泳道；<code>NEW</code> 是本轮首次入库。</li>
         <li><b>看谁中了标</b>：①库中标类公告 <b>389 条全部带原文链接</b>，点开自己看（华光环保、龙净这类不用另做采集）；中标情况的主体在<b>②库</b>，按单位聚合在「同业与伙伴 / 客户与业主」。</li>
         <li><b>查资质</b>：伙伴档案里点「四库一平台 ↗」跳住建部自己查；详情页要人机验证，本库不编资质证书号。</li>
-        <li><b>海外 / 政策 / 行情</b>：海外信号跟踪出海业主与备案线索；政策档见 <code>data.policy.js</code>（837 号 / 49 号令 + 5 部配套规定）；右侧当日有色行情 + 13 个品种过往曲线。</li>
+        <li><b>海外 / 政策 / 行情</b>：海外信号跟踪出海业主与备案线索；政策档见 <code>data.policy.js</code>（837 号 / 49 号令 + 5 部配套规定）；右侧当日行情 + 20 个品种过往曲线。</li>
         <li><b>拿不准就回查</b>：完整口径与更新机制在下方折叠区；事实与裁决底稿是 <code>/workspace/00-公司业务口径.md</code>，<b>口径一律以底稿为准</b>。</li>
       </ul>
     </div>
@@ -2488,20 +2588,20 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
       <div class="rulebox" style="margin-top:12px">
         <h4>数据血缘 · 这些数字从哪来</h4>
         <ul>
-          <li><b>采集 → 过滤 → 入库</b>：原始公告 <b>3905</b> 条 → <code>semantic_drop()</code> 判删 <b>2786</b> 条 → <b>①投放 / 商机库 1119</b> 条（列式三块 77 + 461 + 581）。数字由本脚本实时读 <code>data.core.js · meta</code> 与三块 <code>n</code>，不是手填。</li>
-          <li><b>②业绩 / 动向库 4589 条</b>：rivalperf 452 家 / 2846 条，candperf 79 家 / 186 条，org 各单位库 1557 条。按单位聚合，看业主招过什么标、谁中标、跟谁合作最多，<b>不是①库的 1119 条</b>；②反推①要再过①过滤。</li>
-          <li><b>规则源唯一</b>：<code>biz-radar-tools/biz_rules.py</code>，采集端与构建端调同一份。来源平台 <b>57</b> 个（招标平台页签）、规划前瞻 124 条、行情历史 13 个品种、政策档 837 号 + 49 号令 + 5 部配套规定。</li>
+          <li><b>采集 → 过滤 → 入库</b>：原始公告 <b>1958</b> 条 → <code>semantic_drop()</code> 判删 <b>1177</b> 条 → <b>①投放 / 商机库 781</b> 条（列式三块 28 + 417 + 336）。数字由本脚本实时读 <code>data.core.js · meta</code> 与三块 <code>n</code>，不是手填。</li>
+          <li><b>②业绩 / 动向库 3894 条</b>：rivalperf 452 家 / 2727 条，candperf 79 家 / 186 条，org 各单位库 981 条。按单位聚合，看业主招过什么标、谁中标、跟谁合作最多，<b>不是①库的 781 条</b>；②反推①要再过①过滤。</li>
+          <li><b>规则源唯一</b>：<code>biz-radar-tools/biz_rules.py</code>，采集端与构建端调同一份。来源平台 <b>49</b> 个（招标平台页签）、规划前瞻 165 条、行情历史 20 个品种、政策档 837 号 + 49 号令 + 5 部配套规定。</li>
           <li><b>每次更新全量重跑</b>：<code>update_weekly.py</code> 重建全部模块，处理「今天招标 → 明天出结果」的实时状态变化与漏项；更新后重跑本体检，本区块自动刷新。</li>
         </ul>
-        <h4>数据质量体检 · 自动快照（2026-11-06 11:16）</h4>
+        <h4>数据质量体检 · 自动快照（2026-11-20 15:40）</h4>
         <ul>
-          <li><b>23 项检查 / 阻断错误 0 / 需关注 2</b>。①库 1119 行 × 31 列；ID 唯一、<code>order</code> 与 <code>ext</code> 索引合法、<code>w</code> 与金额 ≥1 亿逐条一致（<code>w=1 98 / w=0 1021</code>）。</li>
-          <li><b>中标情况看两个库</b>：①库中标类公告 389 条，带原文链接 <b>389/389</b>（点开自己看，不用另做中标采集）；带中标单位字段 220 条，其余 169 条主体在②库。</li>
-          <li><b>字段完整率最低 5 列</b>：nw 1.9%、expect 2.4%、linkbad 3.3%、w 8.8%、iv 14.4% —— 这些是稀疏字段，空值属正常，不是数据缺失。</li>
+          <li><b>25 项检查 / 阻断错误 0 / 需关注 2</b>。①库 781 行 × 31 列；ID 唯一、<code>order</code> 与 <code>ext</code> 索引合法、<code>w</code> 与金额 ≥1 亿逐条一致（<code>w=1 42 / w=0 739</code>）。</li>
+          <li><b>中标情况看两个库</b>：①库中标类公告 199 条，带原文链接 <b>199/199</b>（点开自己看，不用另做中标采集）；带中标单位字段 99 条，其余 100 条主体在②库。</li>
+          <li><b>字段完整率最低 5 列</b>：nw 0.4%、linkbad 2.4%、expect 3.1%、w 5.4%、amtTxt 12.9% —— 这些是稀疏字段，空值属正常，不是数据缺失。</li>
         </ul>
         <p style="font-size:12.5px;color:var(--tx3);margin:8px 0 4px"><b>需关注 2 项（只报不改）</b>：改主数据要先给逐条清单并等确认，本脚本一条数据都不动。</p>
-        <ul style="font-size:12.5px"><li><b>url 无占位/假链接</b>：异常 1 条：P5bb5f589 https://www.toutiao.com/a7668xxxx/</li><li><b>发布日期 d 格式</b>：异常 2 条：P5bb5f589（2026-04）盐城联鑫钢铁煤气资源综合利用热电升级改造项目配套标段(煤气管网/；P38a2d7bc（2026-08）铜陵有色金冠铜业分公司奥炉电收尘器</li></ul>
-        <p style="font-size:12px;color:var(--tx3);margin:8px 0 0">本区块由 <code>biz-radar-tools/healthcheck.py</code> 每次体检后自动重写（只替换两行注释之间，页面其余字节不动）；完整 23 项明细见 <code>/workspace/数据质量体检.html</code> 与 <code>数据质量体检.json</code>。加 <code>--no-sync</code> 可关闭同步。</p>
+        <ul style="font-size:12.5px"><li><b>发布日期 d 格式</b>：异常 1 条：P38a2d7bc（2026-08）铜陵有色金冠铜业分公司奥炉电收尘器</li><li><b>关注档 watch 与 w 列一致</b>：watch.amt=1.0，w=1 实际 42 条</li></ul>
+        <p style="font-size:12px;color:var(--tx3);margin:8px 0 0">本区块由 <code>biz-radar-tools/healthcheck.py</code> 每次体检后自动重写（只替换两行注释之间，页面其余字节不动）；完整 25 项明细见 <code>/workspace/数据质量体检.html</code> 与 <code>数据质量体检.json</code>。加 <code>--no-sync</code> 可关闭同步。</p>
       </div>
     <!-- HEALTH_SNAPSHOT_END -->
     <details style="margin-top:12px;border-top:1px dashed var(--line);padding-top:10px">
@@ -2583,7 +2683,7 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
         <li><b>① 自动（默认）</b>：已配置三个定时任务，由系统按计划自动执行，<b>不需要人工发命令、也不需要开着电脑或客户端</b>——
           <br>· 每天 16:10：检索四地新项目 + <b>提前量信号</b>（发改委核准/备案、招标计划预公告、环评公示、技改备案、重大项目清单、上市公告、<b>地方热电联产规划批复</b>）+ 客户海外动态 + 行业政策，增量入库后<b>挖掘 A/B 级项目的新单位</b>、合并新增单位、<b>补厚档案过薄的单位</b>，全量重建并发布
           <br>· 每天 16:40：微信线索采集（竞对喜报 + 行业动态），严格校验后并入竞对档案与「微信线索」池（<b>不再塞进本页行业动态</b>，避免两处重复）
-          <br>· 工作日 16:05：刷新 13 个金属期货收盘价并发布（项目数据不变）
+          <br>· 工作日 16:05：刷新 18 个期货收盘价与 2 个现货基准价并发布（项目数据不变）
         </li>
         <li><b>② 人工触发</b>：随时说一句「更新商机数据」即可，我会立即跑一遍完整流程</li>
         <li><b>③ 自己跑脚本</b>：在 <code>/workspace/biz-radar-tools/</code> 下执行 <code>python3.11 update_weekly.py</code>（<code>--no-publish</code> 只重建不发布，<code>--check</code> 只做体检）</li>
@@ -2596,7 +2696,7 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
       </ul>
       <h4>五、各模块口径补充</h4>
       <ul>
-        <li><b>当日有色行情</b>（页顶蓝条 + 行业动态页）：13 个期货品种价格，来源上期所公开行情，<b>每个工作日收盘 16:05 自动刷新一次</b>，页面显示的是最近一次抓取的价格与时刻；抓取失败自动沿用上一次成功快照并保留原日期，不会显示假数据</li>
+        <li><b>当日有色行情</b>（页顶蓝条 + 行业动态页）：18 个期货 + 2 个现货（硫磺/硫酸，生意社基准价）品种价格，期货来源上期所等公开行情、现货来源生意社，<b>每个工作日收盘 16:05 自动刷新一次</b>，页面显示的是最近一次抓取的价格与时刻；抓取失败自动沿用上一次成功快照并保留原日期，不会显示假数据</li>
         <li><b>为什么不做成逐秒实时</b>：页面是纯静态页，浏览器直连行情源会被拒绝——新浪 <code>hq.sinajs.cn</code> 校验 Referer、东方财富 <code>push2</code> 不支持跨域、腾讯 <code>qt.gtimg.cn</code> 不提供国内期货代码，三个源都实测过，无一可用。因此改为服务端定时抓取，<b>最多滞后约 3 小时</b>；做投标决策看的是趋势与量级，这个精度足够，若要逐笔盯盘请直接看行情软件</li>
         <li><b>合作生态</b>：按「设计院补资质 + 施工单位补资源 + 当地关系」逻辑收录 30 家潜在联合体伙伴，全部附 2025-2026 年真实业绩佐证；其中东华、中机一院、煤炭院、浙江城建煤气热电院等在「竞争对手」里同时带 <b>竞合双身份</b> 标——同业竞争但可联合投标</li>
         <li><b>海外信号</b>：跟踪 44 家客户的境外矿山/园区/扩产动态，按与「用能用电+海水淡化」业务的相关度排序，前 4 条放大展示；筛选条可按行业过滤</li>
@@ -2637,8 +2737,8 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
   </div>
 </div>
 
-<script src="data.core.js?v=202611041807"></script>
-<script src="data.items.js?v=202611041807"></script>
+<script src="data.core.js?v=202611201540"></script>
+<script src="data.items.js?v=202611201540"></script>
 <script src="data.metalhist.js?v=202611041941"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
@@ -2706,7 +2806,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611041941';
+var VER='?v=202611201540';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -3896,6 +3996,8 @@ function filtered(){
   if(F.sort==='amt')a.sort(function(x,y){return num(y.amt)-num(x.amt)});
   else if(F.sort==='d')a.sort(function(x,y){return (y.d||'').localeCompare(x.d||'')});
   else a.sort(function(x,y){return y.sc-x.sc});
+  /* 2026-11-18 §5.62：线索陈旧置底（稳定排序，不打乱同档内的原有顺序） */
+  a.sort(function(x,y){return (x.stale||0)-(y.stale||0)});
   return a;
 }
 
@@ -3927,7 +4029,10 @@ function cardHtml(x){
     (x.mode?'<span class="tg tg-mode">'+esc(x.mode)+'</span>':'')+
     /* 命中词很有用：一眼看出「为什么判成这个分层」，也方便复核规则准不准 */
     (x.sG?'<span class="tg" style="background:#fff7e6;color:#a86612" title="按这个词判进这一层">'+esc(x.sG)+'</span>':'')+
-    (x.early?'<span class="tg tg-early">提前量 · '+esc(x.early)+'</span>':'');
+    (x.early?'<span class="tg tg-early">提前量 · '+esc(x.early)+'</span>':'')+
+    /* 2026-11-18 线索状态推进（§5.62）：>2 年无后续公开记录的死线索，
+       服务端标 stale=1，这里只负责显示 —— 灰显 + 「线索陈旧」角标 + 排序置底。 */
+    (x.stale?'<span class="tg tg-stale" title="发布超过2年，采集层未发现同项目后续招标/中标记录">线索陈旧</span>':'');
   var mv=(x.amt!=null?'<div class="pj-money">'+money(x.amt)+
     (x.amtTxt?'<small title="'+esc(x.amtTxt)+'">'+esc(x.amtTxt)+'</small>':'')+'</div>':'');
   var meta='';
@@ -4005,7 +4110,7 @@ function cardHtml(x){
 
   /* 2026-10-24：卡片可点 → 弹详情层（openPjDetail）。整卡 cursor:pointer，
      点到 a/button（原文、工商信息、附件等）时不触发弹层——那些有自己的去处。 */
-  return '<div class="pj '+GCLASS[x.g]+'" data-pjid="'+esc(x.id||'')+'" style="cursor:pointer">'+
+  return '<div class="pj '+(x.stale?'pj-stale ':'')+GCLASS[x.g]+'" data-pjid="'+esc(x.id||'')+'" style="cursor:pointer">'+
     '<div class="pj-top"><span class="gbadge '+x.g+'">'+GTXT[x.g]+'</span>'+
       '<span class="gscore">'+x.sc+'分</span>'+
       (x.nw?'<span class="newdot">NEW</span>':'')+mv+'</div>'+
@@ -4498,18 +4603,45 @@ function renderPolicy(q){
     top.innerHTML='逐条原文均摘自官方发布页，<b>biz / 业务判断是结合本库业务做的判断，不是政策原文</b>。'+
       '查证 '+(P.meta.checked||P.gen||'')+'。⚠ '+(P.meta.transition||'');
   }
-  /* 分组顺序按首次出现，保持「总览→主法规→逐条→配套→资金链→判断→时间线→更正」 */
+  /* 分组顺序按首次出现，保持「总览→主法规→逐条→配套→资金链→判断→时间线→更正」
+     §5.71（用户拍板「太长了拖动久」）：每组各包一层折叠、默认收起；
+     检索命中时自动展开，保证检索体验不变。
+     §5.72（用户拍板「搞的好看一点」）：主法规/配套规定的竖排散行改成
+     「一句摘要 · 时间胶囊 · 键值两列」结构化排版；只改渲染，原文数据不动。 */
   var groups=[],seen={};
   hit.forEach(function(x){ if(!seen[x.g]){seen[x.g]=1;groups.push(x.g)} });
+  function polBodyHTML(g,x){
+    var body=x.body||'';
+    if(!/^(主法规|配套规定)/.test(g)||body.indexOf('<br>')<0)
+      return '<div class="pol-l">'+body+'</div>';
+    var rows=body.split('<br>').filter(Boolean), pills=[],kv=[],plain=[];
+    rows.forEach(function(ln){
+      ln=ln.replace(/^\s+|\s+$/g,''); if(!ln) return;
+      var m=ln.match(/^(公布|施行|状态)\s+(.*)$/);
+      if(m){ pills.push('<span style="display:inline-block;margin:0 6px 6px 0;padding:2px 10px;border-radius:20px;font-size:11.5px;background:#eef4fd;color:#1a56b0;border:1px solid #d3e2f7">'+m[1]+' '+esc(m[2])+'</span>'); return; }
+      m=ln.match(/^(依据|收录条文|通过|角色|关系)\s*[:：]?\s*(.*)$/);
+      if(m&&m[2]){ kv.push('<div style="display:flex;gap:10px;font-size:12.5px;line-height:1.7;padding:2px 0"><span style="flex:none;width:62px;color:#8a919e">'+m[1]+'</span><span style="color:#3c4450;flex:1">'+esc(m[2])+'</span></div>'); return; }
+      plain.push(ln);
+    });
+    var h='';
+    if(plain.length) h+='<div style="color:#5b6470;font-size:12.5px;line-height:1.8;margin-bottom:7px">'+
+      plain.map(function(s){return esc(s)}).join(' <span style="color:#c9ced6">·</span> ')+'</div>';
+    if(pills.length) h+='<div style="margin-bottom:7px">'+pills.join('')+'</div>';
+    h+=kv.join('');
+    return '<div class="pol-l">'+h+'</div>';
+  }
   var html=groups.map(function(g){
     var sub=hit.filter(function(x){return x.g===g});
-    return '<div class="sect" style="margin-top:14px">'+esc(g)+' <small>'+sub.length+' 条</small></div>'+
+    return '<details class="polgrp"'+(qq?' open':'')+
+      ' style="margin-top:10px;border:1px solid var(--line);border-radius:9px;background:#fbfcfe;padding:0 12px 8px">'+
+      '<summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--tx2);padding:9px 0">'+
+        esc(g)+' <small style="font-weight:400;color:var(--tx3)">'+sub.length+' 条</small></summary>'+
       '<div class="polgrid">'+sub.map(function(x){
         return '<div class="polc"><div class="pol-h"><span class="pol-tag">'+esc(g.split(' · ')[0])+'</span>'+
-          '<b>'+esc(x.t)+'</b></div><div class="pol-l">'+x.body+'</div>'+
-          (x.url&&/^https?:/.test(x.url)?'<div class="pol-l"><a href="'+esc(x.url)+'" target="_blank" rel="noopener">官方原文 ↗</a></div>':'')+
+          '<b>'+esc(x.t)+'</b></div>'+ polBodyHTML(g,x) +
+          (x.url&&/^https?:/.test(x.url)?'<div style="text-align:right;margin-top:6px"><a href="'+esc(x.url)+'" target="_blank" rel="noopener" style="display:inline-block;padding:3px 12px;border-radius:6px;background:#146edc;color:#fff;font-size:12px;text-decoration:none">官方原文 ↗</a></div>':'')+
         '</div>';
-      }).join('')+'</div>';
+      }).join('')+'</div></details>';
   }).join('');
   wrap.innerHTML=html||'<div class="empty">没有命中「'+esc(q||'')+'」的条款，换个关键词（如「跨境资金」「第十四条」「备案」）试试。</div>';
 }
@@ -6955,9 +7087,11 @@ function ovRenderFlash(d) {
   h += '<ul class="ovfl">';
   L.forEach(function (x) {
     var ti = esc(x.t || '');
+    /* §5.71（用户拍板）：灰底色块太丑，改标题后浅灰小字后缀，几乎无感 */
+    var bTag = x.tier === 'E' ? '<span style="color:#a6adb8;font-size:12px"> · 企业动向</span>' : '';
     h += '<li class="ovf">' +
       '<span class="ovf-d">' + esc((x.d || '').slice(5)) + '</span>' +
-      '<span class="ovf-b">' +
+      '<span class="ovf-b">' + bTag +
       (x.u ? '<a href="' + esc(x.u) + '" target="_blank" rel="noopener" class="ovf-t">' + ti + '</a>'
         : '<span class="ovf-t">' + ti + '</span>') +
       (x.m ? '<span class="ovf-m">' + esc(x.m) + '</span>' : '') +
@@ -6973,6 +7107,84 @@ function ovRenderFlash(d) {
 function ovToggleKw() { ovKwOpen = !ovKwOpen; renderOverseas(); }
 
 /* ── 视图 2：项目线索（新闻来源，人工确认过）────────────────────── */
+/* ── 视图 2：项目线索（按「单位」聚合，一家一行）────────────────────
+   2026-11-13 改：原来一条线索一行，同一家单位（如青山 5 条、华友 4 条）
+   散在表格各处，看不出「这家一共出了几件事、走到哪一步」。
+   现在默认按单位归并，列里给条数、最近动态、阶段进度；点行弹层看全部记录。 */
+var ovClueOpen = '';   // 当前弹层展示的单位名；'' = 关闭
+
+/* 阶段识别：只认能落到流程上的词，认不出就返回 -1（不猜）
+   ⚠ 判断顺序很重要：「已投产」要先于「计划投产」检查，
+   否则「计划年底前投产」会被当成已经投产（华友 Pomalaa 实测踩过）。
+   所以每条都先排除未来时态（计划/拟/将/预计/力争/目标/有望/待），再认既成事实。 */
+var OV_STAGES = ['签约', '备案', '开工', '投产'];
+var OV_FUTURE = /计划|拟|将于|预计|力争|目标|有望|待|争取|预期|将于|将于/;
+
+function ovStage(t) {
+  var s = String(t || '');
+  /* 拆成分句，逐句判断：一句话里可能前半句是计划、后半句是已完工 */
+  var segs = s.split(/[，。；、,;]/);
+  var best = -1;
+  for (var i = 0; i < segs.length; i++) {
+    var g = segs[i];
+    var fut = OV_FUTURE.test(g);
+    var v = -1;
+    if (/已(投产|达产|商运|并网|投运)|建成投产|正式投产|投产成功|全部投运|全面达产|点火成功|满产/.test(g)) v = 3;
+    else if (/开工|奠基|破土|首根|吊装|进场施工|封顶/.test(g)) v = 2;
+    else if (!fut && /投产|达产|满产|量产|点火|并网|商运|投运/.test(g)) v = 3;
+    else if (!fut && /施工|在建|建设有序推进|推进中|设备调试|试生产|设备安装/.test(g)) v = 2;
+    else if (/备案|核准|获批|证书|审批通过|ODI 获批|取得.{0,6}证书/.test(g)) v = 1;
+    else if (/签约|签署|备忘录|谅解|框架协议|中标|合同|交割|收购|投资协议/.test(g)) v = 0;
+    /* 「新建 / 建设 / 扩建 / 拟投资」= 已决定要建，但还没到开工。
+       这一档必须放在最后兜底：它太宽，先判会吃掉备案和签约。 */
+    else if (/新建|建设|扩建|扩产|拟投资|投资建设|二期|三期/.test(g)) v = 1;
+    if (v > best) best = v;
+  }
+  return best;
+}
+/* 把一家单位的所有记录合成一条汇总 */
+function ovGroupClue(L) {
+  var map = {}, arr2 = [];
+  L.forEach(function (o) {
+    var k = o.name || '（未标单位）';
+    if (!map[k]) { map[k] = { name: k, rows: [], geo: o._geo, grp: o.grp || '', cut: o.cut || '' }; arr2.push(map[k]); }
+    map[k].rows.push(o);
+  });
+  arr2.forEach(function (g) {
+    g.rows.sort(function (a, b) { return (a.date || '') < (b.date || '') ? -1 : 1; });
+    g.n = g.rows.length;
+    g.last = g.rows[g.n - 1];
+    g.first = g.rows[0];
+    /* 阶段判定：从最新一条往回找，取第一个能认出来的。
+       原来的做法是「全部记录里最靠后的一步」，看起来更保守，但实测会失真 ——
+       华友「Pomalaa 推进中」被判成投产，只因为更早有一条提到「投产」。
+       阶段应该反映「现在走到哪」，所以从最近一条往回找最新可辨识的状态。 */
+    g.stage = -1;
+    for (var _i = g.rows.length - 1; _i >= 0; _i--) {
+      var _v = ovStage(g.rows[_i].title);
+      if (_v >= 0) { g.stage = _v; break; }
+    }
+    /* 全程都认不出时，用更宽的兜底词再试一遍（收入、产能、订单这类也算在推进） */
+    if (g.stage < 0) {
+      for (var _j = g.rows.length - 1; _j >= 0; _j--) {
+        if (/产能|收入|营收|订单|扩产|达产|产量|出口|发运|供地|土地|设备调试/.test(g.rows[_j].title || '')) {
+          g.stage = 2; break;
+        }
+      }
+    }
+    /* 国别用出现最多的那个，避免同名单位被标错 */
+    var gc = {};
+    g.rows.forEach(function (r) { gc[r._geo] = (gc[r._geo] || 0) + 1; });
+    g.geo = Object.keys(gc).sort(function (a, b) { return gc[b] - gc[a]; })[0];
+  });
+  /* 排序：条数多的在前，同条数按最近日期 */
+  arr2.sort(function (a, b) {
+    if (b.n !== a.n) return b.n - a.n;
+    return (b.last.date || '') > (a.last.date || '') ? 1 : -1;
+  });
+  return arr2;
+}
+
 function ovRenderClue(d) {
   var b = el('ovBoxClue'); if (!b) return;
   var L = d.clue;
@@ -6980,17 +7192,24 @@ function ovRenderClue(d) {
   L.forEach(function (o) {
     if (!o._geo) o._geo = ovGeo((o.title || '') + ' ' + (o.desc || '').slice(0, 120)) || '未标';
   });
+  var G = ovGroupClue(L);
+
   var geoN = {};
-  L.forEach(function (o) { geoN[o._geo] = (geoN[o._geo] || 0) + 1; });
+  G.forEach(function (g) { geoN[g.geo] = (geoN[g.geo] || 0) + 1; });
   var geos = Object.keys(geoN).sort(function (a, c) { return geoN[c] - geoN[a]; });
 
   var h = '<div class="ovnote">来自新闻、公告的早期信号，<b>每条都对应到具体业主</b>。' +
-    '确定性低于「已备案」——签约阶段的项目可能黄，跟进前先核实。</div>';
+    '确定性低于「已备案」——签约阶段的项目可能黄，跟进前先核实。' +
+    '<div style="margin-top:7px;padding-top:7px;border-top:1px dashed #b9d4f0">' +
+    '<b>' + G.length + ' 家单位共 ' + L.length + ' 条线索</b>（' +
+    G.filter(function (g) { return g.n > 1; }).length + ' 家有 2 条以上）。' +
+    '默认按单位归并，<b>点任意一行</b>可看这家单位的全部记录与推进过程。</div></div>';
 
-  var rest = L.filter(function (o) {
-    if (ovClueGeo && o._geo !== ovClueGeo) return false;
+  var rest = G.filter(function (g) {
+    if (ovClueGeo && g.geo !== ovClueGeo) return false;
     if (ovClueKw) {
-      var s = (o.name || '') + (o.title || '') + (o.desc || '');
+      var s = g.name;
+      g.rows.forEach(function (r) { s += (r.title || '') + (r.desc || ''); });
       if (s.indexOf(ovClueKw) < 0) return false;
     }
     return true;
@@ -7001,13 +7220,14 @@ function ovRenderClue(d) {
      一个筛选条吃掉 90px，正是用户说的「臃肿」。 */
   h += '<div class="ovfbar">';
   h += '<select id="ovFGeo" class="ovsel">' +
-    '<option value="">全部国家（' + L.length + '）</option>' +
+    '<option value="">全部国家（' + G.length + '）</option>' +
     geos.map(function (g) {
       return '<option value="' + esc(g) + '"' + (ovClueGeo === g ? ' selected' : '') + '>' +
         esc(g) + '（' + geoN[g] + '）</option>';
     }).join('') + '</select>';
   h += '<input id="ovKw" class="ovinput" placeholder="搜业主 / 项目关键词" value="' + esc(ovClueKw) + '">';
-  h += '<span class="ovfb-n">当前 ' + rest.length + ' 条</span>';
+  h += '<span class="ovfb-n">当前 ' + rest.length + ' 家 / ' +
+    rest.reduce(function (a, g) { return a + g.n; }, 0) + ' 条</span>';
   h += '</div>';
 
   if (!rest.length) {
@@ -7016,37 +7236,41 @@ function ovRenderClue(d) {
   }
 
   h += '<table class="pf-table ovtbl"><colgroup>' +
-    '<col style="width:16%"><col style="width:8%"><col style="width:40%">' +
-    '<col style="width:9%"><col style="width:10%"><col style="width:9%">' +
+    '<col style="width:24%"><col style="width:7%"><col style="width:33%">' +
+    '<col style="width:17%"><col style="width:11%"><col style="width:8%">' +
     '</colgroup><thead><tr>' +
-    '<th>业主</th><th>国家</th><th>项目 / 动态</th><th>类型</th><th>切口</th>' +
-    '<th style="text-align:right">日期</th></tr></thead><tbody>';
+    '<th>业主 / 单位</th><th>国家</th><th>最近动态</th><th>推进阶段</th>' +
+    '<th>切口</th><th style="text-align:right">最近日期</th></tr></thead><tbody>';
 
-  rest.forEach(function (o) {
-    /* 表格里只放短标签（海水淡化 / 自备电站·动力岛 / 余热回收），
-       完整的 cutWhy 塞进 title 悬停看。
-       cutMeta 会优先返回 cutWhy 的前 20 字，那是给卡片用的长句（「360MW 燃机自备电站
-       已在项目本体里。」），放进 10% 宽的列里会把整行撑成两行高。 */
+  rest.forEach(function (g) {
+    var o = g.last;
     var m = cutMeta(o);
-    /* opp（机会池）和 ''（看不出）都不是真正的切口 —— 旧版把「看不出」也当成一个
-       可筛选项，结果详情里一半的标签是「机会池」，等于没说。表格里这类一律留空，
-       只保留能落到具体工艺的那五种。 */
     var mt = (o.cut && o.cut !== 'opp') ? ((CUT_META[o.cut] || {}).t || '') : '';
-    var tg = (o.tag || '').replace(/^海外/, '') || '动态';
-    var ds = String(o.desc || '');
-    h += '<tr' + (o.url ? ' class="pf-row-link" data-u="' + esc(o.url) + '" title="点开看新闻原文"' : '') + '>' +
-      '<td class="ovt-own">' + esc(o.name || '—') + '</td>' +
-      '<td class="ovt-geo">' + esc(o._geo) + '</td>' +
-      '<td class="p"><b>' + esc(o.title || '') + '</b>' +
-      (ds ? '<div class="ovt-desc ovt-clamp">' + esc(ds.slice(0, 120)) + (ds.length > 120 ? '…' : '') + '</div>' : '') + '</td>' +
-      '<td>' + esc(tg) + '</td>' +
-      '<td>' + (mt ? '<span class="ovcut" style="background:' + m.bg + ';color:' + m.c + '" title="' + esc(m.tip) + '">' + esc(mt) + '</span>' : '<span class="ovdim">—</span>') + '</td>' +
+    /* 一家单位多个切口时取最近那条的；为空则留空 */
+    var ds = String(o.title || '');
+    /* 阶段进度条 */
+    var stg = '<span class="ovstg">';
+    for (var i = 0; i < 4; i++) stg += '<i class="' + (g.stage >= i ? 'on' : '') + '"></i>';
+    stg += '<em class="' + (g.stage < 0 ? 'none' : '') + '">' +
+      (g.stage < 0 ? '未识别' : OV_STAGES[g.stage]) + '</em></span>';
+    h += '<tr class="ovg-row pf-row-link" data-g="' + esc(g.name) + '">' +
+      '<td class="ovt-own"><b>' + esc(g.name) + '</b>' +
+      (g.n > 1 ? '<span class="ovgrp-n" title="这家单位有 ' + g.n + ' 条线索，点开看全部">' + g.n + '</span>'
+        : '<span class="ovgrp-n one">1</span>') +
+      (g.grp ? '<div class="ovt-last">' + esc(g.grp) + '</div>' : '') + '</td>' +
+      '<td class="ovt-geo">' + esc(g.geo) + '</td>' +
+      '<td class="p"><b>' + esc(ds) + '</b>' +
+      (g.n > 1 ? '<div class="ovt-last">首次 <b>' + esc(g.first.date || '') + '</b>｜共 ' +
+        g.n + ' 条，点开看全过程</div>' : '') + '</td>' +
+      '<td>' + stg + '</td>' +
+      '<td>' + (mt ? '<span class="ovcut" style="background:' + m.bg + ';color:' + m.c +
+        '" title="' + esc(m.tip) + '">' + esc(mt) + '</span>' : '<span class="ovdim">—</span>') + '</td>' +
       '<td class="d" style="text-align:right">' + esc(o.date || '') + '</td>' +
       '</tr>';
   });
   h += '</tbody></table>';
-  h += '<div class="ovfoot">共 ' + L.length + ' 条线索，当前筛选出 ' + rest.length + ' 条。' +
-    '点任意一行可打开原文。</div>';
+  h += '<div class="ovfoot">共 ' + G.length + ' 家单位 / ' + L.length + ' 条线索，当前筛选出 ' +
+    rest.length + ' 家。<b>点任意一行</b>看这家单位的全部记录（含原文链接）。</div>';
   b.innerHTML = h;
   ovBindClue();
 }
@@ -7070,10 +7294,80 @@ function ovBindClue() {
   }
   var box = el('ovBoxClue');
   if (box) box.onclick = function (e) {
-    var tr = e.target.closest('tr.pf-row-link');
-    if (tr && tr.dataset.u) window.open(tr.dataset.u, '_blank', 'noopener');
+    var tr = e.target.closest('tr.ovg-row');
+    if (tr && tr.dataset.g) { openOvUnit(tr.dataset.g); }
   };
 }
+
+/* ── 单位弹层：一家的全部记录，按时间轴排 ─────────────────────────── */
+function openOvUnit(name) {
+  var d = ovData();
+  var rows = [];
+  (d.clue || []).forEach(function (o) {
+    if ((o.name || '（未标单位）') === name) { o._kind = 'clue'; rows.push(o); }
+  });
+  /* 已备案里同名的主体也并进来 —— 用户问的就是「一家是不是只备案一次」，
+     把两组信息放在一起，才能看出「先签约、后备案、再开工」的完整链条 */
+  (d.odi || []).forEach(function (o) {
+    if ((o.own || '') === name) { o._kind = 'odi'; rows.push(o); }
+  });
+  rows.sort(function (a, b) { return (a.date || a.d || '') < (b.date || b.d || '') ? -1 : 1; });
+
+  var h = '<div class="ovsheet-h"><div class="t">' + esc(name) +
+    '<small>共 ' + rows.length + ' 条记录（线索 ' +
+    rows.filter(function (r) { return r._kind === 'clue'; }).length + ' · 备案 ' +
+    rows.filter(function (r) { return r._kind === 'odi'; }).length +
+    '）· 按时间正序，最后一条是最近进展</small></div>' +
+    '<button class="ovsheet-x" onclick="closeOvUnit()" title="关闭">✕</button></div>';
+  h += '<div class="ovsheet-b"><div class="ovtl">';
+  rows.forEach(function (r, i) {
+    var isLast = (i === rows.length - 1);
+    var dt = r.date || r.d || '';
+    if (r._kind === 'odi') {
+      h += '<div class="ovtl-i' + (isLast ? ' on' : '') + '">' +
+        '<div class="ovtl-d">' + esc(dt) + ' · 已备案</div>' +
+        '<div class="ovtl-t">' + esc(r.nm || '') + '</div>' +
+        '<div class="ovtl-m">' +
+        (r.geo ? '<span class="ovcut" style="background:#eaf2fb;color:#1a4f8a">' + esc(r.geo) + '</span>' : '') +
+        (r.act ? '<span class="ovdim">' + esc(r.act) + '</span>' : '') +
+        (r.mt ? '<span class="ovdim">申报金额 ' + esc(r.mt) + '</span>' : '') +
+        '</div>' +
+        (r.why ? '<div class="ovtl-p">' + esc(String(r.why).replace(/^[^：]*：/, '')) + '</div>' : '') +
+        '</div>';
+    } else {
+      var st = ovStage(r.title);
+      h += '<div class="ovtl-i' + (isLast ? ' on' : '') + '">' +
+        '<div class="ovtl-d">' + esc(dt) +
+        (st >= 0 ? ' · ' + OV_STAGES[st] : '') +
+        (r._geo ? ' · ' + esc(r._geo) : '') + '</div>' +
+        '<div class="ovtl-t">' + (r.url
+          ? '<a href="' + esc(r.url) + '" target="_blank" rel="noopener">' + esc(r.title || '') + ' ↗</a>'
+          : esc(r.title || '')) + '</div>' +
+        (r.cutWhy ? '<div class="ovtl-m"><span class="ovdim">切口</span> ' +
+          esc(r.cutWhy) + '</div>' : '') +
+        (r.desc ? '<div class="ovtl-p">' + esc(String(r.desc).slice(0, 300)) +
+          (String(r.desc).length > 300 ? '…' : '') + '</div>' : '') +
+        '</div>';
+    }
+  });
+  h += '</div></div>';
+
+  var old = el('ovMask');
+  if (old) old.parentNode.removeChild(old);
+  var mk = document.createElement('div');
+  mk.id = 'ovMask';
+  mk.className = 'ovmask';
+  mk.innerHTML = '<div class="ovsheet" role="dialog" aria-modal="true">' + h + '</div>';
+  mk.onclick = function (e) { if (e.target === mk) closeOvUnit(); };
+  document.body.appendChild(mk);
+}
+function closeOvUnit() {
+  var m = el('ovMask');
+  if (m) m.parentNode.removeChild(m);
+}
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeOvUnit();
+});
 
 /* ── 视图 3：已备案（政府登记）──────────────────────────────────── */
 function ovRenderOdi(d) {
@@ -7100,10 +7394,23 @@ function ovRenderOdi(d) {
 
   var S = L.filter(function (x) { return x.tier === 'S'; });
   var A = L.filter(function (x) { return x.tier === 'A'; });
+  /* 按投资主体聚合：实测 23 条落在 22 家主体上，只有伟明环保 2 条。
+     单条时行为与原来完全一致；多家时给角标 + 可点开看全部。 */
+  var OC = {};
+  L.forEach(function (x) { var k = x.own || '（未标主体）'; (OC[k] = OC[k] || []).push(x); });
+  var nMulti = Object.keys(OC).filter(function (k) { return OC[k].length > 1; }).length;
+
   h += '<div class="ovsum">' +
     '<span><i><b>' + S.length + '</b>直接相关</i><em>工程本体就是我们的活</em></span>' +
     '<span><i><b>' + A.length + '</b>潜在客户</i><em>客户行业在海外建厂，厂里必配电水热</em></span>' +
     '<span><i><b>' + L.length + '</b>合计</i><em>筛后入库，不是备案总量</em></span>' +
+    '</div>';
+
+  h += '<div class="ovfoot" style="margin:-4px 0 10px">' +
+    '共 <b>' + Object.keys(OC).length + ' 家主体 / ' + L.length + ' 条备案</b>' +
+    (nMulti ? '（' + nMulti + ' 家有多次备案，行首角标标了次数，点开看全部）' : '') +
+    '。<b>一家单位可以多次备案</b>——每次新设子公司、增资、并购都是一条独立备案。' +
+    '本视图只收录<b>筛后与主业相关的</b>，不是备案总量（浙江全库远大于此）。' +
     '</div>';
 
   h += '<table class="pf-table ovtbl"><colgroup>' +
@@ -7142,10 +7449,19 @@ function ovRenderOdi(d) {
        放进 9% 宽的列里会折成两行。这里只在前端做短标签，不改数据。 */
     var actTxt = ({ '新设子公司/机构': '新设', '绿地建厂': '绿地建厂',
                     '增资扩股': '增资', '并购': '并购' })[x.act] || x.act || '—';
-    h += '<tr>' +
-      '<td class="ovt-own">' + esc(own || '—') + '</td>' +
+    var cnt = (OC[x.own || '（未标主体）'] || []).length;
+    h += '<tr' + (cnt > 1 ? ' class="ovg-row pf-row-link" data-g="' + esc(x.own || '') + '"' : '') + '>' +
+      '<td class="ovt-own">' + esc(own || '—') +
+      (cnt > 1 ? '<span class="ovgrp-n" title="这家主体有 ' + cnt + ' 条备案，点开看全部">' + cnt + '</span>' : '') +
+      '</td>' +
       '<td class="ovt-geo">' + esc(x.geo || '—') + '</td>' +
-      '<td class="p"><b>' + esc(nm) + '</b>' +
+      '<td class="p"><b>' +
+      /* §5.71（用户指出「已备案不能跳转」）：有公示详情链的直接跳（存量 22/23 已反查补上）；
+         补不到的（走「新设企业」渠道无公示详情，如巨力越南）退回公示列表页人工搜。 */
+      (function(){
+        var u = x.url || 'https://tzxm.zjzwfw.gov.cn/tzxmweb/zwtpages/resultsPublicity/notice_of_publicity_new.html';
+        return '<a href="' + esc(u) + '" target="_blank" rel="noopener" style="color:inherit" title="打开备案公示页">' + esc(nm) + ' ↗</a>';
+      })() + '</b>' +
       (x.mt ? '<div class="ovt-desc">申报金额 ' + esc(x.mt) + '</div>' : '') + '</td>' +
       '<td class="ovt-act">' + esc(actTxt) + '</td>' +
       '<td>' + badge + (x.why ? '<div class="ovt-desc ovt-one">' + esc(x.why.replace(/^[^：]*：/, '')) + '</div>' : '') + '</td>' +
@@ -7155,11 +7471,26 @@ function ovRenderOdi(d) {
   h += '</tbody></table>';
   h += '<div class="ovfoot">备案号可在浙江政务服务网核验（项目代码在数据里）。' +
     '金额只有' + L.filter(function (x) { return x.mt; }).length + '条写在项目名里——' +
-    '详情页接口返回 500，拿不到，所以大部分显示为空，不做假数据填充。</div>';
+    '详情页接口返回 500，拿不到，所以大部分显示为空，不做假数据填充。' +
+    (nMulti ? '<br><b>点带角标的行</b>可看该主体的全部备案记录。' : '') + '</div>';
   b.innerHTML = h;
+  /* 已备案行点击 → 同一个单位弹层（它会把线索 + 备案合并展示） */
+  var box0 = el('ovBoxOdi');
+  if (box0) box0.onclick = function (e) {
+    var tr = e.target.closest('tr.ovg-row');
+    if (tr && tr.dataset.g) openOvUnit(tr.dataset.g);
+  };
 }
 
 /* ── 视图 4：市场与政策 ─────────────────────────────────────────── */
+/* ── 视图 4：市场与政策 ─────────────────────────────────────
+   2026-11-13 改：原来一条一张卡片平铺，5 条散在网格里。实测 5 条落在 3 家主体上
+   （BP Batam 2 条、PT PLN Batam 2 条）。同一主体的话放在一起读才有意义 ——
+   「它先说要建淡化厂、后说产能缺口」，两条连起来才是完整判断。
+   现在按主体聚合：头顶给主体 + 国别 + 条数，正文列该主体的全部条目，
+   条目多的折起，点「展开其余 N 条」。 */
+var ovPolOpen = {};   // 主体 → 是否展开全部
+
 function ovRenderEnv(d) {
   var b = el('ovBoxEnv'); if (!b) return;
   var L = d.env;
@@ -7169,23 +7500,79 @@ function ovRenderEnv(d) {
     h += '<div class="empty">暂时没有新的市场/政策条目。</div>';
     b.innerHTML = h; return;
   }
-  h += '<div class="ovcards">';
+
+  /* 按主体归并 */
+  var G = {}, order = [];
   L.forEach(function (o) {
-    var m = cutMeta(o);
-    h += '<div class="ovc">' +
-      '<div class="ovc-t">' + (o.url
-        ? '<a href="' + esc(o.url) + '" target="_blank" rel="noopener">' + esc(o.title || '') + ' ↗</a>'
-        : esc(o.title || '')) + '</div>' +
-      (o.desc ? '<div class="ovc-m">' + esc(o.desc) + '</div>' : '') +
-      '<div class="ovc-f">' +
-      (m.t ? '<span class="ovcut" style="background:' + m.bg + ';color:' + m.c + '">' + esc(m.t) + '</span>' : '') +
-      '<span class="ovdim">' + esc(o.name || '') + '</span>' +
-      '<span class="ovdim">' + esc(o.tag || '') + '</span>' +
-      '<span class="ovdim" style="margin-left:auto">' + esc(o.date || '') + '</span>' +
-      '</div></div>';
+    var k = o.name || '（未标主体）';
+    if (!G[k]) { G[k] = { name: k, rows: [], geo: '' }; order.push(G[k]); }
+    G[k].rows.push(o);
+  });
+  order.forEach(function (g) {
+    g.rows.sort(function (a, c) { return (a.date || '') < (c.date || '') ? -1 : 1; });
+    g.n = g.rows.length;
+    g.last = g.rows[g.n - 1].date || '';
+    /* 国别从标题里认一个，认不出留空 */
+    var gc = {};
+    g.rows.forEach(function (r) {
+      var gg = ovGeo((r.title || '') + ' ' + (r.desc || '').slice(0, 80));
+      if (gg) gc[gg] = (gc[gg] || 0) + 1;
+    });
+    g.geo = Object.keys(gc).sort(function (a, c) { return gc[c] - gc[a]; })[0] || '';
+  });
+  order.sort(function (a, c) {
+    if (c.n !== a.n) return c.n - a.n;
+    return (c.last || '') > (a.last || '') ? 1 : -1;
+  });
+
+  var nMulti = order.filter(function (g) { return g.n > 1; }).length;
+  h += '<div class="ovfoot" style="margin:-4px 0 10px">' +
+    '共 <b>' + order.length + ' 个主体 / ' + L.length + ' 条</b>' +
+    (nMulti ? '（' + nMulti + ' 个主体有多条，按主体归在一起看更清楚）' : '') + '。</div>';
+
+  h += '<div class="ovpol">';
+  order.forEach(function (g, gi) {
+    var open = !!ovPolOpen[g.name];
+    var show = open ? g.rows : g.rows.slice(-2);   // 折起时只显示最近 2 条
+    var rest = g.n - show.length;
+
+    h += '<div class="ovpol-c">' +
+      '<div class="ovpol-h">' +
+      '<span class="nm">' + esc(g.name) + '</span>' +
+      (g.geo ? '<span class="geo">' + esc(g.geo) + '</span>' : '') +
+      '<span class="ovgrp-n' + (g.n > 1 ? '' : ' one') + '">' + g.n + '</span>' +
+      '</div><div class="ovpol-b"><ul class="ovpol-l">';
+
+    show.forEach(function (o) {
+      var m = cutMeta(o);
+      h += '<li>' +
+        '<div class="tt">' + (o.url
+          ? '<a href="' + esc(o.url) + '" target="_blank" rel="noopener">' + esc(o.title || '') + ' ↗</a>'
+          : esc(o.title || '')) + '</div>' +
+        (o.desc ? '<div class="ovpol-l-d" style="font-size:12px;color:var(--tx2);line-height:1.72;margin-top:3px">' +
+          esc(String(o.desc).slice(0, 190)) + (String(o.desc).length > 190 ? '…' : '') + '</div>' : '') +
+        '<div class="dd">' +
+        (m.t ? '<span class="ovcut" style="background:' + m.bg + ';color:' + m.c + ';margin-right:6px">' + esc(m.t) + '</span>' : '') +
+        (o.tag ? esc(o.tag) + ' · ' : '') + esc(o.date || '') +
+        '</div></li>';
+    });
+    h += '</ul>';
+    if (rest > 0) {
+      h += '<button class="ovpol-more" onclick="ovPolToggle(' + gi + ')">展开其余 ' + rest + ' 条 ▾</button>';
+    } else if (open && g.n > 2) {
+      h += '<button class="ovpol-more" onclick="ovPolToggle(' + gi + ')">收起 ▴</button>';
+    }
+    h += '</div></div>';
   });
   h += '</div>';
   b.innerHTML = h;
+  window._ovPolOrder = order;
+}
+function ovPolToggle(gi) {
+  var o = window._ovPolOrder && window._ovPolOrder[gi];
+  if (!o) return;
+  ovPolOpen[o.name] = !ovPolOpen[o.name];
+  renderOverseas();
 }
 
 /* ── 绑定 ──────────────────────────────────────────────────────── */
@@ -7198,20 +7585,45 @@ function ovRenderEnv(d) {
   };
 })();
 
-/* ==================== 金属仪表盘 ==================== */
-var MBLACK={RB:1,HC:1,'I':1,JM:1};
+/* ==================== 金属仪表盘 ====================
+   2026-11-18 扩品种（用户拍板）：13 → 20 个，右栏按 grp 分组渲染。
+   顺序即显示顺序：有色 → 黑色系 → 能源 → 光伏 → 酸化工。
+   旧数据没有 grp 字段时按 MBLACK 兜底（黑色系/有色），不会丢品种。 */
+var MGRP_ORDER=['有色','黑色系','能源','光伏','酸化工'];
+var MBLACK={RB:1,HC:1,'I':1,JM:1,J:1};
+function mgrpOf(m){
+  if(m.grp) return m.grp;
+  return MBLACK[m.code]?'黑色系':'有色';
+}
 function renderMetals(){
   var M=D.metals||{}; var its=M.items||[];
     el('mtDate').textContent=(M.at?('抓取时间 '+(M.updated||'')+' '+M.at+' · ') : (M.updated?('价格日期 '+M.updated+' · '):''))
-      +'每个工作日收盘 16:05 自动刷新，数据来自上期所公开行情';
-  el('mtGrid').innerHTML=its.map(function(m){
-    var cls=m.chg>0?'up':(m.chg<0?'down':'');
-    var arrow=m.chg>0?'▲':(m.chg<0?'▼':'—');
-    return '<div class="mt '+cls+'"><div class="mn">'+esc(m.name)+
-      '<span class="mcat">'+(MBLACK[m.code]?'黑色系':'有色')+'</span></div>'+
-      '<div class="mp">'+formatNum(m.price)+'<span class="mu">'+esc(m.unit)+'</span>'+
-      '<span class="mc">'+arrow+' '+sign_abs(m)+'</span></div>'+
-      '<div class="mh">'+esc(m.hint)+'</div></div>'}).join('');
+      +'期货为收盘价（上期所等公开行情）· 现货为生意社基准价 · 每个工作日 16:05 自动刷新';
+  var byG={}; its.forEach(function(m){ (byG[mgrpOf(m)]=byG[mgrpOf(m)]||[]).push(m); });
+  var html='';
+  MGRP_ORDER.forEach(function(g){
+    var arr=byG[g]; if(!arr||!arr.length) return; delete byG[g];
+    html+='<div class="mcat-h">'+g+'</div>'+
+      arr.map(function(m){
+      var cls=m.chg>0?'up':(m.chg<0?'down':'');
+      var arrow=m.chg>0?'▲':(m.chg<0?'▼':'—');
+      return '<div class="mt '+cls+'"><div class="mn">'+esc(m.name)+'</div>'+
+        '<div class="mp">'+formatNum(m.price)+'<span class="mu">'+esc(m.unit)+'</span>'+
+        '<span class="mc">'+arrow+' '+sign_abs(m)+'</span></div>'+
+        '<div class="mh">'+esc(m.hint)+'</div></div>'}).join('');
+  });
+  /* 兜底：万一出现分组字典之外的 grp，照样渲染不丢数据 */
+  Object.keys(byG).sort().forEach(function(g){
+    html+='<div class="mcat-h">'+esc(g)+'</div>'+
+      byG[g].map(function(m){
+      var cls=m.chg>0?'up':(m.chg<0?'down':'');
+      var arrow=m.chg>0?'▲':(m.chg<0?'▼':'—');
+      return '<div class="mt '+cls+'"><div class="mn">'+esc(m.name)+'</div>'+
+        '<div class="mp">'+formatNum(m.price)+'<span class="mu">'+esc(m.unit)+'</span>'+
+        '<span class="mc">'+arrow+' '+sign_abs(m)+'</span></div>'+
+        '<div class="mh">'+esc(m.hint)+'</div></div>'}).join('');
+  });
+  el('mtGrid').innerHTML=html;
 }
 function sign_abs(m){return (m.chg>0?'+':'')+Math.abs(m.chg)+'%'}
 function formatNum(n){return n>=10000?Math.round(n).toLocaleString('en-US'):n}
@@ -7221,7 +7633,6 @@ function mhNum(n){ return Math.round(n).toLocaleString('en-US') }
 function renderMStrip(){
   var its=(D.metals&&D.metals.items)||[];
   if(!its.length){el('mstrip').style.display='none';return}
-  var BLACK={RB:1,HC:1,'I':1,JM:1};
   function card(m){
     var c=m.chg>0?'up':(m.chg<0?'dn':'');
     /* 2026-10-30：整格可点，点开近 30/90 天走势（品种代码进 openMetalHist） */
@@ -7231,23 +7642,31 @@ function renderMStrip(){
       '<span class="r2"><span class="u">'+esc(m.unit)+'</span>'+
       '<span class="c '+c+'">'+(m.chg>0?'▲ +':(m.chg<0?'▼ ':'— '))+Math.abs(m.chg)+'%</span></span></span>';
   }
-  var nf=its.filter(function(m){return !BLACK[m.code]}), bk=its.filter(function(m){return BLACK[m.code]});
+  /* 2026-11-18：与右栏同款分组（有色→黑色系→能源→光伏→酸化工），现货品种也有迷你走势 */
+  var byG={}; its.forEach(function(m){ (byG[mgrpOf(m)]=byG[mgrpOf(m)]||[]).push(m); });
   var lab='当日行情'+(D.metals.updated?' · '+esc(D.metals.updated).slice(5):'');
   var tail;
   if(D.metals.at){ tail='<b style="color:#8ef0b4">'+esc(D.metals.updated||'')+' '+esc(D.metals.at)+'</b> 抓取'; }
   else if(D.metals.updated){ tail=esc(D.metals.updated)+' 行情'; }
   else tail='';
-  tail+=' · 每个工作日收盘 16:05 自动刷新';
+  tail+=' · 每个工作日 16:05 自动刷新 · 点品种看历史走势';
+  var body='';
+  MGRP_ORDER.forEach(function(g){
+    var arr=byG[g]; if(!arr||!arr.length) return; delete byG[g];
+    body+='<span class="sep"></span><span class="mslab">'+g+'</span>'+arr.map(card).join('');
+  });
+  Object.keys(byG).sort().forEach(function(g){
+    body+='<span class="sep"></span><span class="mslab">'+esc(g)+'</span>'+byG[g].map(card).join('');
+  });
   el('mstrip').innerHTML='<span class="mslab">'+lab+'</span>'+
-    nf.map(card).join('')+
-    (bk.length?'<span class="sep"></span><span class="mslab">黑色系</span>'+bk.map(card).join(''):'')+
+    body+
     '<span class="dt">'+tail+'</span>';
 }
 
 /* ==================== 历史价格走势（2026-10-30） ====================
    点页顶行情条任意一格 → 弹出该品种的折线图，可切 1月/3月/1年/5年/全部。
 
-   数据：data.metalhist.js（按需加载，约 250KB，13 个品种）
+   数据：data.metalhist.js（按需加载，约 333KB，20 个品种）
       结构 {updated, src, note, s:{CU:{n,u,sym,start,end,cnt,df,d:[],p:[]}}}
       d 的编码分两段：df 之前是月末采样，存完整 'YYYY-MM-DD'；
       df 之后是近 5 年逐日，存 'MMDD'，年份靠 end 倒推（跨年时月份变大就退一年）。
@@ -7318,7 +7737,8 @@ function mhPaint(){
 
   var body;
   if(idx.length<2){
-    body='<div class="mh-load">这个区间内历史数据不足（该品种上市较晚）。</div>';
+    body='<div class="mh-load">'+(s.sym?'这个区间内历史数据不足（该品种上市较晚）。'
+        :'现货价格自 '+esc(s.start||'')+' 起每日记录（生意社基准价），曲线随每日更新逐渐成形。')+'</div>';
   }else{
     body=mhChart(dates,px,idx,curD);
   }
@@ -7343,10 +7763,14 @@ function mhPaint(){
     body+
     '<div class="mh-facts">'+mhFacts(dates,px,idx,cur)+'</div>'+
     '<div class="mh-note">'+
+      (s.sym?
       '<b>怎么看</b>：这条线是期货主力连续合约的收盘价，反映的是原材料市场价，'+
       '不等于你手上某个项目的投标报价——中间还隔着加工费、运费、品牌溢价。'+
       '真正有用的是<b>方向</b>：涨得急的品种，报价时要留调价条款的余地，'+
-      '锁价期越长越吃亏。'+
+      '锁价期越长越吃亏。'
+      :'<b>怎么看</b>：这条线是生意社现货基准价（非期货），硫磺/硫酸是冶炼'+
+      '脱硫-烟气制酸环节的原料与副产品价格：酸价跌 → 印尼镍湿法(HPAL)酸耗'+
+      '成本下降、配套供汽需求 ↑，但客户烟气制酸的副产品收入同步缩水。')+
     '</div>'+
   '</div>';
 }
@@ -9945,8 +10369,18 @@ function profPage(kind, o){
     if(o.nSupA!=null) kpi.push(['', o.nSupA+' / '+(o.nSupB||0), 'A 类 / B 类供应商', '']);
     kpi.push(['', A.rg.length, '涉及地区', '']);
   }else if(kind==='sup'){
-    kpi.push(['n', o.n, '本库中标次数', '']);
-    kpi.push(['a', profMoney(o.amt), '中标金额合计', 'acc']);
+    /* 2026-11-17 修（用户抓出华光环保「0.33亿中标金额合计」瞎写）：
+       原来 sup 分支直接用 o.amt —— 那是①库里该单位某一条中标记录的金额，
+       不是合计。华光①库只挂了江苏极易一条 0.33 亿，业绩表里 0.95/4.08/0.33/0.27
+       亿一个没算进去。改成与 else 分支同款：剔掉「动态」后按 _realAll 聚合，
+       业绩表看见什么就加什么，两处数字必须对得上账。 */
+    var _amtSup=0;
+    _realAll.forEach(function(x){
+      var _a=parseAmtAny(x.amt);
+      if(_a>0) _amtSup+=_a;
+    });
+    kpi.push(['n', _realAll.length, '本库中标次数', '']);
+    kpi.push(['a', profMoney(_amtSup||o.amt), '中标金额合计', 'acc']);
     kpi.push(['', o.nOwners||'—', '服务业主数', '']);
     kpi.push(['', A.rg.length, '覆盖地区', '']);
     kpi.push(['', esc(o.last||'—'), '最近中标', 'txt']);
@@ -10800,14 +11234,86 @@ function sigJudge(n){
   return r;
 }
 
+/* ── 项目动态二次归档（2026-11-19 用户指令：「行业动态政策档只放政策动态，项目按阶段归位」）──
+   普通动态（非信号）里混着两类条目：政策/行业资讯，和「有业务切口/是工程项目
+   但标题没有标准动作词」的项目条目（如发改委审批流的「XX热电联产项目」——
+   desc 里全是节能审查/环评批复/施工许可，标题反而干净）。
+   projJudge 把项目条目从普通动态里拎出来，按可推断的阶段归进
+   已动土(strong)/已进程序(mid)/仅意向(weak) 三档，与信号同档混排（卡片带
+   「项目动态」灰标区分）。政策与纯行业资讯留在「政策与行业动态」折叠区。
+   ⚠ sig 判定（93 条信号）一个字没动 —— 后端 signal.py 的一致性不受影响；
+     本层是纯前端展示归档，不改变「是/不是信号」的口径。 */
+var PROJ_ENG = ['火电','煤电','燃煤发电','燃气发电','超超临界','超低排放','脱硫','脱硝',
+  '废水','污水','锅炉','汽轮机','发电机组','输变电','变电站','热网','供热','供汽',
+  '垃圾焚烧','生物质','光伏','储能','风电场','水电','抽水蓄能','海洋能','氢能'];
+var PROJ_STRONG = ['开工','动工','奠基','土建施工','点火','投产','试生产','达产','建成',
+  '竣工验收','并网发电','首台机组','吊装','首吊','水压试验','吹管','试运行','并网',
+  '施工到顶','浇筑','开钻','转体','投运','移交生产','首根'];
+var PROJ_MID = ['环评','环境影响评价','受理','公示','拟建','新建','扩建','技改','立项',
+  '备案','核准','签约','协议','中标','EPC','总承包','招标','勘察设计','可行性研究','可研',
+  '获核准','批复','审批','节能审查','用地预审','中标通知书','续建'];
+var PROJ_EXCL = ['设备采购','系统采购','集中采购','物资采购','设备供货','光伏组件',
+  '风电整机','电池片','组件招标','人事','招聘','股价','涨停','减持','分红','财报',
+  '业绩预告','咨询服务','课题','中期评估','评估方案','专题研究','首台（套）','名单的公示',
+  '转为应急备用','推荐项目名单','拟将','入选','名单',
+  /* 2026-11-19 补：政策文件与行业统计误收防堵（复现实测 4 条） */
+  '印发','优选排序','竞争配置结果','碳达峰','碳中和','节能降碳','重点工作安排',
+  '三年行动','工作方案','行动计划','指导意见','全球能源监测','GEM'];
+function projJudge(n){
+  var title=n.title||'', desc=n.desc||'', text=title+' '+desc;
+  var r={proj:false,lvl:'',seg:'',segcn:'',why:''};
+  if(sigHas(title,PROJ_EXCL)) return r;                 // 货物/人事/名单/政策文件类
+  if(/约?\d+(\.\d+)?\s*GW/.test(title)) return r;       // 行业装机统计（约30GW/达274GW），非单项目
+  /* SIG_POLICY 层（配额分配方案/督察整改销号/规划纲要/十五五…）：命中即政策，
+     除非标题带明确项目动作豁免（项目获核准/开工/中标…）——2026-11-19 复现抓出
+     「碳排放配额分配方案」「督察整改销号」被「万吨」实体词误放进项目动态 */
+  if(sigHas(title,SIG_POLICY) && !sigHas(title,SIG_PROJ_EXEMPT)) return r;
+  if(sigHas(title,SIG_DOC) && !sigHas(title,SIG_PROJ_EXEMPT) && !sigHas(title,SIG_ENTITY))
+    return r;                                            // 纯政策文件
+  if(!sigHas(text,SIG_ENTITY)) return r;                 // 没有项目实体，是行业资讯
+  // 业务切口：优先 SIG_TECH（与信号同组），否则扩到主业工程词
+  var seg='', kw='';
+  for(var i=0;i<SIG_SEG_ORDER.length;i++){
+    var k=SIG_SEG_ORDER[i], h=sigHas(text,SIG_TECH[k]);
+    if(!h) continue;
+    if(k==='datactr' && !sigHas(text,SIG_DC_ENERGY)) continue;
+    seg=k; kw=h; break;
+  }
+  if(!seg){ var h2=sigHas(text,PROJ_ENG); if(!h2) return r; seg='eng'; kw=h2; }
+  r.seg=seg; r.segcn=(seg==='eng')?'能源环保工程':SIG_SEG_CN[seg];
+  // 阶段：标题+摘要里的动作词；审批流条目按审批类型推断
+  var lvl='', act='';
+  ['strong','mid','weak'].forEach(function(L){
+    if(lvl) return;
+    var ws=({strong:PROJ_STRONG,mid:PROJ_MID,weak:SIG_ACT.weak})[L];
+    var a=sigHas(text,ws); if(a){lvl=L; act=a;}
+  });
+  if(!lvl && /施工许可证/.test(text)){ lvl='strong'; act='施工许可证'; }
+  if(!lvl && /批复文号|审批事项|已过用地预审|最近办结/.test(text)){ lvl='mid'; act='审批批复'; }
+  if(!lvl) return r;                                     // 推不出阶段，留在政策与行业动态
+  r.proj=true; r.lvl=lvl;
+  var lvcn={strong:'已动土/已投产',mid:'已进程序',weak:'仅意向'}[lvl];
+  r.why='项目动态 · '+lvcn+' —— 依据「'+act+'」'+(r.seg!=='eng'?('，'+r.segcn):'');
+  return r;
+}
 var tTag=new Set(), tSig=new Set(), tLvl=new Set();
 function renderTrends(){
-  var all=(D.trends||[]).map(function(x){ var j=sigJudge(x); j.x=x; return j; });
+  var all=(D.trends||[]).map(function(x){ var j=sigJudge(x); j.x=x;
+    if(!j.sig){ var p=projJudge(x); j.proj=p.proj; j.lvl2=p.lvl; j.pseg=p.seg;
+      j.psegcn=p.segcn; j.pwhy=p.why;
+      /* 项目动态的档位/切口用 proj 的，信号档合并展示 */
+      if(p.proj){ j.lvl=p.lvl; j.seg=p.seg; j.segcn=p.segcn; } }
+    else { j.proj=false; }
+    return j; });
   var sigs=all.filter(function(j){return j.sig});
   var news=all.filter(function(j){return !j.sig});
+  /* 2026-11-19 用户指令：政策档只放政策动态，项目按阶段归位 ——
+     非信号条目拆成「项目动态」（归三档）与「政策与行业动态」（留折叠区） */
+  var projs=news.filter(function(j){return j.proj});
+  var polNews=news.filter(function(j){return !j.proj});
 
-  /* KPI：先说清「有几条真信号」，再说「池子里有多少条」，
-     避免用户以为 179 条都是机会。 */
+  /* KPI：先说清「有几条真信号」，再说「池子里有多少条」。
+     §5.72（用户拍板）：只统计真信号 —— 项目动态已迁「找商机 → 项目情况」工作台。 */
   var kp=el('tSigKpi');
   if(kp){
     var byLvl={strong:0,mid:0,weak:0}, bySeg={};
@@ -10817,7 +11323,11 @@ function renderTrends(){
       '<div class="kpi"><b>'+byLvl.strong+'</b><span>已动土 / 已投产</span></div>'+
       '<div class="kpi"><b>'+byLvl.mid+'</b><span>已进程序（可提前介入）</span></div>'+
       '<div class="kpi"><b>'+sigs.filter(function(j){return j.oversea}).length+'</b><span>海外</span></div>'+
-      '<div class="kpi"><b>'+news.length+'</b><span>普通动态（不构成机会）</span></div>';
+      '<div class="kpi"><b>'+polNews.length+'</b><span>政策与行业动态（非项目）</span></div>';
+    /* §5.72：折叠条 summary 只报信号计数；项目动态计数在「项目情况」的折叠条上 */
+    var sf=el('sigFoldCnt');
+    if(sf) sf.textContent='· 已动土 '+byLvl.strong+' · 已进程序 '+byLvl.mid+
+      ' · 仅意向 '+byLvl.weak+'（共 '+sigs.length+' 条；项目动态已迁「项目情况」工作台）';
   }
 
   /* 说明条：把「为什么只有 3 条」讲明白，这是数据现状不是功能缺陷 */
@@ -10834,11 +11344,14 @@ function renderTrends(){
       '<b>怎么算「信号」</b>：①建厂/扩产动作（开工/投产/核准/环评/中标）'+
       ' ②我们的业务切口（有色冶炼·电解铝·水泥窑余热·数据中心·自备电厂…）③具体项目实体，'+
       '三者缺一不可；政策方案、设备采购、人事股价一律不算。'+
-      '当前 <b style="color:#d4380d">'+sigs.length+' 条</b>，覆盖 '+segN+' 个业务方向。';
+      '当前 <b style="color:#d4380d">'+sigs.length+' 条</b>，覆盖 '+segN+' 个业务方向；'+
+      '项目动态 '+projs.length+' 条按同一阶段混排（带灰标）。'+
+      '政策与行业资讯在本页签<b>顶部主区</b>（§5.71 已搬）。';
   }
 
-  // 信号区
-  var sg=sigs.filter(function(j){
+  // 信号区（§5.72：只渲染真信号；项目动态已迁「项目情况」工作台）
+  var sg=all.filter(function(j){
+    if(!j.sig) return false;
     if(tSig.size && !tSig.has(j.seg)) return false;
     if(tLvl.size && !tLvl.has(j.lvl)) return false;
     return true;
@@ -10853,7 +11366,7 @@ function renderTrends(){
         '<div class="sig-h">'+
           '<span class="sig-lv" style="background:'+lvBg[0]+';color:'+lvBg[1]+'">'+lvTxt+'</span>'+
           '<span class="sig-seg">'+esc(j.segcn)+'</span>'+
-          (j.region.length?'<span class="sig-rg">'+esc(j.region.slice(0,2).join(' / '))+'</span>':'')+
+          (j.region&&j.region.length?'<span class="sig-rg">'+esc(j.region.slice(0,2).join(' / '))+'</span>':'')+
           (j.oversea?'<span class="sig-ov">海外</span>':'')+
         '</div>'+
         '<h3>'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.title)+' ↗</a>':esc(x.title))+'</h3>'+
@@ -10865,8 +11378,8 @@ function renderTrends(){
       '<a href="javascript:void 0" onclick="tSig.clear();tLvl.clear();renderTrends()" style="color:#146edc">清空筛选看全部</a></div>';
   }
 
-  // 普通动态（默认折叠，点开才看）
-  var list=news.filter(function(j){return !tTag.size||tTag.has(j.x.tag)});
+  // 政策与行业动态（默认折叠，点开才看）——项目已按阶段归入上方三档
+  var list=polNews.filter(function(j){return !tTag.size||tTag.has(j.x.tag)});
   list.sort(function(a,b){return (b.x.date||'').localeCompare(a.x.date||'')});
   el('newsGrid').innerHTML=list.map(function(j){
     var x=j.x;
@@ -10876,12 +11389,46 @@ function renderTrends(){
       esc(x.title)+(x.url?' ↗</a>':'')+'</h3>'+
       '<div class="nd">'+esc(x.desc)+'</div>'+
       '<div class="ns"><span class="ntag '+cls+'">'+esc(x.tag)+'</span><span>'+esc(x.source)+'</span><span>'+esc(x.date)+'</span>'+
-      '<span class="nr" title="'+esc(j.why)+'">未判为信号：'+esc((j.why||'').slice(0,14))+'</span></div></div>'
+      '<span class="nr" title="'+esc(j.why)+'">非项目：'+esc((j.why||'').slice(0,14))+'</span></div></div>'
   }).join('');
   var cnt=el('newsCnt');
   if(cnt) cnt.textContent='· '+list.length+' 条';
 }
 function bySegOf(list){ var m={}; list.forEach(function(j){m[j.segcn]=1}); return m; }
+/* §5.72：项目动态渲染到「找商机 → 项目情况」工作台（projNewsFold 折叠展开时才算） */
+function pjNewsRender(){
+  var wrap=el('pjWrap'); if(!wrap) return;
+  if(!window.DATA_NEWS){ wrap.innerHTML='<div class="empty">行业动态模块尚未加载完，合上再展开一次即可。</div>'; return; }
+  var projs=(D.trends||[]).map(function(x){
+    var j=sigJudge(x); j.x=x; j.proj=false;
+    if(!j.sig){ var p=projJudge(x); if(p.proj){ j.proj=true; j.lvl=p.lvl; j.segcn=p.segcn; } }
+    return j; }).filter(function(j){return j.proj});
+  var strong=projs.filter(function(j){return j.lvl==='strong'});
+  var mid=projs.filter(function(j){return j.lvl==='mid'});
+  var cnt=el('pjCnt');
+  if(cnt) cnt.textContent='· 已动土 '+strong.length+' · 已进程序 '+mid.length;
+  function sec(name,L){
+    if(!L.length) return '';
+    return '<div style="font-size:12px;font-weight:700;color:var(--tx2);margin:10px 0 4px">'+name+' · '+L.length+' 条</div>'+
+      L.map(function(j){ var x=j.x;
+        return '<div style="padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px;line-height:1.6">'+
+          '<span style="color:#14713a;font-weight:600;margin-right:8px">'+esc((x.date||'').slice(5))+'</span>'+
+          (x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+esc(x.title)+' ↗</a>':esc(x.title))+
+          '<span style="color:#8a919e;font-size:11.5px;margin-left:8px">'+esc(x.source||'')+
+          (j.segcn?' · '+esc(j.segcn):'')+'</span>'+
+        '</div>'; }).join('');
+  }
+  wrap.innerHTML=(sec('已动土 / 已投产',strong)+sec('已进程序（可提前介入）',mid))||
+    '<div class="empty">暂无项目动态。</div>';
+}
+(function(){
+  var f=el('projNewsFold'); if(!f) return;
+  f.addEventListener('toggle',function(){
+    if(!f.open) return;
+    if(window.DATA_NEWS){ pjNewsRender(); }
+    else if(typeof need==='function'){ need('news',function(){ pjNewsRender(); }); }
+  });
+})();
 /* 行业动态的标签集合依赖 data.news.js（按需加载），放到 renderTrends 里建 */
 function buildTrendFilter(){
   chipsBox('f-tg',uniq(arr(D.trends).map(function(x){return x.tag})),null,'ttag');
@@ -10891,11 +11438,16 @@ el('f-tg').onclick=function(e){var c=e.target.closest('.chip');if(!c)return;
 /* 信号筛选：业务切口 + 强度。用 id 白名单单独绑，不要并入通用 chip 绑定
    （那边假定 chip 都对应 Set，这里两个 Set 名不同）。 */
 function buildSigFilter(){
-  var all=(D.trends||[]).map(sigJudge).filter(function(j){return j.sig});
+  /* §5.72：筛选 chips 只按真信号计数（项目动态迁走了） */
+  var all=(D.trends||[]).map(function(x){ var j=sigJudge(x); j.x=x; return j; })
+    .filter(function(j){return j.sig});
   var sc={}; all.forEach(function(j){sc[j.seg]=(sc[j.seg]||0)+1});
   var lc={strong:0,mid:0,weak:0}; all.forEach(function(j){lc[j.lvl]++});
-  if(el('f-sigseg')) el('f-sigseg').innerHTML=SIG_SEG_ORDER.filter(function(k){return sc[k]}).map(function(k){
-    return '<span class="chip'+(tSig.has(k)?' on':'')+'" data-k="sigseg" data-v="'+k+'">'+SIG_SEG_CN[k]+'<em>'+sc[k]+'</em></span>'}).join('')
+  if(el('f-sigseg')) el('f-sigseg').innerHTML=Object.keys(sc).sort(function(a,b){
+      var ia=SIG_SEG_ORDER.indexOf(a), ib=SIG_SEG_ORDER.indexOf(b);
+      return (ia<0?99:ia)-(ib<0?99:ib); }).map(function(k){
+      var cn=(SIG_SEG_CN[k]||(k==='eng'?'能源环保工程':k));
+      return '<span class="chip'+(tSig.has(k)?' on':'')+'" data-k="sigseg" data-v="'+k+'">'+cn+'<em>'+sc[k]+'</em></span>'}).join('')
     ||'<span class="chip off" style="cursor:default;opacity:.6">暂无信号</span>';
   var LN={strong:'已动土/已投产',mid:'已进程序',weak:'仅意向'};
   if(el('f-siglvl')) el('f-siglvl').innerHTML=['strong','mid','weak'].filter(function(k){return lc[k]}).map(function(k){
@@ -11180,7 +11732,7 @@ function boot_main(){
   font-size:calc(8px*var(--z));color:var(--ink4)}
 #aMk .a-mr b{flex:0 0 48px;text-align:right;white-space:nowrap;
   font-size:calc(10px*var(--z))!important}
-/* 涨跌幅必须单行：+0.19% 换行会把行高从 26px 撑到 38px，13 个品种装不下 */
+/* 涨跌幅必须单行：+0.19% 换行会把行高从 26px 撑到 38px，20 个品种装不下 */
 #aMk .a-mr i{flex:0 0 48px!important;min-width:0!important;white-space:nowrap!important;
   font-size:calc(9px*var(--z))!important}
 #aMk .a-spark{flex:0 0 30px;width:30px;height:14px;display:block}
@@ -11557,7 +12109,7 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
       // ──────────────────────────────────────────────────────────────
       // 当日行情 → 金属价格行情（用户 2026-11-06 截图指定样式）
       // 数据只有两处、都是站里现成的：
-      //   · 当日价 / 涨跌幅：data.core.js 的 DATA_CORE.metals.items（13 品种）
+      //   · 当日价 / 涨跌幅：data.core.js 的 DATA_CORE.metals.items（20 品种）
       //   · 迷你走势：data.metalhist.js 的 DATA_METALHIST.s[code].p（按需加载）
       // 不新造字段、不写死数字；点品种仍走原站 openMetalHist()。
       // ──────────────────────────────────────────────────────────────
@@ -11573,16 +12125,29 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         var es=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(ch){
           return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch];});};
         var fmt=function(n){try{return Number(n).toLocaleString('zh-CN',{maximumFractionDigits:2});}catch(e){return n;}};
-        // 涨跌汇总：从 13 个品种实时算，不写死
+        // 涨跌汇总：从 20 个品种实时算，不写死
         var nUp=0,nDn=0,nFl=0;
         arr.forEach(function(it){var v=Number(it.chg);if(v>0)nUp++;else if(v<0)nDn++;else nFl++;});
         var sm=document.getElementById('aMkSum');
         if(sm)sm.textContent=(upd?('更新 '+upd+' · '):'')+'共 '+arr.length+' 个品种';
+        /* 2026-11-18 扩到 20 品种：按组渲染（有色→黑色系→能源→光伏→酸化工），
+           组间插分组标题行。旧数据没有 grp 字段时按 code 兜底（黑色系词表）。 */
+        var MBLK={RB:1,HC:1,'I':1,JM:1,J:1};
+        var GORD=['有色','黑色系','能源','光伏','酸化工'];
+        function grpOf(it){
+          if(it.grp) return it.grp;
+          return MBLK[it.code]?'黑色系':'有色';
+        }
+        var byG={}; arr.forEach(function(it){ (byG[grpOf(it)]=byG[grpOf(it)]||[]).push(it); });
         var rows='<div class="a-mksum"><span>上涨 <b style="color:var(--up)">'+nUp+'</b></span>'+
           '<span>下跌 <b style="color:var(--dn)">'+nDn+'</b></span>'+
           '<span>平盘 <b>'+nFl+'</b></span>'+
           '<em>点任一品种 → 看历史曲线 ↗</em></div>';
-        rows+=arr.map(function(it){
+        var htmlParts=[];
+        function grpRow(g){
+          htmlParts.push('<div class="a-mg-h">'+es(g)+'</div>');
+        }
+        function itemRow(it){
           var chg=it.chg, isUp=Number(chg)>0, col=isUp?'var(--up)':'var(--dn)';
           var pct=(chg==null||isNaN(Number(chg)))?'—':((isUp?'+':'')+Number(chg).toFixed(2)+'%');
           return '<div class="a-mr" data-code="'+es(it.code||'')+'" title="点开看 '+es(it.name)+' 历史走势 ›">'+
@@ -11591,7 +12156,15 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
             '<i style="color:'+col+'">'+pct+'</i>'+
             '<svg class="a-spark" data-spark="'+es(it.code||'')+'" viewBox="0 0 32 14" preserveAspectRatio="none" aria-label="迷你走势"></svg>'+
             '</div>';
-        }).join('');
+        }
+        GORD.forEach(function(g){
+          var a=byG[g]; if(!a||!a.length) return; delete byG[g];
+          grpRow(g); a.forEach(function(it){ htmlParts.push(itemRow(it)); });
+        });
+        Object.keys(byG).sort().forEach(function(g){
+          grpRow(g); byG[g].forEach(function(it){ htmlParts.push(itemRow(it)); });
+        });
+        rows+=htmlParts.join('');
         if(mkb)mkb.insertAdjacentHTML('afterbegin',rows||'<div class="a-mr"><span>行情数据载入中…</span></div>');
         // 点品种行 → 复用原站 openMetalHist（近1月/3月/1年/5年/全部 + SVG 折线图），一行不改
         if(mkb)mkb.addEventListener('click',function(ev){
@@ -11942,22 +12515,13 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
           ' · <b>未过①库过滤，不构成可投标的</b>；完整清单见「规划前瞻」。</div>';
       }
       function inject544(){
-        // 1) 9 个 TABS 每个一个页内检索条
+        // 1) 页签级检索条已按用户裁决（2026-11-20 §5.81）全部移除：
+        //    「最上面那个搜索都不要了，改成下面那个在表上方那种搜索」。
+        //    顶栏 #aQ（全局搜索）不动；表上方各自的搜索保留：海外 ovKw / 政策 polQ / 规划 pl-q / 找商机顶栏。
+        //    顺带解决输入法打不了中文的问题（该框的过滤重排会打断 IME 组词）。
         (window.TABS||[]).forEach(function(tb,i){
-          var pn=document.getElementById(tb[0]);if(!pn||pn.querySelector('.a-tabq'))return;
-          var sc=SCOPE544[i]||SCOPE544[0];
-          var bx=document.createElement('div');bx.className='a-tabq';
-          bx.innerHTML='<label>本页检索</label><span class="a-tabq-in">'+
-                       '<input type="text" data-tq="'+i+'" placeholder="'+sc.ph+'">'+
-                       '<button class="a-tabq-x" type="button" title="清空本页检索">×</button>'+
-                       '</span><span class="a-tabqn"></span>';
-          pn.insertBefore(bx,pn.firstChild);
-          var inp=bx.querySelector('input');
-          inp.addEventListener('input',function(){
-            apply544(i,inp.value);
-          });
-          var xb=bx.querySelector('.a-tabq-x');
-          if(xb)xb.onclick=function(){clear544(i);inp.value='';inp.focus();};
+          var pn=document.getElementById(tb[0]);
+          if(pn){[].forEach.call(pn.querySelectorAll(':scope > .a-tabq'),function(n){n.remove();});}
         });
         // 2) 更多入口：删与「行业动态 · 政策档」重复的行业动态；规划中 15 项占位
         if(more){
@@ -11985,7 +12549,7 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         var mt=document.getElementById('mtGrid');
         if(mt){
           var note=document.createElement('div');note.className='a-mknote';
-          note.innerHTML='13 个品种的当日价格、涨跌幅与迷你走势在右栏「金属价格行情」'+
+          note.innerHTML='20 个品种的当日价格、涨跌幅与迷你走势在右栏「金属价格行情」'+
             '（点品种可看历史曲线）；这里只保留业务解读，不重复列价格。';
           mt.parentNode.insertBefore(note,mt);
         }
