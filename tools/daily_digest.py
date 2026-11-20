@@ -131,9 +131,13 @@ def _link(x, n=60):
 
 
 def build_html(items, nb, wc, ov, al):
-    """HTML 版：所有条目标题可点击跳原文。样式内联（QQ 邮箱会剥 <style>）。"""
+    """HTML 版：所有条目标题可点击跳原文。样式内联（QQ 邮箱会剥 <style>）。
+    底部加折叠式「今日全部新增」（details/summary，QQ 邮箱网页端支持）。"""
     P = 'margin:2px 0;padding:6px 10px;background:#f6f8fa;border-radius:6px;font-size:14px'
     H = 'margin:18px 0 6px;font-size:15px;color:#0f4a9e;border-bottom:1px solid #e3e8ee;padding-bottom:4px'
+    # 全量新增：今日/昨日入库的全部条目（不分档位），折叠在邮件底部
+    recent = [x for x in items if (x.get('d') or x.get('date') or '') in (TODAY, YDAY)]
+    recent.sort(key=lambda y: ((y.get('g') or '?').upper(), y.get('d') or ''), reverse=False)
     h = ['<div style="font-family:-apple-system,\'PingFang SC\',\'Microsoft YaHei\',sans-serif;max-width:680px">']
     h.append('<h2 style="margin:0 0 4px">商机雷达 · 每日摘要 <small style="color:#888;font-weight:400">%s</small></h2>' % TODAY)
     if al:
@@ -158,7 +162,23 @@ def build_html(items, nb, wc, ov, al):
                  % (P, _esc(x.get('d', '')), _esc(x.get('tier', '')), _link(x, 56)))
     h.append('<div style="margin-top:16px;color:#888;font-size:13px">—— 完整数据见 '
              '<a href="https://zhouqingy.github.io/biz-radar/" style="color:#0f4a9e">商机雷达主站</a>'
-             '（①库当前 %d 条）</div></div>' % len(items))
+             '（①库当前 %d 条）</div>' % len(items))
+    # 折叠：今日/昨日全部新增（含 C/D 档），想扫全量再展开
+    if recent:
+        gcnt = {}
+        for x in recent:
+            g = (x.get('g') or '?').upper()
+            gcnt[g] = gcnt.get(g, 0) + 1
+        h.append('<details style="margin-top:14px"><summary style="cursor:pointer;color:#0f4a9e;font-size:13px">'
+                 '▼ 近两日全部新增 %d 条（A%d / B%d / C%d / D%d，点开查看）</summary>'
+                 % (len(recent), gcnt.get('A', 0), gcnt.get('B', 0),
+                    gcnt.get('C', 0), gcnt.get('D', 0)))
+        for x in recent:
+            h.append('<div style="%s"><span style="color:#888">%s</span> [%s] %s</div>'
+                     % (P, _esc((x.get('d') or '')[:10]), _esc((x.get('g') or '?').upper()),
+                        _link(x, 52)))
+        h.append('</details>')
+    h.append('</div>')
     return '\n'.join(h)
 
 
