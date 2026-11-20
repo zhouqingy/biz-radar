@@ -7282,7 +7282,10 @@ function ovBindClue() {
   var kw = el('ovKw');
   if (kw) {
     var t = null;
-    kw.oninput = function () {
+    /* §5.81b（2026-11-20）：输入法组词期间（isComposing）不能重画 —— DOM 换掉
+       候选词就丢，表现就是「打不了中文、不给我选字的机会」。组词等
+       compositionend 再过滤；业绩表搜索框（_pfSearchKey）同款修法。 */
+    var _ovKwRun = function () {
       clearTimeout(t);
       t = setTimeout(function () {
         ovClueKw = kw.value.trim();
@@ -7291,6 +7294,8 @@ function ovBindClue() {
         if (n2) { n2.focus(); n2.setSelectionRange(n2.value.length, n2.value.length); }
       }, 280);
     };
+    kw.oninput = function (ev) { if (ev && ev.isComposing) return; _ovKwRun(); };
+    kw.addEventListener('compositionend', _ovKwRun);
   }
   var box = el('ovBoxClue');
   if (box) box.onclick = function (e) {
