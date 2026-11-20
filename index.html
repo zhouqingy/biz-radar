@@ -12515,22 +12515,13 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
           ' · <b>未过①库过滤，不构成可投标的</b>；完整清单见「规划前瞻」。</div>';
       }
       function inject544(){
-        // 1) 9 个 TABS 每个一个页内检索条
+        // 1) 页签级检索条已按用户裁决（2026-11-20 §5.81）全部移除：
+        //    「最上面那个搜索都不要了，改成下面那个在表上方那种搜索」。
+        //    顶栏 #aQ（全局搜索）不动；表上方各自的搜索保留：海外 ovKw / 政策 polQ / 规划 pl-q / 找商机顶栏。
+        //    顺带解决输入法打不了中文的问题（该框的过滤重排会打断 IME 组词）。
         (window.TABS||[]).forEach(function(tb,i){
-          var pn=document.getElementById(tb[0]);if(!pn||pn.querySelector('.a-tabq'))return;
-          var sc=SCOPE544[i]||SCOPE544[0];
-          var bx=document.createElement('div');bx.className='a-tabq';
-          bx.innerHTML='<label>本页检索</label><span class="a-tabq-in">'+
-                       '<input type="text" data-tq="'+i+'" placeholder="'+sc.ph+'">'+
-                       '<button class="a-tabq-x" type="button" title="清空本页检索">×</button>'+
-                       '</span><span class="a-tabqn"></span>';
-          pn.insertBefore(bx,pn.firstChild);
-          var inp=bx.querySelector('input');
-          inp.addEventListener('input',function(){
-            apply544(i,inp.value);
-          });
-          var xb=bx.querySelector('.a-tabq-x');
-          if(xb)xb.onclick=function(){clear544(i);inp.value='';inp.focus();};
+          var pn=document.getElementById(tb[0]);
+          if(pn){[].forEach.call(pn.querySelectorAll(':scope > .a-tabq'),function(n){n.remove();});}
         });
         // 2) 更多入口：删与「行业动态 · 政策档」重复的行业动态；规划中 15 项占位
         if(more){
