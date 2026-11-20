@@ -708,3 +708,27 @@ jobs:
           fi
           cd tools
           python mail_notify.py --stage end || echo "::warning::收工通知失败（不影响已推数据）"
+
+      # ══════════════════════════════════════════════════════════════
+      # 9) 每日摘要邮件（2026-11-20 新增 · roadmap 第 1、6 项）
+      # ══════════════════════════════════════════════════════════════
+      # 与第 8 步的「收工通知」（跑给系统看的健康回执）不同，这一封是
+      # 跑给用户看的业务日报：昨日新增 A/B 级商机 + 重点关注项目最新状态
+      # + 出海速览 S/A 档 + 体检告警（①库暴跌>30% / 行情>2天 / 速览>3天）。
+      # 放在 7) 采集健康判定之后：告警拿到的已经是今天采完、建完的库。
+      # 凭证与第 8 步共用同一对 Secret：MAIL_USER / MAIL_PASS
+      # （QQ 邮箱授权码 IMAP/SMTP 通用，一个授权码两边都能用）。
+      # 任意缺失 → 脚本自己打印一行提示 exit 0，绝不判红。
+      - name: 9) 每日摘要邮件（未配 MAIL_* 则跳过）
+        if: always()
+        continue-on-error: true
+        env:
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
+        run: |
+          if [ -z "$MAIL_USER" ] || [ -z "$MAIL_PASS" ]; then
+            echo "未配置 MAIL_USER / MAIL_PASS，跳过每日摘要（不影响采集）"
+            exit 0
+          fi
+          cd tools
+          python daily_digest.py --mail || echo "::warning::每日摘要发送失败（不影响已推数据）"
