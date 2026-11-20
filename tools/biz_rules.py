@@ -501,10 +501,15 @@ def judge(title, snip='', amt=None, st='', buyer='', win='', bk=''):
 
     # ── ⑪ 分档：信号类归 lead，其余按阶段 ─────────────────────────
     #    传了 bk 就说明分档是构建期定的，这里不再改。
-    if not fixed_bk and r['bucket'] != 'lead':
-        if st in ('中标结果公示', '中标候选人公示', '成交公告', '合同公告'):
-            r['bucket'] = 'win'
-        elif st in ('立项公示',):
+    #    2026-11-18 §5.62：阶段优先于标题信号词。线索状态推进机制把
+    #    「核准前公示」推进到「中标结果公示」后，标题里的信号词还在，
+    #    原逻辑 bucket!=lead 才按 st 改，导致已兑现的线索永远挂在
+    #    立项线索页签（马钢南区三期就是这条路径）。现在：只要阶段已到
+    #    win 档，一律归 win —— 线索已兑现，不再是线索。
+    if not fixed_bk and st in ('中标结果公示', '中标候选人公示', '成交公告', '合同公告'):
+        r['bucket'] = 'win'
+    elif not fixed_bk and r['bucket'] != 'lead':
+        if st in ('立项公示',):
             r['bucket'] = 'lead'
         else:
             r['bucket'] = 'tender'
@@ -895,3 +900,38 @@ if __name__ == '__main__':
         print('%-40s %-8s %-9s %-7s %s'
               % (t[:38], r['segname'][:7], r['mode'] or '-', r['bucket'],
                  ('✅留' if r['investable'] else '❌剔 ' + r['drop'])[:44]))
+
+
+# ═══════════════════════════════════════════════════════════════════
+# 设备级/建安级硬过滤（2026-11-20 用户逐条裁决 §5.77，build_data 入库调用）
+# ═══════════════════════════════════════════════════════════════════
+# 用户原话口径：
+#   「我们不管 EP 还是 EPC 都应该是电厂的，而不是设备的」（→ 浙能长兴 32 条设备采购族删）
+#   「这是把 EPC 拆开了（建安标段），我们不会去投的」
+#   「绿色热能输送工程一看就是管网」
+#   光储充「看大小，小的话没必要，本来也不是强势的产品」
+# 返回 drop 原因字符串（该删）或 ''（不适用本规则）。
+EQUIP_WORDS = ('锅炉', '汽轮机', '发电机', '脱硝装置', '脱硫设备', '炉排',
+               '余热锅炉', '除尘设备', '水处理设备')
+WHOLE_PLANT_WORDS = ('EPC', 'epc', '总承包', '工程总承包', '设计采购施工',
+                     '设计施工', '交钥匙', '一体化')
+
+
+def equip_level_drop(title, amt=None):
+    """设备级采购 / EPC 拆分的建安标段 / 输送管网 / 小型光储充 → 该删，返回原因。"""
+    t = title or ''
+    has_whole = any(w in t for w in WHOLE_PLANT_WORDS)
+    # ① 设备级采购：标题点名主设备（含「设备」「采购」「供货」字样或直接以设备为主语）
+    if not has_whole and any(w in t for w in EQUIP_WORDS):
+        if any(w in t for w in ('设备', '采购', '供货', '货物', '装置')):
+            return '设备级采购（只做电厂整体 EPC/EP，不做单体设备）'
+    # ② EPC 拆出来的建安/净化建安标段
+    if not has_whole and ('建安' in t or '净化建安' in t or ('标段' in t and '施工' in t and '总承包' not in t)):
+        return 'EPC 拆分的建安/施工标段'
+    # ③ 供热/热能输送管网（judge 词表漏网的补刀）
+    if '输送工程' in t or ('热能输送' in t) or ('供热管线' in t):
+        return '供热输送管网'
+    # ④ 光储充：非拳头产品，金额 < 1 亿的不做
+    if '光储充' in t and (amt or 0) < 1.0e8:
+        return '光储充小额（非拳头产品，<1亿不做）'
+    return ''
