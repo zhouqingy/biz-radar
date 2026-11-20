@@ -114,6 +114,49 @@ def alerts(items):
     return out
 
 
+def _esc(s):
+    return (s or '').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+
+def _link(x, n=60):
+    """标题带原文链接（有 url 才是 <a>，没有就纯文字）。"""
+    t = _esc((x.get('t') or x.get('title') or '')[:n])
+    u = x.get('url') or ''
+    return '<a href="%s" style="color:#0f4a9e;text-decoration:none">%s</a>' % (_esc(u), t) if u.startswith('http') else t
+
+
+def build_html(items, nb, wc, ov, al):
+    """HTML 版：所有条目标题可点击跳原文。样式内联（QQ 邮箱会剥 <style>）。"""
+    P = 'margin:2px 0;padding:6px 10px;background:#f6f8fa;border-radius:6px;font-size:14px'
+    H = 'margin:18px 0 6px;font-size:15px;color:#0f4a9e;border-bottom:1px solid #e3e8ee;padding-bottom:4px'
+    h = ['<div style="font-family:-apple-system,\'PingFang SC\',\'Microsoft YaHei\',sans-serif;max-width:680px">']
+    h.append('<h2 style="margin:0 0 4px">商机雷达 · 每日摘要 <small style="color:#888;font-weight:400">%s</small></h2>' % TODAY)
+    if al:
+        h.append('<div style="background:#fff3e0;border-left:4px solid #f60;padding:8px 12px;margin:10px 0"><b>⚠ 告警</b><br>%s</div>'
+                 % '<br>'.join(_esc(a) for a in al))
+    else:
+        h.append('<div style="color:#2a8f4d;margin:10px 0">✔ 体检正常，无告警</div>')
+    h.append('<div style="%s">【昨日新增 A/B 级商机】%d 条</div>' % (H, len(nb)))
+    for x in nb:
+        h.append('<div style="%s"><b style="color:#c00">[%s]</b> %s <span style="color:#888">%s</span></div>'
+                 % (P, _esc((x.get('g') or '?').upper()), _link(x),
+                    _esc(str(x.get('amtTxt') or x.get('amt') or ''))))
+    if not nb:
+        h.append('<div style="%s;color:#999">（昨日无新增 A/B 级）</div>' % P)
+    h.append('<div style="%s">【重点关注项目 · 最新状态】</div>' % H)
+    for x in wc[:6]:
+        h.append('<div style="%s"><span style="color:#888">%s</span> %s</div>'
+                 % (P, _esc((x.get('d') or x.get('date') or '')[:10]), _link(x)))
+    h.append('<div style="%s">【出海速览 · S/A 档最新】</div>' % H)
+    for x in ov:
+        h.append('<div style="%s"><span style="color:#888">%s</span> <b style="color:#b26a00">[%s]</b> %s</div>'
+                 % (P, _esc(x.get('d', '')), _esc(x.get('tier', '')), _link(x, 56)))
+    h.append('<div style="margin-top:16px;color:#888;font-size:13px">—— 完整数据见 '
+             '<a href="https://zhouqingy.github.io/biz-radar/" style="color:#0f4a9e">商机雷达主站</a>'
+             '（①库当前 %d 条）</div></div>' % len(items))
+    return '\n'.join(h)
+
+
 def build():
     items = load_items()
     nb = new_biz(items)
@@ -139,12 +182,13 @@ def build():
         L.append(' %s [%s] %s' % (x.get('d', ''), x.get('tier', ''),
                                   (x.get('t') or x.get('title') or '')[:56]))
     L += ['', '—— 完整数据见 https://zhouqingy.github.io/biz-radar/']
-    return '\n'.join(L), len(items)
+    return '\n'.join(L), build_html(items, nb, wc, ov, al), len(items)
 
 
-def send_mail(text, to='3072871455@qq.com'):
-    """SMTP 直发。凭证优先环境变量 MAIL_USER/MAIL_PASS（CI 用），
-    其次 ~/.digest_smtp.json（本机用）。QQ 授权码 IMAP/SMTP 通用。"""
+def send_mail(text, to='3072871455@qq.com', html=None):
+    """SMTP 直发（html 有值发 multipart：无链接客户端看纯文本，正常客户端点标题跳原文）。
+    凭证优先环境变量 MAIL_USER/MAIL_PASS（CI 用），其次 ~/.digest_smtp.json（本机用）。"""
+    from email.mime.multipart import MIMEMultipart
     user = os.environ.get('MAIL_USER', '').strip()
     pw = os.environ.get('MAIL_PASS', '').strip()
     if not (user and pw):
@@ -154,7 +198,12 @@ def send_mail(text, to='3072871455@qq.com'):
             return False
         cfg = json.load(open(cfg_p))
         user, pw = cfg['user'], cfg['pass']
-    msg = MIMEText(text, 'plain', 'utf-8')
+    if html:
+        msg = MIMEMultipart('alternative')
+        msg.attach(MIMEText(text, 'plain', 'utf-8'))
+        msg.attach(MIMEText(html, 'html', 'utf-8'))
+    else:
+        msg = MIMEText(text, 'plain', 'utf-8')
     msg['Subject'] = Header('商机雷达每日摘要 %s' % TODAY, 'utf-8')
     msg['From'] = user
     msg['To'] = to
@@ -167,14 +216,14 @@ def send_mail(text, to='3072871455@qq.com'):
 
 
 def main():
-    text, total = build()
+    text, html, total = build()
     print(text)
     print('\n（①库当前 %d 条）' % total)
-    json.dump({'updated': time.strftime('%Y-%m-%d %H:%M'), 'text': text},
+    json.dump({'updated': time.strftime('%Y-%m-%d %H:%M'), 'text': text, 'html': html},
               open(os.path.join(ROOT, 'raw', 'digest_daily.json'), 'w', encoding='utf-8'),
               ensure_ascii=False)
     if '--mail' in sys.argv:
-        send_mail(text)
+        send_mail(text, html=html)
 
 
 if __name__ == '__main__':
