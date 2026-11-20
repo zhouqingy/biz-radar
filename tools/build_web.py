@@ -90,6 +90,26 @@ if os.path.exists(_NE_PATH):
     print('[中标回填] notice_extra 补上 %d 条中标单位' % _filled)
 
 IND = json.load(open(os.path.join(ROOT, 'raw', 'industry.json'), encoding='utf-8'))
+
+# ── §5.79（2026-11-20 用户裁决）：行业动态池去「企业工程进展 + 市场数据播报」──
+# 「华东院总承包…1号锅炉首根大板梁顺利吊装」这类竞对工程节点不是政策/行业情报，
+# 「GEM 上半年投运 30GW」这类数据播报也不是。此处组一层标题排除，digest.json 存量已手删。
+PROG_DROP_KW = ('大板梁', '首吊', '水压试验', '筒壁', '吊装', '钢架顺利', '桩基',
+                '开钻', '试车成功', '施工到顶', '受热面', '转轮吊装', '全球能源监测',
+                '全国能源形势')
+def _prog_drop(x):
+    t = x.get('title') or x.get('t') or ''
+    return any(k in t for k in PROG_DROP_KW)
+try:
+    _it = IND.get('trends') or IND.get('items') or []
+    _n0 = len(_it)
+    IND = {**IND, 'trends': [x for x in _it if not _prog_drop(x)],
+           'items': [x for x in (IND.get('items') or []) if not _prog_drop(x)]} \
+        if isinstance(IND, dict) else [x for x in IND if not _prog_drop(x)]
+    print('行业动态去工程进展/数据播报 %d 条' % (_n0 - len(IND.get('trends') or IND.get('items') or [])))
+except Exception as _e:
+    print('[WARN] 工程进展过滤跳过：', _e)
+
 AB = json.load(open(os.path.join(ROOT, 'raw', 'clients_abroad.json'), encoding='utf-8'))
 AB2_PATH = os.path.join(ROOT, 'raw', 'clients_abroad2.json')
 AB2 = json.load(open(AB2_PATH, encoding='utf-8')) if os.path.exists(AB2_PATH) else {'clients': []}
