@@ -1118,6 +1118,25 @@ try:
 except Exception as _e:
     print('[WARN] 速览并入线索跳过：', _e)
 
+# ── §5.84（2026-11-20 用户裁决）：海外四视图行业过滤 ──
+# 海外主线=有色/高用能制造（用热用电+海水淡化配套，看业主行业）。低用能行业
+# （医药原料、纺织服装、食品、贸易等）即使「绿色建厂」也不是我们的单；除非正文
+# 明确带能源切口词（自备电厂/余热/海水淡化/数据中心…）。
+OV_DROP_IND = ('医药', '原料药', '制药', '药业', '纺织', '服装', '制衣', '食品',
+               '饮料', '乳业', '家具', '玩具', '鞋', '化妆品', '日化', '包装印',
+               '贸易公司', '房地产')
+OV_ENERGY_CUT = ('自备电厂', '余热', '余气', '海水淡化', '动力岛', '电厂', '电站',
+                 '供配电', '光伏', '垃圾焚烧', '热电', '变压器', '输变电',
+                 '数据中心', '算力', '烧结', '冶炼', '电解铝', '熔盐')
+
+
+def ov_industry_drop(txt):
+    t = txt or ''
+    if any(k in t for k in OV_ENERGY_CUT):
+        return False
+    return any(k in t for k in OV_DROP_IND)
+
+
 # 2026-10-22 去重：同一条海外动态会从两个来源各进一次——
 #   ① 客户卡（clients 里的 abroad）② raw/oversea_extra.json 手工补录，
 #   两边 name 可能写成「海螺集团」和「安徽海螺集团有限责任公司」，标题一字不差。
@@ -1143,6 +1162,14 @@ for _o in overseas:
 if len(_dedup) != len(overseas):
     print('海外动态去重：%d → %d 条（同标题跨来源重复）' % (len(overseas), len(_dedup)))
 overseas = _dedup
+
+# §5.84：项目线索同样过行业过滤（低用能行业剔除，能源切口词放行）
+_ov_before3 = len(overseas)
+overseas = [o for o in overseas
+            if not ov_industry_drop(' '.join([o.get('name') or '', o.get('title') or o.get('t') or '',
+                                              o.get('desc') or '']))]
+if len(overseas) != _ov_before3:
+    print('项目线索行业过滤：%d → %d 条' % (_ov_before3, len(overseas)))
 
 # 2026-10-22 补丁：去重之后补 cutWhy。
 #   上面「三行业增量」那段只补了 cut / cutN，没补 cutWhy，导致前端标签退化成
@@ -1548,6 +1575,7 @@ if _all_orgs:
 def _load_oversea_extra():
     import html as _html
     flash, odi = [], []
+    _ov_indrop = [0]
     p1 = os.path.join(ROOT, 'raw', 'oversea_flash.json')
     if os.path.exists(p1):
         try:
@@ -1569,6 +1597,9 @@ def _load_oversea_extra():
                     _it['tier'] = x.get('tier')
                 if x.get('chan'):
                     _it['chan'] = x.get('chan')
+                if ov_industry_drop(_it['t'] + ' ' + _it['m']):
+                    _ov_indrop[0] += 1
+                    continue
                 flash.append(_it)
             flash.sort(key=lambda y: (y['d'], y['sc']), reverse=True)
         except Exception as e:
@@ -1578,6 +1609,10 @@ def _load_oversea_extra():
         try:
             d = json.load(open(p2, encoding='utf-8'))
             for x in (d.get('items') or []):
+                # §5.84：低用能行业（医药/纺织/食品/贸易…）备案剔除，速特药业类不再混入
+                if ov_industry_drop(x.get('name') or '') or ov_industry_drop(x.get('deal') or ''):
+                    _ov_indrop[0] += 1
+                    continue
                 odi.append({'own': x.get('owner') or '', 'geo': x.get('geo') or '',
                             'nm': x.get('name') or '', 'act': x.get('act') or '',
                             'tier': x.get('tier') or '', 'why': x.get('why') or '',
@@ -1591,7 +1626,8 @@ def _load_oversea_extra():
             odi.sort(key=lambda y: y['d'], reverse=True)
         except Exception as e:
             print('  ⚠ 备案读取失败：%s' % e)
-    print('  海外速览 %d 条 / 出海备案 %d 条' % (len(flash), len(odi)))
+    print('  海外速览 %d 条 / 出海备案 %d 条（行业过滤剔除 %d 条）'
+          % (len(flash), len(odi), _ov_indrop[0]))
     return flash, odi
 
 
