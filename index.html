@@ -9629,8 +9629,7 @@ function renderClients(){
           ' <span class="sub-i">'+esc(it.st)+' '+esc(it.d)+(it.win?' · 中:'+esc(it.win):'')+'</span>'+
           (it.url?'</a>':'')+'</li>'}).join('')+'</ul>'+
       (x.items.length>IT_SHOW?ccMore('it:'+x.name,x.items.length-(open?x.items.length:IT_SHOW),open):'')+'</div>'
-      :'<div class="cc-m" style="color:#8a9099">本库（国内公开渠道）暂无该客户记录——不代表没机会，'+
-        '海外建厂信息通常先在集团官网/行业媒体发布，不在国内招标平台。</div>';
+      :''; /* §5.84 用户裁决删除灰字说明行 */
     return '<div class="ccard ab-card cc-click" data-client="'+esc(x.name)+'" title="点击查看这家出海企业的详情：为什么跟、海外基地、企业档案、动态与本库记录">'+
       '<div class="cc-h"><b>'+esc(x.name)+'</b>'+
       '<span class="cc-tag" style="background:'+(GTAG[abGrp(x.grp)]||'#f1f3f6')+';color:'+(GCOL[abGrp(x.grp)]||'#5a6270')+'">'+esc(abGrp(x.grp))+'</span>'+
@@ -9752,9 +9751,7 @@ function openClientProf(name){
       if(hits.length>10) h+='<div class="pf-more">另有 '+(hits.length-10)+' 条，点「在商机库搜它的全部记录」看全量</div>';
     }
   }else{
-    h+='<div class="cli-ep missing">这家还没有企业档案。本库对它的公开中标记录为 '+
-       (x.n||0)+' 条'+(x.n?'（下面已列出）':'')+' —— 海外建厂信息多数先在集团官网、'+
-       '行业媒体披露，不进国内招标平台，所以企业档案暂时是空的，不是它没实力。</div>';
+    h+=''; /* §5.84 用户裁决删除灰字说明行 */
   }
   h+='</div>';
   /* ④ 海外动态（全量，可跳原文） */
