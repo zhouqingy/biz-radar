@@ -19,7 +19,8 @@ name: 金属行情刷新（交易日）
 
 on:
   schedule:
-    - cron: '5 8 * * 1-5'
+    - cron: '5 8 * * 1-5'    # 北京 16:05 收盘后抓当日日K（§5.83：原来只有凌晨一次，白天永远显示昨日价）
+    - cron: '5 17 * * 0-4'   # 北京凌晨 1:05 抓上一交易日补漏（原有一条，保留）
   workflow_dispatch:
   # 2026-11-04：加 push 触发。原因很实际 —— 无 workflow scope 的 token 不能
   # dispatch，只能在网页上点；而「Re-run all jobs」用的是**当时那次运行的旧 commit**，
