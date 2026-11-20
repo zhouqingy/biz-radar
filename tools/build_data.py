@@ -639,7 +639,10 @@ for i, (k, r) in enumerate(merged.items()):
     # 用户原话：「这完全不是我们的业务啊」「删除」。
     # ⚠ 只删 drop 原因明确的七类；「不在12个业务层级内」「非 EPC 类」两族
     #   混有真主业（长丰光伏/东阳热电联产被 judge 误判），不在本名单，逐条与用户复核。
-    from biz_rules import judge as _judge
+    from biz_rules import judge as _judge, equip_level_drop as _equip
+    _dp2 = _equip(r['t'], r.get('amt'))
+    if _dp2:
+        continue
     _j = _judge(r['t'], r.get('snip') or '', amt=r.get('amt'), st=r.get('st') or '',
                 buyer=r.get('buyer') or '', win=r.get('win') or '', bk=r.get('bk') or '')
     if not _j.get('investable'):
