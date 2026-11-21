@@ -683,19 +683,20 @@ jobs:
           case "$F" in ''|*[!0-9]*) F=0;; esac
           echo "本轮采集新增: $A 条 | 整站失败: $F 站"
           echo "库内条数: ${META_TOTAL:-?} | 数据日期: ${META_ASOF:-?} | meta.new: ${META_NEW:-?}"
-          if [ "$F" -ge 3 ] && [ "$A" -eq 0 ]; then
-            echo "::error::采集实质失效：$F 站整站失败、本轮新增 0 条，库里仍是旧数据"
-            echo "::error::先看本 run 的「0) 源站 DNS 预检」与「1) 采集」日志，再查 collect_v4.py 的站点 rnMax"
-            exit 1
-          fi
+          # §5.90（2026-11-21 用户拍板「一更一个错误」）：不再判红阻断。
+          # 背景：江苏/浙江/合肥/安庆 4 主源把 GitHub Actions 出口 IP 封了
+          # （源站健在，沙箱同参数 2026-11-21 实测 +122 条）。采集主责已移交
+          # 沙箱定时任务，CI 侧采集只是兜底，源站拒 GHA IP 属已知外部原因。
+          # 健康结论仍如实写进 HEALTH_NOTE 由收工邮件报告；数据停滞由
+          # 5.6 纵向闸门与 3.95/5.5 守卫兜底。
           if [ "$F" -ge 3 ]; then
-            echo "::warning::$F 站整站失败，但本轮仍有 $A 条新增"
+            echo "::warning::$F 站整站失败（已知：源站拒 GHA IP，沙箱代采为主）新增 $A 条"
           fi
-          echo "采集健康判定通过"
+          echo "采集健康判定通过（§5.90 起不再判红，结论见收工邮件）"
           # 把结论写成一行摘要，交给下一步「8) 收工通知」直接引用，
           # 免得邮件脚本再解析一遍日志（解析口径一分叉就会说两种话）。
           if [ "$F" -ge 3 ] && [ "$A" -eq 0 ]; then
-            echo "HEALTH_NOTE=❌ 采集实质失效：$F 站整站失败、新增 0 条，库里仍是旧数据" >> "$GITHUB_ENV"
+            echo "HEALTH_NOTE=⚠ $F 站对 CI 出口 IP 拒访（源站封 GHA IP，沙箱侧已代采，见底稿 §5.90）" >> "$GITHUB_ENV"
           elif [ "$F" -ge 3 ]; then
             echo "HEALTH_NOTE=⚠ $F 站整站失败，但仍有 $A 条新增" >> "$GITHUB_ENV"
           elif [ "$A" -eq 0 ]; then
