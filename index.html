@@ -2737,8 +2737,8 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
   </div>
 </div>
 
-<script src="data.core.js?v=202611210552"></script>
-<script src="data.items.js?v=202611210552"></script>
+<script src="data.core.js?v=202611201707"></script>
+<script src="data.items.js?v=202611201707"></script>
 <script src="data.metalhist.js?v=202611041941"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
@@ -2806,7 +2806,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611210552';
+var VER='?v=202611201707';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -12255,17 +12255,10 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         [].forEach.call(nav.querySelectorAll(':scope > .a-sep'),function(x){
           x.textContent='功能位 · 已接入（9）'; sepEl=x;
         });
-        var navf=document.createElement('input');
-        navf.className='a-navfilter'; navf.id='aNavFilter'; navf.placeholder='筛选功能 / 模块…';
-        if(nl&&nl.parentNode)nl.parentNode.insertBefore(navf,nl);
-        // 老 DOM 里分组标题排在列表后面，按截图把整块移到「筛选框 → 标题 → 9 项」
-        if(sepEl&&nl&&nl.parentNode)nl.parentNode.insertBefore(sepEl,nl);
-        navf.addEventListener('input',function(){
-          var q=navf.value.trim();
-          [].forEach.call(nl.querySelectorAll('.a-ni[data-i]'),function(d){
-            d.style.display=(!q||d.textContent.indexOf(q)>=0)?'':'none';
-          });
-        });
+        /* §5.87 用户裁决：删掉左栏「筛选功能 / 模块…」框。
+           它只过滤左侧菜单文字、不搜数据，但长得像全局搜索框，
+           是用户「搜索混着很乱」观感的来源之一。现在全站只保留
+           每个页签自己的「搜+页签名」检索条，一框一表。 */
       }
       // 底部更多入口：让被合并掉的原页签仍可达（9 个 TABS 全部有入口，不留死链）
       var more=document.getElementById('aMore');
@@ -12389,6 +12382,11 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         var p=panel544(i);if(!p)return{hit:0,total:0,on:false};
         var all=[].slice.call(p.querySelectorAll(NSEL544));
         var ns=all.filter(function(n){return !all.some(function(m){return m!==n&&m.contains(n);});});
+        /* §5.87 一框一表：只过滤/统计当前可见子表（如同业页的「竞争实力榜 / 联合体伙伴榜」、
+           客户页的「国内重点客户 / 海外中资出海」）。原来把整个 panel 两张表一起算，
+           命中数混算、切子表后另一张表还带着隐形过滤 —— 用户反馈「搜索混着很乱」的根因。 */
+        function inVis(n){for(var x=n;x&&x!==p;x=x.parentNode){var s='';try{s=x.style.display;}catch(e){}if(s==='none')return false;}return true;}
+        ns=ns.filter(inVis);
         var qq=(q||'').trim().toLowerCase(),hit=0;
         ns.forEach(function(n){
           var ok=!qq||((n.textContent||'').toLowerCase().indexOf(qq)>=0);
@@ -12517,7 +12515,7 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
           var pn=document.getElementById(tb[0]);if(!pn||pn.querySelector('.a-tabq'))return;
           var sc=SCOPE544[i]||SCOPE544[0];
           var bx=document.createElement('div');bx.className='a-tabq';
-          bx.innerHTML='<label>本页检索</label><span class="a-tabq-in">'+
+          bx.innerHTML='<label>搜'+esc(tb[1]||'本页')+'</label><span class="a-tabq-in">'+
                        '<input type="text" data-tq="'+i+'" placeholder="'+sc.ph+'">'+
                        '<button class="a-tabq-x" type="button" title="清空本页检索">×</button>'+
                        '</span><span class="a-tabqn"></span>';
@@ -12525,6 +12523,16 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
           var inp=bx.querySelector('input');
           inp.addEventListener('input',function(){
             apply544(i,inp.value);
+          });
+          /* §5.87：页签内切子表（实力榜↔伙伴榜、国内↔海外）后，把当前关键词
+             重新只应用到新出现的子表上，避免「切过去不带过滤/带着旧过滤」。 */
+          pn.addEventListener('click',function(e){
+            if(!e.target.closest||!e.target.closest('.cswitch span'))return;
+            setTimeout(function(){
+              var v=(inp.value||'').trim();
+              if(v)apply544(i,v);
+              else{var cc=bx.querySelector('.a-tabqn');if(cc)cc.textContent='';}
+            },60);
           });
           var xb=bx.querySelector('.a-tabq-x');
           if(xb)xb.onclick=function(){clear544(i);inp.value='';inp.focus();};
