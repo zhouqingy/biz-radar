@@ -317,6 +317,18 @@ jobs:
         run: |
           python tzxm_approve.py --days 30 --maxpage 5 || echo "::warning::tzxm 办结公示采集失败，沿用上次结果"
 
+      # 3.11 央企电商平台（2026-11-21，Roadmap 第 1 项）：
+      #   国家电投·电能e招采，首页公告链接 → PDF → pdftotext → semantic_drop，
+      #   严守江浙沪皖区域边界（collect_central.py 内预判，区域外不落盘）。
+      #   大唐/华能/华电/国能/三峡 平台反爬或 DNS 不通，待接备注见 collect_central.py 头注释。
+      - name: 3.11) 央企电商平台 · 电能e招采
+        working-directory: tools
+        continue-on-error: true
+        timeout-minutes: 20
+        run: |
+          which pdftotext >/dev/null || sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+          python collect_central.py --days 2 || echo "::warning::央企电商采集失败，沿用上次结果"
+
       # ── 构建段：不允许失败 ────────────────────────────────────────
       # 注意 tools/raw/oversea_extra.json 必须在仓库里（人工补录的巴淡岛等
       # 情报就存在这）。它不在的话 build_web 只打一行 WARN 继续跑，
@@ -734,3 +746,4 @@ jobs:
           fi
           cd tools
           python daily_digest.py --mail || echo "::warning::每日摘要发送失败（不影响已推数据）"
+
