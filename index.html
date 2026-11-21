@@ -12369,7 +12369,8 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         {ph:'搜规划项目 / 业主 / 城市',fwd:'pl-q',cards:false}
       ];
       var NSEL544='#grid > div, .cgrid > div, tbody > tr, .siggrid > div, .news > div, '+
-                  '.ncard, .plgrid > .pl, [id^="ovBox"] > div, #plGrid > div';
+                  '.ncard, .plgrid > .pl, [id^="ovBox"] > div, #plGrid > div, '+
+                  '.ccard /* §5.87 补：客户与业主页的客户卡原来不在选择器里，搜索一直无效 */';
       function curTab544(){
         try{
           if(window.F&&typeof window.F.tab==='number')return window.F.tab;
