@@ -12385,8 +12385,10 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         var ns=all.filter(function(n){return !all.some(function(m){return m!==n&&m.contains(n);});});
         /* §5.87 一框一表：只过滤/统计当前可见子表（如同业页的「竞争实力榜 / 联合体伙伴榜」、
            客户页的「国内重点客户 / 海外中资出海」）。原来把整个 panel 两张表一起算，
-           命中数混算、切子表后另一张表还带着隐形过滤 —— 用户反馈「搜索混着很乱」的根因。 */
-        function inVis(n){for(var x=n;x&&x!==p;x=x.parentNode){var s='';try{s=x.style.display;}catch(e){}if(s==='none')return false;}return true;}
+           命中数混算、切子表后另一张表还带着隐形过滤 —— 用户反馈「搜索混着很乱」的根因。
+           §5.87c 修正：从 parentNode 起查祖先，不能查节点自己 —— 否则被上一轮搜索
+           隐藏的卡片会被永久排除在 ns 外，命中数坍缩成「14 / 14」「0 / 0」。 */
+        function inVis(n){for(var x=n.parentNode;x&&x!==p;x=x.parentNode){var s='';try{s=x.style.display;}catch(e){}if(s==='none')return false;}return true;}
         ns=ns.filter(inVis);
         var qq=(q||'').trim().toLowerCase(),hit=0;
         ns.forEach(function(n){
