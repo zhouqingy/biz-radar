@@ -10309,7 +10309,10 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-21",
+"shell": 1,
+"files": []
 },
 {
 "t": "如东县洋口化学工业园(西区)污染源地下水污染防控与修复项目资格后审公告",
@@ -10328,7 +10331,10 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-21",
+"shell": 1,
+"files": []
 },
 {
 "t": "赣榆经济开发区光伏新能源产业链配套项目",
@@ -10347,7 +10353,10 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-21",
+"shell": 1,
+"files": []
 },
 {
 "t": "新能源汽车先进部件产业基地项目",
@@ -10366,7 +10375,10 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-21",
+"shell": 1,
+"files": []
 },
 {
 "t": "(江宁分中心) 创意北路（科技大道-新能源大道）一期建设工程施工招标公告310777",
@@ -10385,7 +10397,10 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-21",
+"shell": 1,
+"files": []
 },
 {
 "t": "盱眙宁淮配售电有限公司新能源智慧运行中心",
@@ -10404,7 +10419,10 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-21",
+"shell": 1,
+"files": []
 },
 {
 "t": "太仓德诚资产投资控股有限公司新建新能源汽车专用设备项目勘察设计",
@@ -10423,7 +10441,10 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-21",
+"shell": 1,
+"files": []
 },
 {
 "t": "新能源汽车先进部件产业基地项目",
@@ -10442,7 +10463,10 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-21",
+"shell": 1,
+"files": []
 },
 {
 "t": "盐城清能灌东85MW渔光互补光伏项目施工总承包",
@@ -10461,7 +10485,10 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-21",
+"shell": 1,
+"files": []
 },
 {
 "t": "盐城清能灌东85MW渔光互补光伏项目施工总承包中标结果公告",
@@ -10480,7 +10507,10 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-21",
+"shell": 1,
+"files": []
 },
 {
 "t": "云海新能源重卡光储充项目设计",
@@ -10499,7 +10529,10 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-21",
+"shell": 1,
+"files": []
 },
 {
 "t": "清能万帮盐城经开区150MW/300MWh储能电站施工总承包",
@@ -10518,7 +10551,10 @@
 "snip": "",
 "attach": "",
 "platLevel": "省级",
-"srcType": "official"
+"srcType": "official",
+"scanAt": "2026-11-21",
+"shell": 1,
+"files": []
 },
 {
 "t": "江苏尚鼎新能源科技有限公司苏州分公司新建年综合利用 2 万吨磷酸铁锂正极材料等项目",
@@ -10535,6 +10571,104 @@
 "url": "https://jsggzy.jszwfw.gov.cn/jyxx/003001/003001005/20261115/eb115dc9-6e12-4b51-9056-ec862443afbf.html",
 "mode": "",
 "snip": "",
+"attach": "",
+"platLevel": "省级",
+"srcType": "official",
+"scanAt": "2026-11-21",
+"shell": 1,
+"files": []
+},
+{
+"t": "市区供热一张网更新改造工程（光大再生公司与经济技术开发区热网联通）",
+"city": "",
+"rg": "江苏",
+"st": "立项公示",
+"buyer": "市区供热一张网更新改造工程（光大再生公司",
+"win": "",
+"amt": null,
+"amtTxt": "",
+"d": "2026-10-21",
+"dl": null,
+"p": "江苏投资在线审批平台",
+"url": "",
+"mode": "",
+"snip": "已拿施工许可 · 最近办结 2026-10-21 · 淮安经济技术开发区行政审批局（建设事务）",
+"attach": "",
+"platLevel": "省级",
+"srcType": "official"
+},
+{
+"t": "江苏英奇热电有限公司热电联产提档升级工程",
+"city": "",
+"rg": "江苏",
+"st": "立项公示",
+"buyer": "江苏英奇热电有限公司",
+"win": "",
+"amt": null,
+"amtTxt": "",
+"d": "2025-07-11",
+"dl": null,
+"p": "江苏投资在线审批平台",
+"url": "",
+"mode": "",
+"snip": "已过用地预审 · 最近办结 2025-07-11 · 响水县自然资源和规划局",
+"attach": "",
+"platLevel": "省级",
+"srcType": "official"
+},
+{
+"t": "盱眙经济开发区中水回用工程",
+"city": "",
+"rg": "江苏",
+"st": "立项公示",
+"buyer": "",
+"win": "",
+"amt": null,
+"amtTxt": "",
+"d": "2025-08-27",
+"dl": null,
+"p": "江苏投资在线审批平台",
+"url": "",
+"mode": "",
+"snip": "已核准 · 最近办结 2025-08-27 · 淮安盱眙县政务服务管理办公室建设审批科",
+"attach": "",
+"platLevel": "省级",
+"srcType": "official"
+},
+{
+"t": "静脉科技产业园一般固废协同处置项目",
+"city": "",
+"rg": "江苏",
+"st": "立项公示",
+"buyer": "",
+"win": "",
+"amt": null,
+"amtTxt": "",
+"d": "2026-11-17",
+"dl": null,
+"p": "江苏投资在线审批平台",
+"url": "",
+"mode": "",
+"snip": "已核准 · 最近办结 2026-11-17 · 苏州张家港市数据局",
+"attach": "",
+"platLevel": "省级",
+"srcType": "official"
+},
+{
+"t": "北控环境再生能源（张家港）有限公司脱硫脱硝提标改造项目",
+"city": "",
+"rg": "江苏",
+"st": "立项公示",
+"buyer": "北控环境再生能源（张家港）有限公司",
+"win": "",
+"amt": null,
+"amtTxt": "",
+"d": "2026-11-17",
+"dl": null,
+"p": "江苏投资在线审批平台",
+"url": "",
+"mode": "",
+"snip": "已核准 · 最近办结 2026-11-17 · 苏州张家港市数据局",
 "attach": "",
 "platLevel": "省级",
 "srcType": "official"
