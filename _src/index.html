@@ -2737,8 +2737,8 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
   </div>
 </div>
 
-<script src="data.core.js?v=202611201540"></script>
-<script src="data.items.js?v=202611201540"></script>
+<script src="data.core.js?v=202611220358"></script>
+<script src="data.items.js?v=202611220358"></script>
 <script src="data.metalhist.js?v=202611041941"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
@@ -2806,7 +2806,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611201540';
+var VER='?v=202611220358';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -7282,10 +7282,7 @@ function ovBindClue() {
   var kw = el('ovKw');
   if (kw) {
     var t = null;
-    /* §5.81b（2026-11-20）：输入法组词期间（isComposing）不能重画 —— DOM 换掉
-       候选词就丢，表现就是「打不了中文、不给我选字的机会」。组词等
-       compositionend 再过滤；业绩表搜索框（_pfSearchKey）同款修法。 */
-    var _ovKwRun = function () {
+    kw.oninput = function () {
       clearTimeout(t);
       t = setTimeout(function () {
         ovClueKw = kw.value.trim();
@@ -7294,8 +7291,6 @@ function ovBindClue() {
         if (n2) { n2.focus(); n2.setSelectionRange(n2.value.length, n2.value.length); }
       }, 280);
     };
-    kw.oninput = function (ev) { if (ev && ev.isComposing) return; _ovKwRun(); };
-    kw.addEventListener('compositionend', _ovKwRun);
   }
   var box = el('ovBoxClue');
   if (box) box.onclick = function (e) {
@@ -9634,8 +9629,7 @@ function renderClients(){
           ' <span class="sub-i">'+esc(it.st)+' '+esc(it.d)+(it.win?' · 中:'+esc(it.win):'')+'</span>'+
           (it.url?'</a>':'')+'</li>'}).join('')+'</ul>'+
       (x.items.length>IT_SHOW?ccMore('it:'+x.name,x.items.length-(open?x.items.length:IT_SHOW),open):'')+'</div>'
-      :'<div class="cc-m" style="color:#8a9099">本库（国内公开渠道）暂无该客户记录——不代表没机会，'+
-        '海外建厂信息通常先在集团官网/行业媒体发布，不在国内招标平台。</div>';
+      :''; /* §5.84 用户裁决删除灰字说明行 */
     return '<div class="ccard ab-card cc-click" data-client="'+esc(x.name)+'" title="点击查看这家出海企业的详情：为什么跟、海外基地、企业档案、动态与本库记录">'+
       '<div class="cc-h"><b>'+esc(x.name)+'</b>'+
       '<span class="cc-tag" style="background:'+(GTAG[abGrp(x.grp)]||'#f1f3f6')+';color:'+(GCOL[abGrp(x.grp)]||'#5a6270')+'">'+esc(abGrp(x.grp))+'</span>'+
@@ -9757,9 +9751,7 @@ function openClientProf(name){
       if(hits.length>10) h+='<div class="pf-more">另有 '+(hits.length-10)+' 条，点「在商机库搜它的全部记录」看全量</div>';
     }
   }else{
-    h+='<div class="cli-ep missing">这家还没有企业档案。本库对它的公开中标记录为 '+
-       (x.n||0)+' 条'+(x.n?'（下面已列出）':'')+' —— 海外建厂信息多数先在集团官网、'+
-       '行业媒体披露，不进国内招标平台，所以企业档案暂时是空的，不是它没实力。</div>';
+    h+=''; /* §5.84 用户裁决删除灰字说明行 */
   }
   h+='</div>';
   /* ④ 海外动态（全量，可跳原文） */
@@ -12263,17 +12255,10 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         [].forEach.call(nav.querySelectorAll(':scope > .a-sep'),function(x){
           x.textContent='功能位 · 已接入（9）'; sepEl=x;
         });
-        var navf=document.createElement('input');
-        navf.className='a-navfilter'; navf.id='aNavFilter'; navf.placeholder='筛选功能 / 模块…';
-        if(nl&&nl.parentNode)nl.parentNode.insertBefore(navf,nl);
-        // 老 DOM 里分组标题排在列表后面，按截图把整块移到「筛选框 → 标题 → 9 项」
-        if(sepEl&&nl&&nl.parentNode)nl.parentNode.insertBefore(sepEl,nl);
-        navf.addEventListener('input',function(){
-          var q=navf.value.trim();
-          [].forEach.call(nl.querySelectorAll('.a-ni[data-i]'),function(d){
-            d.style.display=(!q||d.textContent.indexOf(q)>=0)?'':'none';
-          });
-        });
+        /* §5.87 用户裁决：删掉左栏「筛选功能 / 模块…」框。
+           它只过滤左侧菜单文字、不搜数据，但长得像全局搜索框，
+           是用户「搜索混着很乱」观感的来源之一。现在全站只保留
+           每个页签自己的「搜+页签名」检索条，一框一表。 */
       }
       // 底部更多入口：让被合并掉的原页签仍可达（9 个 TABS 全部有入口，不留死链）
       var more=document.getElementById('aMore');
@@ -12384,7 +12369,8 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         {ph:'搜规划项目 / 业主 / 城市',fwd:'pl-q',cards:false}
       ];
       var NSEL544='#grid > div, .cgrid > div, tbody > tr, .siggrid > div, .news > div, '+
-                  '.ncard, .plgrid > .pl, [id^="ovBox"] > div, #plGrid > div';
+                  '.ncard, .plgrid > .pl, [id^="ovBox"] > div, #plGrid > div, '+
+                  '.ccard /* §5.87 补：客户与业主页的客户卡原来不在选择器里，搜索一直无效 */';
       function curTab544(){
         try{
           if(window.F&&typeof window.F.tab==='number')return window.F.tab;
@@ -12397,6 +12383,13 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         var p=panel544(i);if(!p)return{hit:0,total:0,on:false};
         var all=[].slice.call(p.querySelectorAll(NSEL544));
         var ns=all.filter(function(n){return !all.some(function(m){return m!==n&&m.contains(n);});});
+        /* §5.87 一框一表：只过滤/统计当前可见子表（如同业页的「竞争实力榜 / 联合体伙伴榜」、
+           客户页的「国内重点客户 / 海外中资出海」）。原来把整个 panel 两张表一起算，
+           命中数混算、切子表后另一张表还带着隐形过滤 —— 用户反馈「搜索混着很乱」的根因。
+           §5.87c 修正：从 parentNode 起查祖先，不能查节点自己 —— 否则被上一轮搜索
+           隐藏的卡片会被永久排除在 ns 外，命中数坍缩成「14 / 14」「0 / 0」。 */
+        function inVis(n){for(var x=n.parentNode;x&&x!==p;x=x.parentNode){var s='';try{s=x.style.display;}catch(e){}if(s==='none')return false;}return true;}
+        ns=ns.filter(inVis);
         var qq=(q||'').trim().toLowerCase(),hit=0;
         ns.forEach(function(n){
           var ok=!qq||((n.textContent||'').toLowerCase().indexOf(qq)>=0);
@@ -12520,13 +12513,41 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
           ' · <b>未过①库过滤，不构成可投标的</b>；完整清单见「规划前瞻」。</div>';
       }
       function inject544(){
-        // 1) 页签级检索条已按用户裁决（2026-11-20 §5.81）全部移除：
-        //    「最上面那个搜索都不要了，改成下面那个在表上方那种搜索」。
-        //    顶栏 #aQ（全局搜索）不动；表上方各自的搜索保留：海外 ovKw / 政策 polQ / 规划 pl-q / 找商机顶栏。
-        //    顺带解决输入法打不了中文的问题（该框的过滤重排会打断 IME 组词）。
+        // 1) 9 个 TABS 每个一个页内检索条
         (window.TABS||[]).forEach(function(tb,i){
-          var pn=document.getElementById(tb[0]);
-          if(pn){[].forEach.call(pn.querySelectorAll(':scope > .a-tabq'),function(n){n.remove();});}
+          var pn=document.getElementById(tb[0]);if(!pn||pn.querySelector('.a-tabq'))return;
+          var sc=SCOPE544[i]||SCOPE544[0];
+          var bx=document.createElement('div');bx.className='a-tabq';
+          bx.innerHTML='<label>搜'+esc(tb[1]||'本页')+'</label><span class="a-tabq-in">'+
+                       '<input type="text" data-tq="'+i+'" placeholder="'+sc.ph+'">'+
+                       '<button class="a-tabq-x" type="button" title="清空本页检索">×</button>'+
+                       '</span><span class="a-tabqn"></span>';
+          pn.insertBefore(bx,pn.firstChild);
+          var inp=bx.querySelector('input');
+          /* §5.94（2026-11-22）：IME 组词保护。用户实测：打拼音时每敲一个字母
+             就触发 input → apply544 → render()，组词被打断，框里留下「r热电」
+             这类残词 → 命中 0 条，表现为「输不了中文、过滤不了」。
+             修法：composition 期间不应用，compositionend 后应用一次最终词。 */
+          inp.addEventListener('compositionstart',function(){inp._composing=1;});
+          inp.addEventListener('compositionend',function(){
+            inp._composing=0;apply544(i,inp.value);});
+          inp.addEventListener('input',function(ev){
+            if(ev&&ev.isComposing)return;
+            if(inp._composing)return;
+            apply544(i,inp.value);
+          });
+          /* §5.87：页签内切子表（实力榜↔伙伴榜、国内↔海外）后，把当前关键词
+             重新只应用到新出现的子表上，避免「切过去不带过滤/带着旧过滤」。 */
+          pn.addEventListener('click',function(e){
+            if(!e.target.closest||!e.target.closest('.cswitch span'))return;
+            setTimeout(function(){
+              var v=(inp.value||'').trim();
+              if(v)apply544(i,v);
+              else{var cc=bx.querySelector('.a-tabqn');if(cc)cc.textContent='';}
+            },60);
+          });
+          var xb=bx.querySelector('.a-tabq-x');
+          if(xb)xb.onclick=function(){clear544(i);inp.value='';inp.focus();};
         });
         // 2) 更多入口：删与「行业动态 · 政策档」重复的行业动态；规划中 15 项占位
         if(more){
