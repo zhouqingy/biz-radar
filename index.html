@@ -12524,7 +12524,16 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
                        '</span><span class="a-tabqn"></span>';
           pn.insertBefore(bx,pn.firstChild);
           var inp=bx.querySelector('input');
-          inp.addEventListener('input',function(){
+          /* §5.94（2026-11-22）：IME 组词保护。用户实测：打拼音时每敲一个字母
+             就触发 input → apply544 → render()，组词被打断，框里留下「r热电」
+             这类残词 → 命中 0 条，表现为「输不了中文、过滤不了」。
+             修法：composition 期间不应用，compositionend 后应用一次最终词。 */
+          inp.addEventListener('compositionstart',function(){inp._composing=1;});
+          inp.addEventListener('compositionend',function(){
+            inp._composing=0;apply544(i,inp.value);});
+          inp.addEventListener('input',function(ev){
+            if(ev&&ev.isComposing)return;
+            if(inp._composing)return;
             apply544(i,inp.value);
           });
           /* §5.87：页签内切子表（实力榜↔伙伴榜、国内↔海外）后，把当前关键词
