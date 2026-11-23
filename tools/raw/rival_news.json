@@ -1,7 +1,34 @@
 {
- "updated": "2026-11-16 10:03",
- "n_src": 15,
+ "updated": "2026-11-23 11:03",
+ "n_src": 17,
  "items": [
+  {
+   "t": "中国能建江苏院勘察设计的华能灌云400兆瓦海上光伏项目开工",
+   "url": "http://www.jspdi.ceec.net.cn/art/2026/11/23/art_8540_2528879.html",
+   "d": "2026-11-23",
+   "src": "中国能源建设集团江苏省电力设计院有限公司（中国能建江苏院）",
+   "srcKind": "官网",
+   "tag": "开工投产",
+   "level": "S"
+  },
+  {
+   "t": "中电工程微博：浙江三澳核电厂二期工程4号机组主体工程正式开工",
+   "url": "http://www.zepdi.ceec.net.cn/art/2026/11/23/art_17583_2528938.html",
+   "d": "2026-11-23",
+   "src": "中国能源建设集团浙江省电力设计院有限公司（中国能建浙江院）",
+   "srcKind": "官网",
+   "tag": "开工投产",
+   "level": "A"
+  },
+  {
+   "t": "中国能建华东院勘察设计的新疆规模最大热电联产项目喀什华电2×66万千瓦机组工程全面投产",
+   "url": "https://www.ecepdi.ceec.net.cn/art/2026/11/22/art_14298_2518668.html",
+   "d": "2026-11-22",
+   "src": "中国电力工程顾问集团华东电力设计院有限公司",
+   "srcKind": "官网",
+   "tag": "开工投产",
+   "level": "S"
+  },
   {
    "t": "新华社 | 中企在科承建西非最大生物质电站项目竣工",
    "url": "http://www.intl.ceec.net.cn/art/2026/11/12/art_55166_2515136.html",
@@ -14,15 +41,6 @@
   {
    "t": "中国能建网站：中国能建浙江院中标诏安四都80兆瓦渔光互补光伏电站EPC总承包",
    "url": "http://www.zepdi.ceec.net.cn/art/2026/11/11/art_17583_2528867.html",
-   "d": "2026-11-11",
-   "src": "中国能源建设集团浙江省电力设计院有限公司（中国能建浙江院）",
-   "srcKind": "官网",
-   "tag": "中标签约",
-   "level": "S"
-  },
-  {
-   "t": "中国能建网站：中国能建浙江院中标罗源松山130兆瓦陆上渔光互补光伏电站",
-   "url": "http://www.zepdi.ceec.net.cn/art/2026/11/11/art_17583_2528865.html",
    "d": "2026-11-11",
    "src": "中国能源建设集团浙江省电力设计院有限公司（中国能建浙江院）",
    "srcKind": "官网",
@@ -46,24 +64,6 @@
    "srcKind": "官网",
    "tag": "开工投产",
    "level": "A"
-  },
-  {
-   "t": "中国能建江苏院中标云海新能源重卡光储充设计项目",
-   "url": "http://www.jspdi.ceec.net.cn/art/2026/11/4/art_8540_2528770.html",
-   "d": "2026-11-04",
-   "src": "中国能源建设集团江苏省电力设计院有限公司（中国能建江苏院）",
-   "srcKind": "官网",
-   "tag": "中标签约",
-   "level": "A"
-  },
-  {
-   "t": "中国能建江苏院总承包的马来西亚切雷赫200兆瓦漂浮式光伏项目开工",
-   "url": "http://www.jspdi.ceec.net.cn/art/2026/10/30/art_8540_2528738.html",
-   "d": "2026-10-30",
-   "src": "中国能源建设集团江苏省电力设计院有限公司（中国能建江苏院）",
-   "srcKind": "官网",
-   "tag": "海外项目",
-   "level": "S"
   },
   {
    "t": "投产！中煤岱山鱼山电厂首台机组",
@@ -282,24 +282,6 @@
    "level": "S"
   },
   {
-   "t": "国家电投鲁北基地15万千瓦风电全容量并网",
-   "url": "http://www.cpnn.com.cn/news/xny/202611/t20261113_1926336.html",
-   "d": "",
-   "src": "中国能源建设集团安徽省电力设计院有限公司（中国能建安徽院）",
-   "srcKind": "官网",
-   "tag": "开工投产",
-   "level": "S"
-  },
-  {
-   "t": "新疆阜康：10万千瓦熔盐塔式光热发电项目并网",
-   "url": "http://www.cpnn.com.cn/dianlituku/202611/t20261105_1924688.html",
-   "d": "",
-   "src": "中国能源建设集团安徽省电力设计院有限公司（中国能建安徽院）",
-   "srcKind": "官网",
-   "tag": "开工投产",
-   "level": "S"
-  },
-  {
    "t": "中冶京诚总承包的安丰钢铁135MW超超临界煤气发电项目锅炉水压试验一次成功（发表于...",
    "url": "https://www.ceri.com.cn/xwzx/mtjj/202611/t20261104_402367.html",
    "d": "",
@@ -327,15 +309,6 @@
    "level": "S"
   },
   {
-   "t": "2.18亿元！清新环境中标贵州七星关2&amp;#215;66万千瓦超超临界燃煤发电项目脱硫及废水零排放EPC工程",
-   "url": "https://www.chinaxdsb.com/article/87566.html",
-   "d": "",
-   "src": "申能环境科技有限公司",
-   "srcKind": "官网",
-   "tag": "中标签约",
-   "level": "S"
-  },
-  {
    "t": "人民网：阿联酋哈斯彦海水淡化EPC项目斩获国...",
    "url": "http://www.sepco3.com/col/col16682/art/2026/art_cf52c2b387a745ee83cfa4070e701ddb.html",
    "d": "",
@@ -354,8 +327,26 @@
    "level": "S"
   },
   {
-   "t": "国家能源局公布前三季度光伏并网数据",
-   "url": "http://www.cpnn.com.cn/news/nytt/202611/t20261116_1926599.html",
+   "t": "能源环保部65MW热电联产汽轮机能效提升维修工程中标结果公告",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001001/018001001004/20261123/d7188819-ae76-4ad6-bce1-5908a462583f.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "S"
+  },
+  {
+   "t": "能源环保部65MW热电联产及360烧结环冷余热锅炉系统设备运维[中标候选人公示]",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001003/018001003003/20261123/b17377ee-7f83-4740-879d-629e914a0d12.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "S"
+  },
+  {
+   "t": "金沙江上游装机规模最大水电站正式开工",
+   "url": "http://www.cpnn.com.cn/news/dianli2023/202611/t20261123_1928607.html",
    "d": "",
    "src": "中国能源建设集团安徽省电力设计院有限公司（中国能建安徽院）",
    "srcKind": "官网",
@@ -363,8 +354,26 @@
    "level": "A"
   },
   {
-   "t": "国电投鸭溪电厂完成3号机DEH并网信号优化改造",
-   "url": "http://www.cpnn.com.cn/qiye/fadianPD2023/202611/t20261112_1925974.html",
+   "t": "新疆最大热电联产项目全容量投产",
+   "url": "http://www.cpnn.com.cn/news/dianli2023/202611/t20261123_1928423.html",
+   "d": "",
+   "src": "中国能源建设集团安徽省电力设计院有限公司（中国能建安徽院）",
+   "srcKind": "官网",
+   "tag": "开工投产",
+   "level": "A"
+  },
+  {
+   "t": "杭州平晟电力实业有限公司：打通浙北换流站新型储能并网“最后一公里”",
+   "url": "http://www.cpnn.com.cn/qiye/fadianPD2023/202611/t20261120_1928195.html",
+   "d": "",
+   "src": "中国能源建设集团安徽省电力设计院有限公司（中国能建安徽院）",
+   "srcKind": "官网",
+   "tag": "开工投产",
+   "level": "A"
+  },
+  {
+   "t": "河南省一大型独立储能电站并网",
+   "url": "http://www.cpnn.com.cn/dianlituku/202611/t20261123_1928685.html",
    "d": "",
    "src": "中国能源建设集团安徽省电力设计院有限公司（中国能建安徽院）",
    "srcKind": "官网",
@@ -417,21 +426,21 @@
    "level": "A"
   },
   {
-   "t": "节能国祯中标中捷石化工业园污水处理及中水回用特许经营项目",
-   "url": "https://www.gzep.com.cn/display.php?id=1116",
-   "d": "",
-   "src": "中节能国祯工程有限公司",
-   "srcKind": "官网",
-   "tag": "中标签约",
-   "level": "A"
-  },
-  {
    "t": "钢铁焦化废水处理EPC 项目",
    "url": "https://www.gzep.com.cn/display.php?id=33",
    "d": "",
    "src": "中节能国祯工程有限公司",
    "srcKind": "官网",
    "tag": "行业动向",
+   "level": "A"
+  },
+  {
+   "t": "节能国祯中标中捷石化工业园污水处理及中水回用特许经营项目",
+   "url": "https://www.gzep.com.cn/display.php?id=1116",
+   "d": "",
+   "src": "中节能国祯工程有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
    "level": "A"
   },
   {
@@ -606,39 +615,66 @@
    "level": "A"
   },
   {
-   "t": "全球海拔最高的并网型光储热电项目并网发电",
-   "url": "http://www.powerchina.cn/zxzx/jcdt/art/2026/art_8e214c1ac0a1486394be9c02ed54e03f.html",
+   "t": "北京京城环保股份有限公司（原北京机电院高技术股份有限公司）拥有环境工程总承包及项目管理甲级资质。提供生活垃圾综合处置、危险废物处置、污泥处置、污水处理、餐厨垃圾处置、环保生物技术、废旧金属拆解及资源化利用等领域工程项目的设计、采购、施工、试运行（竣工...",
+   "url": "https://www.bmei.com/index.php/Engineering",
    "d": "",
-   "src": "中国电建集团河南工程有限公司",
+   "src": "北京京城环保股份有限公司",
    "srcKind": "官网",
-   "tag": "开工投产",
+   "tag": "政策资质",
    "level": "A"
   },
   {
-   "t": "4.49亿！湖北汉川城区污水处理厂及配套管网建设项目一期EPC二次资审公告 4.49亿！湖北汉川城区污水处理厂及配套管网建设项目一期EPC二次资审公告",
-   "url": "https://www.chinaxdsb.com/article/87598.html",
+   "t": "赋能皖江绿能发展 京城环保中标...",
+   "url": "https://www.bmei.com/index.php/News/newsArt/id/2357",
    "d": "",
-   "src": "申能环境科技有限公司",
-   "srcKind": "官网",
-   "tag": "行业动向",
-   "level": "A"
-  },
-  {
-   "t": "3.16元/吨！陕西环保集团水环境公司中标大荔县城区污水处理厂二期特许经营权项目 [详细]",
-   "url": "https://www.chinaxdsb.com/article/87593.html",
-   "d": "",
-   "src": "申能环境科技有限公司",
+   "src": "北京京城环保股份有限公司",
    "srcKind": "官网",
    "tag": "中标签约",
    "level": "A"
   },
   {
-   "t": "2134万！800吨&zwnj;/日垃圾焚烧脱硝EPC将招标 [详细]",
-   "url": "https://www.chinaxdsb.com/article/87583.html",
+   "t": "逆势突围！京城环保中标密云污泥处置运营项目",
+   "url": "https://www.bmei.com/index.php/News/newsArt/id/2353",
    "d": "",
-   "src": "申能环境科技有限公司",
+   "src": "北京京城环保股份有限公司",
    "srcKind": "官网",
-   "tag": "行业动向",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "扬帆启新 绿动三江 京城环保中标玉树生态工程",
+   "url": "https://www.bmei.com/index.php/News/newsArt/id/2324",
+   "d": "",
+   "src": "北京京城环保股份有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "喜报！京城环保中标太原医疗废物处置项目智慧赋能三晋生态安全",
+   "url": "https://www.bmei.com/index.php/News/newsArt/id/2305",
+   "d": "",
+   "src": "北京京城环保股份有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "天津水泥院粉磨技术装备公司签约山西荣泰铁",
+   "url": "https://www.sinoma-tianjin.com/news_details.aspx?id=3993",
+   "d": "",
+   "src": "天津水泥工业设计研究院有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "天津水泥院粉磨技术装备公司签约山西荣泰铁矿项目",
+   "url": "https://www.sinoma-tianjin.com/xwdt_details.aspx?id=3993",
+   "d": "",
+   "src": "天津水泥工业设计研究院有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
    "level": "A"
   },
   {
@@ -682,6 +718,123 @@
    "url": "http://www.sepco3.com/col/col16682/art/2026/art_924fd6fc179348e6b07bce41e25cea4b.html",
    "d": "",
    "src": "山东电力建设第三工程有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "能环部煤气柜安全仪表SIS系统之施工总承包[中标候选人公示]",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001001/018001001003/20261123/be78e3f4-5a89-4d89-a453-ce323a211d6f.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "环科重庆重钢高炉矿渣资源综合利用项目收粉器及成套除尘非标设计、工艺成套设备供货[中标候选人公示]",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001001/018001001003/20261120/cc9ffc0c-df49-4dc6-b798-88676a1fede1.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "净化分厂槽区环保隐患消缺及再生系统大修项目中标结果公告",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001001/018001001004/20261123/f561b7fc-5c7b-4e49-be19-512f6865fc2e.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "5CR机组电气系统改造项目-施工中标结果公告",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001001/018001001004/20261123/3d00feb8-1c5f-4575-8a9a-da9bfb55498a.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "炼铁部6#烧结机脱硫脱硝GGH维修工程中标结果公告",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001001/018001001004/20261122/48613f3d-7fb0-4d8a-b9a1-4aa5c037fe6e.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "宝武环科华德环保环科武汉矿渣环保储运料棚项目钢网架结构材料采购[中标候选人公示]",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001002/018001002003/20261123/ce488a06-11f8-4f9a-9bc6-6251d3d3289c.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "宝钢股份炼铁厂焦炉特护改造（二步）一期1#、2#出焦及干熄焦除尘冷却器中标结果公告",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001002/018001002004/20261123/4878ae11-e122-4353-a543-32a0c475af86.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "宝武环科宝钢股份超高等级取向硅钢绿色制造示范项目配套硅钢六期废水处理站氯化钠MVR结晶系统中标结果公告",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001002/018001002004/20261123/12a99c7d-2d83-49af-9d5c-cc19a2efaaa1.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "山东钢铁集团日照有限公司金海分公司LNG、煤气净化充装站车辆管理系统升级改造项目[中标候选人公示]",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001003/018001003003/20261123/7e124426-0b33-412b-8294-ab3e79cc48d9.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "宝武环科武汉金属资源有限责任公司、宝武集团环境资源科技有限公司-炼钢污泥混配加工服务项目公开招标中标结果公告",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001003/018001003004/20261123/73414573-9558-45f8-a65b-bc0b697814c5.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "岚县矿业2026年能源动力部各泵房检修及水源热泵维修项目中标结果公告",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001003/018001003004/20261123/a67cb1d6-a857-471e-b6eb-179a03539557.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "能环部动力中心三号转炉煤气柜大修中标结果公告",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001003/018001003004/20261123/b0da70e9-5de0-4f8a-afae-adba0f38bfae.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "柯坪海鑫光伏发电公司整体消缺服务公开招标中标结果公告",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001003/018001003004/20261123/2c9d2ec1-8dc8-4246-ac14-8cb79fd0a061.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
    "srcKind": "官网",
    "tag": "中标签约",
    "level": "A"
