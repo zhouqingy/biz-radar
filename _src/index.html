@@ -2392,6 +2392,7 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
         这些配套就是我们的活。所以这一块看的不是「新闻」，是<b>谁要在海外建厂、我们能不能去配套能源岛</b>。
       </div>
       <div class="kpirow" id="cAbKpi"></div>
+      <div class="frow" style="padding:0 0 10px"><label>档位</label><div class="chips" id="f-ctier"></div></div>
       <div class="frow" style="padding:0 0 10px"><label>优先级</label><div class="chips" id="f-cpri"></div>
         <label style="margin-left:16px">行业</label><div class="chips" id="f-cgrp"></div></div>
       <div class="cgrid" id="cliGrid"></div>
@@ -9572,6 +9573,7 @@ function ccMore(key,cnt,open){
    排序：pri → 行业（有色→水泥→数据中心→钢铁→化工→造纸→玻璃）→ 库内命中数。
    行业顺序是用户点名的重点业务顺序，别按字母排。 */
 var cRg=new Set(), cPri=new Set(), cEx=new Set();
+var cTier=new Set(['A']);   /* §5.106b：海外档位筛选，默认只看 A（有据重点） */
 var AB_GRP_ORDER=['有色冶炼','水泥','数据中心','钢铁','化工化纤','造纸','玻璃'];
 /* 行业别名归一：历史数据里同时存在「有色」和「有色冶炼」、「水泥」和「水泥建材」，
    不归一会导致同一个行业在筛选器里出现两次、各带一半数据。 */
@@ -9622,35 +9624,18 @@ function renderClients(){
     if(ga!==gb) return ga-gb;
     return (b.n||0)-(a.n||0);
   });
-  /* §5.106 分级折叠（用户 11-23：低等级折叠起来方便看）：A 档=江浙沪皖优先或
-     有海外动向/库内记录/相关情报 → 保持卡片；B 档=外地大厂无证据、C 档=自动发现
-     待确认 → 默认折叠成紧凑表格，点开才展开，行仍可点开详情弹层。 */
-  var _ev=function(x){return (x.pri||2)===1||(x.abroad||[]).length>0||(x.n||0)>0||(x.news||[]).length>0;};
-  var hi=list.filter(function(x){return _ev(x);});
-  var mid=list.filter(function(x){return !_ev(x)&&(x.pri||2)===2;});
-  var low=list.filter(function(x){return !_ev(x)&&(x.pri||2)===3;});
-  function _tierTbl(arr,label){
-    if(!arr.length)return '';
-    var _td='padding:6px 10px;border-bottom:1px solid #f0f2f5';
-    return '<details style="margin:16px 0 4px"><summary style="cursor:pointer;font-weight:700;color:#5a6270;padding:9px 14px;background:#f5f7fa;border:1px solid #e3e8ef;border-radius:8px;list-style:none">'+
-      '▸ '+label+' · '+arr.length+' 家（默认折叠，点开展开）</summary>'+
-      '<div style="max-height:420px;overflow:auto;border:1px solid #e3e8ef;border-top:0;border-radius:0 0 8px 8px">'+
-      '<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="position:sticky;top:0">'+
-      ['企业','行业','属地','库内记录','最新出海动态','相关情报'].map(function(hh){
-        return '<th style="text-align:left;padding:6px 10px;background:#fafbfc;border-bottom:1px solid #e3e8ef">'+hh+'</th>'}).join('')+
-      '</tr></thead><tbody>'+arr.map(function(x){
-        var ab=x.abroad||[];
-        return '<tr class="cc-click" data-client="'+esc(x.name)+'" title="点击查看这家企业详情">'+
-        '<td style="'+_td+'"><b>'+esc(x.name)+'</b>'+(x.why?'<div style="color:#8a9099;font-size:12px;max-width:320px">'+esc(x.why)+'</div>':'')+'</td>'+
-        '<td style="'+_td+'"><span class="cc-tag" style="background:'+(GTAG[abGrp(x.grp)]||'#f1f3f6')+';color:'+(GCOL[abGrp(x.grp)]||'#5a6270')+'">'+esc(abGrp(x.grp))+'</span></td>'+
-        '<td style="'+_td+'">'+((x.pri||2)===1?'江浙沪皖':(x.rg?esc(x.rg):'—'))+'</td>'+
-        '<td style="'+_td+'">'+(x.n||0)+'</td>'+
-        '<td style="'+_td+'">'+(ab.length?esc(ab[0].date)+'（'+ab.length+' 条动向）':esc(x.latest||'—'))+'</td>'+
-        '<td style="'+_td+'">'+((x.news||[]).length||'—')+'</td></tr>';
-      }).join('')+'</tbody></table></div></details>';
-  }
-  el('cliGrid').innerHTML=hi.map(function(x){
+  /* §5.106b 改版（用户 11-23：details 折叠表格样式丑，改成与国内客户同款档位筛选）：
+     每家打一个档位——A=有据（江浙沪皖优先 或 有海外动向/库内记录/相关情报），
+     B=外地大厂无据，C=自动发现待确认；f-ctier chips 过滤（默认只看 A），
+     B/C 也是同款卡片，不再有折叠表格。 */
+  var _tier=function(x){
+    if((x.pri||2)===1||(x.abroad||[]).length>0||(x.n||0)>0||(x.news||[]).length>0)return 'A';
+    return (x.pri||2)===3?'C':'B';
+  };
+  list=list.filter(function(x){return !cTier.size||cTier.has(_tier(x))});
+  el('cliGrid').innerHTML=list.map(function(x){
     var hit=x.n>0, ab=x.abroad||[], open=cEx.has(x.name);
+    var tier=_tier(x);
     var pri=x.pri||2;
     var priTag = pri===1
       ? '<span class="cc-tag" style="background:#e8f1ff;color:#1053c9">江浙沪皖 · 优先</span>'
@@ -9702,6 +9687,7 @@ function renderClients(){
       :''; /* §5.84 用户裁决删除灰字说明行 */
     return '<div class="ccard ab-card cc-click" data-client="'+esc(x.name)+'" title="点击查看这家出海企业的详情：为什么跟、海外基地、企业档案、动态与本库记录">'+
       '<div class="cc-h"><b>'+esc(x.name)+'</b>'+
+      '<span class="cc-tag" style="background:'+(tier==='A'?'#e8f6ef':tier==='C'?'#fff2e0':'#f1f3f6')+';color:'+(tier==='A'?'#0d7a4e':tier==='C'?'#a85c10':'#5a6270')+'">'+tier+'</span>'+
       '<span class="cc-tag" style="background:'+(GTAG[abGrp(x.grp)]||'#f1f3f6')+';color:'+(GCOL[abGrp(x.grp)]||'#5a6270')+'">'+esc(abGrp(x.grp))+'</span>'+
       priTag+
       (hit?'<span class="cc-tag" style="background:#fff2e0;color:#a85c10">'+x.n+' 条库内记录</span>':"")+
@@ -9709,8 +9695,7 @@ function renderClients(){
       '<span class="cc-open">看详情 ›</span></div>'+
       whyHtml+projHtml+nwHtml+abHtml+hitHtml+
       '<div class="cc-i"><a href="javascript:searchFor(\''+esc(x.kw)+'\')">在商机库中搜索该客户国内记录 ↗</a></div>'+
-      '</div>'}).join('') + _tierTbl(mid,'B 档 · 外地大厂（暂无海外动向/库内证据）') +
-      _tierTbl(low,'C 档 · 自动发现 · 待确认') || '<div class="empty">没有匹配的客户，换个筛选条件试试</div>';
+      '</div>'}).join('')||'<div class="empty">没有匹配的客户，换个筛选条件试试</div>';
 }
 /* ==================== 客户 / 业主卡片 → 详情（2026-11-04） ====================
    用户要求：「这个也不需要单位画像了，同步下也是点击跳转」「海外中资出海也是做成
@@ -9897,6 +9882,17 @@ el('cliGrid').onclick=function(e){
 /* 筛选器：优先级 + 行业。行业用归一后的名字，避免「有色 / 有色冶炼」重复出现。 */
 function buildAbFilters(){
   var all=D.clients||[];
+  /* 档位 chips（§5.106b）：与国内 S/A/B 同款交互；默认选 A，B/C 点了才显示 */
+  var _tier=function(x){
+    if((x.pri||2)===1||(x.abroad||[]).length>0||(x.n||0)>0||(x.news||[]).length>0)return 'A';
+    return (x.pri||2)===3?'C':'B';
+  };
+  var tc={}; all.forEach(function(x){var t=_tier(x);tc[t]=(tc[t]||0)+1});
+  el('f-ctier').innerHTML=[['A','A · 有据重点','#e8f6ef','#0d7a4e'],['B','B · 外地大厂（暂无据）','#f1f3f6','#5a6270'],['C','C · 待确认','#fff2e0','#a85c10']].map(function(p){
+    var n=tc[p[0]]||0; if(!n)return '';
+    return '<span class="chip'+(cTier.has(p[0])?' on':'')+'" data-k="ctier" data-v="'+p[0]+'" style="'+(cTier.has(p[0])?'background:'+p[3]+';color:#fff':'color:'+p[3])+'">'+
+      p[1]+'<em>'+n+'</em></span>';
+  }).join('');
   var pc={}; all.forEach(function(x){var p=String(x.pri||2);pc[p]=(pc[p]||0)+1});
   el('f-cpri').innerHTML=[[1,'江浙沪皖优先'],[2,'外地大厂'],[3,'自动发现·待确认']].map(function(p){
     var n=pc[String(p[0])]||0; if(!n)return '';
@@ -9919,6 +9915,12 @@ function buildAbFilters(){
     c.classList.toggle('on'); renderClients();
   };
 });
+el('f-ctier').onclick=function(e){
+  var c=e.target.closest('.chip'); if(!c)return;
+  var v=c.dataset.v;
+  if(cTier.has(v))cTier.delete(v);else cTier.add(v);
+  c.classList.toggle('on'); buildAbFilters(); renderClients();
+};
 
 /* ==================== 业主画像 · 供应商关系图谱 ==================== */
 /* 数据来自 build_owner_graph.py：把商机库 1475 条记录按「业主」和「中标单位」两个维度折叠。
