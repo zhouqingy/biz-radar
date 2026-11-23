@@ -6809,7 +6809,10 @@ function ovProfFill(buyer){
     if(!hit){box.innerHTML='';return;}
     var pend='<span style="color:#b58a2c;font-size:12px">（待核实）</span>';
     var h='<div class="ep-sec"><b>企业出海档案 · '+esc(hk)+'</b>';
-    if(hit.verify!=='DONE')h+='<p style="background:#fdf6e3;border:1px solid #e8d9a8;border-radius:6px;padding:6px 10px;font-size:12px;color:#7a5c14">'+(hit.status==='seed'?'该档案为种子稿：库内动向已自动聚合，组织架构/国别布局/分管领导待逐条调研核实。':'该档案为线索整理稿，逐条信源核实中，正式引用前请对原文复核。')+'</p>';
+    var _bn = hit.status==='seed' ? '该档案为种子稿：库内动向已自动聚合，组织架构/国别布局/分管领导待逐条调研核实。'
+      : hit.status==='researched' ? '组织架构/分管领导已按公开信源核实（官网/公告/双源一致标已核实），带（待核实）灰标的为单一来源，引用前请复核。'
+      : '该档案为线索整理稿，逐条信源核实中，正式引用前请对原文复核。';
+    if(hit.verify!=='DONE')h+='<p style="background:#fdf6e3;border:1px solid #e8d9a8;border-radius:6px;padding:6px 10px;font-size:12px;color:#7a5c14">'+_bn+'</p>';
     if(hit.relevance_note)h+='<p style="color:var(--tx3);font-size:12px">'+esc(hit.relevance_note)+'</p>';
     if(hit.org&&hit.org.mode){
       h+='<p><b>组织架构</b>'+esc(hit.org.mode||'—')+'</p>';
@@ -9619,7 +9622,34 @@ function renderClients(){
     if(ga!==gb) return ga-gb;
     return (b.n||0)-(a.n||0);
   });
-  el('cliGrid').innerHTML=list.map(function(x){
+  /* §5.106 分级折叠（用户 11-23：低等级折叠起来方便看）：A 档=江浙沪皖优先或
+     有海外动向/库内记录/相关情报 → 保持卡片；B 档=外地大厂无证据、C 档=自动发现
+     待确认 → 默认折叠成紧凑表格，点开才展开，行仍可点开详情弹层。 */
+  var _ev=function(x){return (x.pri||2)===1||(x.abroad||[]).length>0||(x.n||0)>0||(x.news||[]).length>0;};
+  var hi=list.filter(function(x){return _ev(x);});
+  var mid=list.filter(function(x){return !_ev(x)&&(x.pri||2)===2;});
+  var low=list.filter(function(x){return !_ev(x)&&(x.pri||2)===3;});
+  function _tierTbl(arr,label){
+    if(!arr.length)return '';
+    var _td='padding:6px 10px;border-bottom:1px solid #f0f2f5';
+    return '<details style="margin:16px 0 4px"><summary style="cursor:pointer;font-weight:700;color:#5a6270;padding:9px 14px;background:#f5f7fa;border:1px solid #e3e8ef;border-radius:8px;list-style:none">'+
+      '▸ '+label+' · '+arr.length+' 家（默认折叠，点开展开）</summary>'+
+      '<div style="max-height:420px;overflow:auto;border:1px solid #e3e8ef;border-top:0;border-radius:0 0 8px 8px">'+
+      '<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="position:sticky;top:0">'+
+      ['企业','行业','属地','库内记录','最新出海动态','相关情报'].map(function(hh){
+        return '<th style="text-align:left;padding:6px 10px;background:#fafbfc;border-bottom:1px solid #e3e8ef">'+hh+'</th>'}).join('')+
+      '</tr></thead><tbody>'+arr.map(function(x){
+        var ab=x.abroad||[];
+        return '<tr class="cc-click" data-client="'+esc(x.name)+'" title="点击查看这家企业详情">'+
+        '<td style="'+_td+'"><b>'+esc(x.name)+'</b>'+(x.why?'<div style="color:#8a9099;font-size:12px;max-width:320px">'+esc(x.why)+'</div>':'')+'</td>'+
+        '<td style="'+_td+'"><span class="cc-tag" style="background:'+(GTAG[abGrp(x.grp)]||'#f1f3f6')+';color:'+(GCOL[abGrp(x.grp)]||'#5a6270')+'">'+esc(abGrp(x.grp))+'</span></td>'+
+        '<td style="'+_td+'">'+((x.pri||2)===1?'江浙沪皖':(x.rg?esc(x.rg):'—'))+'</td>'+
+        '<td style="'+_td+'">'+(x.n||0)+'</td>'+
+        '<td style="'+_td+'">'+(ab.length?esc(ab[0].date)+'（'+ab.length+' 条动向）':esc(x.latest||'—'))+'</td>'+
+        '<td style="'+_td+'">'+((x.news||[]).length||'—')+'</td></tr>';
+      }).join('')+'</tbody></table></div></details>';
+  }
+  el('cliGrid').innerHTML=hi.map(function(x){
     var hit=x.n>0, ab=x.abroad||[], open=cEx.has(x.name);
     var pri=x.pri||2;
     var priTag = pri===1
@@ -9679,7 +9709,8 @@ function renderClients(){
       '<span class="cc-open">看详情 ›</span></div>'+
       whyHtml+projHtml+nwHtml+abHtml+hitHtml+
       '<div class="cc-i"><a href="javascript:searchFor(\''+esc(x.kw)+'\')">在商机库中搜索该客户国内记录 ↗</a></div>'+
-      '</div>'}).join('')||'<div class="empty">没有匹配的客户，换个筛选条件试试</div>';
+      '</div>'}).join('') + _tierTbl(mid,'B 档 · 外地大厂（暂无海外动向/库内证据）') +
+      _tierTbl(low,'C 档 · 自动发现 · 待确认') || '<div class="empty">没有匹配的客户，换个筛选条件试试</div>';
 }
 /* ==================== 客户 / 业主卡片 → 详情（2026-11-04） ====================
    用户要求：「这个也不需要单位画像了，同步下也是点击跳转」「海外中资出海也是做成

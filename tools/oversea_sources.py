@@ -313,7 +313,32 @@ def src_goalfore_walk(days=14, back=60):
     return out
 
 
+# ── 源 5：丝路出海网 gosilu.com（2026-11-23 §5.105 用户推荐，实测不拦截）──
+# WordPress 站，wp-json 结构化接口免登录、带日期、标题干净。覆盖中资海外工程/
+# 冶金/能源动向，与国复高度互补（用户样例「中冶京诚越南 VinMetal」该站有独立稿）。
+def src_gosilu(days=14, limit=30):
+    out = []
+    try:
+        r = requests.get('https://www.gosilu.com/wp-json/wp/v2/posts?per_page=%d' % limit,
+                         headers={'User-Agent': 'Mozilla/5.0'}, timeout=25)
+        posts = r.json()
+    except Exception as e:
+        print('  ✗ 丝路出海网抓取失败：%s' % type(e).__name__)
+        return out
+    for p in posts:
+        t = re.sub(r'<[^>]+>', '', p.get('title', {}).get('rendered', '')).strip()
+        # wp excerpt 里有正文摘要，洗掉标签和实体
+        sn = re.sub(r'<[^>]+>', '', p.get('excerpt', {}).get('rendered', ''))
+        sn = re.sub(r'&#\d+;|&\w+;', '', sn).strip()[:160]
+        if len(t) < 10:
+            continue
+        out.append({'title': t, 'url': p.get('link', ''), 'date': (p.get('date') or '')[:10],
+                    'src': '丝路出海网', 'snip': sn})
+    return out
+
+
 SOURCES = [('印尼商报', src_shangbao), ('国复咨询', src_goalfore), ('国复回扫', src_goalfore_walk),
+           ('丝路出海网', src_gosilu),
            ('我的钢铁', src_mysteel),
            ('新浪财经7x24', src_sina724)]
 
@@ -396,7 +421,6 @@ def main():
         _wl_noise = ('螺纹', '热卷', '早读', '钢价', '报价', '期货', '收盘',
                      '涨', '跌', '涨停', '跌停', '成交额', '融资余额', '股价')
         if _wh and not any(k in x['title'] for k in _wl_noise):
-        if _wh:
             keep.append({
                 'title': x['title'], 'url': x['url'], 'summary': summ,
                 'date': date, 'datetime': (date or '') + ' 00:00',
@@ -566,6 +590,10 @@ def main():
         except Exception:
             pass
     merged = {OM.norm_url(x.get('url')): x for x in old.get('items', [])}
+    # 与存量库做同题去重（2026-11-23 §5.105 用户要求「不要同一条新闻出现多次」）：
+    # 不同网站转载同一事件标题高度相似，跨源 title 去重只管本轮候选，
+    # 这里补上「与库里已有条目」的同题判定，转载晚到的不再重复入库。
+    _tk = {re.sub(r'[\s\W]', '', x.get('title') or '')[:22] for x in old.get('items', [])}
     _dead = 0
     for _k, _x in merged.items():
         if 'weixin.sogou.com' in (_x.get('url') or '') and not _x.get('linkdead'):
@@ -577,9 +605,12 @@ def main():
     added = 0
     for r in keep:
         k = OM.norm_url(r['url'])
-        if k not in merged:
-            merged[k] = r
-            added += 1
+        tk = re.sub(r'[\s\W]', '', r['title'])[:22]
+        if k in merged or tk in _tk:
+            continue
+        merged[k] = r
+        _tk.add(tk)
+        added += 1
     items = sorted(merged.values(),
                    key=lambda y: (y.get('datetime') or y.get('date') or '', -int(y.get('sc') or 0)),
                    reverse=True)
