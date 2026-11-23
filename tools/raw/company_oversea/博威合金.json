@@ -1,0 +1,26 @@
+{
+ "company": "博威合金",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（有色）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-25",
+   "t": "越南基地现有产能预计无法满足未来需求，正论证扩产可行性",
+   "src": "博威合金客户卡",
+   "url": "https://www.fxbaogao.com/detail/5665815",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-05-11",
+   "t": "快速推进越南工厂GB300液冷板材料量产及15000吨铜铝复合材料项目建设",
+   "src": "博威合金客户卡",
+   "url": "https://www.cnfin.com/announ/detail/index.html?announ=lc&code=601137&dannoun=lcdetail&id=831915453853",
+   "verify": "pending"
+  }
+ ]
+}

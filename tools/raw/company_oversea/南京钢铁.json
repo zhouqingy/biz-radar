@@ -1,0 +1,26 @@
+{
+ "company": "南京钢铁",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（钢铁）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-22",
+   "t": "用能/出口动态：X70管线钢进入沙特阿美，上半年印尼焦炭项目减亏明显",
+   "src": "南京钢铁客户卡",
+   "url": "https://www.cnfin.com/announ/detail/index.html?dannoun=lcdetail&id=841162854724",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-21",
+   "t": "印尼青山工业园金瑞、金祥焦炭项目10座焦炉全部投运，上半年焦炭销量同比增31.24%",
+   "src": "南京钢铁客户卡",
+   "url": "https://paper.cnstock.com/html/2026-08/21/content_2257289.htm",
+   "verify": "pending"
+  }
+ ]
+}

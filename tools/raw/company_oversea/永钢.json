@@ -1,0 +1,26 @@
+{
+ "company": "永钢",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（钢铁）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-09-28",
+   "t": "永钢中亚钢铁含装机360兆瓦天然气发电站总投资约12亿美元，一期2027年投产",
+   "src": "永钢集团客户卡",
+   "url": "https://finance.sina.com.cn/roll/2026-09-28/doc-initkhwz8644529.shtml",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-09-11",
+   "t": "哈萨克斯坦江布尔州12亿美元氢基竖炉DRI短流程钢厂开工，配套约350兆瓦天然气自备电站",
+   "src": "永钢集团客户卡",
+   "url": "https://www.zgw.com/kc/2541619",
+   "verify": "pending"
+  }
+ ]
+}

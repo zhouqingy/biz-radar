@@ -1,0 +1,26 @@
+{
+ "company": "力勤资源",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（有色）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-05",
+   "t": "KPS项目8月1日达到设计产能，Obi项目全面达产形成年产40万金属吨镍能力",
+   "src": "力勤资源客户卡",
+   "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0805/2026080501900_c.pdf",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-06-05",
+   "t": "印尼OBI岛RKEF二期KPS项目12条产线2026年5月全部投入商业运营",
+   "src": "力勤资源客户卡",
+   "url": "https://gu.qq.com/resources/shy/news/detail-v2/index.html?t=1#/index?_tentrees_trans=0&id=SN20260605160518a7307bef",
+   "verify": "pending"
+  }
+ ]
+}

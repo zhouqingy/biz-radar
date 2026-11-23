@@ -1,0 +1,26 @@
+{
+ "company": "华峰集团",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（化工化纤）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-04-24",
+   "t": "华峰化学投36亿元建20万吨高性能低碳化数智化氨纶项目，另有重庆5万吨差别化氨纶项目在办证",
+   "src": "华峰集团（华峰化学）客户卡",
+   "url": "https://www.fxbaogao.com/detail/5376700",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-03-31",
+   "t": "华峰化学明确\"暂无海外生产基地建设规划\"，海外销售占比约20%，仅设韩国、土耳其等境外子公司",
+   "src": "华峰集团（华峰化学）客户卡",
+   "url": "http://static.cninfo.com.cn/finalpage/2026-03-31/1225066929.PDF",
+   "verify": "pending"
+  }
+ ]
+}

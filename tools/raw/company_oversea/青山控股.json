@@ -1,0 +1,47 @@
+{
+ "company": "青山控股",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（有色）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-09-22",
+   "t": "厄尔尼诺干旱致印尼莫罗瓦利工业园（IMIP）镍冶炼厂减产，冷却水告急",
+   "src": "青山控股集团客户卡",
+   "url": "https://xny.mysteel.com/a/26092315/631438DC47CBB6F7.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-07-21",
+   "t": "IMIP园区TMI镍湿法冶炼项目完成多方股权合作签约",
+   "src": "青山控股集团客户卡",
+   "url": "https://www.tssgroup.com.cn/category/news-cat-1/page/8/",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-05-15",
+   "t": "青山在印尼北马鲁古威达湾工业园新建80万吨电解铝项目，同步配套建设发电设施",
+   "src": "青山控股集团客户卡",
+   "url": "https://finance.sina.com.cn/wm/2026-07-07/doc-inifyqva5249564.shtml",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-03-15",
+   "t": "青山追加约55亿元扩建津巴布韦鼎森钢铁工业园，碳钢产能翻倍至120万吨",
+   "src": "青山控股集团客户卡",
+   "url": "https://finance.sina.com.cn/wm/2026-07-07/doc-inifyqva5249564.shtml",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-02-06",
+   "t": "青山实业与马达加斯加政府签署矿产资源开发与现代绿色产业园建设一体化项目合作备忘录",
+   "src": "青山控股集团客户卡",
+   "url": "https://www.tssgroup.com.cn/",
+   "verify": "pending"
+  }
+ ]
+}

@@ -1,0 +1,40 @@
+{
+ "company": "新凤鸣",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（化工化纤）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-28",
+   "t": "埃及36万吨/年功能性纤维项目ODI获批，220KV变电站落地、聚酯与纺丝方案敲定",
+   "src": "新凤鸣客户卡",
+   "url": "https://www.ccedia.com/energy_detail/c-_detailId%3D1549348287324348416.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-04-30",
+   "t": "新凤鸣埃及项目完成江苏省发改委境外投资备案并取得《企业境外投资证书》，进入实施阶段",
+   "src": "新凤鸣集团客户卡",
+   "url": "https://www.cnfin.com/announ/detail/index.html?id=830883246905&code=603225&dannoun=lcdetail&announ=lc",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-01-28",
+   "t": "新凤鸣与埃及苏伊士运河经济区管理总局、泰达特区开发公司签署谅解备忘录及土地使用权转让合同",
+   "src": "新凤鸣集团客户卡",
+   "url": "https://www.cnfin.com/announ/detail/index.html?id=830883246905&code=603225&dannoun=lcdetail&announ=lc",
+   "verify": "pending"
+  },
+  {
+   "d": "2025-12-12",
+   "t": "新凤鸣启动埃及36万吨/年功能性纤维项目，总投资约2.8亿美元（约19.78亿元）",
+   "src": "新凤鸣集团客户卡",
+   "url": "https://paper.cnstock.com/html/2026-01/30/content_2175605.htm",
+   "verify": "pending"
+  }
+ ]
+}

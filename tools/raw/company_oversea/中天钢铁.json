@@ -1,0 +1,19 @@
+{
+ "company": "中天钢铁",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（钢铁）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-07-13",
+   "t": "3亿美元汽车轮胎核心材料项目签约落地埃及中埃泰达苏伊士经贸合作区",
+   "src": "中天钢铁客户卡",
+   "url": "http://news.big5.enorth.com.cn/system/2026/07/13/059567733.shtml",
+   "verify": "pending"
+  }
+ ]
+}

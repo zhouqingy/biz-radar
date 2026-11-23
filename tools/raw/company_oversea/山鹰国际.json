@@ -1,0 +1,26 @@
+{
+ "company": "山鹰国际",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（水泥建材）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-26",
+   "t": "东南亚布局再生浆生产基地，美国子公司凤凰纸业拥有56万吨浆纸综合产能",
+   "src": "山鹰国际客户卡",
+   "url": "https://news.10jqka.com.cn/20260826/c679295400.shtml",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-25",
+   "t": "包装板块紧跟大客户出海，已在越南、泰国建成/在建二级厂",
+   "src": "山鹰国际客户卡",
+   "url": "https://static.cninfo.com.cn/finalpage/2026-08-25/1225497719.PDF",
+   "verify": "pending"
+  }
+ ]
+}

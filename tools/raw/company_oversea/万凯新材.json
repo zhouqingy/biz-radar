@@ -1,0 +1,40 @@
+{
+ "company": "万凯新材",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（化工化纤）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-25",
+   "t": "印尼75万吨聚酯瓶片项目按计划推进中",
+   "src": "万凯新材客户卡",
+   "url": "https://www.cnfin.com/announ/detail/index.html?id=840814529480&code=301216&dannoun=lcdetail&announ=lc",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-24",
+   "t": "尼日利亚30万吨/年食品级PET项目正式投产，成为公司首个海外生产基地",
+   "src": "万凯新材客户卡",
+   "url": "https://subsites.chinadaily.com.cn/ezhejiang/jiaxing/2026-08/24/c_1207834.htm",
+   "verify": "pending"
+  },
+  {
+   "d": "2025-12-26",
+   "t": "印尼万丹省75万吨/年食品级PET项目奠基，总投资20.20亿元（约2.84亿美元）",
+   "src": "万凯新材客户卡",
+   "url": "https://www.semuli.com/news/202512/10467.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2025-06-17",
+   "t": "尼日利亚30万吨/年聚酯瓶片（SSP）基地在建，计划总投资4,500万美元，预计2026年上半年投产",
+   "src": "万凯新材客户卡",
+   "url": "https://www1.cfi.cn/p20250617003077.html",
+   "verify": "pending"
+  }
+ ]
+}

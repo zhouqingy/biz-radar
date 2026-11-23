@@ -1,0 +1,33 @@
+{
+ "company": "金田铜业",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（有色）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-09-16",
+   "t": "越南海防市3万吨高精密铜排新建厂房项目奠基，计划2027年二季度投产",
+   "src": "宁波金田铜业客户卡",
+   "url": "https://www.toutiao.com/article/7686354780045836819",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-06-15",
+   "t": "泰国年产8万吨精密铜管项目完成设备调试并进入试生产",
+   "src": "宁波金田铜业客户卡",
+   "url": "https://www.cnfin.com/announ/detail/index.html?dannoun=lcdetail&id=835115981707",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-04-01",
+   "t": "拟投资不超6亿元在越南建设年产3万吨液冷散热及机架母线用高精密铜排项目",
+   "src": "宁波金田铜业客户卡",
+   "url": "https://paper.cnstock.com/html/2026-04/01/content_2194878.htm",
+   "verify": "pending"
+  }
+ ]
+}

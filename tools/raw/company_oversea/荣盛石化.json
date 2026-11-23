@@ -1,0 +1,40 @@
+{
+ "company": "荣盛石化",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（化工化纤）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-07-16",
+   "t": "与沙特基础工业公司签署项目开发协议，评估其为舟山金塘新材料项目持股30%—50%",
+   "src": "荣盛石化客户卡",
+   "url": "https://www.cs.com.cn/ssgs/01/2026/07/16/detail_2026071610024926.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-07-16",
+   "t": "SABIC拟入股荣盛新材料（舟山）金塘新材料项目30%—50%，签署《项目开发协议》",
+   "src": "荣盛石化客户卡",
+   "url": "https://newzzbcx.cs.com.cn/cxnews.html?name=new20260716213828hefdnxtl&random=Ist75y4O",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-07-16",
+   "t": "浙石化炼化一体化项目改造提升工程，总投资约196亿元",
+   "src": "荣盛石化客户卡",
+   "url": "https://newzzbcx.cs.com.cn/cxnews.html?name=new20260716213828hefdnxtl&random=Ist75y4O",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-01-02",
+   "t": "荣盛石化与沙特阿美签署谅解备忘录，拟收购朱拜勒SASREF炼厂50%股权并参与扩建",
+   "src": "荣盛石化客户卡",
+   "url": "https://www.cnrspc.com/newsinfo/6720385.html",
+   "verify": "pending"
+  }
+ ]
+}

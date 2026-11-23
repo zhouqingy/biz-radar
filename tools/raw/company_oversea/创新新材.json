@@ -1,0 +1,33 @@
+{
+ "company": "创新新材",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（有色）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-06-24",
+   "t": "沙特红海铝产业链综合项目实现关键进展，2026年全面施工、2027年投产目标不变",
+   "src": "创新新材客户卡",
+   "url": "https://www.cls.cn/detail/xk/5aeefa13462ccc81ce5ef787b46ea4bf",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-04-24",
+   "t": "公司完成墨西哥项目土地购买，推进汽车轻量化铝合金材料海外基地",
+   "src": "创新新材客户卡",
+   "url": "https://m.toutiao.com/article/7632343521743962665",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-04-15",
+   "t": "越南3C消费电子型材基地产线陆续投产，产能持续扩大",
+   "src": "创新新材客户卡",
+   "url": "https://peking.bjd.com.cn/content/s69dee7f8e4b0cd719ea08db3.html",
+   "verify": "pending"
+  }
+ ]
+}

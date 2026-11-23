@@ -1,0 +1,26 @@
+{
+ "company": "中国宝武",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（钢铁）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-05-08",
+   "t": "中国宝武提出国际化指数目标，锁定沙特、马来西亚、印尼、巴西等重点市场",
+   "src": "中国宝武客户卡",
+   "url": "https://gulfconstructiononline.com/ArticleTA/274215/aramco-baosteel-to-set-up-steel-plate-complex-in-ksa",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-04-30",
+   "t": "宝钢股份沙特绿色低碳全流程厚板项目审慎推进，2026年4月重新评估建设节奏",
+   "src": "中国宝武客户卡",
+   "url": "http://mcchina.org.cn/newsinfo/11175217.html",
+   "verify": "pending"
+  }
+ ]
+}

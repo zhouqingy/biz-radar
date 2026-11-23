@@ -1,0 +1,40 @@
+{
+ "company": "红狮",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（水泥建材）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-09-27",
+   "t": "已在印尼、老挝、尼泊尔布局4个大型水泥项目，合计年产能约930万吨",
+   "src": "红狮控股客户卡",
+   "url": "https://www.qcc.com/cfengxian/86103d33fa4f863233f9ec07ebaa8387.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-09-27",
+   "t": "已在印尼、老挝、尼泊尔布局4个大型水泥项目，合计年产能约930万吨",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-03-28",
+   "t": "印尼东加红狮二期项目窑尾框架首根构件启动吊装",
+   "src": "红狮控股客户卡",
+   "url": "https://www.hongshigroup.com/",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-03-28",
+   "t": "印尼东加红狮二期项目窑尾框架首根构件启动吊装",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "company": "鹏欣",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（有色）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-26",
+   "t": "刚果（金）希图鲁铜矿推进光伏储能发电、蒸汽发电等中长期电力保供项目",
+   "src": "鹏欣环球资源客户卡",
+   "url": "https://static.cninfo.com.cn/finalpage/2026-08-26/1225505472.PDF",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-07-14",
+   "t": "南非奥尼金矿产能释放，上半年黄金产量823.97公斤同比增62%",
+   "src": "鹏欣环球资源客户卡",
+   "url": "http://www.pengxinzy.com.cn/business/news/view.htmls?id=393",
+   "verify": "pending"
+  }
+ ]
+}

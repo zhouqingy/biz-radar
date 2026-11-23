@@ -1,0 +1,40 @@
+{
+ "company": "恒逸",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（化工化纤）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-09-15",
+   "t": "文莱炼化二期1200万吨/年项目全面启动，地基处理工程开工，力争2028年底建成",
+   "src": "恒逸石化客户卡",
+   "url": "https://www.sohu.com/a/1080991505_121856153",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-12",
+   "t": "文莱炼厂上半年贡献归母净利约45.65亿元，占公司净利77%，二期资金已筹措到位",
+   "src": "恒逸石化客户卡",
+   "url": "https://finance.sina.com.cn/roll/2026-08-12/doc-inimzytr3967133.shtml",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-10",
+   "t": "文莱炼化二期全面启动，设计产能调整为1,200万吨/年，力争2028年底建成",
+   "src": "恒逸石化（恒逸集团）客户卡",
+   "url": "https://finance.sina.com.cn/roll/2026-08-12/doc-inimzytr3967133.shtml",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-05-31",
+   "t": "新疆吐鲁番240万吨/年高品质纤维用煤制乙二醇项目，总投资预计257亿元",
+   "src": "恒逸石化（恒逸集团）客户卡",
+   "url": "https://www.cnfin.com/announ/detail/index.html?dannoun=lcdetail&id=834611209184",
+   "verify": "pending"
+  }
+ ]
+}

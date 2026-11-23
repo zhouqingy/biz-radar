@@ -1,0 +1,19 @@
+{
+ "company": "BW Digital",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "用户 11-23 勾选名单，库内动向较少，待补调研",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-06-01",
+   "t": "BW Digital 巴淡 144 MW 数据中心（NDP1）采用直接液冷，2026 年中投运",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  }
+ ]
+}

@@ -1,0 +1,68 @@
+{
+ "company": "海螺",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（水泥建材）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-30",
+   "t": "2026年上半年海外收入29.8亿元同比增21%、毛利率47.4%，全年资本开支118.2亿元投向海外等项目",
+   "src": "安徽海螺客户卡",
+   "url": "https://finance.sina.com.cn/stock/aiassist/agqsjs/2026-08-30/doc-iniqcmti4871505.shtml",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-30",
+   "t": "2026年上半年海外收入29.8亿元同比增21%、毛利率47.4%，全年资本开支118.2亿元投向海外等项目",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-15",
+   "t": "与印尼西巴布亚省政府敲定马诺夸里低碳水泥扩产计划，配套专用光伏电站直供",
+   "src": "安徽海螺客户卡",
+   "url": "https://www.cemnet.com/News/story/181406/conch-group-and-west-papua-agree-low-carbon-cement-expansion-plan.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-15",
+   "t": "与印尼西巴布亚省政府敲定马诺夸里低碳水泥扩产计划，配套专用光伏电站直供",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-07-15",
+   "t": "塔什干海螺（乌兹别克斯坦）日产6300吨熟料线配套9MW余热发电+5MW光伏，满足近三分之一用电",
+   "src": "安徽海螺客户卡",
+   "url": "https://m.163.com/dy/article/KR4FPGMI05568W0A.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-07-15",
+   "t": "塔什干海螺（乌兹别克斯坦）日产6300吨熟料线配套9MW余热发电+5MW光伏，满足近三分之一用电",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-05-27",
+   "t": "海螺集团在RCEP区域累计投资超150亿元、设立企业24家，将继续输出水泥先进产能",
+   "src": "安徽海螺客户卡",
+   "url": "https://www.chinaconch.com/wxzx/mtjj/202606/t20260603_51937.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-05-27",
+   "t": "海螺集团在RCEP区域累计投资超150亿元、设立企业24家，将继续输出水泥先进产能",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  }
+ ]
+}

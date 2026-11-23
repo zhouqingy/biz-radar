@@ -1,0 +1,26 @@
+{
+ "company": "振石控股",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（有色）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-04-10",
+   "t": "印尼华宝工业园寒锐镍业年产2万吨镍金属量高冰镍项目点火",
+   "src": "振石控股集团客户卡",
+   "url": "https://www.zhenshigroup.com/news_details/316.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-04-09",
+   "t": "华宝工业园坚持以园区电厂、码头、机场等基础设施匹配镍铁产能，明确要求优化发电与用电模式",
+   "src": "振石控股集团客户卡",
+   "url": "https://www.zhenshigroup.com/news_details/316.html",
+   "verify": "pending"
+  }
+ ]
+}

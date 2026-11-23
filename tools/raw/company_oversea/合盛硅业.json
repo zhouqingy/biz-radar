@@ -1,0 +1,26 @@
+{
+ "company": "合盛硅业",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（有色）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-07-17",
+   "t": "2026年上半年预计归母净利润3.2亿—3.8亿元，同比扭亏为盈",
+   "src": "合盛硅业客户卡",
+   "url": "https://finance.sina.com.cn/wm/2026-07-17/doc-iniickaw4190700.shtml",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-05-07",
+   "t": "2026年战略明确“增强上游、延伸下游、完善产业配套和能源补链”，多家工厂配套自备电厂",
+   "src": "合盛硅业客户卡",
+   "url": "https://www.cnfin.com/announ/detail/index.html?announ=lc&dannoun=lcdetail&id=831491576573",
+   "verify": "pending"
+  }
+ ]
+}

@@ -1,0 +1,33 @@
+{
+ "company": "洛阳栾川钼业",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（有色）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-20",
+   "t": "刚果（金）KFM二期项目建设有序推进，计划2027年建成投产",
+   "src": "洛阳栾川钼业客户卡",
+   "url": "https://epaper.cs.com.cn/zgzqb/html/2026-08/20/nw.D110000zgzqb_20260820_1-B045.htm",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-20",
+   "t": "2026年1月完成巴西四座在产金矿100%权益交割，黄金年产能向20吨迈进",
+   "src": "洛阳栾川钼业客户卡",
+   "url": "https://stock.finance.sina.com.cn/stock/go.php/vReport_Show/kind/search/rptid/840807055106/index.phtml",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-07-15",
+   "t": "2026年铜产量指引上调至76万—82万吨，KFM拟新增10万吨阴极铜产能",
+   "src": "洛阳栾川钼业客户卡",
+   "url": "https://www.metalnomist.com/2026/07/cmoc-copper-output-rises-as-drc-mines.html",
+   "verify": "pending"
+  }
+ ]
+}

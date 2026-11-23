@@ -1,0 +1,61 @@
+{
+ "company": "华友钴业",
+ "updated": "2026-11-23",
+ "status": "seed",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "客户卡在册（有色）",
+ "org": {},
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-09-09",
+   "t": "境外投资项目备案：浙江华友钴业股份有限公司并购华越镍钴（印尼）有限公司3%股权项目",
+   "src": "ODI 备案（浙江省发展和改革委员会）",
+   "url": "",
+   "verify": "done"
+  },
+  {
+   "d": "2026-08-31",
+   "t": "印尼年产12万吨镍金属量Pomalaa湿法项目建设有序推进，计划年底前投产",
+   "src": "华友钴业客户卡",
+   "url": "https://www.huayou.com/news/press-release/744",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-31",
+   "t": "华友钴业签署协议收购加纳Ewoyaa锂矿控制权，资源量约112.7万吨碳酸锂当量",
+   "src": "华友钴业客户卡",
+   "url": "https://www.huayou.com/news/press-release/744",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-22",
+   "t": "津巴布韦建成非洲首座硫酸锂工厂，首批产品4月装车发运",
+   "src": "华友钴业客户卡",
+   "url": "https://www.tx.gov.cn/col/col1631361/art/2026/art_e1b669da76974ff4a9ae280356a81a91.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-18",
+   "t": "印尼华飞、华越两大项目上半年合计贡献营收超130亿元",
+   "src": "华友钴业客户卡",
+   "url": "https://www.tx.gov.cn/col/col1631361/art/2026/art_e1b669da76974ff4a9ae280356a81a91.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-02-10",
+   "t": "境外投资项目备案：浙江华友钴业股份有限公司在印度尼西亚新建年产5万吨（镍金属量）电解镍项目",
+   "src": "ODI 备案（浙江省发展和改革委员会）",
+   "url": "",
+   "verify": "done"
+  },
+  {
+   "d": "2026-01-16",
+   "t": "境外投资项目备案：浙江华友钴业股份有限公司并购印度尼西亚PTCiptaDjayaSelarasMining公司90%股权项目",
+   "src": "ODI 备案（浙江省发展和改革委员会）",
+   "url": "",
+   "verify": "done"
+  }
+ ]
+}
