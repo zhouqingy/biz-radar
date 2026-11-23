@@ -40,6 +40,8 @@ import os
 import re
 import sys
 import time
+
+import requests
 import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -78,7 +80,11 @@ SKIP_KW = ('光伏', '风电', '储能电站', '组件', '逆变器', '铀', '�
            # 光伏：底稿口径里「光伏+储能+柴发」是国内业务形态，海外电源投资不是主线；
            # pick_odi 的 POWER_W 分支对 <20MW 才判 X，580MW 会漏进 A 档。
            # 这里**只管速览收不收**，不改 pick_odi（它管的是备案，口径不同不能混）。
-           '光伏', '风电', '储能', '组件', '逆变器', '氢气', '绿氢')
+           '光伏', '风电', '储能', '组件', '逆变器', '氢气', '绿氢',
+           # 2026-11-19 §5.71：新浪 7x24 接入后带进来的股市人事类噪声
+           # （实测「杭州热电聘任副总经理」命中 S_W「热电」进了 S 档）——
+           # 人事/股价快讯按 tip 口径「人事股价一律不算」。
+           '聘任', '辞职', '上任', '停牌', '回购', '分红', '中签', '解禁')
 
 
 def get(url, timeout=40):
@@ -165,6 +171,31 @@ def src_shangbao(days=7, limit=40):
     return out
 
 
+# ── 企业名单（2026-11-23 §5.104 用户勾选 43 家 + 建议补充冶金工程竞对）──
+# 命中名单企业名 → 强制收进出海速览（chan=watchlist），不再依赖赛道词。
+# 这是「不是用户说一条我做一条」的系统性修法：名单在 raw/company_watch.json，
+# 用户增删名单即生效，不用改代码。仍受 SKIP_KW / semantic_drop 双重约束。
+_WATCH_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'raw', 'company_watch.json')
+try:
+    _WJ = json.load(open(_WATCH_PATH, encoding='utf-8'))
+    WATCH = [w for w in (_WJ.get('companies') or []) if w]
+    for _gl in (_WJ.get('groups') or {}).values():
+        WATCH += [w for w in (_gl or []) if w]
+    print('企业名单：%d 个名字（company_watch.json）' % len(WATCH))
+except Exception as _e:
+    WATCH = []
+    print('⚠ company_watch.json 读失败，名单强制收退出：%s' % _e)
+
+
+def watch_hit(text):
+    if not WATCH:
+        return ''
+    for w in WATCH:
+        if w in text:
+            return w
+    return ''
+
+
 # ── 源 2：国复咨询（中资海外工程头条）──────────────────────────────────
 def src_goalfore(days=7, limit=40):
     out = []
@@ -211,7 +242,80 @@ def src_mysteel(days=7, limit=30):
     return out
 
 
-SOURCES = [('印尼商报', src_shangbao), ('国复咨询', src_goalfore), ('我的钢铁', src_mysteel)]
+# ── 源 4：新浪财经 7x24 全球快讯（2026-11-19 §5.71 用户拍板「换别的地方，任何新闻推送都可以」）──
+# 接口免登录、结构化 JSON、rich_text 即全文（无独立详情页，url 用 7x24 页锚点）。
+# 量大约每天 600+ 条，靠主循环的 PRE_KW 标题预筛兜底；每轮只取最新 400 条（≈1 天），
+# 日更足够 —— 速览是「当天有什么」，不是回溯历史。
+def src_sina724(days=1, pages=8):
+    out = []
+    for pg in range(1, pages + 1):
+        try:
+            r = requests.get(
+                'https://zhibo.sina.com.cn/api/zhibo/feed?page=%d&page_size=50&zhibo_id=152' % pg,
+                headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
+            lst = r.json()['result']['data']['feed']['list']
+        except Exception as e:
+            print('  ✗ 新浪7x24/第%d页 抓取失败：%s' % (pg, type(e).__name__))
+            break
+        if not lst:
+            break
+        for x in lst:
+            t = (x.get('rich_text') or '').strip()
+            ct = (x.get('create_time') or '')[:10]
+            if not t or not ct:
+                continue
+            # 去掉【】公告前缀，标题太长的截断（7x24 一条就是一个完整快讯）
+            title = re.sub(r'^【([^】]*)】', r'\1：', t)[:90]
+            out.append({'title': title, 'url': 'https://finance.sina.com.cn/7x24/?id=%s&zhibo_id=152' % x.get('id'),
+                        'date': ct, 'src': '新浪财经7x24',
+                        'snip': t[:160]})
+        time.sleep(0.4)
+    return out
+
+
+# ── 源 2b：国复咨询详情页回扫（2026-11-23 §5.104 补漏）─────────────────
+# 踩过的坑：用户 11-23 给的样例「中冶京诚签越南 VinMetal 13 亿 EPC」（11-16 发布）
+# 不在库里 —— 官网列表页只挂最近几天头条，11-16 那篇在采集轮次到来前已被挤掉。
+# 详情页按自增 ID 直达；⚠ 实测 ID 不按时间排序（109015=11-20、109025=7 月），
+# 所以回扫按页面日期过滤：扫到的条目只留窗口内的，位置随机不影响正确性，
+# 标题照常走 PRE_KW / 名单 / 业务判定 —— 回扫只是「多捞一批候选」，不改变任何入库口径。
+def src_goalfore_walk(days=14, back=60):
+    out = []
+    try:
+        h = get('https://news.goalfore.cn/latest')
+    except Exception as e:
+        print('  ✗ 国复回扫/列表抓取失败：%s' % type(e).__name__)
+        return out
+    ids = sorted({int(m.group(1)) for m in re.finditer(r'/latest/detail/(\d+)\.html', h)})
+    if not ids:
+        return out
+    top = ids[-1]
+    for i in range(top - 1, max(top - 1 - back, 0), -1):
+        try:
+            pg = get('https://news.goalfore.cn/latest/detail/%d.html' % i)
+        except Exception:
+            continue
+        mt = re.search(r'<title>([^<]*)</title>', pg)
+        if not mt:
+            continue
+        title = mt.group(1).split(' - 电报文章正文')[0].split('- 电报文章正文')[0].strip()
+        if len(title) < 10 or 'goalfore' in title.lower():
+            continue
+        md = re.search(r'20\d\d-\d\d-\d\d', pg)
+        date = md.group(0) if md else ''
+        # 回扫只补窗口内的（比 days 早上 3 天余量，窗口外的列表早已轮过、回扫意义不大）
+        if date and date < time.strftime('%Y-%m-%d', time.localtime(time.time() - (days + 3) * 86400)):
+            continue
+        out.append({'title': title,
+                    'url': 'https://news.goalfore.cn/latest/detail/%d.html' % i,
+                    'date': date, 'src': '国复咨询', 'snip': ''})
+        time.sleep(0.3)
+    return out
+
+
+SOURCES = [('印尼商报', src_shangbao), ('国复咨询', src_goalfore), ('国复回扫', src_goalfore_walk),
+           ('我的钢铁', src_mysteel),
+           ('新浪财经7x24', src_sina724)]
 
 
 def main():
@@ -229,19 +333,23 @@ def main():
         except Exception as e:
             print('  ✗ %s 异常：%s' % (name, e))
             got = []
-        # 预筛：标题不沾业务的连正文都不用抓
+        # 预筛：标题不沾业务的连正文都不用抓；名单企业命中也放行（仍受 SKIP_KW 约束）
         hit = [x for x in got
-               if any(k in x['title'] for k in PRE_KW)
+               if (any(k in x['title'] for k in PRE_KW) or watch_hit(x['title']))
                and not any(k in x['title'] for k in SKIP_KW)]
         # 标题预筛是「省请求」的粗筛，不是业务判定；但 SKIP_KW 里放的是明确不看的，
         # 命中就真丢。这里给出丢弃计数，便于判断是词表问题还是源本身没货。
-        _skip = [x for x in got if any(k in x['title'] for k in PRE_KW)
+        _skip = [x for x in got if (any(k in x['title'] for k in PRE_KW) or watch_hit(x['title']))
                  and any(k in x['title'] for k in SKIP_KW)]
         for x in _skip[:3]:
             print('     · 跳过（电源/行情/党务）%s' % x['title'][:38])
         print('%-8s 列表 %2d 条 → 标题预筛 %d 条' % (name, len(got), len(hit)))
         stat.append((name, len(got), len(hit)))
         cand.extend(hit)
+
+    # 多源合并去重（国复列表 + 回扫会出同一篇）：同 url 只留一条，列表页的优先（带摘要片段）
+    _seen = set()
+    cand = [x for x in cand if not (x['url'] in _seen or _seen.add(x['url']))]
 
     print('\n== 逐条校验（semantic_drop + pick_odi.judge）==')
     keep, review = [], []
@@ -280,6 +388,26 @@ def main():
         # tier W    = 命中客户行业但无产能描述 → 丢（这是软文/行情/政策解读）
         # tier X    = 明确不相关行业（铁路/港口/轻轨/光伏组件/储备数据）→ 丢
         #
+        # ── 企业名单强制收（2026-11-23 §5.104 用户勾选名单）────────────
+        # 命中 company_watch.json 里的企业名 → 不看 seg/tier，直接收进出海速览。
+        # 只绕过「赛道判定」，不绕过 semantic_drop / SKIP_KW —— 名单不是免检通道。
+        # 名单也有自己的噪音：名单企业发布的国内行情（「永钢螺纹降80元」）不是出海动向。
+        _wh = watch_hit(x['title'] + ' ' + (summ or ''))
+        _wl_noise = ('螺纹', '热卷', '早读', '钢价', '报价', '期货', '收盘',
+                     '涨', '跌', '涨停', '跌停', '成交额', '融资余额', '股价')
+        if _wh and not any(k in x['title'] for k in _wl_noise):
+        if _wh:
+            keep.append({
+                'title': x['title'], 'url': x['url'], 'summary': summ,
+                'date': date, 'datetime': (date or '') + ' 00:00',
+                'src': x['src'], 'kw': 'watchlist',
+                'sc': 4, 'tier': 'W', 'tierwhy': '命中企业名单：%s' % _wh,
+                'sem': 'KEEP', 'semwhy': '名单企业动向（用户 11-23 勾选）', 'chan': 'watchlist',
+            })
+            print('  ✓ [名单·%s] %s | %s' % (_wh, date or '????-??-??', x['title'][:40]))
+            time.sleep(0.6)
+            continue
+
         # ── 补一道业务层级判断（在定档之前）─────────────────────────────
         # 踩过的坑：伊拉克祖拜尔「脱气站扩建」被判成 A「客户建厂」进了速览。
         # 它命中的是 A_W 里的 '氨'（在「埃尼」→ 没有；实际是正文里"氨"字），
@@ -296,8 +424,45 @@ def main():
         # 只在速览入口做一道「关键词可信度」过滤，且只影响速览收不收。
         _GENERIC = {'扩建项目', '新建项目', '项目', '改造项目', '建设项目',
                     '工程', 'EPC', '总承包', '承包'}
+
+        # ── E 档兜底（2026-11-19 用户二次拍板：不要「行业动态」，改收「企业动向」）──
+        # 上一版 B 档（命中行业词就收）按用户指示撤掉；改成只收「企业海外动向」——
+        # 具体企业 + 建厂动作（投产/开工/奠基/签约/扩建/新基地），典型如
+        # 「中策越南轮胎工厂投资签约」（微信公众号车与轮，用户给的样例）。
+        # 纯行业统计/行业政策（不落到具体企业动作）不收；X_W / THERMO_FALSE 照拦。
+        # ⚠ 动作词是速览展示层自有词，只影响出海速览收不收，不进 ①库判定，
+        #   不碰 judge()/semantic_drop()。
+        E_ACT = ('建厂', '投产', '开工', '奠基', '签约', '扩建', '扩产',
+                 '新工厂', '新基地', '投资建设', '投资设立', '落成')
+        E_OBJ = PO.A_W + ('工厂', '生产基地', '产业园', '工业园', '生态园',
+                          '制造基地', '产线', '生产线')
+
+        def _e_fallback():
+            n = x['title'] + ' ' + (summ or '')
+            if any(w in n for w in PO.X_W) or any(w in n for w in PO.THERMO_FALSE):
+                return None
+            act = [w for w in E_ACT if w in n]
+            if not act:
+                return None
+            obj = [w for w in E_OBJ if w in n]
+            if not obj:
+                return None
+            return '企业动向：%s（%s）' % ('、'.join(act[:2]), '、'.join(obj[:2]))
+
         if seg in (None, 'other') or not segkw or segkw in _GENERIC:
-            print('  ✗ [业务层级 %s/%s] %s' % (seg, segkw or '-', x['title'][:38]))
+            e = _e_fallback()
+            if not e:
+                print('  ✗ [业务层级 %s/%s] %s' % (seg, segkw or '-', x['title'][:38]))
+                continue
+            keep.append({
+                'title': x['title'], 'url': x['url'], 'summary': summ,
+                'date': date, 'datetime': (date or '') + ' 00:00',
+                'src': x['src'], 'kw': 'autoE:' + x['src'],
+                'sc': 4, 'tier': 'E', 'tierwhy': e,
+                'sem': 'KEEP', 'semwhy': 'E档（企业海外动向，主档未过）', 'chan': 'autoE',
+            })
+            print('  ✓ [E] %s | %s' % (date or '????-??-??', x['title'][:44]))
+            time.sleep(0.6)
             continue
         tier, tierwhy = PO.judge(x['title'] + ' ' + summ)
         # ⚠ 这里**不另写词表**，只决定「用不用 tier 这个结果」。业务口径仍在
@@ -323,10 +488,34 @@ def main():
                        'selfplant', 'datactr', 'wte', 'sewage', 'zero', 'soil'):
                 tier, tierwhy = 'A', '业务层级=%s（备案口径未覆盖）' % seg
             else:
-                print('  ✗ [业务层级 other] %s' % x['title'][:40])
+                e = _e_fallback()
+                if not e:
+                    print('  ✗ [业务层级 other] %s' % x['title'][:40])
+                    continue
+                keep.append({
+                    'title': x['title'], 'url': x['url'], 'summary': summ,
+                    'date': date, 'datetime': (date or '') + ' 00:00',
+                    'src': x['src'], 'kw': 'autoE:' + x['src'],
+                    'sc': 4, 'tier': 'E', 'tierwhy': e,
+                    'sem': 'KEEP', 'semwhy': 'E档（企业海外动向，主档未过）', 'chan': 'autoE',
+                })
+                print('  ✓ [E] %s | %s' % (date or '????-??-??', x['title'][:44]))
+                time.sleep(0.6)
                 continue
         else:
-            print('  ✗ [%s %s] %s' % (tier or '-', tierwhy[:16], x['title'][:40]))
+            e = _e_fallback()
+            if not e:
+                print('  ✗ [%s %s] %s' % (tier or '-', tierwhy[:16], x['title'][:40]))
+                continue
+            keep.append({
+                'title': x['title'], 'url': x['url'], 'summary': summ,
+                'date': date, 'datetime': (date or '') + ' 00:00',
+                'src': x['src'], 'kw': 'autoE:' + x['src'],
+                'sc': 4, 'tier': 'E', 'tierwhy': e,
+                'sem': 'KEEP', 'semwhy': 'E档（企业海外动向，主档未过）', 'chan': 'autoE',
+            })
+            print('  ✓ [E] %s | %s' % (date or '????-??-??', x['title'][:44]))
+            time.sleep(0.6)
             continue
         keep.append({
             'title': x['title'], 'url': x['url'], 'summary': summ,

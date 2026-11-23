@@ -6809,8 +6809,9 @@ function ovProfFill(buyer){
     if(!hit){box.innerHTML='';return;}
     var pend='<span style="color:#b58a2c;font-size:12px">（待核实）</span>';
     var h='<div class="ep-sec"><b>企业出海档案 · '+esc(hk)+'</b>';
-    if(hit.verify!=='DONE')h+='<p style="background:#fdf6e3;border:1px solid #e8d9a8;border-radius:6px;padding:6px 10px;font-size:12px;color:#7a5c14">该档案为线索整理稿，逐条信源核实中，正式引用前请对原文复核。</p>';
-    if(hit.org){
+    if(hit.verify!=='DONE')h+='<p style="background:#fdf6e3;border:1px solid #e8d9a8;border-radius:6px;padding:6px 10px;font-size:12px;color:#7a5c14">'+(hit.status==='seed'?'该档案为种子稿：库内动向已自动聚合，组织架构/国别布局/分管领导待逐条调研核实。':'该档案为线索整理稿，逐条信源核实中，正式引用前请对原文复核。')+'</p>';
+    if(hit.relevance_note)h+='<p style="color:var(--tx3);font-size:12px">'+esc(hit.relevance_note)+'</p>';
+    if(hit.org&&hit.org.mode){
       h+='<p><b>组织架构</b>'+esc(hit.org.mode||'—')+'</p>';
       if(hit.org.regions&&hit.org.regions.length)h+='<p><b>海外团队</b>'+hit.org.regions.map(esc).join('、')+'</p>';
       if(hit.org.capital_vehicle)h+='<p><b>资本载体</b>'+esc(hit.org.capital_vehicle)+'</p>';
