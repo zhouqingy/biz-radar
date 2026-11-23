@@ -6791,7 +6791,46 @@ function openPjDetail(x){
     (qcn.length>=4?'<a href="https://www.qcc.com/web/search?key='+encodeURIComponent(qcn)+'" target="_blank" rel="noopener nofollow">查业主工商信息 ↗</a>':'')+
     (x.linkbad?'<a href="https://www.baidu.com/s?wd='+encodeURIComponent(x.t.replace(/[\[\]]/g,''))+'" target="_blank" rel="noopener nofollow">搜官方源 ↗</a>':'')+
     '</div>';
-  openUniProf(x.t||'', sub, h);
+  openUniProf(x.t||'', sub, h+'<div id="pjOvProf"></div>');
+  try{ovProfFill(x.buyer||'')}catch(err){console.warn('[ovProf]',err)}
+}
+/* §5.102 企业出海档案进画像弹窗：raw/company_oversea/<企业>.json → data.ovprofile.js
+   （window.DATA_OVPROFILE），点开弹窗才懒加载。按业主名做包含匹配（全称/简称互含）；
+   档案是线索稿，verify 未完成的一律灰标「待核实」，前端不洗白、不另造结论。 */
+function ovProfFill(buyer){
+  var box=document.getElementById('pjOvProf'); if(!box) return;
+  function render(){
+    if(!document.getElementById('pjOvProf'))return;
+    var P=window.DATA_OVPROFILE||{},hit=null,hk='';
+    if(buyer)for(var k in P){
+      if(!P.hasOwnProperty(k))continue;
+      if(buyer.indexOf(k)>=0||k.indexOf(buyer)>=0){hit=P[k];hk=k;break;}
+    }
+    if(!hit){box.innerHTML='';return;}
+    var pend='<span style="color:#b58a2c;font-size:12px">（待核实）</span>';
+    var h='<div class="ep-sec"><b>企业出海档案 · '+esc(hk)+'</b>';
+    if(hit.verify!=='DONE')h+='<p style="background:#fdf6e3;border:1px solid #e8d9a8;border-radius:6px;padding:6px 10px;font-size:12px;color:#7a5c14">该档案为线索整理稿，逐条信源核实中，正式引用前请对原文复核。</p>';
+    if(hit.org){
+      h+='<p><b>组织架构</b>'+esc(hit.org.mode||'—')+'</p>';
+      if(hit.org.regions&&hit.org.regions.length)h+='<p><b>海外团队</b>'+hit.org.regions.map(esc).join('、')+'</p>';
+      if(hit.org.capital_vehicle)h+='<p><b>资本载体</b>'+esc(hit.org.capital_vehicle)+'</p>';
+      h+=(hit.org.key_person||[]).map(function(p){
+        return '<p><b>分管/关键人</b>'+esc(p.name)+' · '+esc(p.title||'')+' — '+esc(p.scope||'')+(p.verify==='done'?'':pend)+'</p>';
+      }).join('');
+    }
+    if(hit.layout&&hit.layout.length)h+='<p style="margin-top:6px"><b>国别布局</b></p>'+hit.layout.map(function(r){
+      return '<p>'+esc(r.country)+'：'+esc(r.what)+'</p>';
+    }).join('');
+    if(hit.actions_90d&&hit.actions_90d.length)h+='<p style="margin-top:6px"><b>近 90 天动作</b></p>'+hit.actions_90d.map(function(a){
+      return '<p>'+(a.url?'<a href="'+esc(a.url)+'" target="_blank" rel="noopener">'+esc(a.d)+' · '+esc(a.t)+' ↗</a>':esc(a.d)+' — '+esc(a.t))+
+        '<span style="color:var(--tx3);font-size:12px">（'+esc(a.src||'信源待补')+(a.verify==='done'?'':' · 待核实')+'）</span></p>';
+    }).join('');
+    h+='<p style="color:var(--tx3);font-size:12px">档案更新 '+esc(hit.updated||'—')+' · 线索稿，逐条核实进度见档案源文件</p></div>';
+    box.innerHTML=h;
+  }
+  if(window.DATA_OVPROFILE){render();return;}
+  box.innerHTML='<div class="ep-sec"><b>企业出海档案</b><p style="color:var(--tx3)">档案数据加载中…</p></div>';
+  need('ovprofile',render);
 }
 /* 事件委托：点到卡片本体（非 a/button）就弹详情
    §5.49：从「只认 #grid」扩到「任何带 data-pjid 的 .pj」。右栏画像块删掉后，
