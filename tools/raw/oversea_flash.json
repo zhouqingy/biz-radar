@@ -1,7 +1,67 @@
 {
- "updated": "2026-11-23 04:11",
- "n": 44,
+ "updated": "2026-11-24 10:37",
+ "n": 53,
  "items": [
+  {
+   "title": "华为算力概念震荡回升 华胜天成8天4板：早盘华为算力概念震荡回升，华胜天成走出8天4板，真视通、拓维信息、四川长虹、常山北明、星华新材、软通动力等冲高。",
+   "url": "https://finance.sina.com.cn/7x24/?id=5234202&zhibo_id=152",
+   "summary": "【华为算力概念震荡回升 华胜天成8天4板】早盘华为算力概念震荡回升，华胜天成走出8天4板，真视通、拓维信息、四川长虹、常山北明、星华新材、软通动力等冲高。",
+   "date": "2026-11-24",
+   "datetime": "2026-11-24 00:00",
+   "src": "新浪财经7x24",
+   "kw": "watchlist",
+   "sc": 4,
+   "tier": "W",
+   "tierwhy": "命中企业名单：华新",
+   "sem": "KEEP",
+   "semwhy": "名单企业动向（用户 11-23 勾选）",
+   "chan": "watchlist"
+  },
+  {
+   "title": "东京电力公司将合并三个内部小组，负责日本北部福岛第一核电站退役工作的相关事务。",
+   "url": "https://finance.sina.com.cn/7x24/?id=5234138&zhibo_id=152",
+   "summary": "东京电力公司将合并三个内部小组，负责日本北部福岛第一核电站退役工作的相关事务。",
+   "date": "2026-11-24",
+   "datetime": "2026-11-24 00:00",
+   "src": "新浪财经7x24",
+   "kw": "auto:新浪财经7x24",
+   "sc": 6,
+   "tier": "A",
+   "tierwhy": "业务层级=selfplant（备案口径未覆盖）",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "auto"
+  },
+  {
+   "title": "西子洁能签约浙石化120万吨/年丙烷脱氢（PDH）余热回收器项目：近日，西子洁能中标浙石化120万吨/年丙烷脱氢（PDH）余热回收器项目并完成签约。资料显示，西子洁能为项目提供配套",
+   "url": "https://finance.sina.com.cn/7x24/?id=5234125&zhibo_id=152",
+   "summary": "【西子洁能签约浙石化120万吨/年丙烷脱氢（PDH）余热回收器项目】近日，西子洁能中标浙石化120万吨/年丙烷脱氢（PDH）余热回收器项目并完成签约。",
+   "date": "2026-11-24",
+   "datetime": "2026-11-24 00:00",
+   "src": "新浪财经7x24",
+   "kw": "auto:新浪财经7x24",
+   "sc": 8,
+   "tier": "S",
+   "tierwhy": "工程含：余热",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "auto"
+  },
+  {
+   "title": "华新旗下奇兰加水泥赞比亚扩产：恩多拉1号窑改造后日产提升至1500吨",
+   "url": "https://news.goalfore.cn/latest/detail/109126.html",
+   "summary": "11月18日，联合国非洲经济委员会报道的配套活动，已把本地采购、供应商能力和营运资金放在一起讨论。 它的2025年报显示，中国华新旗下的华新海南投资持有这家公司 75%的股份 。",
+   "date": "2026-11-23",
+   "datetime": "2026-11-23 00:00",
+   "src": "国复咨询",
+   "kw": "watchlist",
+   "sc": 4,
+   "tier": "W",
+   "tierwhy": "命中企业名单：华新",
+   "sem": "KEEP",
+   "semwhy": "名单企业动向（用户 11-23 勾选）",
+   "chan": "watchlist"
+  },
   {
    "title": "日本东京电力公司因事故暂停核电站施工。",
    "url": "https://finance.sina.com.cn/7x24/?id=5230942&zhibo_id=152",
@@ -18,6 +78,66 @@
    "chan": "auto"
   },
   {
+   "title": "喀麦隆拉格都电站调速器设备完成出厂验收",
+   "url": "https://news.goalfore.cn/latest/detail/109154.html",
+   "summary": "11月19日，喀麦隆拉格都（Lagdo）电站调速器设备出厂验收在武汉四创完成，杭州泰和机电与业主SOCADEL代表共同参与。",
+   "date": "2026-11-23",
+   "datetime": "2026-11-23 00:00",
+   "src": "国复咨询",
+   "kw": "auto:国复咨询",
+   "sc": 6,
+   "tier": "A",
+   "tierwhy": "业务层级=selfplant（备案口径未覆盖）",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "auto"
+  },
+  {
+   "title": "科威特夏盖亚至瓦夫拉400kV输电线路授标，金额约1.35亿美元",
+   "url": "https://news.goalfore.cn/latest/detail/109139.html",
+   "summary": "科威特《الجريدة》11月22日报道，科威特公共招标中央机构第97/2026次会议记录显示，该机构已于11月18日批准夏盖亚太阳能发电站至瓦夫拉Z主变电站400千伏架空输电线路项目授标，项目金额为4145万科威特第纳尔。",
+   "date": "2026-11-23",
+   "datetime": "2026-11-23 00:00",
+   "src": "国复咨询",
+   "kw": "auto:国复咨询",
+   "sc": 6,
+   "tier": "A",
+   "tierwhy": "业务层级=selfplant（备案口径未覆盖）",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "auto"
+  },
+  {
+   "title": "Trungnam牵头财团签署越南Ca-Na LNG电厂燃气轮机供应合同与上海电气合作备忘录",
+   "url": "https://news.goalfore.cn/latest/detail/109122.html",
+   "summary": "茶那LNG电厂规划装机容量1500 MW，总投资额约22亿美元。 电厂预计于2030年投入运营后，每年向越南国家电网供应约90亿千瓦时电量。 根据合同，安萨尔多能源公司将提供两套GT36型燃气轮机组、发电机及相关辅助系统。",
+   "date": "2026-11-23",
+   "datetime": "2026-11-23 00:00",
+   "src": "国复咨询",
+   "kw": "auto:国复咨询",
+   "sc": 6,
+   "tier": "A",
+   "tierwhy": "业务层级=selfplant（备案口径未覆盖）",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "auto"
+  },
+  {
+   "title": "阿联酋沙迦批准卡尔巴自贸区总规，数据中心目标容量400MW",
+   "url": "https://news.goalfore.cn/latest/detail/109106.html",
+   "summary": "400MW 是园区数据中心的目标总容量，不是某一座已定标数据中心的容量，更不是已经建成的发电装机；",
+   "date": "2026-11-23",
+   "datetime": "2026-11-23 00:00",
+   "src": "国复咨询",
+   "kw": "auto:国复咨询",
+   "sc": 6,
+   "tier": "A",
+   "tierwhy": "业务层级=datactr（备案口径未覆盖）",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "auto"
+  },
+  {
    "title": "北京：完成既有公共建筑节能绿色化改造1000万平方米、既有建筑供热智能化改造8000万平方米：北京市人民政府关于印发《北京市“十五五”时期城市更新规划》的通知，其中提到，深入实施绿",
    "url": "https://finance.sina.com.cn/7x24/?id=5231332&zhibo_id=152",
    "summary": "【北京：完成既有公共建筑节能绿色化改造1000万平方米、既有建筑供热智能化改造8000万平方米】北京市人民政府关于印发《北京市“十五五”时期城市更新规划》的通知，其中提到，深入实施绿色北京战略,加大既有建筑绿色节能改造支持力度,培育绿色低碳新动能。",
@@ -28,6 +148,21 @@
    "sc": 8,
    "tier": "S",
    "tierwhy": "工程含：供热",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "auto"
+  },
+  {
+   "title": "军信股份签署比什凯克垃圾发电二期补充协议，新增处理能力2000吨/日",
+   "url": "https://news.goalfore.cn/latest/detail/109108.html",
+   "summary": "一期项目规模为1000吨/日，已于2025年12月建成投产，是中亚地区首座建成投产的垃圾焚烧发电项目。 投资总额约为2.3亿美元，其中30%来源于吉尔吉斯军信自有资金，70%来源于吉尔吉斯军信融资。",
+   "date": "2026-11-23",
+   "datetime": "2026-11-23 00:00",
+   "src": "国复咨询",
+   "kw": "auto:国复咨询",
+   "sc": 8,
+   "tier": "S",
+   "tierwhy": "工程含：垃圾焚烧/焚烧发电",
    "sem": "KEEP",
    "semwhy": "未命中已启用的过滤规则",
    "chan": "auto"
@@ -61,6 +196,16 @@
    "sem": "KEEP",
    "semwhy": "规模化容量护栏（1400MW ≥ 50MW）",
    "chan": "auto"
+  },
+  {
+   "title": "印尼与泰国13个在建数据中心：中方资本/运营4个、总包框架1个（中建三局普哇加达1.6GW、DayOne巴淡511MVA购电）",
+   "url": "https://mp.weixin.qq.com/s/N1x_TzY6W3An-IAWFVkk5Q",
+   "summary": "印尼8个+泰国5个在建数据中心盘点：中建三局签印尼普哇加达1.6GW EPC框架（首期50MW）；DayOne巴淡签511MVA购电（印尼最大PPA）；TikTok泰国250亿美元获批。用电是共同约束——巴淡全岛装机0.9GW、泰国10GW排队等电，用能配套机会直接相关。",
+   "date": "2026-11-22",
+   "src": "智算联盟（用户提供链接）",
+   "sc": 3,
+   "tier": "A",
+   "tierwhy": "深度盘点：东南亚数据中心用能缺口+中资总包/购电动作，用能配套直接相关"
   },
   {
    "title": "格林美与韩国ECOPRO签约印尼绿色产业园项目",
@@ -106,16 +251,6 @@
    "sem": "KEEP",
    "semwhy": "未命中已启用的过滤规则",
    "chan": "auto"
-  },
-  {
-   "title": "【印尼行业合规·数据中心】印尼数据中心的电和水:接电、绿电与用水,项目最容易卡在哪里?",
-   "url": "https://weixin.sogou.com/link?url=dn9a_-gY295K0Rci_xozVXfdMkSQTLW6cwJThYulHEtVjXrGTiVgS4wOagRgUm_MGCBDJwIcH477BgYaLXuT3lqXa8Fplpd9s8JhyIMElhCn1a3Ecq-UNjXCv1BXHocM65lMBe1dvvWw1H6dmTr5BfwBTxZ8SGnvuVb3hk3qqsOdONJP5IVevQlol_-IuyV3pAbyHHwjUz1ejxYbwT1kaUHsxqMCR16BouczP8y-B8swcb_WdJSTGcg_rrhI-EI1c97scMnxSpnf3q8uRDTfkw..&amp;type=2&amp;query=%E5%8D%B0%E5%B0%BC %E6%95%B0%E6%8D%AE%E4%B8%AD%E5%BF%83&amp;token=B9AB3051539B7F9B00F99FE93E9DFA68001F69D26B03BC64",
-   "summary": "一、数据中心的用电规模与印尼的供电体制(一)需求增长与接入排队能源与矿产资源部(Kementerian Energi dan Sumber Daya ...",
-   "date": "2026-11-19",
-   "datetime": "2026-11-19 08:19:15",
-   "src": "经济学人精选精读",
-   "kw": "印尼 数据中心",
-   "sc": 4
   },
   {
    "title": "海尔埃及生态园二期投产",
@@ -613,14 +748,19 @@
    "chan": "auto"
   },
   {
-   "title": "印尼与泰国13个在建数据中心：中方资本/运营4个、总包框架1个（中建三局普哇加达1.6GW、DayOne巴淡511MVA购电）",
-   "url": "https://mp.weixin.qq.com/s/N1x_TzY6W3An-IAWFVkk5Q",
-   "summary": "印尼8个+泰国5个在建数据中心盘点：中建三局签印尼普哇加达1.6GW EPC框架（首期50MW）；DayOne巴淡签511MVA购电（印尼最大PPA）；TikTok泰国250亿美元获批。用电是共同约束——巴淡全岛装机0.9GW、泰国10GW排队等电，用能配套机会直接相关。",
-   "date": "2026-11-22",
-   "src": "智算联盟（用户提供链接）",
-   "sc": 3,
+   "title": "中国电工与永福股份签约阿尔及利亚特贝萨燃机电站项目设计管理服务合同",
+   "url": "https://news.goalfore.cn/latest/detail/104302.html",
+   "summary": "8月13日，中国电工总经理闫伟华与永福股份总经理黄炎生共同签署了阿尔及利亚特贝萨1406.017MW燃机电站项目设计管理服务合同，标志着双方在海外大型电力工程设计管理领域的深度战略合作正式落地。 中国电工副总经理袁博、永福股份副总经理卢庆议参加签约仪式。",
+   "date": "2026-08-18",
+   "datetime": "2026-08-18 00:00",
+   "src": "国复咨询",
+   "kw": "auto:国复咨询",
+   "sc": 6,
    "tier": "A",
-   "tierwhy": "深度盘点：东南亚数据中心用能缺口+中资总包/购电动作，用能配套直接相关"
+   "tierwhy": "业务层级=selfplant（备案口径未覆盖）",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "auto"
   }
  ]
 }
