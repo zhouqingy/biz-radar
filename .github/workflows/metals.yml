@@ -60,6 +60,9 @@ jobs:
 
       - name: 1) 抓历史日 K → data.metalhist.js
         id: hist
+        # 新浪封 Actions 机房 IP 是常态（§5.68）；失败就跳过历史重建，
+        # 保留仓库里上一次推送的版本，不让它挡住当日行情重建（§5.110）。
+        continue-on-error: true
         working-directory: tools
         timeout-minutes: 12
         run: |
