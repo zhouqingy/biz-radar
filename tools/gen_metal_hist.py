@@ -25,7 +25,7 @@ import json, os, re, subprocess, sys
 from datetime import datetime
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(os.environ.get('BIZ_OUT') or os.path.join(ROOT, '..'), 'data.metalhist.js')
+OUT = os.path.join(ROOT, '..', 'biz-radar', 'data.metalhist.js')
 RAW = os.path.join(ROOT, 'raw', 'metal_hist_raw.json')
 
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120'
@@ -47,6 +47,12 @@ SYMS = [
     ('HC', 'HC0', '热轧卷板', '元/吨'),
     ('I',  'I0',  '铁矿石', '元/吨'),
     ('JM', 'JM0', '焦煤', '元/吨'),
+    # 2026-11-18 用户拍板扩品种（5 个期货，新浪日 K 同一接口，实测可用）
+    ('J',  'J0',  '焦炭', '元/吨'),
+    ('FU', 'FU0', '燃料油', '元/吨'),
+    ('SI', 'SI0', '工业硅', '元/吨'),   # 广期所，2022-12 上市
+    ('PS', 'PS0', '多晶硅', '元/吨'),   # 广期所，2024-12 上市
+    ('AG', 'AG0', '白银', '元/吨'),
 ]
 
 RECENT_DAYS = 1260      # 近 5 年（约 252×5 交易日）保留逐日
@@ -138,6 +144,34 @@ def main():
     if ok == 0:
         print('!! 全部失败，不覆盖线上文件')
         return 1
+
+    # ── 现货品种（硫磺/硫酸，spot_100ppi.py 自建历史）────────────────
+    # 现货没有新浪日 K，从 2026-11-18 启用日起每天 append 一点（见 spot_100ppi.py）。
+    # 序列编码与期货同款：df=0 全量「逐日」MMDD，年份由 end 倒推。
+    # 起步只有 1 个点，曲线页如实显示起点，随积累逐渐成形 —— 不造历史数据。
+    SPOT_HIST = os.path.join(ROOT, 'raw', 'spot_hist.json')
+    SPOT_NAMES = {'SULFUR': ('硫磺', '元/吨'), 'ACID': ('硫酸', '元/吨')}
+    if os.path.exists(SPOT_HIST):
+        try:
+            sh = json.load(open(SPOT_HIST, encoding='utf-8'))
+        except Exception as e:
+            print('  ✗ spot_hist 读失败:', e)
+            sh = {}
+        for code, (name, unit) in SPOT_NAMES.items():
+            rows = [[d, p] for d, p in (sh.get(code) or []) if p]
+            if not rows:
+                continue
+            ds, ps = [], []
+            for d, p in rows:
+                ds.append(d[5:].replace('-', ''))
+                ps.append(p)
+            series[code] = {'n': name, 'u': unit, 'sym': '',
+                            'start': rows[0][0], 'end': rows[-1][0],
+                            'cnt': len(rows), 'df': 0,
+                            'd': ds, 'p': ps}
+            ok += 1
+            print(f'  ✓ {name}(现货) 自建历史 {len(rows)} 点 '
+                  f'{rows[0][0]} ~ {rows[-1][0]}  最新 {ps[-1]}')
 
     json.dump(raw_all, open(RAW, 'w'), ensure_ascii=False)
 
