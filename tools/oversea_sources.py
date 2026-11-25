@@ -180,6 +180,44 @@ def longest_block(h):
 
 
 # ── 源 1：印尼商报（中资在印尼的主战场）────────────────────────────────
+# ── 源 7：上海有色网 SMM 快讯（2026-11-25 §5.106g）─────────────────────
+# 实证补充：用户指出的 VinMetal 大单，微信公众号首发后 SMM 与新浪滚动都转载了，
+# 但新浪我们只接了 7x24 直播流（转载稿进不去）。SMM 是有色行业垂媒，中资海外
+# 冶炼/电厂动态覆盖好，且页面是标准 JSON-LD（headline/description/url），
+# 服务端渲染、无需登录。域名语料天然偏有色，命中 PRE_KW 概率高。
+def src_smm(days=7, limit=40):
+    out = []
+    # ⚠ 该站强制 gzip，urllib 裸抓拿到的是压缩二进制，必须走 requests 自动解压
+    r = requests.get('https://news.smm.cn/live',
+                     headers={'User-Agent': UA,
+                              'Accept': 'text/html,application/xhtml+xml',
+                              'Accept-Language': 'zh-CN,zh;q=0.9'}, timeout=30)
+    h = r.text
+    for m in re.finditer(
+            r'"url":"(https://news\.smm\.cn/live/detail/[A-Z0-9]+)"\s*,\s*'
+            r'"headline":"([^"]{6,150})"\s*,\s*"description":"([^"]{0,300})"', h):
+        url, title, desc = m.group(1), m.group(2), m.group(3)
+        # JSON-LD 里没有发布时间字段时先不带日期，入库前按 URL 详情页补
+        out.append({'title': title.replace('\\u201c', '"').replace('\\u201d', '"'),
+                    'url': url, 'date': '', 'src': 'SMM上海有色网',
+                    'snip': desc.replace('\\u201c', '"').replace('\\u201d', '"')[:160]})
+        if len(out) >= limit:
+            break
+    # 逐条取详情页补日期（该站 gzip，必须 requests；SMM 无日期会被写盘的
+    # 「无日期清退」规则当垃圾清掉——2026-11-25 实测 5 条全灭的教训）
+    dated = []
+    for x in out:
+        try:
+            hd = requests.get(x['url'], headers={'User-Agent': UA}, timeout=20).text
+            m = re.search(r'20\d\d-\d\d-\d\d', hd)
+            x['date'] = m.group(0) if m else ''
+        except Exception:
+            x['date'] = ''
+        dated.append(x)
+        time.sleep(0.4)
+    return dated
+
+
 def src_shangbao(days=7, limit=40):
     out = []
     for ch in ('economy', 'financial'):
@@ -377,7 +415,7 @@ def src_gosilu(days=14, limit=30):
 SOURCES = [('印尼商报', src_shangbao), ('国复咨询', src_goalfore), ('国复回扫', src_goalfore_walk),
            ('丝路出海网', src_gosilu),
            ('我的钢铁', src_mysteel),
-           ('新浪财经7x24', src_sina724)]
+           ('新浪财经7x24', src_sina724), ('SMM上海有色网', src_smm)]
 
 
 def main():
