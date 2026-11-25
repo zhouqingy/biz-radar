@@ -172,8 +172,45 @@ def src_sh():
     return out
 
 
+# ── 源 E：盐城市政务服务网公告公示（市级核准前公示，§5.107c）────────────
+# 用户拍板岚泽案例后点名要「市数据局/审批局核准前公示」；盐城把市级核准前公示
+# 发在 ycsp.yancheng.gov.cn 公告公示栏（大汉 CMS，列表在 recordset CDATA 里）。
+# 港丰机械余气综合利用热电（2026-11-19）即出自此栏。
+def src_ycsp():
+    out = []
+    h = fetch('https://ycsp.yancheng.gov.cn/col/col17325/index.html')
+    for m in re.finditer(
+            r'<record><!\[CDATA\[\s*<li>\s*<a[^>]+href="(/art/[^"]+)"[^>]*>([^<]{8,80})</a>\s*'
+            r'<span[^>]*>(20\d\d-\d\d-\d\d)</span>', h):
+        url, t, d = m.groups()
+        out.append({'t': clean(t), 'rg': '江苏', 'city': '盐城',
+                    'early': '核准公示', 'd': d,
+                    'url': 'https://ycsp.yancheng.gov.cn' + url,
+                    'p': '盐城市数据局·核准前公示',
+                    'snip': '盐城市数据局/审批局核准前公示（市级渠道），公示期7天，公示后即核准。'})
+    return out
+
+
+# ── 源 F：江苏省发改委行政许可公示（省级核准结果，含能源大项目）────────────
+def src_jsfgw():
+    out = []
+    h = fetch('https://fzggw.jiangsu.gov.cn/col/col59371/index.html')
+    for m in re.finditer(r'href="([^"]*/art/[^"]+)"[^>]*(?:title="([^"]{6,80})")?[^>]*>([^<]{6,80})<', h):
+        url, t1, t2 = m.groups()
+        title = (t1 or t2).strip()
+        seg = h[m.start():m.start() + 300]
+        dm = re.search(r'(20\d\d/\d\d/\d\d|20\d\d-\d\d-\d\d)', seg)
+        d = dm.group(1).replace('/', '-') if dm else ''
+        out.append({'t': clean(title), 'rg': '江苏', 'early': '核准公示', 'd': d,
+                    'url': url if url.startswith('http') else 'https://fzggw.jiangsu.gov.cn' + url,
+                    'p': '江苏省发改委·行政许可公示',
+                    'snip': '江苏省发改委核准许可公示（省批项目）。'})
+    return out
+
+
 SOURCES = [('安徽省厅环评', src_ah), ('江苏公众网环评', src_js_gz),
-           ('江苏省厅环评', src_js_provhall), ('上海市厅环评', src_sh)]
+           ('江苏省厅环评', src_js_provhall), ('上海市厅环评', src_sh),
+           ('盐城核准前公示', src_ycsp), ('苏发改核准公示', src_jsfgw)]
 
 
 def rg_of(x):
