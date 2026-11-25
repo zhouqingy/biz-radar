@@ -146,8 +146,34 @@ def src_js_provhall():
     return out
 
 
+# ── 源 D：上海市生态环境局环评公示（拟审批表，2026-11-25 §5.107b）────────
+# link.sthj.sh.gov.cn 列表为规整表格（td title=全称）；浙江/上海列表页均含公示时间段
+def src_sh():
+    out = []
+    for gtype, tag in [('1', '受理公示'), ('2', '拟审批公示')]:
+        try:
+            h = fetch('https://link.sthj.sh.gov.cn/shhj/fa/cms/shhj/hpnsp_list_login.jsp'
+                      '?applyitem=1&approvtype=1&gongshitype=' + gtype)
+        except Exception:
+            continue
+        # 每行：td(项目名) td(地点) td(建设单位) td(环评单位) td(公示时间 2026-11-20 ~2026-11-27) …
+        for m in re.finditer(
+                r'<td title="([^"]{8,90})"[^>]*>[^<]*</td>\s*'
+                r'<td title="([^"]{0,60})"[^>]*>.*?</td>\s*'
+                r'<td title="([^"]{2,60})"[^>]*>.*?</td>(.{0,900}?)</tr>', h, re.S):
+            t, _loc, buyer, rest = m.groups()
+            dm = re.search(r'(20\d\d-\d\d-\d\d)', rest)
+            out.append({'t': clean(t), 'rg': '上海', 'city': '',
+                        'early': '环评公示', 'd': dm.group(1) if dm else '',
+                        'url': 'https://link.sthj.sh.gov.cn/shhj/fa/cms/shhj/hpnsp_list_login.jsp?applyitem=1&approvtype=1&gongshitype=' + gtype,
+                        'p': '上海市生态环境局·环评' + tag,
+                        'snip': '建设单位：%s；公示时间：%s。' % (buyer, (dm.group(0) + '起') if dm else '见公示页')})
+        time.sleep(0.4)
+    return out
+
+
 SOURCES = [('安徽省厅环评', src_ah), ('江苏公众网环评', src_js_gz),
-           ('江苏省厅环评', src_js_provhall)]
+           ('江苏省厅环评', src_js_provhall), ('上海市厅环评', src_sh)]
 
 
 def rg_of(x):
@@ -201,9 +227,9 @@ def main():
         if x['url'] in have or re.sub(r'[\s\W]', '', x['t'])[:22] in tk:
             continue
         old_arr.append({
-            't': x['t'], 'rg': rg_of(x), 'early': '环评公示',
+            't': x['t'], 'rg': x.get('rg') or rg_of(x), 'early': '环评公示',
             'd': x['d'], 'url': x['url'], 'src': x['p'],
-            'snip': '环评受理公示（%s）。环评受理=核准前实质推进信号，距招标/开工近。' % x['p']})
+            'snip': x.get('snip') or '环评受理公示（%s）。环评受理=核准前实质推进信号，距招标/开工近。' % x['p']})
         have.add(x['url'])
         tk.add(re.sub(r'[\s\W]', '', x['t'])[:22])
         added += 1
