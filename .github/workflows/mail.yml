@@ -1,0 +1,84 @@
+name: 商机雷达每日邮件
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # 每天 14:00 北京时间
+  workflow_dispatch:
+  repository_dispatch:
+    types: [manual-mail]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: biz-radar-mail
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 检出正式数据与同一生成入口
+        uses: actions/checkout@v4
+
+      - name: 装 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 核对邮件配置并生成快照预览
+        working-directory: tools
+        env:
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          BIZ_OUT: ${{ github.workspace }}
+          BIZ_SITE: ${{ github.workspace }}
+        run: |
+          if [ -z "$MAIL_USER" ] || [ -z "$MAIL_PASS" ]; then
+            echo "::error::缺少 MAIL_USER / MAIL_PASS；本任务不假装发送成功"
+            exit 1
+          fi
+          python send_daily.py --dry --output-dir "$RUNNER_TEMP/mail-preview" --tag 日报
+
+      - name: 实发日报、重大插发与周一报
+        working-directory: tools
+        env:
+          MAIL_USER: ${{ secrets.MAIL_USER }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          BIZ_OUT: ${{ github.workspace }}
+          BIZ_SITE: ${{ github.workspace }}
+        run: |
+          set -e
+          python send_daily.py --tag 日报
+          python send_daily.py --spot
+          if [ "$(date -u '+%u')" = "1" ]; then
+            python send_daily.py --weekly --tag 同事
+          fi
+
+      - name: 保存已发状态与送达回执
+        run: |
+          git config user.name "biz-radar-mail-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add tools/raw/mail_state.json tools/raw/mail_delivery_log.jsonl
+          if git diff --staged --quiet; then
+            echo "状态和回执无变化"
+            exit 0
+          fi
+          remote=$(git ls-remote origin refs/heads/main | awk '{print $1}')
+          if [ "$remote" != "${GITHUB_SHA}" ]; then
+            echo "::error::发送后仓库基线变化：${GITHUB_SHA} → ${remote}；邮件回执未推，请人工核查"
+            exit 1
+          fi
+          git commit -m "邮件发送回执 $(date -u '+%Y-%m-%d %H:%M') UTC [skip ci]"
+          git push origin HEAD:main
+
+      - name: 上传邮件预览和发送回执
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mail-receipt-${{ github.run_id }}
+          path: |
+            tools/raw/mail_delivery_log.jsonl
+            tools/raw/mail_state.json
+          if-no-files-found: error

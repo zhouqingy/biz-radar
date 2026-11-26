@@ -703,21 +703,15 @@ jobs:
       # 凭证与第 8 步共用同一对 Secret：MAIL_USER / MAIL_PASS
       # （QQ 邮箱授权码 IMAP/SMTP 通用，一个授权码两边都能用）。
       # 任意缺失 → 脚本自己打印一行提示 exit 0，绝不判红。
-      - name: 9) 每日摘要邮件（配置后失败即判红）
+      - name: 9) 每日邮件预览自检（实发由 mail.yml 统一负责）
         if: success()
         env:
-          MAIL_USER: ${{ secrets.MAIL_USER }}
-          MAIL_PASS: ${{ secrets.MAIL_PASS }}
           BIZ_OUT: ${{ github.workspace }}
           BIZ_SITE: ${{ github.workspace }}
         run: |
-          if [ -z "$MAIL_USER" ] || [ -z "$MAIL_PASS" ]; then
-            echo "未配置 MAIL_USER / MAIL_PASS，明确跳过每日摘要"
-            exit 0
-          fi
           cd tools
-          # 路径、数据解析、SMTP 任一失败都返回非零，不再吞成 warning。
-          python daily_digest.py --mail
+          # 与 14:00 实发使用同一生成入口；此处只验证数据、路由和 HTML，不重复发信。
+          python send_daily.py --dry --tag 日报
 
       - name: 10) 最终业务健康闸门
         if: always()
