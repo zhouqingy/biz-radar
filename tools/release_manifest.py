@@ -138,7 +138,9 @@ def metrics(root, scope):
         series = hist.get('s') or {}
         ends = sorted({day(v.get('end')) for v in series.values() if day(v.get('end'))})
         if len(ends) > 1:
-            raise GateError('金属历史端点不一致：%s' % ends)
+            detail = sorted('%s(%s)：%s' % (code, v.get('n') or '未命名', day(v.get('end')))
+                            for code, v in series.items())
+            raise GateError('金属历史端点不一致：%s；品种明细：%s' % (ends, '、'.join(detail)))
         out['metals'] = {'count': len(items), 'updated': day(metals.get('updated')),
                          'historyCount': len(series), 'historyEnds': ends,
                          'historyGenerated': day(hist.get('updated'))}

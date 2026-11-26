@@ -207,6 +207,23 @@ class P0Fixture(unittest.TestCase):
         self.assertNotEqual(r.returncode, 0)
         self.assertIn('历史端点不一致', r.stderr)
 
+    def test_11_spot_lag_is_named_and_recovery_is_allowed(self):
+        p = self.root / 'data.metalhist.js'
+        d = self.read_var(p)
+        d['s'] = {str(i): {'n': '期货%d' % i, 'end': TODAY} for i in range(18)}
+        d['s'].update({'SULFUR': {'n': '硫磺', 'end': '2026-11-25'},
+                       'ACID': {'n': '硫酸', 'end': '2026-11-25'}})
+        dump_js(p, 'DATA_METALHIST', d)
+        r = run_script('release_manifest.py', self.root, 'metals', env={'BIZ_EXPECT_DATE': TODAY})
+        self.assertNotEqual(r.returncode, 0)
+        self.assertIn('SULFUR(硫磺)：2026-11-25', r.stderr)
+        self.assertIn('ACID(硫酸)：2026-11-25', r.stderr)
+        for code in ('SULFUR', 'ACID'):
+            d['s'][code]['end'] = TODAY
+        dump_js(p, 'DATA_METALHIST', d)
+        r = run_script('release_manifest.py', self.root, 'metals', env={'BIZ_EXPECT_DATE': TODAY})
+        self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
+
     def test_10_workflow_contract(self):
         import yaml
         wf = HERE.parent / '.github' / 'workflows'
@@ -221,7 +238,11 @@ class P0Fixture(unittest.TestCase):
         self.assertEqual(groups, ['biz-radar-release'] * 4)
         self.assertNotIn('python build_web.py', (wf / 'digest.yml').read_text())
         self.assertNotIn('python build_web.py', (wf / 'metals.yml').read_text())
-        self.assertIn('refresh_metals_core.py', (wf / 'metals.yml').read_text())
+        metals = (wf / 'metals.yml').read_text()
+        self.assertIn('refresh_metals_core.py', metals)
+        self.assertIn('python spot_100ppi.py', metals)
+        self.assertLess(metals.index('python spot_100ppi.py'), metals.index('python gen_metal_hist.py'))
+        self.assertIn('steps.spot.outcome', metals)
         daily = (wf / 'daily.yml').read_text()
         self.assertIn('python daily_digest.py --mail\n', daily)
         self.assertNotIn('每日摘要发送失败（不影响已推数据）', daily)

@@ -60,6 +60,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4 lxml
 
+      - name: 0) 抓生意社现货 → 缓存与自建历史
+        id: spot
+        # 硫磺 / 硫酸不是新浪期货日 K；必须先更新 spot_hist.json，
+        # 否则 gen_metal_hist.py 只会把昨天的两个现货端点再次打包。
+        continue-on-error: true
+        working-directory: tools
+        timeout-minutes: 5
+        run: python spot_100ppi.py
+
       - name: 1) 抓历史日 K → data.metalhist.js
         id: hist
         # 新浪封 Actions 机房 IP 是常态（§5.68）；失败就跳过历史重建，
@@ -94,7 +103,7 @@ jobs:
       - name: 3) 自检与防回退清单
         env:
           BIZ_EXPECT_DATE: ${{ steps.date.outputs.today }}
-          BIZ_SOURCE_HEALTH: history=${{ steps.hist.outcome }}
+          BIZ_SOURCE_HEALTH: spot=${{ steps.spot.outcome }},history=${{ steps.hist.outcome }}
         run: |
           python - <<'PY'
           import json, re, sys, os
@@ -151,6 +160,7 @@ jobs:
           echo "### 金属行情刷新" >> $GITHUB_STEP_SUMMARY
           echo "| 项 | 值 |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| 生意社现货 | ${{ steps.spot.outcome }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 历史日K | ${{ steps.hist.outcome }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 当日行情 | ${{ steps.core.outcome }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 日期 | $(date -u '+%Y-%m-%d') |" >> $GITHUB_STEP_SUMMARY
@@ -158,6 +168,10 @@ jobs:
       - name: 6) 最终业务健康闸门
         if: always()
         run: |
+          if [ "${{ steps.spot.outcome }}" = "failure" ]; then
+            echo "::error::生意社现货抓取失败；不得把旧现货端点作为完整当日更新发布"
+            exit 1
+          fi
           if [ "${{ steps.hist.outcome }}" = "failure" ]; then
             echo "::error::历史行情抓取失败；当日行情可能已更新，但本任务不得以 success 收尾"
             exit 1
