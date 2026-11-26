@@ -12,10 +12,10 @@ name: 情报精选刷新（每周一）
 #   → 提交进仓库 → 本流程每周一自动把它和新抓到的竞对新闻合并。
 # 好处是：人只负责挑链接，合并去重和发布全自动，不用每次都动 WorkBuddy。
 #
-# ── 为什么必须跑 build_web.py ───────────────────────────────
-# digest.json 只是中间产物，页面读的是 build_web 生成的 data.js / data.news.js。
-# 少了这一步，raw 里更新了、线上页面不动 —— 这是最容易静默失败的地方，
-# 所以第 3 步自检里专门核对 data.js 的 digest.updated 是不是今天。
+# ── 为什么只更新 digest 字段（2026-11-26 P0）─────────────────
+# 旧流程用 merged.snapshot.json 跑 build_web.py，会把其他模块回滚到快照版。
+# 现在 merge_digest.py 同时更新 data.js / data.news.js 的 digest 字段，其余字段断言不变；
+# 自检再核对 raw 与两个产物同源，并通过 release_manifest.py 做日期和数量防回退。
 
 on:
   schedule:
@@ -30,12 +30,14 @@ on:
       - '.github/workflows/digest.yml'   # 改工作流本身也要跑一次，否则「修完重跑还是失败」
       - 'tools/merge_digest.py'
       - 'tools/mine_rival_news.py'
+      - 'tools/release_manifest.py'
 
 permissions:
   contents: write
 
+# 与 daily / metals / guard-index 共用发布锁，避免共享产物并发提交。
 concurrency:
-  group: digest-weekly
+  group: biz-radar-release
   cancel-in-progress: false
 
 jobs:
@@ -67,32 +69,21 @@ jobs:
           # 读 data.js 里的 competitors 列表，逐家抓官网新闻页，按事件词/主业词/海外词分级
           python mine_rival_news.py
 
-      - name: 2) 合并去重（竞对官网 + 微信深度稿）
+      - name: 2) 合并去重（只更新 digest 字段）
         working-directory: tools
+        env:
+          BIZ_OUT: ${{ github.workspace }}
         run: |
           # 读 raw/rival_news.json + raw/wechat_digest.json
           # 相似度 0.72 去重 → 写 raw/digest.json
           python merge_digest.py
 
-      - name: 3) 重建页面
-        working-directory: tools
-        env:
-          BIZ_OUT: ${{ github.workspace }}
-        run: |
-          # merge_digest.py 直接写 data.js，但 build_web 会按 raw/digest.json 重算
-          # data.js + data.news.js，两处口径一致（build_web 里 ELG 那段注释专门说过这个坑）。
-          # 再跑一次 build_web 保证 index.html 与数据同步。
-          #
-          # merged.json 是 build_web.py 的必需输入且不进仓库，用根目录快照补齐。
-          if [ -f ../merged.snapshot.json ]; then
-            cp ../merged.snapshot.json merged.json
-            echo "已用仓库快照 merged.snapshot.json ($(du -h merged.json | cut -f1))"
-          else
-            echo "❌ 仓库缺 merged.snapshot.json，build_web.py 无输入"; exit 1
-          fi
-          python build_web.py
+      # P0：这里不再调用 build_web.py。merge_digest.py 已同时、且仅更新
+      # data.js / data.news.js 的 digest 字段，避免拿 merged.snapshot.json 回写其他模块。
 
-      - name: 4) 自检
+      - name: 4) 自检与防回退清单
+        env:
+          BIZ_SOURCE_HEALTH: rival=${{ steps.rival.outcome }}
         run: |
           python - <<'PY'
           import json, sys, time
@@ -109,29 +100,35 @@ jobs:
           print('data.js digest   %d 条  更新于 %s' % (len(dg.get('items') or []), dg.get('updated')))
           if len(dg.get('items') or []) < 20:
               print('❌ 页面 digest 少于 20 条，疑似被清空，本次不提交'); sys.exit(1)
-          print('✅ 自检通过')
+          ns = open('data.news.js', encoding='utf-8').read()
+          nd = json.loads(ns[ns.index('{'):ns.rindex('}') + 1]).get('digest') or {}
+          assert nd == dg, 'data.news.js 与 data.js 的 digest 不一致'
+          print('✅ data.js / data.news.js / raw digest 同源')
           PY
+          python tools/release_manifest.py build --root "$GITHUB_WORKSPACE" --scope digest
 
       - name: 5) 提交并推送
         run: |
           git config user.name  "biz-radar-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add data.js data.news.js index.html tools/raw/digest.json tools/raw/rival_news.json
+          git add data.js data.news.js release-manifest.json tools/raw/digest.json tools/raw/rival_news.json
           if git diff --staged --quiet; then
             echo "没有变化，跳过提交"
             exit 0
           fi
           git commit -m "情报精选 $(date -u '+%Y-%m-%d') 刷新"
-          git -c rebase.autoStash=true pull --rebase --strategy-option=ours origin main || {
-            git rebase --abort 2>/dev/null || true
-            git pull --no-rebase --strategy-option=ours origin main
-          }
-          for i in 1 2; do
-            if git push; then echo "推送成功（第 $i 次）"; exit 0; fi
-            git pull --rebase --strategy-option=ours origin main || true
-            sleep 5
-          done
-          echo "两次推送均失败"; exit 1
+          # 不用 ours 合并新提交；基线变化即停止，重新在最新 main 上构建。
+          remote=$(git ls-remote origin refs/heads/main | awk '{print $1}')
+          if [ "$remote" != "${GITHUB_SHA}" ]; then
+            echo "::error::发布基线已变化：${GITHUB_SHA} → ${remote}；本次不推，请重跑"
+            exit 1
+          fi
+          git push origin HEAD:main
+
+      - name: 5.5) 仓库与 Pages 回读
+        run: |
+          test "$(git ls-remote origin refs/heads/main | awk '{print $1}')" = "$(git rev-parse HEAD)"
+          python tools/release_manifest.py verify-online --root "$GITHUB_WORKSPACE" --scope digest
 
       - name: 6) 结果摘要
         if: always()
@@ -140,4 +137,12 @@ jobs:
           echo "| 项 | 值 |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
           echo "| 竞对官网抓取 | ${{ steps.rival.outcome }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 合并 / 重建 / 自检 | 见上方各步 |" >> $GITHUB_STEP_SUMMARY
+          echo "| 合并 / 自检 / 发布 | 见上方各步 |" >> $GITHUB_STEP_SUMMARY
+
+      - name: 7) 最终业务健康闸门
+        if: always()
+        run: |
+          if [ "${{ steps.rival.outcome }}" = "failure" ]; then
+            echo "::error::竞对官网抓取失败；已有精选可按守卫发布，但本任务不得以 success 收尾"
+            exit 1
+          fi

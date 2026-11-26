@@ -38,8 +38,9 @@ on:
 permissions:
   contents: write
 
+# daily / digest / metals / guard-index 共用同一把发布锁；只串行，不互相取消。
 concurrency:
-  group: daily-update
+  group: biz-radar-release
   cancel-in-progress: false
 
 jobs:
@@ -392,7 +393,7 @@ jobs:
       #     宁可让规划页停在上一次的版本，也不能拖垮整个每日更新。
       - name: 4.7) 生成规划前瞻（独立模块，不进商机库）
         working-directory: tools
-        continue-on-error: true
+        # P0：关键模块失败必须可见，不再静默沿用旧文件后继续发布。
         timeout-minutes: 5
         env:
           BIZ_OUT: ${{ github.workspace }}
@@ -413,6 +414,17 @@ jobs:
             exit 1
           fi
           python build_plan_forecast.py
+
+      - name: 4.8) 本周变化与质量快照（同一批①库）
+        working-directory: tools
+        env:
+          BIZ_OUT: ${{ github.workspace }}
+          BIZ_SITE: ${{ github.workspace }}
+          BIZ_WORKSPACE: ${{ github.workspace }}
+        run: |
+          # 两块都直接读刚生成的三个 chunk；不得沿用上周或上一快照。
+          python build_changes.py
+          python healthcheck.py
 
       - name: 5) 检查产物
         run: |
@@ -537,49 +549,12 @@ jobs:
       # ⚠ 阶段③要做的事：把 tools/ 下的 biz_rules / collect_v4 / build_data / build_web
       #   换成最新版，跑一次全量对齐、逐条核对 1119 → 912 那 207 条的差异，
       #   确认后再把闸门阈值放开到 100%。
-      - name: 5.5) 口径一致性闸门（不通过则跳过推送，不判红）
+      - name: 5.5) 统一发布清单与防回退闸门（失败即停）
         id: gate
         run: |
-          python - <<'PY'
-          import json, subprocess, sys, os
-
-          def read_total(path):
-              s = open(path, encoding='utf-8').read()
-              j = json.loads(s[s.index('=') + 1:].strip().rstrip(';'))
-              return j.get('meta', {}).get('total', 0)
-
-          new = read_total('data.core.js')
-          try:
-              head = subprocess.run(['git', 'show', 'HEAD:data.core.js'],
-                                    capture_output=True, text=True, check=True).stdout
-              open('/tmp/head_core.js', 'w', encoding='utf-8').write(head)
-              old = read_total('/tmp/head_core.js')
-          except Exception as e:
-              print('读不到 HEAD 版 data.core.js（%s），按首次构建处理' % str(e)[:60])
-              old = new
-
-          diff = abs(new - old) / float(max(old, 1))
-          print('本次构建 %s 条 | 在库 %s 条 | 差异 %.1f%%' % (new, old, diff * 100))
-
-          # 2026-11-08 22:55 用户裁决「页面已经确定了，可以更新数据了」→ 放开闸门。
-          # 原来的逻辑：构建条数与在库条数差 >1% 就跳过推送（阶段③止血用）。
-          # 现在 tools/ 已与本地口径完全一致（biz_rules 60153B 等逐字节相同），
-          # 全量重建 3905 → judge 剔 1109 → semantic_drop 剔 1884 → 入库 912，
-          # 且这 912 条与线上 core 的 meta.total 逐字节一致。
-          # 阈值放到 50%：正常重建不会触发；只有「规则源跑偏、条数爆掉/塌掉」
-          # 这类事故才会拦住，仍然不判红（数据一条不动，等人工看）。
-          ok = 'true'
-          if diff > 0.50:
-              ok = 'false'
-              print('')
-              print('=' * 66)
-              print('⚠ 构建条数与在库条数差 %.0f%%，超过 50%% 安全线，已跳过推送。' % (diff * 100))
-              print('  原因：条数变化过大，通常是规则源跑偏或 raw 源异常。')
-              print('  处置：这不算失败，数据一条不动。人工核对后再决定是否手动推送。')
-              print('=' * 66)
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-              f.write('ok=%s\n' % ok)
-          PY
+          # 同快照核对 core / chunks / changes；日期回退、关键模块塌缩均返回非零。
+          python tools/release_manifest.py build --root "$GITHUB_WORKSPACE" --scope daily
+          echo "ok=true" >> "$GITHUB_OUTPUT"
 
       # ── 提交段：核心修复 ─────────────────────────────────────────
       # ★ 2026-11-13 新增：重建纵向闸门。
@@ -627,8 +602,9 @@ jobs:
           # 只点名 4 个文件，避免把 tools/raw 下的缓存、日志、验证码图（很杂）一起带上去。
           # 2026-11-08 §5.52：外加海外速览两个数据文件 —— 采集完不提交 = 白抓，
           # 「8 天还是 11 条」就是这类问题的另一种表现。
-          git add -A '*.js' '*.html' 'merged.snapshot.json' \
+          git add -A '*.js' '*.html' 'merged.snapshot.json' 'release-manifest.json' \
                   'tools/raw/jiangsu.json' 'tools/raw/zhejiang.json' \
+                  'tools/raw/metals_cache.json' 'tools/raw/spot_cache.json' \
                   'tools/raw/anhui.json' 'tools/raw/shanghai.json' \
                   'tools/raw/oversea_flash.json' 'tools/raw/oversea_manual.json' \
                   'tools/raw/weekly' 'tools/raw/early' \
@@ -644,26 +620,20 @@ jobs:
 
           git commit -m "自动更新 $(date -u '+%Y-%m-%d %H:%M') UTC"
 
-          # 把远端的新提交接上再推。用 rebase 不用 merge：
-          # 产物文件与远端冲突时 rebase 保本地（我们的这版是刚构建的，更新）。
-          git -c rebase.autoStash=true pull --rebase --strategy-option=ours origin main || {
-            echo "rebase 失败，改用合并策略"
-            git rebase --abort 2>/dev/null || true
-            git pull --no-rebase --strategy-option=ours origin main
-          }
+          # 发布期间若出现任何新提交，明确失败并重新跑，绝不用 ours 把对方改动冲掉。
+          remote=$(git ls-remote origin refs/heads/main | awk '{print $1}')
+          if [ "$remote" != "${GITHUB_SHA}" ]; then
+            echo "::error::发布基线已变化：${GITHUB_SHA} → ${remote}；本次不推，请在最新 main 上重跑"
+            exit 1
+          fi
+          git push origin HEAD:main
+          echo "推送成功：$(git rev-parse HEAD)"
 
-          # 推两次：第一次可能又被抢先，重试一次基本能过
-          for i in 1 2; do
-            if git push; then
-              echo "推送成功（第 $i 次尝试）"
-              exit 0
-            fi
-            echo "第 $i 次推送被拒，拉取后重试"
-            git pull --rebase --strategy-option=ours origin main || true
-            sleep 5
-          done
-          echo "两次推送均失败"
-          exit 1
+      - name: 6.5) 仓库与 Pages 回读
+        if: steps.gate.outputs.ok == 'true' && steps.rebuild_gate.outputs.ok == 'true'
+        run: |
+          test "$(git ls-remote origin refs/heads/main | awk '{print $1}')" = "$(git rev-parse HEAD)"
+          python tools/release_manifest.py verify-online --root "$GITHUB_WORKSPACE" --scope daily
 
       # ══════════════════════════════════════════════════════════════
       # 7) 采集健康判定（2026-11-13 新增 · 防「全绿但零新增」）
@@ -683,16 +653,15 @@ jobs:
           case "$F" in ''|*[!0-9]*) F=0;; esac
           echo "本轮采集新增: $A 条 | 整站失败: $F 站"
           echo "库内条数: ${META_TOTAL:-?} | 数据日期: ${META_ASOF:-?} | meta.new: ${META_NEW:-?}"
-          # §5.90（2026-11-21 用户拍板「一更一个错误」）：不再判红阻断。
-          # 背景：江苏/浙江/合肥/安庆 4 主源把 GitHub Actions 出口 IP 封了
-          # （源站健在，沙箱同参数 2026-11-21 实测 +122 条）。采集主责已移交
-          # 沙箱定时任务，CI 侧采集只是兜底，源站拒 GHA IP 属已知外部原因。
-          # 健康结论仍如实写进 HEALTH_NOTE 由收工邮件报告；数据停滞由
-          # 5.6 纵向闸门与 3.95/5.5 守卫兜底。
-          if [ "$F" -ge 3 ]; then
-            echo "::warning::$F 站整站失败（已知：源站拒 GHA IP，沙箱代采为主）新增 $A 条"
+          # 已知 GHA 出口拒访仍保留原因说明，但“3 站以上失败且 0 新增”
+          # 不能再以 success 收尾；先完成通知，再由最后的健康闸门判红。
+          if [ "$F" -ge 3 ] && [ "$A" -eq 0 ]; then
+            echo "::error::采集实质失效：$F 站整站失败且新增 0 条（可能为源站拒 GHA IP）"
+            echo "HEALTH_FAILED=1" >> "$GITHUB_ENV"
+          elif [ "$F" -ge 3 ]; then
+            echo "::warning::$F 站整站失败，但本轮仍有 $A 条新增"
           fi
-          echo "采集健康判定通过（§5.90 起不再判红，结论见收工邮件）"
+          echo "采集健康状态已记录（结论见收工邮件与最终闸门）"
           # 把结论写成一行摘要，交给下一步「8) 收工通知」直接引用，
           # 免得邮件脚本再解析一遍日志（解析口径一分叉就会说两种话）。
           if [ "$F" -ge 3 ] && [ "$A" -eq 0 ]; then
@@ -734,17 +703,28 @@ jobs:
       # 凭证与第 8 步共用同一对 Secret：MAIL_USER / MAIL_PASS
       # （QQ 邮箱授权码 IMAP/SMTP 通用，一个授权码两边都能用）。
       # 任意缺失 → 脚本自己打印一行提示 exit 0，绝不判红。
-      - name: 9) 每日摘要邮件（未配 MAIL_* 则跳过）
-        if: always()
-        continue-on-error: true
+      - name: 9) 每日摘要邮件（配置后失败即判红）
+        if: success()
         env:
           MAIL_USER: ${{ secrets.MAIL_USER }}
           MAIL_PASS: ${{ secrets.MAIL_PASS }}
+          BIZ_OUT: ${{ github.workspace }}
+          BIZ_SITE: ${{ github.workspace }}
         run: |
           if [ -z "$MAIL_USER" ] || [ -z "$MAIL_PASS" ]; then
-            echo "未配置 MAIL_USER / MAIL_PASS，跳过每日摘要（不影响采集）"
+            echo "未配置 MAIL_USER / MAIL_PASS，明确跳过每日摘要"
             exit 0
           fi
           cd tools
-          python daily_digest.py --mail || echo "::warning::每日摘要发送失败（不影响已推数据）"
+          # 路径、数据解析、SMTP 任一失败都返回非零，不再吞成 warning。
+          python daily_digest.py --mail
+
+      - name: 10) 最终业务健康闸门
+        if: always()
+        run: |
+          if [ "${HEALTH_FAILED:-0}" = "1" ]; then
+            echo "::error::本轮数据已按守卫发布，但采集业务状态失败；请查看 1) 采集与 7) 健康判定"
+            exit 1
+          fi
+          echo "业务健康闸门通过"
 

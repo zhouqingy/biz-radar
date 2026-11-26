@@ -30,6 +30,11 @@ on:
 permissions:
   contents: write
 
+# 页面恢复也属于发布，与 daily / digest / metals 共用同一把锁。
+concurrency:
+  group: biz-radar-release
+  cancel-in-progress: false
+
 jobs:
   guard:
     runs-on: ubuntu-latest
@@ -60,19 +65,10 @@ jobs:
           git add index.html
           git commit -m "页面版本守卫：检测到老版回滚，已用正版副本恢复（$(date -u '+%Y-%m-%d %H:%M') UTC）"
 
-          git -c rebase.autoStash=true pull --rebase --strategy-option=ours origin main || {
-            git rebase --abort 2>/dev/null || true
-            git pull --no-rebase --strategy-option=ours origin main
-          }
-
-          for i in 1 2; do
-            if git push; then
-              echo "恢复推送成功（第 $i 次尝试）"
-              exit 0
-            fi
-            echo "第 $i 次推送被拒，拉取后重试"
-            git pull --rebase --strategy-option=ours origin main || true
-            sleep 5
-          done
-          echo "两次恢复推送均失败"
-          exit 1
+          # 恢复前再次确认基线；若有新提交则退出并重跑检查，绝不用 ours 覆盖。
+          remote=$(git ls-remote origin refs/heads/main | awk '{print $1}')
+          if [ "$remote" != "${GITHUB_SHA}" ]; then
+            echo "::error::页面守卫基线已变化：${GITHUB_SHA} → ${remote}；本次不推，等待重新检查"
+            exit 1
+          fi
+          git push origin HEAD:main

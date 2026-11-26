@@ -32,6 +32,28 @@ from preflight import require_briefing
 require_briefing('daily_digest.py')
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
+
+
+def find_site():
+    """定位真正发布的三块①库，兼容本地与 GitHub Actions 目录。
+
+    CI 布局是 <repo>/tools + <repo>/data.*.js；旧逻辑却固定再套一层
+    biz-radar/，最终读到 <repo>/biz-radar/data.items.js 并 FileNotFoundError。
+    """
+    up = os.path.dirname(ROOT)
+    cands = [os.environ.get('BIZ_OUT'), os.environ.get('BIZ_SITE'),
+             up, os.path.join(up, 'biz-radar'), '/workspace/biz-radar']
+    tried = []
+    for path in cands:
+        if not path or path in tried:
+            continue
+        tried.append(path)
+        if os.path.isfile(os.path.join(path, 'data.items.js')):
+            return os.path.abspath(path)
+    raise FileNotFoundError('找不到①库 data.items.js；已试：%s' % tried)
+
+
+SITE = find_site()
 TODAY = time.strftime('%Y-%m-%d')
 YDAY = time.strftime('%Y-%m-%d', time.localtime(time.time() - 86400))
 
@@ -43,7 +65,7 @@ def load_items():
     allcols = collections.defaultdict(list)
     n = 0
     for f in ('data.items.js', 'data.chunk-lead.js', 'data.chunk-rest.js'):
-        p = os.path.join(os.path.dirname(ROOT), 'biz-radar', f)
+        p = os.path.join(SITE, f)
         s = open(p, encoding='utf-8').read()
         m = re.search(r'=\s*(\{.*\})\s*;?\s*$', s, re.S)
         d = json.loads(m.group(1))
@@ -244,11 +266,14 @@ def main():
     text, html, total = build()
     print(text)
     print('\n（①库当前 %d 条）' % total)
+    os.makedirs(os.path.join(ROOT, 'raw'), exist_ok=True)
     json.dump({'updated': time.strftime('%Y-%m-%d %H:%M'), 'text': text, 'html': html},
               open(os.path.join(ROOT, 'raw', 'digest_daily.json'), 'w', encoding='utf-8'),
               ensure_ascii=False)
     if '--mail' in sys.argv:
-        send_mail(text, html=html)
+        if not send_mail(text, html=html):
+            # 显式要求发送却没有可用凭证，不能再以 0 退出制造“已发送”假象。
+            raise RuntimeError('每日摘要未发送：缺少有效邮件配置')
 
 
 if __name__ == '__main__':

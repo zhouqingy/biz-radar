@@ -25,7 +25,11 @@ import json, os, re, subprocess, sys, time
 from datetime import datetime
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(ROOT, '..', 'biz-radar', 'data.metalhist.js')
+_PARENT = os.path.dirname(ROOT)
+OUT_DIR = (os.environ.get('BIZ_OUT') or os.environ.get('BIZ_SITE')
+           or (os.path.join(_PARENT, 'biz-radar')
+               if os.path.isdir(os.path.join(_PARENT, 'biz-radar')) else _PARENT))
+OUT = os.path.join(OUT_DIR, 'data.metalhist.js')
 RAW = os.path.join(ROOT, 'raw', 'metal_hist_raw.json')
 
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120'

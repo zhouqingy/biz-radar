@@ -8,8 +8,8 @@ name: 金属行情刷新（交易日）
 #
 # ── 两个产出，缺一不可 ──────────────────────────────────────
 #   data.metalhist.js  历史曲线（新浪期货日K，20 年全历史）
-#   data.core.js       当日行情 + 涨跌幅（build_web.py 里 fetch_metals 每次构建现抓，
-#                      带 6 次重试 + 失败回退 raw/metals_cache.json）
+#   data.core.js       当日行情 + 涨跌幅（refresh_metals_core.py 只替换 metals 字段，
+#                      复用同一 fetch_metals 抓取与缓存逻辑，不重建其他业务模块）
 # 只跑前者的话，页面「今日行情」那排数字会一直停在旧日期。
 #
 # ── 时间 ────────────────────────────────────────────────────
@@ -29,13 +29,15 @@ on:
     paths:
       - '.github/workflows/metals.yml'   # 改工作流本身也要跑一次，否则「修完重跑还是失败」
       - 'tools/gen_metal_hist.py'
-      - 'tools/build_web.py'
+      - 'tools/refresh_metals_core.py'
+      - 'tools/release_manifest.py'
 
 permissions:
   contents: write
 
+# 与 daily / digest / guard-index 共用发布锁，避免整站产物互相覆盖。
 concurrency:
-  group: metal-daily
+  group: biz-radar-release
   cancel-in-progress: false
 
 jobs:
@@ -64,6 +66,9 @@ jobs:
         # 保留仓库里上一次推送的版本，不让它挡住当日行情重建（§5.110）。
         continue-on-error: true
         working-directory: tools
+        env:
+          BIZ_OUT: ${{ github.workspace }}
+          BIZ_SITE: ${{ github.workspace }}
         timeout-minutes: 12
         run: |
           # 脚本内部：逐品种 curl 新浪接口，全部失败时不覆盖线上文件、返回码 1。
@@ -78,22 +83,18 @@ jobs:
           BIZ_OUT: ${{ github.workspace }}
         timeout-minutes: 12
         run: |
-          # build_web.py 会顺带重建全部数据文件。它的输入（raw/*.json）都在仓库里，
-          # 不跑采集也能确定性重放，所以这一步是安全的。
-          #
-          # ⚠ merged.json 不在仓库里（4MB、由 build_data.py 从 raw 生成，长期当构建产物看）。
-          #   仓库根目录放一份快照，构建前拷进 tools/ 供 build_web.py 读。
-          #   没有这行时，2026-11-04 首次手动运行就挂在
-          #   FileNotFoundError: tools/merged.json。
-          if [ -f ../merged.snapshot.json ]; then
-            cp ../merged.snapshot.json merged.json
-            echo "已用仓库快照 merged.snapshot.json ($(du -h merged.json | cut -f1))"
-          else
-            echo "❌ 仓库缺 merged.snapshot.json，build_web.py 无输入"; exit 1
-          fi
-          python build_web.py
+          # P0：只替换 data.core.js 的 metals 字段；其余 meta / chunks 原样保留。
+          # 不再读取 merged.snapshot.json，也不再调用 build_web.py 重建整站。
+          python refresh_metals_core.py
 
-      - name: 3) 自检
+      - name: 2.8) 固定本次交易日
+        id: date
+        run: echo "today=$(date -u '+%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+
+      - name: 3) 自检与防回退清单
+        env:
+          BIZ_EXPECT_DATE: ${{ steps.date.outputs.today }}
+          BIZ_SOURCE_HEALTH: history=${{ steps.hist.outcome }}
         run: |
           python - <<'PY'
           import json, re, sys, os
@@ -116,38 +117,33 @@ jobs:
               print('❌ 当日行情为空，本次不提交'); sys.exit(1)
           print('✅ 自检通过')
           PY
+          # 当日价格与所有历史端点必须同为本次交易日；回退缓存会在这里判红。
+          python tools/release_manifest.py build --root "$GITHUB_WORKSPACE" --scope metals
 
       - name: 4) 提交并推送
         run: |
           git config user.name  "biz-radar-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add data.metalhist.js data.core.js
+          git add data.metalhist.js data.core.js release-manifest.json \
+                  tools/raw/metals_cache.json tools/raw/spot_cache.json tools/raw/spot_hist.json
           if git diff --staged --quiet; then
             echo "没有变化，跳过提交"
             exit 0
           fi
           git commit -m "金属行情 $(date -u '+%Y-%m-%d') 收盘更新"
 
-          # ⚠ 2026-11-04 修（run #4 失败根因）：
-          #   build_web.py 会顺带重建全部数据文件（data.js / index.html / 分块…），
-          #   本工作流只提交上面两个，其余留在工作区 => 未暂存改动。
-          #   一旦 push 撞上并发推送（例如 WorkBuddy 用 API 推 index.html）触发重试，
-          #   裸 `git pull --rebase` 会直接报
-          #   "cannot pull with rebase: You have unstaged changes"，重试全部作废。
-          #   这里先把无关产物收进 stash，工作区干净，rebase 才能正常兜底。
-          #   runner 结束即销毁，stash 不需要额外清理。
-          git stash push --include-untracked -m "build_web 其它产物（本工作流不提交）" || true
+          # 本流程已无 build_web 副作用。若基线变化，明确停止，不用 ours 覆盖新提交。
+          remote=$(git ls-remote origin refs/heads/main | awk '{print $1}')
+          if [ "$remote" != "${GITHUB_SHA}" ]; then
+            echo "::error::发布基线已变化：${GITHUB_SHA} → ${remote}；本次不推，请重跑"
+            exit 1
+          fi
+          git push origin HEAD:main
 
-          for i in 1 2 3 4 5; do
-            if git push; then echo "推送成功（第 $i 次）"; exit 0; fi
-            echo "第 $i 次推送失败，同步远端后重试…"
-            git pull --rebase --strategy-option=ours origin main || {
-              git rebase --abort 2>/dev/null || true
-              git pull --no-rebase --strategy-option=ours origin main || true
-            }
-            sleep 4
-          done
-          echo "推送重试 5 次仍失败"; exit 1
+      - name: 4.5) 仓库与 Pages 回读
+        run: |
+          test "$(git ls-remote origin refs/heads/main | awk '{print $1}')" = "$(git rev-parse HEAD)"
+          python tools/release_manifest.py verify-online --root "$GITHUB_WORKSPACE" --scope metals
 
       - name: 5) 结果摘要
         if: always()
@@ -158,3 +154,11 @@ jobs:
           echo "| 历史日K | ${{ steps.hist.outcome }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 当日行情 | ${{ steps.core.outcome }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 日期 | $(date -u '+%Y-%m-%d') |" >> $GITHUB_STEP_SUMMARY
+
+      - name: 6) 最终业务健康闸门
+        if: always()
+        run: |
+          if [ "${{ steps.hist.outcome }}" = "failure" ]; then
+            echo "::error::历史行情抓取失败；当日行情可能已更新，但本任务不得以 success 收尾"
+            exit 1
+          fi

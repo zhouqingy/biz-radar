@@ -17,17 +17,18 @@ RAW = os.path.join(ROOT, 'raw')
 # 原来写死第一种，Actions 上就变成 <repo>/biz-radar/data.js（多套一层），
 # 2026-11-04 首次跑 digest.yml 报 FileNotFoundError 就是这个原因。
 # 和 build_web.py 保持一致：优先认 BIZ_OUT。
-def _data_js():
+def _out_file(name):
     out = os.environ.get('BIZ_OUT')
     if out:
-        return os.path.join(out, 'data.js')
-    a = os.path.join(os.path.dirname(ROOT), 'biz-radar', 'data.js')
+        return os.path.join(out, name)
+    a = os.path.join(os.path.dirname(ROOT), 'biz-radar', name)
     if os.path.exists(a):
         return a
-    return os.path.join(os.path.dirname(ROOT), 'data.js')
+    return os.path.join(os.path.dirname(ROOT), name)
 
 
-DATA = _data_js()
+DATA = _out_file('data.js')
+NEWS = _out_file('data.news.js')
 RIVAL = os.path.join(RAW, 'rival_news.json')
 WX = os.path.join(RAW, 'wechat_digest.json')
 SIM = 0.72
@@ -69,24 +70,35 @@ def main():
         keys.append(n)
         kept.append(x)
 
-    # 落盘供 build_web.py 重建时保留（否则下次全量重建会把精选清空）
-    json.dump({'updated': time.strftime('%Y-%m-%d %H:%M'), 'n_src': rv.get('n_src', 0),
-               'items': kept}, open(os.path.join(RAW, 'digest.json'), 'w', encoding='utf-8'),
+    # 只替换 digest 字段，其余业务模块保持原值；绝不用 merged.snapshot 重建整站。
+    # data.js 是整包回退，data.news.js 是页面实际懒加载模块，两者必须同事务更新。
+    payload = {'updated': time.strftime('%Y-%m-%d %H:%M'),
+               'n_src': rv.get('n_src', 0), 'items': kept}
+    json.dump(payload, open(os.path.join(RAW, 'digest.json'), 'w', encoding='utf-8'),
               ensure_ascii=False, indent=1)
 
-    s = open(DATA, encoding='utf-8').read()
-    d = json.loads(s[s.find('{'):s.rfind('}') + 1])
-    d['digest'] = {'updated': time.strftime('%Y-%m-%d %H:%M'),
-                   'n_src': rv.get('n_src', 0), 'items': kept}
-    out = 'window.DATA=' + json.dumps(d, ensure_ascii=False, separators=(',', ':')) + ';'
-    open(DATA, 'w', encoding='utf-8').write(out)
+    sizes = []
+    for path in (DATA, NEWS):
+        s = open(path, encoding='utf-8').read()
+        d = json.loads(s[s.find('{'):s.rfind('}') + 1])
+        before = {k: v for k, v in d.items() if k != 'digest'}
+        d['digest'] = dict(payload)
+        assert {k: v for k, v in d.items() if k != 'digest'} == before, \
+            '除 digest 外的数据发生变化，拒绝写盘：' + path
+        prefix = s[:s.find('{')]
+        out = prefix + json.dumps(d, ensure_ascii=False, separators=(',', ':')) + ';\n'
+        tmp = path + '.tmp'
+        open(tmp, 'w', encoding='utf-8').write(out)
+        os.replace(tmp, path)
+        sizes.append(len(out))
 
     from collections import Counter
     print('合并前 %d 条 → 相似度去重后 %d 条' % (len(allx), len(kept)))
     print('来源:', dict(Counter(x.get('srcKind') for x in kept)))
     print('分级:', dict(Counter(x['level'] for x in kept)))
     print('分类:', dict(Counter(x['tag'] for x in kept)))
-    print('data.js 已写入 %.2f MB' % (len(out) / 1048576.0))
+    print('data.js + data.news.js 已同步更新（%.2f MB / %.2f MB），其余字段未改'
+          % (sizes[0] / 1048576.0, sizes[1] / 1048576.0))
 
 
 if __name__ == '__main__':
