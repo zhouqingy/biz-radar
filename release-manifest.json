@@ -9,8 +9,8 @@
       "sha256": "8e3710f077697b22fe845b9b148ac9760bb4051b441703811c4d8549eaa8a632"
     },
     "data.changes.js": {
-      "bytes": 45001,
-      "sha256": "b686a887095a4068817958ddfabe1e18d24c122410bc3a088359168e9b5094fb"
+      "bytes": 43759,
+      "sha256": "bf5bb480c82bef590597572f2c4bbded9f5d6fabe7d01ac02d355f7c2ada2638"
     },
     "data.chunk-lead.js": {
       "bytes": 263472,
@@ -21,8 +21,8 @@
       "sha256": "fff8c40f784d04dce35015001733a87badfe103b8949551d1140bb5f1a9aaac9"
     },
     "data.core.js": {
-      "bytes": 19569,
-      "sha256": "31ab5e17e614507579feaaffb7b80fdbe6c02d610be0ffb9dcb6036ce1efef02"
+      "bytes": 19701,
+      "sha256": "127b2612bd39b63a4df1cef3bd497e8b7de24812282961d638c4557948a58446"
     },
     "data.entprobe.js": {
       "bytes": 1013545,
@@ -37,16 +37,16 @@
       "sha256": "a9730667641fe6941584351105a1c43cdc0c97a189ea277389a813bed8def98e"
     },
     "data.js": {
-      "bytes": 2416241,
-      "sha256": "8681eac83afe3c85f9875499e65cb3bed4d9fdb00efc12e3d853bae02a3c1776"
+      "bytes": 2275601,
+      "sha256": "09e8d5fda423e095821037429ed6f6b56cce7c19d770dabafa0948a532a7fd67"
     },
     "data.metalhist.js": {
       "bytes": 361281,
       "sha256": "21336b1667627896b06771d6c22843c6e0861ccb7e2dd24f30166fe1545f33bc"
     },
     "data.news.js": {
-      "bytes": 574243,
-      "sha256": "ee3f8d4e3ae4fc08def8891b7adbe1fbca8fe656532a806562363180d5e03444"
+      "bytes": 449976,
+      "sha256": "4c6fb06a1897178c3b84344d8ef976e2f3a5dff0dbc5d2efa09e65a8c97f749f"
     },
     "data.org.js": {
       "bytes": 824126,
@@ -73,8 +73,8 @@
       "sha256": "faca5312ff10424a03771421c8df043615f6d28981607db78d49caf4cffd04bb"
     },
     "index.html": {
-      "bytes": 839005,
-      "sha256": "d3bd997990b7d93c05b8d3bc3ee4aea7be1c88e90781ab5bf40fa67e14c1e6e7"
+      "bytes": 863883,
+      "sha256": "d975493179d9d5290414f6dbb86eb7eed85dde6d0a5a52d7b389a982515c1997"
     }
   },
   "modules": {
@@ -94,9 +94,9 @@
   },
   "run": {
     "attempt": "1",
-    "baseSha": "0b1ecaa7eeba6c0f93ab31835635620bef7db040",
-    "builtAt": "2026-11-26T09:20:23+00:00",
-    "id": "45790605567",
+    "baseSha": "0b00eeaa521c47904ff274d060cdf9b73ed81c52",
+    "builtAt": "2026-11-26T14:23:30+00:00",
+    "id": "45837619231",
     "scope": "metals",
     "sourceHealth": "spot=success,history=success",
     "workflow": "金属行情刷新（交易日）"
