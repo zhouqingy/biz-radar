@@ -919,15 +919,38 @@ for c in CLIENTS:
                    for x in abitems[:6]],
     })
 # 只在 AB / AB2 里出现、但不在人工名单里的海外客户，补进来（标 pri=3 表示「挖掘到的，未确认」）
+# §5.118（2026-11-26 用户指出海螺两边对不上/重复）：这一支若与已有卡是**同一家企业**
+# （名字互含，如「安徽海螺」vs「安徽海螺集团有限责任公司」），必须把 abroad 并进已有卡、
+# 不能另开一张 pri=3 的影子卡 —— 否则海外动态被劈成两半，用户两边各看到一半还以为是重复。
 for src in (AB.get('clients', []), AB2.get('clients', [])):
     for c in src:
         nm = c.get('name', '')
         k = nm.replace('（', '(').split('(')[0][:4]
         if not k or k in _seen_clear:
             continue
+        # 同企业合并判定：与已有卡名互含（剥括号后一边包含另一边，短边 ≥3 字）
+        _nm0 = nm.replace('（', '(').split('(')[0]
+        _tgt = None
+        for _ex in overseas:
+            _en = _ex['name'].replace('（', '(').split('(')[0]
+            _s, _l = (_nm0, _en) if len(_nm0) <= len(_en) else (_en, _nm0)
+            if len(_s) >= 3 and _s in _l:
+                _tgt = _ex
+                break
+        items = [x for x in (c.get('items') or []) if x.get('title')]
+        _new_ab = [{'title': x['title'][:70], 'date': x.get('date') or '', 'tag': x.get('tag') or '',
+                    'cut': x.get('cut') or OC.guess_cut(x['title'], x.get('desc') or ''),
+                    'desc': (x.get('desc') or '')[:130], 'url': x.get('url') or ''} for x in items[:6]]
+        if _tgt is not None:
+            _have = {_a['title'][:14] for _a in _tgt.get('abroad', [])}
+            for _a in _new_ab:
+                if _a['title'][:14] not in _have:
+                    _tgt.setdefault('abroad', []).append(_a)
+                    _have.add(_a['title'][:14])
+            _seen_clear.add(k)
+            continue
         _seen_clear.add(k)
         grp = c.get('group') or '其他制造'
-        items = [x for x in (c.get('items') or []) if x.get('title')]
         overseas.append({
             'name': nm, 'kw': k, 'n': 0, 'grp': grp, 'pri': 3,
             'why': '新闻/公告中发现的出海动向，尚未确认是否属于我们业务范围',
@@ -935,9 +958,7 @@ for src in (AB.get('clients', []), AB2.get('clients', [])):
             'items': [],
             # 2026-10-22：这一支也要算切口。原来漏了，导致「永钢中亚含装机 360 兆瓦
             # 天然气发电站」这种最该被看见的条目，标签是空的、排序掉到最后。
-            'abroad': [{'title': x['title'][:70], 'date': x.get('date') or '', 'tag': x.get('tag') or '',
-                        'cut': x.get('cut') or OC.guess_cut(x['title'], x.get('desc') or ''),
-                        'desc': (x.get('desc') or '')[:130], 'url': x.get('url') or ''} for x in items[:4]],
+            'abroad': _new_ab,
         })
 # 补 cutN：两支都追加完之后统一补，别写在中间分支里（写在中间时后面的条目补不到）。
 for _c in overseas:
@@ -2030,6 +2051,27 @@ if os.path.exists(_siku_path):
     except Exception as _e:
         print('⚠ raw/siku.json 读失败，跳过：', _e)
 _parts = _chunk_total + dump('core', dict(_core, **_extra)) + dump('org', _org) + dump('news', _news) + dump('graph', _graph_mod) + (dump('siku', _siku_mod) if _siku_mod else 0)
+
+# §5.102 企业出海档案：raw/company_oversea/<企业>.json → data.ovprofile.js
+# （window.DATA_OVPROFILE）。业主画像弹窗 openPjDetail 按业主名懒加载匹配展示；
+# 档案是线索稿，verify 字段原样带出由前端灰标「待核实」，前端不洗白、不另造结论。
+try:
+    _co_dir = os.path.join(ROOT, 'raw', 'company_oversea')
+    _ovprof = {}
+    if os.path.isdir(_co_dir):
+        for _fn in sorted(os.listdir(_co_dir)):
+            if not _fn.endswith('.json'):
+                continue
+            try:
+                _d = json.load(open(os.path.join(_co_dir, _fn), encoding='utf-8'))
+                _ovprof[_d.get('company') or _fn[:-5]] = _d
+            except Exception as _e:
+                print('⚠ company_oversea/%s 解析失败，跳过：%s' % (_fn, _e))
+    _ovprof_js = 'window.DATA_OVPROFILE=' + json.dumps(_ovprof, ensure_ascii=False) + ';'
+    open(os.path.join(OUT, 'data.ovprofile.js'), 'w', encoding='utf-8').write(_ovprof_js)
+    print('出海档案 data.ovprofile.js：%d 家企业' % len(_ovprof))
+except Exception as _e:
+    print('⚠ data.ovprofile.js 生成失败：%s' % _e)
 print('分模块：core + items(列式) + org + news 合计 %.0f KB（单文件 data.js %.0f KB）'
       % (_parts / 1024, len(js.encode('utf-8')) / 1024))
 
