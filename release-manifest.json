@@ -21,8 +21,8 @@
       "sha256": "fff8c40f784d04dce35015001733a87badfe103b8949551d1140bb5f1a9aaac9"
     },
     "data.core.js": {
-      "bytes": 19567,
-      "sha256": "903934e2fd1679b6e54e02b1b6399f69f97f524455f1591971905499cb488755"
+      "bytes": 19569,
+      "sha256": "31ab5e17e614507579feaaffb7b80fdbe6c02d610be0ffb9dcb6036ce1efef02"
     },
     "data.entprobe.js": {
       "bytes": 1013545,
@@ -41,8 +41,8 @@
       "sha256": "8681eac83afe3c85f9875499e65cb3bed4d9fdb00efc12e3d853bae02a3c1776"
     },
     "data.metalhist.js": {
-      "bytes": 361194,
-      "sha256": "86e1885c5abab8ab48d025f24d523b60602ed262b9cebbb4e0454ee5985fddc8"
+      "bytes": 361281,
+      "sha256": "21336b1667627896b06771d6c22843c6e0861ccb7e2dd24f30166fe1545f33bc"
     },
     "data.news.js": {
       "bytes": 574243,
@@ -81,16 +81,25 @@
     "digest": {
       "count": 77,
       "updated": "2026-11-26 08:58"
+    },
+    "metals": {
+      "count": 20,
+      "historyCount": 20,
+      "historyEnds": [
+        "2026-11-26"
+      ],
+      "historyGenerated": "2026-11-26",
+      "updated": "2026-11-26"
     }
   },
   "run": {
     "attempt": "1",
-    "baseSha": "67edef235a69d3bfeb77737f51c9168fb0feb331",
-    "builtAt": "2026-11-26T08:58:56+00:00",
-    "id": "45787256341",
-    "scope": "digest",
-    "sourceHealth": "rival=success",
-    "workflow": "情报精选刷新（每周一）"
+    "baseSha": "0b1ecaa7eeba6c0f93ab31835635620bef7db040",
+    "builtAt": "2026-11-26T09:20:23+00:00",
+    "id": "45790605567",
+    "scope": "metals",
+    "sourceHealth": "spot=success,history=success",
+    "workflow": "金属行情刷新（交易日）"
   },
   "schema": 1
 }
