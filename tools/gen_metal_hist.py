@@ -21,7 +21,7 @@
   沪铜 108660.0 存成 108660）。近 5 年全量 + 更早的按月采样，
   两段各自够画「近 30/90 天」和「近 5 年」两条线。
 """
-import json, os, re, subprocess, sys
+import json, os, re, subprocess, sys, time
 from datetime import datetime
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -113,8 +113,27 @@ def main():
     os.makedirs(os.path.dirname(RAW), exist_ok=True)
     raw_all, series = {}, {}
     ok = 0
+    # §5.116（2026-11-26 用户报「老品种比新品种晚一天」）：新浪日 K 各品种刷新
+    # 有先有后，一次抓取会有部分品种少给最新一根（实测 CU/PB/SN/SS/HC/I/SI 中招）。
+    # 护栏：第一轮抓完取全体最新日，落后 ≥1 天的品种自动重试至多 3 次。
+    rows_map = {}
     for code, sym, name, unit in SYMS:
-        rows = fetch(sym)
+        rows_map[sym] = (code, name, unit, fetch(sym))
+    def _last_d(rows):
+        return rows[-1][0] if rows else ''
+    fut_last = [_last_d(r[-1]) for r in rows_map.values() if r[-1]]
+    max_d = max(fut_last) if fut_last else ''
+    for sym in list(rows_map):
+        code, name, unit, rows = rows_map[sym]
+        for attempt in range(3):
+            if rows and (not max_d or _last_d(rows) >= max_d):
+                break
+            print(f'  ↻ {name}({sym}) 落后于最全品种（{_last_d(rows) or "无"} < {max_d}），重试 {attempt+1}/3')
+            time.sleep(2)
+            rows = fetch(sym)
+        rows_map[sym] = (code, name, unit, rows)
+    for code, sym, name, unit in SYMS:
+        rows = rows_map[sym][3]
         if not rows:
             print(f'  ✗ {name}({sym}) 抓取失败，跳过')
             continue
