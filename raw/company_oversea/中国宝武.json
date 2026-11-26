@@ -1,0 +1,51 @@
+{
+ "company": "中国宝武",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "国内钢铁主业最大业主；海外资产/员工/利润「三个倍增」后仍在扩国际化，海外钢铁基地用能配套是增量。",
+ "org": {
+  "mode": "央企集团 — 2026年海外工作会议部署「十五五」国际化，二级公司/海外基地负责制",
+  "regions": [
+   "东南亚",
+   "中东",
+   "非洲",
+   "欧洲"
+  ],
+  "capital_vehicle": "中国宝武钢铁集团有限公司（国务院国资委直属）及宝武资源/宝武海外基地",
+  "key_person": [
+   {
+    "name": "胡望明",
+    "title": "党委书记、董事长",
+    "scope": "主持2026年海外工作会议，定调「更加国际化的宝武」与「十五五」海外事业；海外战略最终决策人",
+    "url": "https://www.baowugroup.com/media_center/topic_list/5037",
+    "verify": "done"
+   },
+   {
+    "name": "侯安贵",
+    "title": "总经理、党委副书记",
+    "scope": "主持海外工作会议，分管集团经营与海外事业推进",
+    "url": "https://www.baowugroup.com/media_center/topic_list/5037",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-05-08",
+   "t": "中国宝武提出国际化指数目标，锁定沙特、马来西亚、印尼、巴西等重点市场",
+   "src": "中国宝武客户卡",
+   "url": "https://gulfconstructiononline.com/ArticleTA/274215/aramco-baosteel-to-set-up-steel-plate-complex-in-ksa",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-04-30",
+   "t": "宝钢股份沙特绿色低碳全流程厚板项目审慎推进，2026年4月重新评估建设节奏",
+   "src": "中国宝武客户卡",
+   "url": "http://mcchina.org.cn/newsinfo/11175217.html",
+   "verify": "pending"
+  }
+ ]
+}

@@ -1,0 +1,41 @@
+{
+ "company": "PLN Batam",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "巴淡数据中心能源链的核心供电方，已规划燃气电站、光伏和BESS扩容；既可能是项目业主也可能是合作方，需结合Danantara接管后的采购机制持续跟踪。",
+ "org": {
+  "mode": "巴淡区域电力供应企业，印尼国有电力体系属地公司；2026年10月管理权转由Danantara接管",
+  "regions": [
+   "印尼巴淡—民丹电力系统"
+  ],
+  "capital_vehicle": "PT PLN Batam；上层管理机构Danantara Indonesia",
+  "key_person": [
+   {
+    "name": "Kwin Fo",
+    "title": "Direktur Utama / President Director（总裁董事）",
+    "scope": "数据中心大客户购电、发电扩容、燃气/光伏/BESS及电网可靠性决策",
+    "url": "https://dayonedc.com/markets/dayone-signs-indonesias-largest-511mva-450mw-ppa-to-expand-hyperscale-data-center-platform-in-batam",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-10-20",
+   "t": "巴淡峰值负荷将从 841 MW 涨到 2035 年 2540 MW，接近三倍；岛上电网与国网不互联",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-10-13",
+   "t": "2026-10-12 巴淡-民丹大停电 16 小时，41 万户断电，PLN 总裁因此下台",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  }
+ ]
+}

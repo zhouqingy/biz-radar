@@ -1,0 +1,59 @@
+{
+ "company": "合盛硅业",
+ "updated": "2026-11-23",
+ "status": "researched",
+ "source_note": "2026-11-23 首轮调研：合盛官网/业绩说明会记录/全球有机硅网/艾约塔；海外项目均为规划或接触阶段",
+ "verify": "PENDING",
+ "relevance_note": "B+ 档：海外产能落地前以「跟踪观察」为主；工业硅/有机硅都是高电耗行业，若印尼/中亚落地将伴随自备电需求",
+ "org": {
+  "mode": "家族控股+事业部制（八大板块）；海外布局刚起步、无独立海外事业部迹象",
+  "key_person": [
+   {
+    "name": "罗立国",
+    "title": "董事长（创始人）",
+    "scope": "集团战略；亲自出面涉外（2026-07 会见哈萨克斯坦总统托卡耶夫）",
+    "verify": "done",
+    "src": "全球有机硅网 soyjg.com + 合盛官网双源"
+   },
+   {
+    "name": "罗烨栋",
+    "title": "董事、总经理",
+    "scope": "经营（2026 适度收缩光伏、聚焦硅基主业）",
+    "verify": "done",
+    "src": "业绩说明会记录（东方财富公告页）"
+   }
+  ],
+  "capital_vehicle": "宁波合盛集团（控股股东）；生产基地新疆/浙江/四川/云南/黑龙江",
+  "verify": "done"
+ },
+ "layout": [
+  {
+   "country": "印尼（规划）",
+   "what": "首座海外 DMC 有机硅工厂规划 20 万吨/年（2026 年宣布，选址/投产未定）",
+   "src": "艾约塔化工 zh.iotachem.com（单一行业媒体，待进一步核实）",
+   "verify": "pending"
+  },
+  {
+   "country": "哈萨克斯坦（接触中）",
+   "what": "2026-07-16 罗立国出席中哈圆桌会，表态关注哈国硅基新材料机会（无具体项目）",
+   "src": "全球有机硅网",
+   "verify": "pending"
+  }
+ ],
+ "actions_90d": [
+  {
+   "d": "2026-07-17",
+   "t": "2026年上半年预计归母净利润3.2亿—3.8亿元，同比扭亏为盈",
+   "src": "合盛硅业客户卡",
+   "url": "https://finance.sina.com.cn/wm/2026-07-17/doc-iniickaw4190700.shtml",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-05-07",
+   "t": "2026年战略明确“增强上游、延伸下游、完善产业配套和能源补链”，多家工厂配套自备电厂",
+   "src": "合盛硅业客户卡",
+   "url": "https://www.cnfin.com/announ/detail/index.html?announ=lc&dannoun=lcdetail&id=831491576573",
+   "verify": "pending"
+  }
+ ]
+}

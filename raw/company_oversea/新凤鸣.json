@@ -1,0 +1,63 @@
+{
+ "company": "新凤鸣",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "与桐昆共建印尼北加炼化，动力站/热电机会同桐昆园区，对接庄耀中。",
+ "org": {
+  "mode": "新凤鸣控股 — 新凤鸣集团（上市）+ 与桐昆合资泰昆石化（印尼）",
+  "regions": [
+   "印尼北加里曼丹（与桐昆联手）",
+   "徐州/湖州/平湖基地"
+  ],
+  "capital_vehicle": "新凤鸣控股集团（庄奎龙家族）+ 新凤鸣集团股份（上市）",
+  "key_person": [
+   {
+    "name": "庄奎龙",
+    "title": "新凤鸣控股集团董事长",
+    "scope": "创始人，与桐昆联手启动印尼北加炼化项目；2023年随李强总理印尼工商界晚宴",
+    "url": "https://www.xinfengming.com/cn/news/group-news-1595.html",
+    "verify": "done"
+   },
+   {
+    "name": "庄耀中",
+    "title": "集团董事长、总裁",
+    "scope": "2021年接棒，海外项目建设与经营一把手",
+    "url": "https://xinfengming.com/cn/news/page/53",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-28",
+   "t": "埃及36万吨/年功能性纤维项目ODI获批，220KV变电站落地、聚酯与纺丝方案敲定",
+   "src": "新凤鸣客户卡",
+   "url": "https://www.ccedia.com/energy_detail/c-_detailId%3D1549348287324348416.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-04-30",
+   "t": "新凤鸣埃及项目完成江苏省发改委境外投资备案并取得《企业境外投资证书》，进入实施阶段",
+   "src": "新凤鸣集团客户卡",
+   "url": "https://www.cnfin.com/announ/detail/index.html?id=830883246905&code=603225&dannoun=lcdetail&announ=lc",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-01-28",
+   "t": "新凤鸣与埃及苏伊士运河经济区管理总局、泰达特区开发公司签署谅解备忘录及土地使用权转让合同",
+   "src": "新凤鸣集团客户卡",
+   "url": "https://www.cnfin.com/announ/detail/index.html?id=830883246905&code=603225&dannoun=lcdetail&announ=lc",
+   "verify": "pending"
+  },
+  {
+   "d": "2025-12-12",
+   "t": "新凤鸣启动埃及36万吨/年功能性纤维项目，总投资约2.8亿美元（约19.78亿元）",
+   "src": "新凤鸣集团客户卡",
+   "url": "https://paper.cnstock.com/html/2026-01/30/content_2175605.htm",
+   "verify": "pending"
+  }
+ ]
+}

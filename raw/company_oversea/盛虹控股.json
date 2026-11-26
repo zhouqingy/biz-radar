@@ -1,0 +1,49 @@
+{
+ "company": "东方盛虹",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "连云港炼化基地高用能业主，热电联产/余热机会以国内基地为主。",
+ "org": {
+  "mode": "集团（苏州吴江盛泽）— 东方盛虹（上市）炼化一体化+新能源新材料",
+  "regions": [
+   "连云港徐圩新区",
+   "苏州吴江"
+  ],
+  "capital_vehicle": "盛虹控股集团（缪汉根、朱红梅夫妇）+ 江苏东方盛虹股份（上市）",
+  "key_person": [
+   {
+    "name": "缪汉根",
+    "title": "集团党委书记、董事长（东方盛虹董事长兼总经理）",
+    "scope": "集团及上市公司一把手，炼化一体化与新材料战略决策人",
+    "url": "https://financialreports.eu/filings/jiangsu-eastern-shenghong-coltd/regulatory-filings/2026/42075535",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-09-15",
+   "t": "盛虹石化在新加坡新设盛虹化工（新加坡）国际有限公司，获连云港市发改委境外投资备案",
+   "src": "盛虹控股集团（东方盛虹）客户卡",
+   "url": "http://fgw.lyg.gov.cn/lygsfzhggwyh/zwfwzx/content/f76a39f8-dbc7-476d-a266-66c12c015cc0.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-09-15",
+   "t": "新设盛虹化工（新加坡）国际有限公司获发改委境外投资备案",
+   "src": "盛虹石化客户卡",
+   "url": "http://fgw.lyg.gov.cn/lygsfzhggwyh/zwfwzx/content/f76a39f8-dbc7-476d-a266-66c12c015cc0.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-04-30",
+   "t": "东方盛虹投资133亿元建设芳烃产业链提质增效项目（TDI、HDI、PC、双酚A、烧碱等10套装置）",
+   "src": "盛虹控股集团（东方盛虹）客户卡",
+   "url": "https://www.stcn.com/article/detail/4155699.html",
+   "verify": "pending"
+  }
+ ]
+}

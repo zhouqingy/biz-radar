@@ -1,0 +1,40 @@
+{
+ "company": "中国中冶",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "集团层面是冶金工程资源与海外协同入口，具体能源项目仍应落到京诚、南方、赛迪等实施主体。",
+ "org": {
+  "mode": "中国五矿旗下A+H上市工程央企，集团总部统筹，子企业分行业/区域实施海外项目",
+  "regions": [
+   "海外冶金、矿山、有色及基础设施市场"
+  ],
+  "capital_vehicle": "中国冶金科工股份有限公司 + 中冶京诚/中冶南方/中冶赛迪等专业子企业",
+  "key_person": [
+   {
+    "name": "李仲泽",
+    "title": "党委书记、董事长、执行董事",
+    "scope": "集团战略、重大市场与海外资源配置决策；2026年8月换届任职",
+    "url": "https://www.mcc.com.cn:8367/xwzx_7388/ywjj/202608/t20260814_398885.html",
+    "verify": "done"
+   },
+   {
+    "name": "陈阳",
+    "title": "执行董事、总裁",
+    "scope": "集团经营管理与战略执行；2026年8月聘任",
+    "url": "https://www.mcc.com.cn:8367/xwzx_7388/ywjj/202608/t20260814_398885.html",
+    "verify": "done"
+   },
+   {
+    "name": "朱广侠",
+    "title": "党委常委、副总裁",
+    "scope": "市场营销与海外拓展分管；2026年市场营销会作工作报告",
+    "url": "http://mcc.com.cn/xwzx_7388/ywjj/202603/t20260304_390541.html",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": []
+}

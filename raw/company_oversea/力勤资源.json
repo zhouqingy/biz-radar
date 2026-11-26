@@ -1,0 +1,71 @@
+{
+ "company": "力勤资源",
+ "updated": "2026-11-23",
+ "status": "researched",
+ "source_note": "2026-11-23 首轮调研：力勤官网/港交所公告/迪尔集团官网/宁波日报",
+ "verify": "PENDING",
+ "relevance_note": "A 档：OBI 园区配套电厂在扩建、湿法+火法双线用能，且电厂总负责人身份公开=可直接对接",
+ "org": {
+  "mode": "创始人主导+项目公司制（OBI 岛园区化运营，力勤国际为海外投资主体）",
+  "key_person": [
+   {
+    "name": "蔡建勇",
+    "title": "董事长、执行董事（创始人）",
+    "scope": "集团战略、印尼项目投资决策",
+    "verify": "done",
+    "src": "港交所公告（2026-06-04）+ 宁波日报双源"
+   },
+   {
+    "name": "江新芳",
+    "title": "总裁 / 力勤国际董事长",
+    "scope": "海外项目推进与供应商战略签约（电厂/低压电器等）",
+    "verify": "done",
+    "src": "力勤官网 lygend.com + 迪尔集团 draz.com.cn 双源"
+   },
+   {
+    "name": "王标",
+    "title": "电厂总负责人",
+    "scope": "OBI 镍铁配套电厂（2×150MW 二标段）",
+    "verify": "done",
+    "src": "迪尔集团官网 draz.com.cn/contents/10/1450.html"
+   }
+  ],
+  "capital_vehicle": "力勤国际（海外投资/工程发包主体）；港交所 2245 + A 股 IPO 已受理（拟募 40.47 亿）",
+  "verify": "done"
+ },
+ "layout": [
+  {
+   "country": "印尼·北马鲁古 OBI 岛",
+   "what": "RKEF 火法 28 万吨/年（KPS 二期 12 条线 2026-05 全投产，共 18.5 万吨镍铁）+ HPAL 湿法 12 万吨满产；合计 40 万吨镍规模；配套电厂 2×150MW（在建）+ 60 万吨石灰已投产",
+   "src": "港交所公告 + 力勤官网 + 迪尔集团 + 宁波日报多源"
+  },
+  {
+   "country": "菲律宾/马来/所罗门/新喀",
+   "what": "镍矿贸易来源地（贸易量全球第一，市占 10.4%）",
+   "src": "力勤官网/宁波日报"
+  }
+ ],
+ "actions_90d": [
+  {
+   "d": "2026-08-05",
+   "t": "KPS项目8月1日达到设计产能，Obi项目全面达产形成年产40万金属吨镍能力",
+   "src": "力勤资源客户卡",
+   "url": "https://www1.hkexnews.hk/listedco/listconews/sehk/2026/0805/2026080501900_c.pdf",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-06-05",
+   "t": "印尼OBI岛RKEF二期KPS项目12条产线2026年5月全部投入商业运营",
+   "src": "力勤资源客户卡",
+   "url": "https://gu.qq.com/resources/shy/news/detail-v2/index.html?t=1#/index?_tentrees_trans=0&id=SN20260605160518a7307bef",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-05",
+   "t": "RKEF 二期 KPS 项目 12 条产线全部投产，Obi 项目具备 40 万吨镍/年能力",
+   "src": "港交所自愿公告",
+   "url": "https://stockn.xueqiu.com/02245/20260604706512.pdf",
+   "verify": "done"
+  }
+ ]
+}

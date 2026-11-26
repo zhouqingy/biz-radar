@@ -2807,7 +2807,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611260339';
+var VER='?v=202611261500';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -6820,7 +6820,7 @@ function ovProfFill(buyer){
           '<p style="margin:0 0 4px"><b style="font-size:15px">'+esc(p.name)+'</b>'+
           (p.title?'<span style="margin-left:9px;color:#2456a6;font-weight:600">'+esc(p.title)+'</span>':'')+(p.verify==='done'?'':pend)+'</p>'+
           (p.scope?'<p style="margin:0;color:#3f4b5b"><b>分管 / 关联事项</b>'+esc(p.scope)+'</p>':'')+
-          (p.src?'<p style="margin:5px 0 0;color:var(--tx3);font-size:12px">来源：'+esc(p.src)+'</p>':'')+'</div>';
+          (p.url?'<p style="margin:5px 0 0;font-size:12px"><a href="'+esc(fullUrl(p.url))+'" target="_blank" rel="noopener nofollow">信源原文 ↗</a>'+(p.src?'<span style="color:var(--tx3)"> · '+esc(p.src)+'</span>':'')+'</p>':(p.src?'<p style="margin:5px 0 0;color:var(--tx3);font-size:12px">来源：'+esc(p.src)+'</p>':''))+'</div>';
       }).join('');
     }else{
       h+='<p style="color:var(--tx3);background:#fff;padding:8px 10px;border-radius:6px">暂无已核实的决策层信息，待调研；不以空姓名或推测职务填充。</p>';

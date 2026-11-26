@@ -1,0 +1,40 @@
+{
+ "company": "中冶京诚",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "钢铁及有色工程总包/设计伙伴；国际事业部是海外能源环保、余热余能利用项目协同的直接入口。",
+ "org": {
+  "mode": "中国五矿/中国中冶旗下冶金工程公司；2026年成立国际事业部，统筹海外市场与履约",
+  "regions": [
+   "全球冶金工程市场；重点跟踪钢铁、有色及能碳管理项目"
+  ],
+  "capital_vehicle": "中冶京诚工程技术有限公司 + 国际事业部 + 冶金公司/城建公司/数科公司",
+  "key_person": [
+   {
+    "name": "韩冰",
+    "title": "党委书记、董事长",
+    "scope": "国际化战略、海外市场布局及重大合作决策",
+    "url": "https://ceri.com.cn/xwzx/jcyw/202608/t20260804_398293.html",
+    "verify": "done"
+   },
+   {
+    "name": "李铁",
+    "title": "党委副书记、总经理",
+    "scope": "经营管理、市场体系与项目履约",
+    "url": "https://ceri.com.cn/xwzx/jcyw/202608/t20260804_398293.html",
+    "verify": "done"
+   },
+   {
+    "name": "张传波",
+    "title": "党委委员、副总经理、国际事业部总经理",
+    "scope": "国际事业部经营与海外项目落地的直接分管负责人",
+    "url": "https://www.ceri.com.cn/xwzx/jcyw/202607/t20260717_397411.html",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": []
+}

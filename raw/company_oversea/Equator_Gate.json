@@ -1,0 +1,34 @@
+{
+ "company": "Equator Gate",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "润泽智算巴淡首个海外项目，公开投资承诺50亿美元、30公顷；电力、储能、冷却及SWRO高度相关。Efendi目前仅见签约报道，完整姓名和职务时效需继续复核。",
+ "org": {
+  "mode": "润泽智算支持的巴淡属地AI数据中心开发主体，BP Batam/PLN Batam协同审批与供电",
+  "regions": [
+   "印尼巴淡Nongsa Teluk Mata Ikan"
+  ],
+  "capital_vehicle": "PT Equator Gate System Batam（EGSB）+ 股东/技术支持方润泽智算",
+  "key_person": [
+   {
+    "name": "Efendi",
+    "title": "PT Equator Gate System Batam董事（Direktur）",
+    "scope": "巴淡30公顷、50亿美元AI数据中心及购电合作的属地公开负责人",
+    "url": "https://silabuskepri.co.id?p=53848/",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-09-10",
+   "t": "润泽科技巴淡项目公司 EGSB 已在 Nongsa 鱼眼湾规划 SWRO，两厂合计目标 750 升/秒",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  }
+ ]
+}

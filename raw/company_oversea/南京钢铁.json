@@ -1,0 +1,62 @@
+{
+ "company": "南京钢铁",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "印尼焦炭园区（650万吨级）配套锅炉/发电/余热机会的直接对接对象：徐兴福（园区）→林国强（投资）→黄一新（决策）。",
+ "org": {
+  "mode": "中信集团先进材料板块成员 — 南钢国贸为全球化窗口，蔚蓝高科技集团为海外产业平台（印尼）",
+  "regions": [
+   "印尼（金瑞/金祥焦炭园区）"
+  ],
+  "capital_vehicle": "南京钢铁股份有限公司（中信集团控股）+ 蔚蓝高科技集团（印尼金瑞/金祥公司）",
+  "key_person": [
+   {
+    "name": "黄一新",
+    "title": "党委书记、董事长",
+    "scope": "国际化战略决策人；多次赴印尼金瑞/金祥现场调研，定调蔚蓝集团为「海外桥头堡」",
+    "url": "https://www.njsteel.com.cn/",
+    "verify": "done"
+   },
+   {
+    "name": "祝瑞荣",
+    "title": "南钢股份总裁",
+    "scope": "经营与海外项目效益负责人，对蔚蓝集团提经营要求",
+    "url": "http://njsteel.com.cn:8089/BrandCulture/",
+    "verify": "done"
+   },
+   {
+    "name": "林国强",
+    "title": "副总裁兼首席投资官",
+    "scope": "分管投资与国际化，国贸公司全球化业务直接分管领导",
+    "url": "http://www.csteelnews.cn/qypd/qydt/202310/t20231012_80264.html",
+    "verify": "done"
+   },
+   {
+    "name": "徐兴福",
+    "title": "蔚蓝集团执行总裁",
+    "scope": "印尼金瑞260万吨+金祥390万吨焦炭园区现场操盘人（南京/雅加达/园区三地）",
+    "url": "http://njsteel.com.cn:8089/BrandCulture/",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-22",
+   "t": "用能/出口动态：X70管线钢进入沙特阿美，上半年印尼焦炭项目减亏明显",
+   "src": "南京钢铁客户卡",
+   "url": "https://www.cnfin.com/announ/detail/index.html?dannoun=lcdetail&id=841162854724",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-21",
+   "t": "印尼青山工业园金瑞、金祥焦炭项目10座焦炉全部投运，上半年焦炭销量同比增31.24%",
+   "src": "南京钢铁客户卡",
+   "url": "https://paper.cnstock.com/html/2026-08/21/content_2257289.htm",
+   "verify": "pending"
+  }
+ ]
+}

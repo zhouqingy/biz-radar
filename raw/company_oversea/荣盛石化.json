@@ -1,0 +1,71 @@
+{
+ "company": "荣盛石化",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "沙特 SASREF 扩建（PREFEED 阶段，大型蒸汽裂解）——炼厂用能/热电配套远期机会，对接孟繁秋（新加坡）。",
+ "org": {
+  "mode": "荣盛控股（杭州萧山）— 荣盛石化（上市）+ 荣盛石化（新加坡）海外主体；浙石化鱼山岛基地",
+  "regions": [
+   "新加坡",
+   "沙特（SASREF朱拜勒）",
+   "中国香港"
+  ],
+  "capital_vehicle": "荣盛石化股份有限公司；沙特阿美持股10%为二股东；荣盛石化（新加坡）为海外签约主体",
+  "key_person": [
+   {
+    "name": "李水荣",
+    "title": "集团董事长、荣盛石化董事长",
+    "scope": "沙特阿美/SASREF 扩建合作决策人，2024年11月北京签约",
+    "url": "https://www.cnrspc.com/newsinfo/7771148.html",
+    "verify": "done"
+   },
+   {
+    "name": "项炯炯",
+    "title": "集团副董事长、荣盛石化总经理",
+    "scope": "SASREF 开发框架协议前排签约人，经营与海外合作推进",
+    "url": "https://www.cnrspc.com/newsinfo/7771148.html",
+    "verify": "done"
+   },
+   {
+    "name": "孟繁秋",
+    "title": "荣盛石化副总经理、荣盛石化（新加坡）总经理",
+    "scope": "海外主体操盘人（原中国航油新加坡CEO），新加坡/沙特业务直接对接人",
+    "url": "https://emh5.eastmoney.com/F10/v/BaseExecutive?fc=00249302",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-07-16",
+   "t": "与沙特基础工业公司签署项目开发协议，评估其为舟山金塘新材料项目持股30%—50%",
+   "src": "荣盛石化客户卡",
+   "url": "https://www.cs.com.cn/ssgs/01/2026/07/16/detail_2026071610024926.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-07-16",
+   "t": "SABIC拟入股荣盛新材料（舟山）金塘新材料项目30%—50%，签署《项目开发协议》",
+   "src": "荣盛石化客户卡",
+   "url": "https://newzzbcx.cs.com.cn/cxnews.html?name=new20260716213828hefdnxtl&random=Ist75y4O",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-07-16",
+   "t": "浙石化炼化一体化项目改造提升工程，总投资约196亿元",
+   "src": "荣盛石化客户卡",
+   "url": "https://newzzbcx.cs.com.cn/cxnews.html?name=new20260716213828hefdnxtl&random=Ist75y4O",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-01-02",
+   "t": "荣盛石化与沙特阿美签署谅解备忘录，拟收购朱拜勒SASREF炼厂50%股权并参与扩建",
+   "src": "荣盛石化客户卡",
+   "url": "https://www.cnrspc.com/newsinfo/6720385.html",
+   "verify": "pending"
+  }
+ ]
+}

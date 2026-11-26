@@ -1,0 +1,43 @@
+{
+ "company": "DayOne",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "巴淡Kabil约450MW新增容量为明确高用能项目，另有SWRO建设承诺；优先跟踪电力基础设施、绿电、储能和海水淡化协同，当前公开资料仅确认CEO一名核心决策人。",
+ "org": {
+  "mode": "新加坡总部超大规模数据中心平台，亚太/欧洲区域园区+属地项目公司，INA为印尼合资及投资方",
+  "regions": [
+   "印尼巴淡Nongsa及Kabil",
+   "新加坡—柔佛—巴淡SIJORI区域",
+   "泰国、日本、中国香港、芬兰"
+  ],
+  "capital_vehicle": "DayOne Data Centers Limited + PT Digitalland Service One；印尼INA合资/投资",
+  "key_person": [
+   {
+    "name": "Jamie Khoo",
+    "title": "DayOne首席执行官（CEO）",
+    "scope": "全球扩张、巴淡双园区及511MVA购电协议决策",
+    "url": "https://dayonedc.com/markets/dayone-signs-indonesias-largest-511mva-450mw-ppa-to-expand-hyperscale-data-center-platform-in-batam",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-09-10",
+   "t": "DayOne 承诺投 1800 亿印尼盾（约 1100 万美元）建 Kabil SWRO，建成移交 BP Batam",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-04-17",
+   "t": "DayOne 与 PLN 签 511 MVA 购电协议（印尼最大），BP Batam 配套 200 MWp 光伏",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  }
+ ]
+}

@@ -1,0 +1,42 @@
+{
+ "company": "永福股份",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "燃机联合循环及新能源设计伙伴；阿尔及利亚1406MW燃机项目与中国电工合作，国际业务部是明确对接入口。",
+ "org": {
+  "mode": "民营上市电力设计企业，发电/电网/新能源/国际业务事业部制，与总包方联合出海",
+  "regions": [
+   "阿尔及利亚",
+   "韩国",
+   "东南亚及其他新能源市场"
+  ],
+  "capital_vehicle": "福建永福电力设计股份有限公司（300712）+ 国际业务部/发电事业部/永福数能",
+  "key_person": [
+   {
+    "name": "林一文",
+    "title": "董事长",
+    "scope": "零碳电力战略、重大国际合作与储能/新能源布局",
+    "url": "https://www.yongfu.com.cn/show_4951.html",
+    "verify": "done"
+   },
+   {
+    "name": "黄炎生",
+    "title": "总经理",
+    "scope": "经营与海外设计项目签约，主导阿尔及利亚燃机项目合作",
+    "url": "https://www.yongfu.com.cn/show_4968.html",
+    "verify": "done"
+   },
+   {
+    "name": "袁了",
+    "title": "国际业务部总经理",
+    "scope": "海外业务开发与项目协调直接负责人",
+    "url": "https://www.yongfu.com.cn/show_4968.html",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": []
+}

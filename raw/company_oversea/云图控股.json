@@ -1,0 +1,60 @@
+{
+ "company": "云图控股",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "复合肥/化工用热场景，马来西亚生产基地蒸汽配套可跟踪；以销售公司为主的东南亚布局用能体量有限。",
+ "org": {
+  "mode": "云图控股（成都）— 马来西亚生产基地 + 东南亚多国销售公司（GARSONI品牌）",
+  "regions": [
+   "马来西亚（生产基地）",
+   "泰国",
+   "越南",
+   "老挝",
+   "菲律宾",
+   "印尼"
+  ],
+  "capital_vehicle": "云图控股（002539）+ 海外营销公司 + 驻泰国公司",
+  "key_person": [
+   {
+    "name": "牟嘉云",
+    "title": "董事长",
+    "scope": "国际化战略决策人，中泰农业交流活动发起人",
+    "url": "https://www.shindoo.com/?news_20/390.html",
+    "verify": "done"
+   },
+   {
+    "name": "史高飞",
+    "title": "市场中心总经理、海外营销公司CEO",
+    "scope": "海外市场与营销体系负责人",
+    "url": "https://www.shindoo.com/?news_20/390.html",
+    "verify": "done"
+   },
+   {
+    "name": "杨宇松",
+    "title": "驻泰国公司总经理",
+    "scope": "泰国属地经营负责人",
+    "url": "https://www.shindoo.com/?news_20/390.html",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-09-22",
+   "t": "关于全资子公司拟与藏格矿业合资成立公司并投资刚果（布）钾盐项目的进展公告",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-09-18",
+   "t": "关于全资子公司拟与藏格矿业合资成立公司并投资刚果（布）钾盐项目的公告",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  }
+ ]
+}

@@ -1,0 +1,98 @@
+{
+ "company": "青山控股",
+ "updated": "2026-11-23",
+ "status": "researched",
+ "source_note": "2026-11-23 首轮调研：官网 tssgroup.com.cn + SMM + 要钢网 + 头条（51不锈钢网），人物/股权为官网与双源一致",
+ "verify": "PENDING",
+ "relevance_note": "A 档：园区级自备电厂/余热/海水淡化需求，IWIP 11 个新项目=新增用能主体",
+ "org": {
+  "mode": "实业集团+两大印尼园区平台（IMIP 莫罗瓦利 / IWIP 纬达贝），园区即项目载体",
+  "key_person": [
+   {
+    "name": "项光达",
+    "title": "董事局主席（创始人，「镍王」）",
+    "scope": "集团战略与印尼政府高层对接（2026-10-27 会见印尼投资部长罗桑）",
+    "verify": "done",
+    "src": "SMM 上海有色网 news.smm.cn/news/104179641 + 要钢网 11gang.com/article/70/316618.html"
+   },
+   {
+    "name": "项炳和",
+    "title": "永青集团董事长",
+    "scope": "纬达贝园区（IWIP）运营管理",
+    "verify": "done",
+    "src": "青山实业官网 tssgroup.com.cn/2026/10/page/7"
+   }
+  ],
+  "capital_vehicle": "PT Weda Bay Nickel（青山 51.3% / Eramet 37.8% / Antam 10%）；IMIP 内 ITSS（IMIP 持股 10%，唯一印尼本土股东）",
+  "verify": "done",
+  "src": "青山实业官网 + 要钢网（官网/双源一致）"
+ },
+ "layout": [
+  {
+   "country": "印尼·中苏拉威西（IMIP）",
+   "what": "镍铁 NPI/不锈钢板坯/硅铁/硫酸；旗下 ITSS、SMI、广青 GCNS、Merdeka Tsingshan MTI",
+   "src": "SMM + 头条（51不锈钢网）双源"
+  },
+  {
+   "country": "印尼·北马鲁古（IWIP 纬达贝）",
+   "what": "2026-10-08 普拉博沃总统视察，11 个下游项目总投资超 100 亿美元（180 万亿印尼盾）揭幕：镍基电池材料/动力电池(瑞浦兰钧)/电解铝/电动重卡/隔膜/电解液/光伏玻璃；电动车电池首批出口",
+   "src": "青山实业官网 tssgroup.com.cn"
+  },
+  {
+   "country": "非洲等",
+   "what": "青山模式向非洲复制中（客户卡在跟马达加斯加 MOU）",
+   "src": "客户卡"
+  }
+ ],
+ "actions_90d": [
+  {
+   "d": "2026-10-27",
+   "t": "印尼投资部长罗桑访华会见项光达：聚焦莫罗瓦利/韦达湾下游深加工",
+   "src": "SMM+要钢网+头条（多源）",
+   "url": "https://news.smm.cn/news/104179641",
+   "verify": "done"
+  },
+  {
+   "d": "2026-10-08",
+   "t": "IWIP 11 个下游项目（超100亿美元）揭幕+电动车电池首批出口",
+   "src": "青山实业官网",
+   "url": "https://www.tssgroup.com.cn/2026/10/page/7",
+   "verify": "done"
+  },
+  {
+   "d": "2026-09-22",
+   "t": "厄尔尼诺干旱致印尼莫罗瓦利工业园（IMIP）镍冶炼厂减产，冷却水告急",
+   "src": "青山控股集团客户卡",
+   "url": "https://xny.mysteel.com/a/26092315/631438DC47CBB6F7.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-07-21",
+   "t": "IMIP园区TMI镍湿法冶炼项目完成多方股权合作签约",
+   "src": "青山控股集团客户卡",
+   "url": "https://www.tssgroup.com.cn/category/news-cat-1/page/8/",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-05-15",
+   "t": "青山在印尼北马鲁古威达湾工业园新建80万吨电解铝项目，同步配套建设发电设施",
+   "src": "青山控股集团客户卡",
+   "url": "https://finance.sina.com.cn/wm/2026-07-07/doc-inifyqva5249564.shtml",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-03-15",
+   "t": "青山追加约55亿元扩建津巴布韦鼎森钢铁工业园，碳钢产能翻倍至120万吨",
+   "src": "青山控股集团客户卡",
+   "url": "https://finance.sina.com.cn/wm/2026-07-07/doc-inifyqva5249564.shtml",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-02-06",
+   "t": "青山实业与马达加斯加政府签署矿产资源开发与现代绿色产业园建设一体化项目合作备忘录",
+   "src": "青山控股集团客户卡",
+   "url": "https://www.tssgroup.com.cn/",
+   "verify": "pending"
+  }
+ ]
+}

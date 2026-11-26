@@ -1,0 +1,51 @@
+{
+ "company": "旺能环境",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "垃圾焚烧发电同行（亦业主亦竞合）；印尼勿加泗1500t/d、越南太平600t/d项目设备/建安分包或合作机会可跟踪。",
+ "org": {
+  "mode": "美欣达集团（单建明）— 旺能环境（上市）+ 越南龙兴绿色能源 + 越南河内办事处",
+  "regions": [
+   "越南太平省（600t/d+15MW已奠基）",
+   "印尼勿加泗（1500t/d推进中）",
+   "泰国",
+   "乌兹别克斯坦"
+  ],
+  "capital_vehicle": "美欣达集团（单建明家族）+ 旺能环境（002034）+ 越南龙兴绿色能源（与升龙集团联营）",
+  "key_person": [
+   {
+    "name": "单建明",
+    "title": "美欣达集团董事会主席（实控人）",
+    "scope": "集团国际化战略决策人，越南项目奠基出席",
+    "url": "http://wannaenergy.com/news/company/detail/1609",
+    "verify": "done"
+   },
+   {
+    "name": "单超",
+    "title": "旺能环境董事长",
+    "scope": "海外项目（越南/印尼/泰国/乌兹别克）推进一把手，「绿能+算力」模式推动者",
+    "url": "http://wannaenergy.com/news/company/detail/1609",
+    "verify": "done"
+   },
+   {
+    "name": "宋平",
+    "title": "旺能环境总裁",
+    "scope": "经营与海外办事处体系建设负责人",
+    "url": "http://wannaenergy.com/news/company/detail/1569",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-17",
+   "t": "境外投资项目备案：旺能环境股份有限公司、旺欣寰投（海南）投资有限公司在印度尼西亚西爪哇省勿加泗市新建1500吨/日垃圾焚烧发电项目",
+   "src": "ODI 备案（浙江省发展和改革委员会）",
+   "url": "",
+   "verify": "done"
+  }
+ ]
+}

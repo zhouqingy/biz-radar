@@ -1,0 +1,51 @@
+{
+ "company": "博威合金",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "越南合金材料基地用能配套对接谢朝春（越南公司董事长兼总经理）。",
+ "org": {
+  "mode": "博威集团（宁波鄞州）— 博威合金（上市）+ 德国贝肯霍夫 + 越南/美国/加拿大基地",
+  "regions": [
+   "越南",
+   "德国",
+   "加拿大",
+   "美国（新能源资产出售中）"
+  ],
+  "capital_vehicle": "博威集团（谢识才家族）+ 博威合金（601137）+ 博威集团（香港）/博威亚太",
+  "key_person": [
+   {
+    "name": "谢识才",
+    "title": "董事长兼总裁",
+    "scope": "集团创始人，全球6大制造基地布局决策人",
+    "url": "https://stock.quote.stockstar.com/corp/executives_601137.shtml",
+    "verify": "done"
+   },
+   {
+    "name": "谢朝春",
+    "title": "董事、副总裁",
+    "scope": "海外基地直接负责人：博威尔特（越南）董事长、贝肯霍夫（越南）董事长兼总经理、博威新能源（德国）董事",
+    "url": "https://stock.quote.stockstar.com/corp/executives_601137.shtml",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-25",
+   "t": "越南基地现有产能预计无法满足未来需求，正论证扩产可行性",
+   "src": "博威合金客户卡",
+   "url": "https://www.fxbaogao.com/detail/5665815",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-05-11",
+   "t": "快速推进越南工厂GB300液冷板材料量产及15000吨铜铝复合材料项目建设",
+   "src": "博威合金客户卡",
+   "url": "https://www.cnfin.com/announ/detail/index.html?announ=lc&code=601137&dannoun=lcdetail&id=831915453853",
+   "verify": "pending"
+  }
+ ]
+}

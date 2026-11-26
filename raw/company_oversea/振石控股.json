@@ -1,0 +1,56 @@
+{
+ "company": "振石控股",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "华宝工业园（2万公顷、105万吨镍铁+寒锐高冰镍等）电厂与园区能源配套是王源直接分管，张毓强亲抓能效。",
+ "org": {
+  "mode": "振石控股（桐乡）— 振石集团/振石股份（2026年上市）+ 印尼华宝工业园+雅加达总部",
+  "regions": [
+   "印尼莫罗瓦里华宝工业园",
+   "西班牙风电材料工厂"
+  ],
+  "capital_vehicle": "振石控股集团（张毓强家族）+ 振石股份（601112）+ 印尼华宝工业园（浙江省境外经贸合作区）",
+  "key_person": [
+   {
+    "name": "张毓强",
+    "title": "集团党委书记、董事局主席",
+    "scope": "印尼战略决策人；2026年4月视察华宝工业园镍铁生产区与电厂，部署「优化发电与用电模式、提升能效」",
+    "url": "https://www.zhenshigroup.com/",
+    "verify": "done"
+   },
+   {
+    "name": "张健侃",
+    "title": "振石集团董事长、振石股份董事长",
+    "scope": "张毓强之子，接棒集团日常经营与业务拓展（据工商变更及媒体报道）",
+    "url": "",
+    "verify": "pending"
+   },
+   {
+    "name": "王源",
+    "title": "集团执行总裁（高级副总裁）",
+    "scope": "印尼华宝工业园操盘人；园区能源/基础设施要素保障直接负责人",
+    "url": "https://www.zhenshigroup.com/",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-04-10",
+   "t": "印尼华宝工业园寒锐镍业年产2万吨镍金属量高冰镍项目点火",
+   "src": "振石控股集团客户卡",
+   "url": "https://www.zhenshigroup.com/news_details/316.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-04-09",
+   "t": "华宝工业园坚持以园区电厂、码头、机场等基础设施匹配镍铁产能，明确要求优化发电与用电模式",
+   "src": "振石控股集团客户卡",
+   "url": "https://www.zhenshigroup.com/news_details/316.html",
+   "verify": "pending"
+  }
+ ]
+}

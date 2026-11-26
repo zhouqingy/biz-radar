@@ -1,0 +1,33 @@
+{
+ "company": "中冶南方",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "冶金能源环保直接同业/伙伴；超临界煤气发电、余热利用与海外钢铁基地能源系统可开展专业分包或联合方案。项明武为历史掌舵人，不列为现职。",
+ "org": {
+  "mode": "中国五矿/中国中冶旗下综合工程公司，钢铁全流程、能源环保与海外总承包并行",
+  "regions": [
+   "海外40余个国家和地区；印尼德信钢铁等冶金基地"
+  ],
+  "capital_vehicle": "中冶南方工程技术有限公司 + 各事业部/区域项目公司",
+  "key_person": [
+   {
+    "name": "郑剑辉",
+    "title": "党委书记、董事长",
+    "scope": "国际化、绿色低碳和重大总承包项目决策",
+    "url": "https://wy.ccnu.edu.cn/info/1173/18771.htm",
+    "verify": "done"
+   },
+   {
+    "name": "李方",
+    "title": "党委委员、副总经理",
+    "scope": "对外工程总包、外经带外贸及海外园区合作；2026年参与湖北省商务厅出海专题交流",
+    "url": "http://mp.weixin.qq.com/s?__biz=MzAxNTE0NzAxMA==&mid=2651089598&idx=1&sn=9d6a34411946ca36c2cb99679bc6c47f&chksm=81096e67f82f514450c4713586de985688053b70e0549cfdbaf63478003f2f22030c4eaf787a#rd",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": []
+}

@@ -1,0 +1,40 @@
+{
+ "company": "中节能",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "工业节能、清洁能源及海外环保项目竞合对象；具体机会需进一步落到中国启源等工程实施主体，而非只跟集团总部。",
+ "org": {
+  "mode": "国务院国资委监管节能环保央企，集团统筹，专业子公司和区域机构实施",
+  "regions": [
+   "国内节能环保与新能源市场；海外市场由集团海外部及专业公司协同拓展"
+  ],
+  "capital_vehicle": "中国节能环保集团有限公司 + 中国启源/太阳能公司/风电公司/中国地质等专业企业",
+  "key_person": [
+   {
+    "name": "廖家生",
+    "title": "党委书记、董事长",
+    "scope": "市场体系、国内深耕与海外业务拓展决策",
+    "url": "https://www.cecep.cn/cecep/page/sytt/2026/7/I1531355215997960192.html",
+    "verify": "done"
+   },
+   {
+    "name": "张世荣",
+    "title": "党委副书记、董事、总经理",
+    "scope": "经营管理、市场开发及专业公司协同",
+    "url": "http://www.cecep.com.cn/cecep/xxgk/qyjbxx/ldth/ggtds/A008010001002002Gone1.html",
+    "verify": "done"
+   },
+   {
+    "name": "曹华斌",
+    "title": "党委常委、副总经理",
+    "scope": "市场开发会议主持及对外产业合作，属经营协同关键层级",
+    "url": "https://www.cecep.cn/cecep/page/sytt/2026/7/I1531355215997960192.html",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": []
+}

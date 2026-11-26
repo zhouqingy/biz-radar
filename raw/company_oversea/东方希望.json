@@ -1,0 +1,52 @@
+{
+ "company": "东方希望",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "铝电一体化业主，海外项目必配自备电厂/清洁能源电站（哈国1GW），用电用热是我们直接切口。",
+ "org": {
+  "mode": "集团总部（上海浦东）— 战略投资部统筹海外重化工投资，项目所在国设项目公司",
+  "regions": [
+   "越南",
+   "印尼",
+   "新加坡",
+   "柬埔寨",
+   "哈萨克斯坦"
+  ],
+  "capital_vehicle": "东方希望集团有限公司及海外项目公司（非上市，刘永行家族控股）",
+  "key_person": [
+   {
+    "name": "刘永行",
+    "title": "集团创始人、董事长",
+    "scope": "集团战略与重大投资决策；2025年6月与哈萨克斯坦政府总理会谈，推进哈国循环经济型有色综合产业园（200万吨氧化铝+100万吨电解铝+配套清洁能源电站）",
+    "url": "http://www.easthope.cn/aboutUs/entrepreneurial-journey",
+    "verify": "done"
+   },
+   {
+    "name": "陈磊",
+    "title": "战略投资总经理",
+    "scope": "海外项目推进与所在国政府对接；2026年5月与哈工业和建设部部长、第一副总理会谈126亿美元铝全产业链集群（含库斯塔奈1GW发电站）。注：部分报道写作「陈雷」，同一职务，用字待核",
+    "url": "https://www.163.com/dy/article/KT27DI2E05568W0A.html",
+    "verify": "pending"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-05-16",
+   "t": "中哈铝业综合体项目进入政企对接关键阶段，一期规划200万吨氧化铝+100万吨电解铝",
+   "src": "东方希望集团客户卡",
+   "url": "https://www.seetao.com/details/265508.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-05-13",
+   "t": "东方希望拟投资126亿美元在哈萨克斯坦建设铝业全产业链集群，配套1GW发电站",
+   "src": "东方希望集团客户卡",
+   "url": "https://www.163.com/dy/article/KT27DI2E05568W0A.html",
+   "verify": "pending"
+  }
+ ]
+}

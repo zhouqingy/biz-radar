@@ -1,0 +1,58 @@
+{
+ "company": "恒力集团",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "炼化/造船基地均为高用能场景（大连长兴岛产业园热电/自备电站），国内用能配套机会为主。",
+ "org": {
+  "mode": "集团（苏州吴江）— 恒力石化/恒力重工/松发股份多板块，大连长兴岛产业园",
+  "regions": [
+   "苏州",
+   "大连长兴岛",
+   "惠州",
+   "贵州"
+  ],
+  "capital_vehicle": "恒力集团（陈建华、范红卫夫妇）+ 恒力石化/松发股份/同里旅游三家上市公司",
+  "key_person": [
+   {
+    "name": "陈建华",
+    "title": "集团董事长、总裁",
+    "scope": "集团一把手，炼化/造船/新材料全板块战略决策人",
+    "url": "https://epaper.hengli.com/hlb/20260128/html/content_20260128001001.htm",
+    "verify": "done"
+   },
+   {
+    "name": "范红卫",
+    "title": "集团副董事长、恒力石化董事长",
+    "scope": "上市公司恒力石化（炼化一体化）决策人",
+    "url": "https://epaper.hengli.com/hlb/20260128/html/content_20260128001001.htm",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-03-31",
+   "t": "恒力集团2026年连落两大百亿级项目：苏州吴江120亿元先进智造集群、大连165亿元船舶动力与聚酯新材料产业园",
+   "src": "恒力集团（恒力石化）客户卡",
+   "url": "https://m.toutiao.com/article/7649915610687636004",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-02-10",
+   "t": "恒力石化设立迪拜贸易子公司，从新加坡向中东扩张原油与石化品交易网络",
+   "src": "恒力集团（恒力石化）客户卡",
+   "url": "https://hydrocarbonprocessing.com/news/2026/02/hengli-petrochemical-sets-up-dubai-trading-subsidiary-in-expansion/",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-02-10",
+   "t": "恒力石化在迪拜设立贸易子公司，将全球贸易网络从新加坡向中东扩展",
+   "src": "恒力石化客户卡",
+   "url": "https://hydrocarbonprocessing.com/news/2026/02/hengli-petrochemical-sets-up-dubai-trading-subsidiary-in-expansion/",
+   "verify": "pending"
+  }
+ ]
+}

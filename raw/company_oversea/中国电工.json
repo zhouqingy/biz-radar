@@ -1,0 +1,44 @@
+{
+ "company": "中国电工",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "海外电力EPC重要伙伴：燃机联合循环、油气处理及新能源项目可跟踪分包；闫伟华、袁博是对外合作直接层级。",
+ "org": {
+  "mode": "国机集团/国机工程集团旗下国际电力工程公司，区域事业部+项目团队执行",
+  "regions": [
+   "阿尔及利亚",
+   "马来西亚",
+   "缅甸",
+   "阿塞拜疆",
+   "斯里兰卡及其他海外市场"
+  ],
+  "capital_vehicle": "中国电力工程有限公司（CNEEC）+ 区域事业部/海外分支机构",
+  "key_person": [
+   {
+    "name": "赵辉",
+    "title": "党委书记、董事长",
+    "scope": "海外能源工程战略、重大客户与项目决策",
+    "url": "http://mp.weixin.qq.com/s?__biz=MzI4NjMzNTEzOQ==&mid=2247510230&idx=1&sn=5255a5f5db2516db8ca15902d8ae7ee0&chksm=eadb02d69e63ec36c5eedebc75837adb9a4324e94410fcc2f096936be4f0d97ee00af3c608a2#rd",
+    "verify": "done"
+   },
+   {
+    "name": "闫伟华",
+    "title": "党委副书记、总经理",
+    "scope": "国际项目签约、EPC统筹及经营履约",
+    "url": "http://www.cneec.com.cn/xwzx/gsyw/202611/t20261113_660803.html",
+    "verify": "done"
+   },
+   {
+    "name": "袁博",
+    "title": "副总经理",
+    "scope": "海外项目合作与执行；参与阿尔及利亚燃机设计分包及缅甸油气项目",
+    "url": "https://www.yongfu.com.cn/show_4968.html",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": []
+}

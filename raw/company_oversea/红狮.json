@@ -1,0 +1,69 @@
+{
+ "company": "红狮",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-23 首轮调研：红狮官网/中经网/水泥网",
+ "verify": "PENDING",
+ "relevance_note": "A 档：两条万吨线=配套余热发电/自备电需求明确，二期 2026-11 投产是时间窗口",
+ "org": {
+  "mode": "集团制，海外事业部实体化（印尼东加/任抹、尼泊尔、老挝均有实体公司）",
+  "key_person": [
+   {
+    "name": "章小华",
+    "title": "集团董事长兼总经理",
+    "scope": "水泥+多晶硅双主业、海外基地和东加二期等重大投资决策",
+    "url": "https://www.hongshigroup.com/speech.html",
+    "verify": "done"
+   }
+  ],
+  "capital_vehicle": "印尼东加里曼丹红狮（10 亿美元）、印尼任抹红狮、尼泊尔红狮希望、万象红狮萨迪他",
+  "verify": "done",
+  "src": "红狮官网子公司名录 hongshigroup.com",
+  "regions": [
+   "印尼东加里曼丹",
+   "印尼任抹",
+   "尼泊尔",
+   "老挝"
+  ]
+ },
+ "layout": [
+  {
+   "country": "印尼·东加里曼丹",
+   "what": "东加红狮：总投资 10 亿美元、规划 800 万吨/年水泥；一期万吨线 2023-08 投产；二期 2025-03 开工、目标 2026-11 点火（窑尾框架 2026-03 吊装）；苏州中材+中国十七冶承建",
+   "src": "红狮官网 hongshigroup.com/newsdetail/4599.html + 中经网双源"
+  },
+  {
+   "country": "印尼·任抹",
+   "what": "任抹红狮（获印尼国家级绿色工厂认证 2025-11）",
+   "src": "红狮官网"
+  },
+  {
+   "country": "尼泊尔/老挝",
+   "what": "尼泊尔红狮希望、万象红狮萨迪他",
+   "src": "红狮官网子公司名录"
+  }
+ ],
+ "actions_90d": [
+  {
+   "d": "2026-09-27",
+   "t": "已在印尼、老挝、尼泊尔布局4个大型水泥项目，合计年产能约930万吨",
+   "src": "红狮控股客户卡",
+   "url": "https://www.qcc.com/cfengxian/86103d33fa4f863233f9ec07ebaa8387.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-03-28",
+   "t": "印尼东加红狮二期项目窑尾框架首根构件启动吊装",
+   "src": "红狮控股客户卡",
+   "url": "https://www.hongshigroup.com/",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-03-28",
+   "t": "东加红狮二期窑尾框架吊装，冲刺 2026-11 投产",
+   "src": "红狮官网",
+   "url": "https://www.hongshigroup.com/newsdetail/4599.html",
+   "verify": "done"
+  }
+ ]
+}

@@ -1,0 +1,69 @@
+{
+ "company": "BP Batam",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "不是普通业主，而是巴淡项目审批与基础设施协调枢纽；数据中心供电、SWRO和园区能源项目需与投资方、PLN Batam三方并行跟进。",
+ "org": {
+  "mode": "巴淡自由贸易区管理机构，负责人—投资/基础设施/公用事业等部门分工，兼具审批与基础设施协调职能",
+  "regions": [
+   "印尼巴淡自由贸易区"
+  ],
+  "capital_vehicle": "Badan Pengusahaan Batam（BP Batam）及所属供水、基础设施、园区管理机构",
+  "key_person": [
+   {
+    "name": "Amsakar Achmad",
+    "title": "Kepala BP Batam（负责人）",
+    "scope": "投资审批、基础设施和数据中心SWRO建设条件的高层决策",
+    "url": "https://www.thefreelibrary.com/Batam+data+centers+to+get+seawater+desalination+plants%3a+BP+Batam.-a0902559977",
+    "verify": "done"
+   },
+   {
+    "name": "Li Claudia Chandra",
+    "title": "Wakil Kepala BP Batam（副负责人）",
+    "scope": "重大数字产业投资协调与项目加速执行",
+    "url": "https://medan.mofcom.gov.cn/jmxw/art/2026/art_c11ecf31548e492d8ff0b5bc3d725f0b.html",
+    "verify": "done"
+   },
+   {
+    "name": "Fary Djemy Francis",
+    "title": "投资事务副负责人/Deputy for Investment",
+    "scope": "投资促进、审批协调与项目落地监管",
+    "url": "https://medan.mofcom.gov.cn/jmxw/art/2026/art_c11ecf31548e492d8ff0b5bc3d725f0b.html",
+    "verify": "done"
+   },
+   {
+    "name": "Mouris Limanto",
+    "title": "基础设施副负责人/Deputy for Infrastructure",
+    "scope": "基础设施规划建设与跨部门协调",
+    "url": "https://jawawa.id/newsitem/president-summons-bp-batam-leadership-prepares-batam-as-global-maritime-and-investment-gateway-1783418027",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-10-16",
+   "t": "巴淡岛监管强制新建数据中心自建海水淡化厂（SWRO），不建不批文",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-10-14",
+   "t": "巴淡落地 20 个数据中心项目，承诺投资超 73 亿美元，装机占印尼全国约 15%",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-10-01",
+   "t": "巴淡市政供水产能仅 3487 升/秒，2030 年将出现缺口；淡化总投资需求约 3 万亿盾",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  }
+ ]
+}

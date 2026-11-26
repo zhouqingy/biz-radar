@@ -1,0 +1,62 @@
+{
+ "company": "桐昆",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "印尼北加千万吨炼化+200万吨PX+120万吨乙烯，90%设备国内采购、400亿装备出海——园区热电/动力站是明确切口，对接陈蕾。",
+ "org": {
+  "mode": "桐昆控股 — 桐昆集团（上市）+ 泰昆石化（印尼）项目公司；与新凤鸣抱团出海",
+  "regions": [
+   "印尼北加里曼丹（泰昆石化炼化一体化）"
+  ],
+  "capital_vehicle": "桐昆控股集团（陈士良家族）+ 桐昆股份（上市）+ 泰昆石化（印尼）",
+  "key_person": [
+   {
+    "name": "陈士良",
+    "title": "桐昆控股集团董事长",
+    "scope": "印尼北加炼化一体化项目发起人，2023年向佐科总统汇报项目进展；北加绿色工业区开工与佐科共同出席",
+    "url": "https://www.zjtkgf.com/en/media-center/company-news-911.html",
+    "verify": "done"
+   },
+   {
+    "name": "陈蕾",
+    "title": "桐昆集团董事长兼总裁、控股集团副董事长",
+    "scope": "2023年6月接棒，主导推进印尼北加项目与国际化供应链；曾任香港诚晖国际总经理",
+    "url": "https://baike.baidu.com/starmap/view?nodeId=eba29de2a4159bc00314e065",
+    "verify": "done"
+   },
+   {
+    "name": "许金祥",
+    "title": "桐昆集团党委书记、总裁",
+    "scope": "集团经营与生产体系负责人",
+    "url": "https://baike.baidu.com/starmap/view?nodeId=eba29de2a4159bc00314e065",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-19",
+   "t": "桐昆与新凤鸣旗下PT Taikun在印尼北加里曼丹推进近60亿美元炼化一体化项目",
+   "src": "桐昆股份客户卡",
+   "url": "https://www.eco-business.com/news/carbon-crossroads-petrochemicals-boom-tests-indonesias-climate-goals",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-02-26",
+   "t": "桐昆牵头、新凤鸣参股的印尼北加炼化一体化项目持续推进（总投资调整为59.48亿美元）",
+   "src": "桐昆集团（桐昆股份）客户卡",
+   "url": "https://static.weeklyonstock.com/26/0226/qdy172318.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2025-10-31",
+   "t": "桐昆向上游延伸：吐鲁番获取储量5亿吨煤矿，并拟投56亿元建120万吨绿色差别化纤维项目",
+   "src": "桐昆集团（桐昆股份）客户卡",
+   "url": "https://static.weeklyonstock.com/26/0226/qdy172318.html",
+   "verify": "pending"
+  }
+ ]
+}

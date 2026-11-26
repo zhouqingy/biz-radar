@@ -1,0 +1,51 @@
+{
+ "company": "协鑫",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-23 首轮调研：新浪财经/见道网/北方有色网/中商碳素研究院；项目状态=前期磋商",
+ "verify": "PENDING",
+ "relevance_note": "A 档：绿电+电解铝闭环逻辑；若落地，自备电厂（燃气/绿电）是超大型切入点；当前严格标注「磋商未签约」，勿当已落地项目汇报",
+ "org": {
+  "mode": "集团多板块（电力/光伏/燃气/算力），海外项目制；董事长朱共山亲自推进",
+  "key_person": [
+   {
+    "name": "朱共山",
+    "title": "集团董事长",
+    "scope": "海外战略、尼日利亚电力与锂产业链重大合作决策",
+    "url": "http://chinaden.cn/news_nr.asp?id=49097",
+    "verify": "done"
+   },
+   {
+    "name": "朱钰峰",
+    "title": "集团党委书记、副董事长、总裁",
+    "scope": "集团经营与各产业板块执行；协鑫科技/协鑫集成等上市平台管理",
+    "url": "https://www.gcl-power.com/jp/about/newsone/3.html?page=4",
+    "verify": "done"
+   },
+   {
+    "name": "朱坤",
+    "title": "协鑫国际副总裁、协鑫科技副总裁",
+    "scope": "国际业务与国际人才/产业合作的具体分管层级",
+    "url": "https://www.gcl-power.com/jp/about/newsone/3.html?page=4",
+    "verify": "done"
+   }
+  ],
+  "capital_vehicle": "协鑫集团 + 协鑫国际及各上市产业平台；尼日利亚项目与Swiber Africa Group合作，具体项目公司待落地核实",
+  "verify": "done",
+  "regions": [
+   "尼日利亚",
+   "埃塞俄比亚",
+   "吉布提",
+   "其他非洲及海外能源市场"
+  ]
+ },
+ "layout": [
+  {
+   "country": "尼日利亚（磋商中，未签约）",
+   "what": "拟投超 20 亿美元建 300 万吨/年电解铝基地（2026-02-23/26 与钢铁发展部会谈）；配套盘活 ALSCON、与 NNPC 合作 LNG、上游铝土矿；⚠ 仍处前期磋商，选址/总包/设备选型未定",
+   "src": "新浪财经 + 见道网 + 北方有色网多源一致",
+   "verify": "done"
+  }
+ ],
+ "actions_90d": []
+}

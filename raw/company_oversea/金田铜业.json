@@ -1,0 +1,56 @@
+{
+ "company": "金田铜业",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "铜加工连续生产高用能，越南/泰国基地设备可靠性与用能成本敏感——楼城直管海外拓展部。",
+ "org": {
+  "mode": "金田股份（宁波）— 越南/泰国生产基地 + 2024年新设海外拓展部",
+  "regions": [
+   "越南",
+   "泰国"
+  ],
+  "capital_vehicle": "金田投资控股（楼氏家族）+ 金田股份（601609）",
+  "key_person": [
+   {
+    "name": "楼城",
+    "title": "董事长、总经理",
+    "scope": "创三代（1988年生）；2024年设海外拓展部，「把出海从方向变为指标」，2025财年境外收入155.49亿元（+27.86%）",
+    "url": "https://www.cet.com.cn/xwsd/10418937.shtml",
+    "verify": "done"
+   },
+   {
+    "name": "楼国强",
+    "title": "创始人、名誉董事长",
+    "scope": "2016年亲赴越南筹建首个海外铜管基地，国际化开创者",
+    "url": "https://baike.baidu.com/item/楼国强/3618429",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-09-16",
+   "t": "越南海防市3万吨高精密铜排新建厂房项目奠基，计划2027年二季度投产",
+   "src": "宁波金田铜业客户卡",
+   "url": "https://www.toutiao.com/article/7686354780045836819",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-06-15",
+   "t": "泰国年产8万吨精密铜管项目完成设备调试并进入试生产",
+   "src": "宁波金田铜业客户卡",
+   "url": "https://www.cnfin.com/announ/detail/index.html?dannoun=lcdetail&id=835115981707",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-04-01",
+   "t": "拟投资不超6亿元在越南建设年产3万吨液冷散热及机架母线用高精密铜排项目",
+   "src": "宁波金田铜业客户卡",
+   "url": "https://paper.cnstock.com/html/2026-04/01/content_2194878.htm",
+   "verify": "pending"
+  }
+ ]
+}

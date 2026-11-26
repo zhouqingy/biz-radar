@@ -1,0 +1,36 @@
+{
+ "company": "中天钢铁",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "国内钢铁主业业主（常州/南通/淮安基地自备电厂、余热余压发电机会）；海外目前以贸易为主。",
+ "org": {
+  "mode": "集团「一总部、多基地」（常州/南通/淮安），海外以香港、新加坡贸易分公司为主",
+  "regions": [
+   "中国香港",
+   "新加坡",
+   "东南亚市场"
+  ],
+  "capital_vehicle": "中天钢铁集团有限公司（董才平家族）",
+  "key_person": [
+   {
+    "name": "董才平",
+    "title": "党委书记、董事局主席、总裁",
+    "scope": "集团一把手，国际化与多元化战略决策人；中国钢铁工业协会副会长、全联冶金商会常务会长",
+    "url": "https://www.zt.net.cn/index.php?m=content&c=index&a=show&catid=9&id=7675",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-07-13",
+   "t": "3亿美元汽车轮胎核心材料项目签约落地埃及中埃泰达苏伊士经贸合作区",
+   "src": "中天钢铁客户卡",
+   "url": "http://news.big5.enorth.com.cn/system/2026/07/13/059567733.shtml",
+   "verify": "pending"
+  }
+ ]
+}

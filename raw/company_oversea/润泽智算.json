@@ -1,0 +1,43 @@
+{
+ "company": "润泽智算",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "数据中心高负荷业主：巴淡EGSB为首个中国境外扩张项目，稳定供电、绿色能源、储能及冷却配套是直接切口。",
+ "org": {
+  "mode": "润泽智算上市平台，园区级数据中心投资运营；国内集群+中国香港/印尼属地项目公司",
+  "regions": [
+   "中国香港沙岭",
+   "印尼巴淡Nongsa（EGSB）",
+   "国内京津冀/长三角/大湾区/成渝/甘肃"
+  ],
+  "capital_vehicle": "润泽智算科技集团股份有限公司（300442）+ 润泽（沙岭）项目主体 + PT Equator Gate System Batam",
+  "key_person": [
+   {
+    "name": "周超男",
+    "title": "董事长、法定代表人",
+    "scope": "全球算力基础设施布局与重大投资决策",
+    "url": "https://emweb.securities.eastmoney.com/pc_hsf10/CompanySurvey/Index?type=web&code=SZ300442",
+    "verify": "done"
+   },
+   {
+    "name": "李笠",
+    "title": "副董事长、总经理（总裁）",
+    "scope": "经营与海外项目执行，主导中国香港沙岭数据园区动工及建设",
+    "url": "http://www.locpg.gov.cn/20260330/f938aa4f1e7d43d68724bd0b454f17d8/c.html",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-05-01",
+   "t": "润泽科技巴淡岛 Nongsa 圈地 30 公顷，投资 50 亿美元，一期 160 MW 高密液冷",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  }
+ ]
+}

@@ -1,0 +1,76 @@
+{
+ "company": "洛阳栾川钼业",
+ "updated": "2026-11-23",
+ "status": "researched",
+ "source_note": "2026-11-23 首轮调研：洛钼官网/上证报/中国证券报/工商高管信息",
+ "verify": "PENDING",
+ "relevance_note": "A 档：电力事业部=我们的直接对口；刚果金矿山自建电（光储/水电/电网调度）是年报级战略，余热/燃机备电均有切入点",
+ "org": {
+  "mode": "集团总部+区域矿山公司；⚠ 已成立「电力事业部」——围绕在产/拟并购矿山提前配置电力（对我们是直接对口部门）",
+  "key_person": [
+   {
+    "name": "刘建锋",
+    "title": "董事长、首席投资官",
+    "scope": "集团战略/并购",
+    "verify": "done",
+    "src": "工商高管信息 + 洛钼官网 cmoc.com"
+   },
+   {
+    "name": "彭旭辉",
+    "title": "执行董事、首席执行官、总裁（2025-12 任）",
+    "scope": "全球运营；公开谈电力配套战略",
+    "verify": "done",
+    "src": "工商高管信息 + 上海证券报（cmoc.com 官网转载）"
+   },
+   {
+    "name": "陈兴垚",
+    "title": "副总裁、首席财务官",
+    "scope": "成本/供应链（刚果金酸耗管控）",
+    "verify": "done",
+    "src": "上海证券报 cmoc.com/html/2026/MediaFocus_0417/402.html"
+   }
+  ],
+  "capital_vehicle": "TFM（80% 权益）/ KFM（71.25%）刚果金；IXM 贸易；巴西铌磷；厄瓜多尔金矿",
+  "verify": "done"
+ },
+ "layout": [
+  {
+   "country": "刚果(金)",
+   "what": "TFM+KFM「非洲双子星」（全球前五铜矿/第一钴矿）；KFM 二期 10.84 亿美元扩建 2027 年投产（+10 万吨铜）；⚠ 在建 TFM/KFM 光伏+储能（年内并网）+ 水电站（2028 投产）+ 自建电网统一调度",
+   "src": "洛钼官网/上证报 + 中国日报双源"
+  },
+  {
+   "country": "巴西",
+   "what": "全球第二大铌生产商、巴西第二大磷肥",
+   "src": "洛钼官网"
+  },
+  {
+   "country": "厄瓜多尔",
+   "what": "Lumina Gold 收购（2026-06 交割）+ 奥丁金矿；新并购四座金矿，黄金剑指 20 吨/年",
+   "src": "中国证券报 + 洛钼官网"
+  }
+ ],
+ "actions_90d": [
+  {
+   "d": "2026-08-20",
+   "t": "刚果（金）KFM二期项目建设有序推进，计划2027年建成投产",
+   "src": "洛阳栾川钼业客户卡",
+   "url": "https://epaper.cs.com.cn/zgzqb/html/2026-08/20/nw.D110000zgzqb_20260820_1-B045.htm",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-20",
+   "t": "2026年1月完成巴西四座在产金矿100%权益交割，黄金年产能向20吨迈进",
+   "src": "洛阳栾川钼业客户卡",
+   "url": "https://stock.finance.sina.com.cn/stock/go.php/vReport_Show/kind/search/rptid/840807055106/index.phtml",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-07-15",
+   "t": "2026年铜产量指引上调至76万—82万吨，KFM拟新增10万吨阴极铜产能",
+   "src": "洛阳栾川钼业客户卡",
+   "url": "https://www.metalnomist.com/2026/07/cmoc-copper-output-rises-as-drc-mines.html",
+   "verify": "pending"
+  }
+ ]
+}

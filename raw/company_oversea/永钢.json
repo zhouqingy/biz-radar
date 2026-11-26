@@ -1,0 +1,49 @@
+{
+ "company": "永钢",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "永钢中亚360兆瓦天然气发电站类项目，吴毅（国际贸易出身、总裁）是第一对接人。",
+ "org": {
+  "mode": "永卓控股（张家港永联村）— 钢铁+新能源+新材料+物流+金融贸易多元集团",
+  "regions": [
+   "中亚（乌兹别克斯坦等）",
+   "东南亚"
+  ],
+  "capital_vehicle": "永卓控股有限公司（吴耀芳家族）+ 科创板富淼科技（2025年控股）",
+  "key_person": [
+   {
+    "name": "吴耀芳",
+    "title": "永卓控股董事局主席",
+    "scope": "集团实际控制人、法定代表人",
+    "url": "https://www.everrising.cn/news?type=1",
+    "verify": "done"
+   },
+   {
+    "name": "吴毅",
+    "title": "党委书记、总裁（永钢集团总裁）",
+    "scope": "第三代掌舵人（1987年生，伦敦大学亚非学院金融硕士）；从国际贸易公司经理起家，主导钢铁+新能源+海外多元化转型",
+    "url": "https://baike.baidu.com/item/%E5%90%B4%E6%AF%85/49993351",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-09-28",
+   "t": "永钢中亚钢铁含装机360兆瓦天然气发电站总投资约12亿美元，一期2027年投产",
+   "src": "永钢集团客户卡",
+   "url": "https://finance.sina.com.cn/roll/2026-09-28/doc-initkhwz8644529.shtml",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-09-11",
+   "t": "哈萨克斯坦江布尔州12亿美元氢基竖炉DRI短流程钢厂开工，配套约350兆瓦天然气自备电站",
+   "src": "永钢集团客户卡",
+   "url": "https://www.zgw.com/kc/2541619",
+   "verify": "pending"
+  }
+ ]
+}

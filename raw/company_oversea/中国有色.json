@@ -1,0 +1,43 @@
+{
+ "company": "中国有色",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "海外有色业主核心目标：矿山、冶炼厂电力与蒸汽配套、余热发电及海水/工业水处理均对口；集团国际业务与属地项目公司双层跟进。",
+ "org": {
+  "mode": "国务院国资委直接监管央企，形成非洲—南美—中亚资源基地，集团—上市/境外企业分层管理",
+  "regions": [
+   "刚果（金）",
+   "赞比亚",
+   "哈萨克斯坦",
+   "南美及中亚其他资源国"
+  ],
+  "capital_vehicle": "中国有色矿业集团有限公司 + 中色股份 + 迪兹瓦矿业/刚波夫矿业/卢阿拉巴铜冶炼等境外企业",
+  "key_person": [
+   {
+    "name": "文岗",
+    "title": "党委书记、董事长",
+    "scope": "国际化经营、境外资源基地与重大项目决策",
+    "url": "https://www.cnmc.com.cn/cnmc/sy/tpxw/2026/7/I1531945454026096640.html",
+    "verify": "done"
+   },
+   {
+    "name": "张晋军",
+    "title": "党委副书记、总经理",
+    "scope": "集团经营、境外企业管理和项目推进",
+    "url": "https://www.cnmc.com.cn/cnmc/sy/tpxw/2026/7/I1531945454026096640.html",
+    "verify": "done"
+   },
+   {
+    "name": "刘宇",
+    "title": "党委委员、副总经理",
+    "scope": "国际化经营直接分管，通报并部署年度海外经营工作",
+    "url": "https://zsfz.cnmc.com.cn/cnmc/xwzx/jtxw/2026/1/I1466347271758020608.html",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": []
+}

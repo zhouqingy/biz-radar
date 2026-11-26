@@ -1,0 +1,49 @@
+{
+ "company": "中铝",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "几内亚120万吨氧化铝项目约10亿美元，及既有博法矿业均为高用能场景；重点跟踪自备电、蒸汽热电与余热利用，项目侧对接中铝香港/属地公司。",
+ "org": {
+  "mode": "中铝集团—中国铝业股份—境外项目公司三级体系，铝土矿、氧化铝、电解铝全产业链",
+  "regions": [
+   "几内亚博法及氧化铝项目",
+   "西芒杜相关产业链",
+   "其他海外铝土矿与铝产业基地"
+  ],
+  "capital_vehicle": "中国铝业集团有限公司 + 中国铝业股份有限公司 + 中铝香港及属地项目公司",
+  "key_person": [
+   {
+    "name": "段向东",
+    "title": "中铝集团党组书记、董事长",
+    "scope": "集团国际化资源战略与重大投资决策",
+    "url": "https://www.chinalco.com.cn/gywm/gywm_gltd/",
+    "verify": "done"
+   },
+   {
+    "name": "王石磊",
+    "title": "中铝集团党组副书记、董事、总经理",
+    "scope": "集团经营与重大工程组织",
+    "url": "https://www.chinalco.com.cn/gywm/gywm_gltd/",
+    "verify": "done"
+   },
+   {
+    "name": "何文建",
+    "title": "中国铝业董事长",
+    "scope": "上市铝产业平台及几内亚氧化铝项目决策，出席2026年项目签约",
+    "url": "https://www.chalco.com.cn/xwdt/gsyw/202605/t20260522_169964.html",
+    "verify": "done"
+   },
+   {
+    "name": "董建雄",
+    "title": "中铝集团副总经理、党组成员",
+    "scope": "海外铝产业项目高层推进，出席几内亚氧化铝项目签约",
+    "url": "https://www.chalco.com.cn/xwdt/gsyw/202605/t20260522_169964.html",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": []
+}

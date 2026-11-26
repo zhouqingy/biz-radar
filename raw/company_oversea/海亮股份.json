@@ -1,0 +1,59 @@
+{
+ "company": "海亮股份",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "印尼10万吨电解铜箔（高耗电！）——铜箔生产用电负荷大，园区配套电源/绿电是明确机会点。",
+ "org": {
+  "mode": "海亮集团（诸暨）— 海亮股份（上市）+ 香港海亮控股 + 印尼海亮新材料（JIIPE吉配特区）",
+  "regions": [
+   "印尼东爪哇JIIPE（10万吨铜箔8.6亿美元）",
+   "美国",
+   "欧洲",
+   "越南",
+   "泰国"
+  ],
+  "capital_vehicle": "海亮集团（冯海良家族）+ 海亮股份（002203）+ 香港海亮控股+印尼海亮新材料",
+  "key_person": [
+   {
+    "name": "冯橹铭",
+    "title": "海亮股份董事长",
+    "scope": "创始人冯海良之子，2025年7月接任上市公司董事长，全球化基地（23个）一把手",
+    "url": "http://fecafo.com/nd.jsp?id=372",
+    "verify": "done"
+   },
+   {
+    "name": "曹建国",
+    "title": "海亮集团董事局主席",
+    "scope": "职业经理人出身；2023年印尼铜箔项目开工致辞人（时任海亮股份董事长），国际化元老",
+    "url": "https://www.hailiangstock.com/news/newsinfor/1025.html",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-09-14",
+   "t": "美国得州基地产能已达10万吨，上半年海外铜加工收入占比升至36.38%",
+   "src": "海亮股份客户卡",
+   "url": "https://finance.sina.cn/2026-09-14/detail-inirtwik4122204.d.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-08-27",
+   "t": "摩洛哥5万吨无锻轧铜产线厂房封顶，预计2026年三季度投产",
+   "src": "海亮股份客户卡",
+   "url": "https://www.stcn.com/article/detail/4149935.html",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-04-13",
+   "t": "拟投资5.66亿美元在沙特建设年产15万吨铜产品高端智造加工厂",
+   "src": "海亮股份客户卡",
+   "url": "https://www.toutiao.com/article/7628179553730511411",
+   "verify": "pending"
+  }
+ ]
+}

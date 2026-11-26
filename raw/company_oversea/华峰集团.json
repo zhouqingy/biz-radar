@@ -1,0 +1,57 @@
+{
+ "company": "华峰集团",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "种子档案：由平台库内数据（客户卡/ODI 备案/手工补录）自动聚合生成，组织架构与分管领导待逐条核实补全",
+ "verify": "PENDING",
+ "relevance_note": "华青铝业电解铝超级高耗能——用电配套（自备电厂/绿电）体量巨大，现场对接项金尧、集团对接潘基础。",
+ "org": {
+  "mode": "华峰集团（温州瑞安）— 与青山实业合资华青铝业（印尼）；集团副总裁分管海外",
+  "regions": [
+   "印尼（华青铝业，青山园区）",
+   "重庆",
+   "上海"
+  ],
+  "capital_vehicle": "华峰集团（尤小平家族）+ 华青铝业（与青山实业合资）",
+  "key_person": [
+   {
+    "name": "尤小平",
+    "title": "集团董事局主席",
+    "scope": "「印尼是海外业务布局重要桥头堡」定调人；华青铝业（规划400万吨氧化铝+200万吨电解铝）战略决策",
+    "url": "https://huafeng.com/news_detail/23.html",
+    "verify": "done"
+   },
+   {
+    "name": "潘基础",
+    "title": "集团副总裁",
+    "scope": "海外产业与本土化人才培养分管",
+    "url": "https://huafeng.com/news_detail/23.html",
+    "verify": "done"
+   },
+   {
+    "name": "项金尧",
+    "title": "华青铝业常务副总经理",
+    "scope": "印尼项目现场负责人（电解铝已投产、年产值百亿）",
+    "url": "https://huafeng.com/news_detail/23.html",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-04-24",
+   "t": "华峰化学投36亿元建20万吨高性能低碳化数智化氨纶项目，另有重庆5万吨差别化氨纶项目在办证",
+   "src": "华峰集团（华峰化学）客户卡",
+   "url": "https://www.fxbaogao.com/detail/5376700",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-03-31",
+   "t": "华峰化学明确\"暂无海外生产基地建设规划\"，海外销售占比约20%，仅设韩国、土耳其等境外子公司",
+   "src": "华峰集团（华峰化学）客户卡",
+   "url": "http://static.cninfo.com.cn/finalpage/2026-03-31/1225066929.PDF",
+   "verify": "pending"
+  }
+ ]
+}

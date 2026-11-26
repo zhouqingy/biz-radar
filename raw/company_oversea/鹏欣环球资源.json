@@ -1,0 +1,49 @@
+{
+ "company": "鹏欣",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "非洲铜金钴采选冶高用能业主，矿山/冶炼供电、余热及配套能源可跟踪；李学才兼具上市公司经营与南非项目职责。",
+ "org": {
+  "mode": "鹏欣系上市矿业平台，总部+矿业事业部+非洲属地公司管理",
+  "regions": [
+   "刚果（金）希图鲁铜矿",
+   "南非奥尼金矿"
+  ],
+  "capital_vehicle": "鹏欣环球资源股份有限公司（600490）+ SMCO + CAPM African Precious Metals",
+  "key_person": [
+   {
+    "name": "王健",
+    "title": "董事长",
+    "scope": "刚果（金）铜矿、南非金矿运营与后续开发建设决策",
+    "url": "http://www.pengxinzy.com.cn/business/news/view.htmls?id=390",
+    "verify": "done"
+   },
+   {
+    "name": "李学才",
+    "title": "总裁；CAPM董事长及CEO",
+    "scope": "上市公司经营、海外矿山生产建设及南非属地公司管理；2026年5月任总裁",
+    "url": "https://paper.cnstock.com/html/2026-05/13/content_2216012.htm",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-08-26",
+   "t": "刚果（金）希图鲁铜矿推进光伏储能发电、蒸汽发电等中长期电力保供项目",
+   "src": "鹏欣环球资源客户卡",
+   "url": "https://static.cninfo.com.cn/finalpage/2026-08-26/1225505472.PDF",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-07-14",
+   "t": "南非奥尼金矿产能释放，上半年黄金产量823.97公斤同比增62%",
+   "src": "鹏欣环球资源客户卡",
+   "url": "http://www.pengxinzy.com.cn/business/news/view.htmls?id=393",
+   "verify": "pending"
+  }
+ ]
+}

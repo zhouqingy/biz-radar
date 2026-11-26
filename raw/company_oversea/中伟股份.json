@@ -1,0 +1,89 @@
+{
+ "company": "中伟股份",
+ "updated": "2026-11-26",
+ "source_note": "初版由用户提供（豆包检索整理，引界面新闻/证券日报网/中国证券报/新浪财经），逐条信源核实中，未核实条目标 pending",
+ "verify": "PENDING",
+ "org": {
+  "mode": "中伟集团（湖南）— 中伟新材（A+H上市）+ 印尼中青新能源等海外基地",
+  "regions": [
+   "印尼",
+   "摩洛哥",
+   "韩国",
+   "芬兰（规划）"
+  ],
+  "capital_vehicle": "湖南中伟控股集团（邓伟明）+ 中伟新材（300919.SZ/02579.HK）+ 印尼中青新能源",
+  "key_person": [
+   {
+    "name": "邓伟明",
+    "title": "董事长兼总裁",
+    "scope": "创始人，全球化（印尼/摩洛哥等）新能源材料基地决策人",
+    "url": "https://www.cngrgf.com.cn/mobile/hyxw/1759.html",
+    "verify": "done"
+   },
+   {
+    "name": "陶吴",
+    "title": "资深副总裁、印尼中青新能源董事",
+    "scope": "经营中心出身，印尼基地董事（2021年起）",
+    "url": "https://www.cngrgf.com.cn/mobile/tjhcl/P1.html",
+    "verify": "done"
+   },
+   {
+    "name": "邓竞",
+    "title": "董事、印尼中青新能源董事",
+    "scope": "印尼基地董事（2021年起），投资背景",
+    "url": "https://cngrgf.com.cn/touzi.html",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [
+  {
+   "country": "印尼",
+   "what": "核心镍原料基地：莫罗瓦利/纬达贝/北莫罗瓦利多基地，红土镍冶炼+冰镍+硫酸配套，万人本地团队"
+  },
+  {
+   "country": "摩洛哥",
+   "what": "非洲首个规模化锂电材料基地：一期4万吨镍系前驱体投产，远期12万吨前驱体+6万吨LFP+回收"
+  },
+  {
+   "country": "阿根廷",
+   "what": "控股 Jama/Solaroz 盐湖锂项目，锁定超1000万吨LCE"
+  },
+  {
+   "country": "韩国",
+   "what": "与 Posco FM 合资 LFP（浦项）；参股 FINO（韩上市）材料平台"
+  },
+  {
+   "country": "欧洲",
+   "what": "与德国 CRONIMET 合作电池回收工厂"
+  }
+ ],
+ "actions_90d": [
+  {
+   "d": "2026-10 下旬",
+   "t": "拟约1.08亿美元收购 HML 53.3% 股权+认购 ANHI 配股，加码印尼镍资源",
+   "src": "公司公告（待审批）",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-11 初",
+   "t": "莫罗瓦利中青新能源获硫酸 IUI 工业许可证，副产品硫酸可市场化销售",
+   "src": "新浪财经",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-11 中旬",
+   "t": "韩国 FINO 定向优先股增资，公司放弃优先认购仍为第一大股东",
+   "src": "中国证券报",
+   "verify": "pending"
+  },
+  {
+   "d": "2026-10",
+   "t": "南美团队参加阿根廷胡胡伊锂业大会，推进 Jama-Solaroz 社区/环评",
+   "src": "湖南中伟控股公众号",
+   "verify": "pending"
+  }
+ ],
+ "relevance_note": "印尼镍冶炼基地高用能，自备电站/余热机会对接陶吴、邓竞（印尼公司董事）。",
+ "status": "researched"
+}

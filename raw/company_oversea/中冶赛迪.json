@@ -1,0 +1,33 @@
+{
+ "company": "中冶赛迪",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "钢铁绿色低碳与能源系统核心同业；煤气发电、余热余压及节能环保工程既可能竞争也可专业协同。",
+ "org": {
+  "mode": "中国五矿/中国中冶旗下，中冶赛迪集团与上市工程股份分层经营，覆盖钢铁全流程和国际化工程",
+  "regions": [
+   "东南亚、南亚、中东、非洲、欧洲等冶金工程市场"
+  ],
+  "capital_vehicle": "中冶赛迪集团有限公司 + 中冶赛迪工程技术股份有限公司 + 海外项目机构",
+  "key_person": [
+   {
+    "name": "张勇",
+    "title": "中冶赛迪集团党委书记、总经理；中冶赛迪股份董事长",
+    "scope": "集团经营与股份公司重大工程、国际化布局决策",
+    "url": "https://cisdigroup.com.cn/channel/zysdjt",
+    "verify": "done"
+   },
+   {
+    "name": "牛强",
+    "title": "中冶赛迪股份党委书记、总经理",
+    "scope": "股份公司生产经营与项目履约",
+    "url": "https://www.cisdigroup.com.cn/channel/zysdgf",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": []
+}

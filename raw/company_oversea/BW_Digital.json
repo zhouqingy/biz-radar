@@ -1,0 +1,42 @@
+{
+ "company": "BW Digital",
+ "updated": "2026-11-26",
+ "status": "researched",
+ "source_note": "2026-11-26 平台级补全：企业官网、上市公司高管/公告、政府网站或项目签约原文；verify=pending 者仍需二次复核",
+ "verify": "PENDING",
+ "relevance_note": "巴淡Nongsa最高80MW数据中心及跨境海缆业主；供电可靠性、绿电和冷却配套可跟，需同时连接BW Digital与园区方。",
+ "org": {
+  "mode": "BW Group旗下新加坡数字基础设施平台，与Citramas/Nongsa Digital Park及Telin合作开发运营",
+  "regions": [
+   "印尼巴淡Nongsa Digital Park",
+   "新加坡—巴淡跨境海缆走廊"
+  ],
+  "capital_vehicle": "BW Digital + Nongsa项目主体；合作方Citramas Group/Telin",
+  "key_person": [
+   {
+    "name": "Ludovic Hutier",
+    "title": "BW Digital首席执行官（CEO）",
+    "scope": "巴淡80MW数据中心及Nongsa—Changi海缆投资与经营决策",
+    "url": "https://www.telkom.co.id/sites/berita/id_ID/news/telkomgroup-nongsa-digital-park-dan-bw-digital-perkuat-gerbang-digital-indonesia-melalui-sistem-kabel-laut-ncc-3847",
+    "verify": "done"
+   },
+   {
+    "name": "Andreas Sohmen-Pao",
+    "title": "BW Group董事长",
+    "scope": "集团层面数字基础设施资本与战略合作决策",
+    "url": "https://www.telkom.co.id/sites/berita/id_ID/news/telkomgroup-nongsa-digital-park-dan-bw-digital-perkuat-gerbang-digital-indonesia-melalui-sistem-kabel-laut-ncc-3847",
+    "verify": "done"
+   }
+  ]
+ },
+ "layout": [],
+ "actions_90d": [
+  {
+   "d": "2026-06-01",
+   "t": "BW Digital 巴淡 144 MW 数据中心（NDP1）采用直接液冷，2026 年中投运",
+   "src": "手工补录",
+   "url": "",
+   "verify": "pending"
+  }
+ ]
+}
