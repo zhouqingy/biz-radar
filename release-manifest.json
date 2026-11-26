@@ -1,0 +1,96 @@
+{
+  "files": {
+    "boot.js": {
+      "bytes": 2622,
+      "sha256": "1d0e21ce9bac1c551243118b05cf4cfe9afe6479eb8d44cb1cba0d9657e29bfd"
+    },
+    "data.candperf.js": {
+      "bytes": 103718,
+      "sha256": "8e3710f077697b22fe845b9b148ac9760bb4051b441703811c4d8549eaa8a632"
+    },
+    "data.changes.js": {
+      "bytes": 45001,
+      "sha256": "b686a887095a4068817958ddfabe1e18d24c122410bc3a088359168e9b5094fb"
+    },
+    "data.chunk-lead.js": {
+      "bytes": 263472,
+      "sha256": "96c17cba3cb50e3be670f01cbde60acb8542051e4a9503f19620a09ca7509785"
+    },
+    "data.chunk-rest.js": {
+      "bytes": 240123,
+      "sha256": "fff8c40f784d04dce35015001733a87badfe103b8949551d1140bb5f1a9aaac9"
+    },
+    "data.core.js": {
+      "bytes": 19567,
+      "sha256": "903934e2fd1679b6e54e02b1b6399f69f97f524455f1591971905499cb488755"
+    },
+    "data.entprobe.js": {
+      "bytes": 1013545,
+      "sha256": "8ee0b1ff9fb4d99e6c619f74f48606e540acca1831dbf28caded09cd2188b42a"
+    },
+    "data.graph.js": {
+      "bytes": 330952,
+      "sha256": "3abc9e3eadeec421c7b5d6488fe87a55249544f2ed85abfedf6a6c6b52c1caf0"
+    },
+    "data.items.js": {
+      "bytes": 29006,
+      "sha256": "a9730667641fe6941584351105a1c43cdc0c97a189ea277389a813bed8def98e"
+    },
+    "data.js": {
+      "bytes": 2416241,
+      "sha256": "8681eac83afe3c85f9875499e65cb3bed4d9fdb00efc12e3d853bae02a3c1776"
+    },
+    "data.metalhist.js": {
+      "bytes": 361194,
+      "sha256": "86e1885c5abab8ab48d025f24d523b60602ed262b9cebbb4e0454ee5985fddc8"
+    },
+    "data.news.js": {
+      "bytes": 574243,
+      "sha256": "ee3f8d4e3ae4fc08def8891b7adbe1fbca8fe656532a806562363180d5e03444"
+    },
+    "data.org.js": {
+      "bytes": 824126,
+      "sha256": "883464b8064df3e15adf1c24cc9d9e9a1ec872cbed17b05754e0c922a78aed07"
+    },
+    "data.ovprofile.js": {
+      "bytes": 99540,
+      "sha256": "d4acc8018b384fb26dbf6873bb9591137c293a97a2a8f6581a8656e4d86e9fec"
+    },
+    "data.plan.js": {
+      "bytes": 100506,
+      "sha256": "342676e3f7a068de9b2be7cdefa835bf5a389eeb6de045e1c049cfcbdde65e88"
+    },
+    "data.policy.js": {
+      "bytes": 33162,
+      "sha256": "7358490c0f78b771c2e1cf92eedfe80e7d3ca9533666225e7bc0c48e0fa50ee6"
+    },
+    "data.rivalperf.js": {
+      "bytes": 1040960,
+      "sha256": "d0e680300cf61062eee7c18f4100fd603f85028ffae9b3bb7d533213203e7f61"
+    },
+    "data.siku.js": {
+      "bytes": 23576,
+      "sha256": "faca5312ff10424a03771421c8df043615f6d28981607db78d49caf4cffd04bb"
+    },
+    "index.html": {
+      "bytes": 839005,
+      "sha256": "d3bd997990b7d93c05b8d3bc3ee4aea7be1c88e90781ab5bf40fa67e14c1e6e7"
+    }
+  },
+  "modules": {
+    "digest": {
+      "count": 77,
+      "updated": "2026-11-26 08:58"
+    }
+  },
+  "run": {
+    "attempt": "1",
+    "baseSha": "67edef235a69d3bfeb77737f51c9168fb0feb331",
+    "builtAt": "2026-11-26T08:58:56+00:00",
+    "id": "45787256341",
+    "scope": "digest",
+    "sourceHealth": "rival=success",
+    "workflow": "情报精选刷新（每周一）"
+  },
+  "schema": 1
+}
