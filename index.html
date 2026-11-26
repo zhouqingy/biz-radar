@@ -9851,7 +9851,12 @@ function openClientProf(name){
      '<a href="javascript:searchFor(\''+esc(String(x.kw||x.name).slice(0,10)).replace(/'/g,"\\'")+'\')">在商机库搜它的全部记录 ↗</a>'+
      '<a href="https://www.baidu.com/s?wd='+encodeURIComponent(x.name+' 海外 建厂 电力')+'" target="_blank" rel="noopener nofollow">搜它最近的海外新闻 ↗</a>'+
      '</div></div>';
-  openUniProf(x.name, abGrp(x.grp)+' · '+(x.rg||'')+(x.rg?' · ':'')+priTxt, h);
+  /* §5.118（2026-11-26 用户问「决策层/公司情况怎么两个界面都找不到」）：
+     决策层/组织架构/国别布局其实 11-23 已上线（data.ovprofile.js，项目线索详情里有），
+     但客户卡弹窗没接 —— 这里补上：弹窗尾部懒加载同一份出海档案，
+     复用 ovProfFill 渲染（分管/关键人=决策层、组织架构、资本载体、国别布局、近 90 天动作）。 */
+  openUniProf(x.name, abGrp(x.grp)+' · '+(x.rg||'')+(x.rg?' · ':'')+priTxt, h+'<div id="pjOvProf"></div>');
+  try{ovProfFill(x.name)}catch(err){console.warn('[ovProf]',err)}
 }
 
 /* 业绩总表整行点击：只有带 data-u 的行才是链接，点里面的 a 不重复触发。 */
