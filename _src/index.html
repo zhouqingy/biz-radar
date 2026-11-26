@@ -1415,7 +1415,7 @@ tr.ovg-row:hover td{background:#f7fbff}
 .pf-tb td.st,.pf-tb td.w{color:var(--tx2);font-size:11.5px;word-break:break-word}
 .pf-tb .pf-ctrl{color:var(--tx3);font-size:10.5px}
 .pf-tags{margin-top:5px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-.pf-s{font-size:10px;padding:1px 6px;border-radius:3px;border:1px solid;white-space:nowrap;font-weight:400}
+.pf-s{font-size:10px;padding:1px 6px;border-radius:3px;border:1px solid #dfe4ec;color:#5a6270;background:#fafbfd;white-space:nowrap;font-weight:400}
 .pf-s-lib{color:#1e7a46;background:#eefaf2;border-color:#c6e9d5}
 .pf-s-prov{color:#1053c9;background:#eef4ff;border-color:#cddcf7}
 .pf-s-probe{color:#8a5a00;background:#fff8e8;border-color:#f0dfb8}
@@ -2738,8 +2738,8 @@ body{height:100vh!important;overflow:hidden!important;background:var(--bg)!impor
   </div>
 </div>
 
-<script src="data.core.js?v=202611220358"></script>
-<script src="data.items.js?v=202611220358"></script>
+<script src="data.core.js?v=202611260339"></script>
+<script src="data.items.js?v=202611260339"></script>
 <script src="data.metalhist.js?v=202611041941"></script>
 <script>
 /* ==================== 数据加载（2026-10-21 提速）====================
@@ -2807,7 +2807,7 @@ function packItems(o){
 
 /* 2026-11-02：加规划前瞻（data.plan.js）+ 规划项目挂业主画像，所有按需模块跟着换版本号，
    否则浏览器缓存里还是旧文件 —— 表现是「规划前瞻」页签空面板、业主画像里没有规划段。 */
-var VER='?v=202611220358';
+var VER='?v=202611261500';
 var SITE_PREFIX = {
   js: 'http://jsggzy.jszwfw.gov.cn',
   zj: 'https://ggzy.zj.gov.cn',
@@ -2856,7 +2856,8 @@ var F = {rg:new Set(),sg:new Set(),ind:new Set(),g:new Set(),mode:new Set(),p:ne
      原因：三档按钮上的 13/18 是「主场 + 关注档（≥3000万 或 A/B）」双重过滤后的数，
      和全库的 96/140 差一个量级。默认档切到「全部」，进来先看到 1521 条这个量级，
      想收窄再点前三档——让「宽口径」当默认值，「严口径」当用户主动的选择。 */
-         st:'',q:'',sort:'sc',page:1,tab:0,bk:'all',hideWin:false,side:false,
+         /* P1-A：默认进入“能投的标”工作队列；C/D 与全部历史记录仍留在“全部”，不删不改档。 */
+         st:'',q:'',sort:'sc',page:1,tab:0,bk:'tender',hideWin:false,side:false,
          /* F05 重点关注一键切换（2026-11-05 第 2 批）：默认关。开的时叠一层
             「只看 w=1（金额 ≥1 亿）」的过滤，不改三档 / iv / 其它既有判据。
             w=0 是「留库不删」，不是删；关掉开关立刻全部回来。依据 §5.10。 */
@@ -3746,12 +3747,12 @@ function buildFilters(){
         '按当前「' + (F.side ? '含兼营' : '只看主场业务') + '」过滤后的条数，点开就是。';
       /* 数字留空，由 syncWareNums() 在每次 render 后填当前列表的真实条数。
          这里先写任何预估值都会跟列表对不上（首屏只有 42 条切片，算不出真值）。 */
-      return '<div class="ware" data-bk="' + b[0] + '" title="' + esc(tip) + '">' +
+      return '<div class="ware' + (F.bk === b[0] ? ' on' : '') + '" data-bk="' + b[0] + '" title="' + esc(tip) + '">' +
         b[1] + '<b style="display:none">0</b></div>';
     }).join('') +
       /* 默认选中「全部」：跟着 F.bk 走，不然按钮高亮在「能投的标」上、列表却是全部，
          用户又会对着两个口径起疑。见上方 4a 的口径说明。 */
-      '<div class="ware on" data-bk="all" id="waAllW">全部 <b style="display:none">0</b></div>' +
+      '<div class="ware' + (F.bk === 'all' ? ' on' : '') + '" data-bk="all" id="waAllW" title="包含 C/D 档与全部历史记录；只改变视图，不删除数据">全部 <b style="display:none">0</b></div>' +
       '<span class="ware-tog" id="waHide" title="「全部」档里有一批已经开过标的，滤掉它们只剩还能投的">只看还能投的</span>' +
       '<div class="wtip" id="waTip">数字 = <b>这一档点进去看到的条数</b>（随下方筛选条件实时变）。' +
       '前三档只留<b>主业 + EPC</b> 的标（已剔除纯采购 / 分包 / 管网 / 后勤），不按金额卡' +
@@ -3813,7 +3814,7 @@ function buildFilters(){
        原来它常驻 display:none，只有用户手点「全部」才出现——
        默认档改了之后，不补这一句用户永远看不到它。 */
     var _h0 = el('waHide');
-    if (_h0) _h0.style.display = 'inline-block';
+    if (_h0) _h0.style.display = (F.bk === 'all') ? 'inline-block' : 'none';
   }
   /* 只给「多选筛选项」绑通用 toggle。
      ⚠ 别改回 querySelectorAll('.chip') 一把抓：
@@ -4386,6 +4387,9 @@ function syncWareNums(){
 
 function render(){
   var a=filtered(); LAST=a;
+  /* P1-A：机器可验收的同一结果集签名；导出与分页直接使用 LAST / filtered()。 */
+  el('rbar').setAttribute('data-result-count',String(a.length));
+  el('grid').setAttribute('data-result-count',String(a.length));
   /* ⚠ 必须在 LAST 赋值之后同步按钮数字：数字来源就是 LAST.length，
      放在前面会拿到上一轮的长度，差一条都算「对不上」。 */
   try{ syncWareNums(); }catch(e){}
@@ -4479,7 +4483,7 @@ el('q').addEventListener('input',function(){
   clearTimeout(_qTimer);
   _qTimer=setTimeout(function(){ loadAllItems(function(){ if(F.q)render() }) },400);
 });
-el('sort').onchange=function(){F.sort=this.value;render()};
+el('sort').onchange=function(){F.sort=this.value;F.page=1;render()};
 el('btnReset').onclick=resetF;
 function resetF(){
   ['rg','sg','ind','g','mode','p'].forEach(function(k){F[k].clear()});
@@ -4495,20 +4499,34 @@ function resetF(){
   }
   el('q').value=''; render();
 }
-el('btnCsv').onclick=function(){
-  var head=['项目名称','地区','城市','阶段','优先级','业务分层','是否主场','命中词','业主','中标单位','金额(亿元)','金额原文','日期','截止','承包模式','来源平台','原始发布平台','附件数','附件清单','链接'];
-  var rows=LAST.map(function(x){return [x.t,x.rg,x.city,x.st,x.g,SEG_NAME[x.sg]||'',(x.hm?'主场':'兼营'),x.sG||'',x.buyer,x.win,
-    (x.amt==null?'':x.amt),x.amtTxt,x.d,x.dl,x.mode,x.p,
-    (x.org&&x.org.n?x.org.n:''),
-    (x.files&&x.files.length?x.files.length:''),
-    (x.files||[]).map(function(f){return f.n+(f.u?' <'+f.u+'>':'')}).join(' | '),
-    x.url].map(function(v){
-    return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}).join(',')});
-  var csv='\ufeff'+[head.join(',')].concat(rows).join('\r\n');
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download='商机雷达_'+meta.updated+'.csv'; a.click();
-};
+function exportItemsCsv(done){
+  var buttons=[el('btnCsv'),document.getElementById('aCsv')].filter(Boolean);
+  function ready(){
+    /* 重新从唯一 selector 取数，避免异步期间用户改变筛选后导出旧 LAST。 */
+    render();
+    var current=filtered(); LAST=current;
+    var head=['项目名称','地区','城市','阶段','优先级','业务分层','是否主场','命中词','业主','中标单位','金额(亿元)','金额原文','日期','截止','承包模式','来源平台','原始发布平台','附件数','附件清单','链接'];
+    var rows=current.map(function(x){return [x.t,x.rg,x.city,x.st,x.g,SEG_NAME[x.sg]||'',(x.hm?'主场':'兼营'),x.sG||'',x.buyer,x.win,
+      (x.amt==null?'':x.amt),x.amtTxt,x.d,x.dl,x.mode,x.p,
+      (x.org&&x.org.n?x.org.n:''),
+      (x.files&&x.files.length?x.files.length:''),
+      (x.files||[]).map(function(f){return f.n+(f.u?' <'+f.u+'>':'')}).join(' | '),x.url];});
+    if(!rows.length){if(typeof toast550==='function')toast550('当前条件没有可导出的项目');return;}
+    function cell(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';}
+    var csv='\ufeff'+[head.map(cell).join(',')].concat(rows.map(function(r){return r.map(cell).join(',');})).join('\r\n');
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+    a.download='商机雷达_当前筛选_'+current.length+'条_'+meta.updated+'.csv';
+    document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+    if(typeof done==='function')done(current.length);
+  }
+  function finish(){buttons.forEach(function(b){b.disabled=false;b.removeAttribute('aria-busy');});}
+  if(window.__itemsSplit&&typeof loadAllItems==='function'){
+    buttons.forEach(function(b){b.disabled=true;b.setAttribute('aria-busy','true');});
+    loadAllItems(function(){try{ready();}finally{finish();}});
+  }else ready();
+}
+el('btnCsv').onclick=function(){exportItemsCsv();};
 
 /* ==================== F21 政策档（2026-11-05 第 3 批）====================
    数据源 biz-radar/data.policy.js（window.DATA_POLICY），need('policy') 点开才加载。
@@ -5309,8 +5327,8 @@ function ex550(){
   /* ── 找商机：①投放库。走原 btnCsv（=LAST，当前 tab 聚合标签内的结果），
         与改造前的行为完全一致，只是现在明确写在「找商机」这一页。 ── */
   if(tid==='p-items'){
-    var b=document.getElementById('btnCsv');
-    if(b){b.click();toast550('已导出①投放库（当前「全部/能投/已出结果」标签内的结果）');return;}
+    exportItemsCsv(function(n){toast550('已导出当前筛选结果 · '+n+' 条（与列表、统计、分页同源）');});
+    return;
   }
 
   /* ── 同业与伙伴：竞争实力榜 + 联合体伙伴榜，两个都导（本页就是一个页签两个榜） ── */
@@ -6795,46 +6813,51 @@ function openPjDetail(x){
   openUniProf(x.t||'', sub, h+'<div id="pjOvProf"></div>');
   try{ovProfFill(x.buyer||'')}catch(err){console.warn('[ovProf]',err)}
 }
-/* §5.102 企业出海档案进画像弹窗：raw/company_oversea/<企业>.json → data.ovprofile.js
-   （window.DATA_OVPROFILE），点开弹窗才懒加载。按业主名做包含匹配（全称/简称互含）；
-   档案是线索稿，verify 未完成的一律灰标「待核实」，前端不洗白、不另造结论。 */
+/* 企业主档：公司情况、决策层、海外布局共用这一份结构。
+   客户画像和海外项目线索只负责各自的动态列表/项目时间轴；
+   这里不再渲染 actions_90d，从结构上消灭重复，而不是靠标题猜重。 */
 function ovProfFill(buyer){
-  var box=document.getElementById('pjOvProf'); if(!box) return;
+  var box=document.getElementById('pjOvProf'); if(!box)return;
   function render(){
-    if(!document.getElementById('pjOvProf'))return;
+    var cur=document.getElementById('pjOvProf'); if(!cur)return;
     var P=window.DATA_OVPROFILE||{},hit=null,hk='';
     if(buyer)for(var k in P){
       if(!P.hasOwnProperty(k))continue;
       if(buyer.indexOf(k)>=0||k.indexOf(buyer)>=0){hit=P[k];hk=k;break;}
     }
-    if(!hit){box.innerHTML='';return;}
+    if(!hit){cur.innerHTML='';return;}
+    var org=hit.org||{},people=org.key_person||[];
     var pend='<span style="color:#b58a2c;font-size:12px">（待核实）</span>';
-    var h='<div class="ep-sec"><b>企业出海档案 · '+esc(hk)+'</b>';
-    var _bn = hit.status==='seed' ? '该档案为种子稿：库内动向已自动聚合，组织架构/国别布局/分管领导待逐条调研核实。'
-      : hit.status==='researched' ? '组织架构/分管领导已按公开信源核实（官网/公告/双源一致标已核实），带（待核实）灰标的为单一来源，引用前请复核。'
-      : '该档案为线索整理稿，逐条信源核实中，正式引用前请对原文复核。';
-    if(hit.verify!=='DONE')h+='<p style="background:#fdf6e3;border:1px solid #e8d9a8;border-radius:6px;padding:6px 10px;font-size:12px;color:#7a5c14">'+_bn+'</p>';
-    if(hit.relevance_note)h+='<p style="color:var(--tx3);font-size:12px">'+esc(hit.relevance_note)+'</p>';
-    if(hit.org&&hit.org.mode){
-      h+='<p><b>组织架构</b>'+esc(hit.org.mode||'—')+'</p>';
-      if(hit.org.regions&&hit.org.regions.length)h+='<p><b>海外团队</b>'+hit.org.regions.map(esc).join('、')+'</p>';
-      if(hit.org.capital_vehicle)h+='<p><b>资本载体</b>'+esc(hit.org.capital_vehicle)+'</p>';
-      h+=(hit.org.key_person||[]).map(function(p){
-        return '<p><b>分管/关键人</b>'+esc(p.name)+' · '+esc(p.title||'')+' — '+esc(p.scope||'')+(p.verify==='done'?'':pend)+'</p>';
+    var h='<div class="ep-sec" style="border:1px solid #dbe7f5;background:#f8fbff;border-radius:10px;padding:12px 14px">'+
+      '<b style="font-size:16px;color:#174b86">公司情况与决策层 · '+esc(hk)+'</b>';
+    if(hit.relevance_note)h+='<p style="margin:8px 0;color:#40536b"><b>业务相关性</b>'+esc(hit.relevance_note)+'</p>';
+    h+='<div style="margin:12px 0 8px;padding-top:10px;border-top:1px solid #dbe7f5"><b style="font-size:15px;color:#2456a6">决策层 / 关键人'+(people.length?'（'+people.length+'）':'')+'</b></div>';
+    if(people.length){
+      h+=people.map(function(p){
+        return '<div style="background:#fff;border:1px solid #e1e9f2;border-radius:8px;padding:9px 11px;margin:7px 0">'+
+          '<p style="margin:0 0 4px"><b style="font-size:15px">'+esc(p.name)+'</b>'+
+          (p.title?'<span style="margin-left:9px;color:#2456a6;font-weight:600">'+esc(p.title)+'</span>':'')+(p.verify==='done'?'':pend)+'</p>'+
+          (p.scope?'<p style="margin:0;color:#3f4b5b"><b>分管 / 关联事项</b>'+esc(p.scope)+'</p>':'')+
+          (p.url?'<p style="margin:5px 0 0;font-size:12px"><a href="'+esc(fullUrl(p.url))+'" target="_blank" rel="noopener nofollow">信源原文 ↗</a>'+(p.src?'<span style="color:var(--tx3)"> · '+esc(p.src)+'</span>':'')+'</p>':(p.src?'<p style="margin:5px 0 0;color:var(--tx3);font-size:12px">来源：'+esc(p.src)+'</p>':''))+'</div>';
       }).join('');
+    }else{
+      h+='<p style="color:var(--tx3);background:#fff;padding:8px 10px;border-radius:6px">暂无已核实的决策层信息，待调研；不以空姓名或推测职务填充。</p>';
     }
-    if(hit.layout&&hit.layout.length)h+='<p style="margin-top:6px"><b>国别布局</b></p>'+hit.layout.map(function(r){
-      return '<p>'+esc(r.country)+'：'+esc(r.what)+'</p>';
+    if(org.mode||org.capital_vehicle||(org.regions&&org.regions.length)){
+      h+='<div style="margin-top:12px"><b>公司 / 组织情况</b></div>';
+      if(org.mode)h+='<p><b>组织架构</b>'+esc(org.mode)+'</p>';
+      if(org.regions&&org.regions.length)h+='<p><b>海外团队</b>'+org.regions.map(esc).join('、')+'</p>';
+      if(org.capital_vehicle)h+='<p><b>资本载体</b>'+esc(org.capital_vehicle)+'</p>';
+    }
+    if(hit.layout&&hit.layout.length)h+='<div style="margin-top:10px"><b>海外布局</b></div>'+hit.layout.map(function(r){
+      return '<p><b>'+esc(r.country)+'</b>：'+esc(r.what)+'</p>';
     }).join('');
-    if(hit.actions_90d&&hit.actions_90d.length)h+='<p style="margin-top:6px"><b>近 90 天动作</b></p>'+hit.actions_90d.map(function(a){
-      return '<p>'+(a.url?'<a href="'+esc(a.url)+'" target="_blank" rel="noopener">'+esc(a.d)+' · '+esc(a.t)+' ↗</a>':esc(a.d)+' — '+esc(a.t))+
-        '<span style="color:var(--tx3);font-size:12px">（'+esc(a.src||'信源待补')+(a.verify==='done'?'':' · 待核实')+'）</span></p>';
-    }).join('');
-    h+='<p style="color:var(--tx3);font-size:12px">档案更新 '+esc(hit.updated||'—')+' · 线索稿，逐条核实进度见档案源文件</p></div>';
-    box.innerHTML=h;
+    h+='<p style="margin:10px 0 0;color:var(--tx3);font-size:12px">档案更新 '+esc(hit.updated||'—')+
+      (hit.source_note?' · '+esc(hit.source_note):'')+'</p></div>';
+    cur.innerHTML=h;
   }
   if(window.DATA_OVPROFILE){render();return;}
-  box.innerHTML='<div class="ep-sec"><b>企业出海档案</b><p style="color:var(--tx3)">档案数据加载中…</p></div>';
+  box.innerHTML='<div class="ep-sec"><b>公司情况与决策层</b><p style="color:var(--tx3)">企业档案加载中…</p></div>';
   need('ovprofile',render);
 }
 /* 事件委托：点到卡片本体（非 a/button）就弹详情
@@ -7345,65 +7368,44 @@ function ovBindClue() {
 
 /* ── 单位弹层：一家的全部记录，按时间轴排 ─────────────────────────── */
 function openOvUnit(name) {
-  var d = ovData();
-  var rows = [];
+  var d = ovData(), rows = [];
   (d.clue || []).forEach(function (o) {
     if ((o.name || '（未标单位）') === name) { o._kind = 'clue'; rows.push(o); }
   });
-  /* 已备案里同名的主体也并进来 —— 用户问的就是「一家是不是只备案一次」，
-     把两组信息放在一起，才能看出「先签约、后备案、再开工」的完整链条 */
   (d.odi || []).forEach(function (o) {
     if ((o.own || '') === name) { o._kind = 'odi'; rows.push(o); }
   });
   rows.sort(function (a, b) { return (a.date || a.d || '') < (b.date || b.d || '') ? -1 : 1; });
 
-  var h = '<div class="ovsheet-h"><div class="t">' + esc(name) +
-    '<small>共 ' + rows.length + ' 条记录（线索 ' +
-    rows.filter(function (r) { return r._kind === 'clue'; }).length + ' · 备案 ' +
-    rows.filter(function (r) { return r._kind === 'odi'; }).length +
-    '）· 按时间正序，最后一条是最近进展</small></div>' +
-    '<button class="ovsheet-x" onclick="closeOvUnit()" title="关闭">✕</button></div>';
-  h += '<div class="ovsheet-b"><div class="ovtl">';
+  /* 上半部是共用企业主档，下半部才是本视图独有的项目推进时间轴。 */
+  var h = '<div id="pjOvProf"></div><div class="ep-sec"><b>项目推进时间轴 <small>共 ' + rows.length +
+    ' 条（线索 ' + rows.filter(function (r) { return r._kind === 'clue'; }).length + ' · 备案 ' +
+    rows.filter(function (r) { return r._kind === 'odi'; }).length + '）· 按时间正序</small></b><div class="ovtl">';
   rows.forEach(function (r, i) {
-    var isLast = (i === rows.length - 1);
-    var dt = r.date || r.d || '';
+    var isLast = (i === rows.length - 1), dt = r.date || r.d || '';
     if (r._kind === 'odi') {
       h += '<div class="ovtl-i' + (isLast ? ' on' : '') + '">' +
         '<div class="ovtl-d">' + esc(dt) + ' · 已备案</div>' +
-        '<div class="ovtl-t">' + esc(r.nm || '') + '</div>' +
-        '<div class="ovtl-m">' +
+        '<div class="ovtl-t">' + esc(r.nm || '') + '</div><div class="ovtl-m">' +
         (r.geo ? '<span class="ovcut" style="background:#eaf2fb;color:#1a4f8a">' + esc(r.geo) + '</span>' : '') +
         (r.act ? '<span class="ovdim">' + esc(r.act) + '</span>' : '') +
-        (r.mt ? '<span class="ovdim">申报金额 ' + esc(r.mt) + '</span>' : '') +
-        '</div>' +
-        (r.why ? '<div class="ovtl-p">' + esc(String(r.why).replace(/^[^：]*：/, '')) + '</div>' : '') +
-        '</div>';
+        (r.mt ? '<span class="ovdim">申报金额 ' + esc(r.mt) + '</span>' : '') + '</div>' +
+        (r.why ? '<div class="ovtl-p">' + esc(String(r.why).replace(/^[^：]*：/, '')) + '</div>' : '') + '</div>';
     } else {
       var st = ovStage(r.title);
       h += '<div class="ovtl-i' + (isLast ? ' on' : '') + '">' +
-        '<div class="ovtl-d">' + esc(dt) +
-        (st >= 0 ? ' · ' + OV_STAGES[st] : '') +
+        '<div class="ovtl-d">' + esc(dt) + (st >= 0 ? ' · ' + OV_STAGES[st] : '') +
         (r._geo ? ' · ' + esc(r._geo) : '') + '</div>' +
-        '<div class="ovtl-t">' + (r.url
-          ? '<a href="' + esc(r.url) + '" target="_blank" rel="noopener">' + esc(r.title || '') + ' ↗</a>'
-          : esc(r.title || '')) + '</div>' +
-        (r.cutWhy ? '<div class="ovtl-m"><span class="ovdim">切口</span> ' +
-          esc(r.cutWhy) + '</div>' : '') +
+        '<div class="ovtl-t">' + (r.url ? '<a href="' + esc(r.url) + '" target="_blank" rel="noopener">' +
+          esc(r.title || '') + ' ↗</a>' : esc(r.title || '')) + '</div>' +
+        (r.cutWhy ? '<div class="ovtl-m"><span class="ovdim">切口</span> ' + esc(r.cutWhy) + '</div>' : '') +
         (r.desc ? '<div class="ovtl-p">' + esc(String(r.desc).slice(0, 300)) +
-          (String(r.desc).length > 300 ? '…' : '') + '</div>' : '') +
-        '</div>';
+          (String(r.desc).length > 300 ? '…' : '') + '</div>' : '') + '</div>';
     }
   });
   h += '</div></div>';
-
-  var old = el('ovMask');
-  if (old) old.parentNode.removeChild(old);
-  var mk = document.createElement('div');
-  mk.id = 'ovMask';
-  mk.className = 'ovmask';
-  mk.innerHTML = '<div class="ovsheet" role="dialog" aria-modal="true">' + h + '</div>';
-  mk.onclick = function (e) { if (e.target === mk) closeOvUnit(); };
-  document.body.appendChild(mk);
+  openUniProf(name, '海外机会 · 项目推进与企业主档', h);
+  try{ovProfFill(name)}catch(err){console.warn('[ovProf]',err)}
 }
 function closeOvUnit() {
   var m = el('ovMask');
@@ -9798,12 +9800,13 @@ function openClientProf(name){
       h+='<div class="pf-tablewrap" style="margin-top:8px"><table class="pf-table"><thead><tr>'+
          '<th>日期</th><th>项目</th><th>金额</th><th>业主</th><th>原文</th></tr></thead><tbody>'+
          hits.slice(0,10).map(function(r){
-           return '<tr><td class="d">'+esc(r.d||'—')+'</td>'+
+           return '<tr><td class="d">'+esc((r.d&&r.d!=='—')?r.d:'')+'</td>'+
              '<td class="p"><b>'+esc(r.p||'')+'</b>'+(r.s?'<div class="pf-tags"><span class="pf-s">'+esc(r.s)+'</span></div>':'')+'</td>'+
              '<td class="a">'+(r.a?esc(r.a):'<span class="pm-na">—</span>')+'</td>'+
              '<td class="w">'+esc(r.who||'—')+'</td>'+
              '<td>'+(r.u?'<a class="lk" href="'+esc(r.u)+'" target="_blank" rel="noopener nofollow">↗</a>':'<span class="pm-na">—</span>')+'</td></tr>';
          }).join('')+'</tbody></table></div>';
+      if(hits.some(function(r){return !r.d||r.d==='—'})) h+='<div class="pf-more" style="color:var(--tx3)">日期留空＝海外基地 / 群组清单（非单次中标事件，故无日期）</div>';
       if(hits.length>10) h+='<div class="pf-more">另有 '+(hits.length-10)+' 条，点「在商机库搜它的全部记录」看全量</div>';
     }
   }else{
@@ -9850,7 +9853,9 @@ function openClientProf(name){
      '<a href="javascript:searchFor(\''+esc(String(x.kw||x.name).slice(0,10)).replace(/'/g,"\\'")+'\')">在商机库搜它的全部记录 ↗</a>'+
      '<a href="https://www.baidu.com/s?wd='+encodeURIComponent(x.name+' 海外 建厂 电力')+'" target="_blank" rel="noopener nofollow">搜它最近的海外新闻 ↗</a>'+
      '</div></div>';
-  openUniProf(x.name, abGrp(x.grp)+' · '+(x.rg||'')+(x.rg?' · ':'')+priTxt, h);
+  /* 企业主档置顶；下方海外动态只由客户卡渲染一次。 */
+  openUniProf(x.name, abGrp(x.grp)+' · '+(x.rg||'')+(x.rg?' · ':'')+priTxt, '<div id="pjOvProf"></div>'+h);
+  try{ovProfFill(x.name)}catch(err){console.warn('[ovProf]',err)}
 }
 
 /* 业绩总表整行点击：只有带 data-u 的行才是链接，点里面的 a 不重复触发。 */
@@ -11717,8 +11722,10 @@ function boot_main(){
      刻意**不阻塞首屏**：卡片先出来让用户有事干，也比盯着白屏等 10 秒强。
      ⚠ 不要改成先 loadAllItems 再 render：那样首屏时间 = 两块 600KB 的下载时间，
        而用户已经抱怨过「上传这么慢」了。 */
-  if ((F.bk || 'all') === 'all' && window.__itemsSplit) {
-    loadAllItems(function () { render(); refreshFilterCounts(); });
+  if (window.__itemsSplit) {
+    /* P1-A 默认“能投的标”也要补齐 rest；否则首屏切片会漏掉后续可投项目。 */
+    if ((F.bk || 'tender') === 'all') loadAllItems(function () { render(); refreshFilterCounts(); });
+    else if ((F.bk || 'tender') !== 'lead') loadChunk('rest', function () { render(); refreshFilterCounts(); });
   }
   renderPlat();    // 平台导航（纯静态，很轻）
   refreshTabCounts();
@@ -12484,6 +12491,13 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         if(sc.fwd==='q'){
           if(window.F){window.F.q=(v||'').trim();window.F.page=1;}
           if(typeof window.render==='function')window.render();
+          /* P1-A：搜索、统计、分页与导出都必须覆盖完整①库，不能停在首屏分块。 */
+          if(window.__itemsSplit&&typeof window.loadAllItems==='function'){
+            window.loadAllItems(function(){
+              if(typeof window.render==='function')window.render();
+              syncQn548(i);
+            });
+          }
           syncQn548(i);
           setTimeout(function(){syncQn548(i);},40);
           return;
@@ -12519,7 +12533,8 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
              ||(window.DATA_CORE&&window.DATA_CORE.meta&&window.DATA_CORE.meta.total)
              ||(window.meta&&window.meta.total)||0;
         var hit=m?m[1]:'0';
-        cc.textContent=tot?('命中 '+hit+' / '+tot):('命中 '+hit+' 条');
+        cc.textContent='当前条件命中 '+hit+' 条';
+        cc.title='列表、分页、统计与导出共用同一筛选结果；全库共 '+tot+' 条';
       }
       function clear544(i){
         var sc=SCOPE544[i]||SCOPE544[0];

@@ -2856,7 +2856,8 @@ var F = {rg:new Set(),sg:new Set(),ind:new Set(),g:new Set(),mode:new Set(),p:ne
      原因：三档按钮上的 13/18 是「主场 + 关注档（≥3000万 或 A/B）」双重过滤后的数，
      和全库的 96/140 差一个量级。默认档切到「全部」，进来先看到 1521 条这个量级，
      想收窄再点前三档——让「宽口径」当默认值，「严口径」当用户主动的选择。 */
-         st:'',q:'',sort:'sc',page:1,tab:0,bk:'all',hideWin:false,side:false,
+         /* P1-A：默认进入“能投的标”工作队列；C/D 与全部历史记录仍留在“全部”，不删不改档。 */
+         st:'',q:'',sort:'sc',page:1,tab:0,bk:'tender',hideWin:false,side:false,
          /* F05 重点关注一键切换（2026-11-05 第 2 批）：默认关。开的时叠一层
             「只看 w=1（金额 ≥1 亿）」的过滤，不改三档 / iv / 其它既有判据。
             w=0 是「留库不删」，不是删；关掉开关立刻全部回来。依据 §5.10。 */
@@ -3746,12 +3747,12 @@ function buildFilters(){
         '按当前「' + (F.side ? '含兼营' : '只看主场业务') + '」过滤后的条数，点开就是。';
       /* 数字留空，由 syncWareNums() 在每次 render 后填当前列表的真实条数。
          这里先写任何预估值都会跟列表对不上（首屏只有 42 条切片，算不出真值）。 */
-      return '<div class="ware" data-bk="' + b[0] + '" title="' + esc(tip) + '">' +
+      return '<div class="ware' + (F.bk === b[0] ? ' on' : '') + '" data-bk="' + b[0] + '" title="' + esc(tip) + '">' +
         b[1] + '<b style="display:none">0</b></div>';
     }).join('') +
       /* 默认选中「全部」：跟着 F.bk 走，不然按钮高亮在「能投的标」上、列表却是全部，
          用户又会对着两个口径起疑。见上方 4a 的口径说明。 */
-      '<div class="ware on" data-bk="all" id="waAllW">全部 <b style="display:none">0</b></div>' +
+      '<div class="ware' + (F.bk === 'all' ? ' on' : '') + '" data-bk="all" id="waAllW" title="包含 C/D 档与全部历史记录；只改变视图，不删除数据">全部 <b style="display:none">0</b></div>' +
       '<span class="ware-tog" id="waHide" title="「全部」档里有一批已经开过标的，滤掉它们只剩还能投的">只看还能投的</span>' +
       '<div class="wtip" id="waTip">数字 = <b>这一档点进去看到的条数</b>（随下方筛选条件实时变）。' +
       '前三档只留<b>主业 + EPC</b> 的标（已剔除纯采购 / 分包 / 管网 / 后勤），不按金额卡' +
@@ -3813,7 +3814,7 @@ function buildFilters(){
        原来它常驻 display:none，只有用户手点「全部」才出现——
        默认档改了之后，不补这一句用户永远看不到它。 */
     var _h0 = el('waHide');
-    if (_h0) _h0.style.display = 'inline-block';
+    if (_h0) _h0.style.display = (F.bk === 'all') ? 'inline-block' : 'none';
   }
   /* 只给「多选筛选项」绑通用 toggle。
      ⚠ 别改回 querySelectorAll('.chip') 一把抓：
@@ -4386,6 +4387,9 @@ function syncWareNums(){
 
 function render(){
   var a=filtered(); LAST=a;
+  /* P1-A：机器可验收的同一结果集签名；导出与分页直接使用 LAST / filtered()。 */
+  el('rbar').setAttribute('data-result-count',String(a.length));
+  el('grid').setAttribute('data-result-count',String(a.length));
   /* ⚠ 必须在 LAST 赋值之后同步按钮数字：数字来源就是 LAST.length，
      放在前面会拿到上一轮的长度，差一条都算「对不上」。 */
   try{ syncWareNums(); }catch(e){}
@@ -4479,7 +4483,7 @@ el('q').addEventListener('input',function(){
   clearTimeout(_qTimer);
   _qTimer=setTimeout(function(){ loadAllItems(function(){ if(F.q)render() }) },400);
 });
-el('sort').onchange=function(){F.sort=this.value;render()};
+el('sort').onchange=function(){F.sort=this.value;F.page=1;render()};
 el('btnReset').onclick=resetF;
 function resetF(){
   ['rg','sg','ind','g','mode','p'].forEach(function(k){F[k].clear()});
@@ -4495,20 +4499,34 @@ function resetF(){
   }
   el('q').value=''; render();
 }
-el('btnCsv').onclick=function(){
-  var head=['项目名称','地区','城市','阶段','优先级','业务分层','是否主场','命中词','业主','中标单位','金额(亿元)','金额原文','日期','截止','承包模式','来源平台','原始发布平台','附件数','附件清单','链接'];
-  var rows=LAST.map(function(x){return [x.t,x.rg,x.city,x.st,x.g,SEG_NAME[x.sg]||'',(x.hm?'主场':'兼营'),x.sG||'',x.buyer,x.win,
-    (x.amt==null?'':x.amt),x.amtTxt,x.d,x.dl,x.mode,x.p,
-    (x.org&&x.org.n?x.org.n:''),
-    (x.files&&x.files.length?x.files.length:''),
-    (x.files||[]).map(function(f){return f.n+(f.u?' <'+f.u+'>':'')}).join(' | '),
-    x.url].map(function(v){
-    return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}).join(',')});
-  var csv='\ufeff'+[head.join(',')].concat(rows).join('\r\n');
-  var a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  a.download='商机雷达_'+meta.updated+'.csv'; a.click();
-};
+function exportItemsCsv(done){
+  var buttons=[el('btnCsv'),document.getElementById('aCsv')].filter(Boolean);
+  function ready(){
+    /* 重新从唯一 selector 取数，避免异步期间用户改变筛选后导出旧 LAST。 */
+    render();
+    var current=filtered(); LAST=current;
+    var head=['项目名称','地区','城市','阶段','优先级','业务分层','是否主场','命中词','业主','中标单位','金额(亿元)','金额原文','日期','截止','承包模式','来源平台','原始发布平台','附件数','附件清单','链接'];
+    var rows=current.map(function(x){return [x.t,x.rg,x.city,x.st,x.g,SEG_NAME[x.sg]||'',(x.hm?'主场':'兼营'),x.sG||'',x.buyer,x.win,
+      (x.amt==null?'':x.amt),x.amtTxt,x.d,x.dl,x.mode,x.p,
+      (x.org&&x.org.n?x.org.n:''),
+      (x.files&&x.files.length?x.files.length:''),
+      (x.files||[]).map(function(f){return f.n+(f.u?' <'+f.u+'>':'')}).join(' | '),x.url];});
+    if(!rows.length){if(typeof toast550==='function')toast550('当前条件没有可导出的项目');return;}
+    function cell(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"';}
+    var csv='\ufeff'+[head.map(cell).join(',')].concat(rows.map(function(r){return r.map(cell).join(',');})).join('\r\n');
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+    a.download='商机雷达_当前筛选_'+current.length+'条_'+meta.updated+'.csv';
+    document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+    if(typeof done==='function')done(current.length);
+  }
+  function finish(){buttons.forEach(function(b){b.disabled=false;b.removeAttribute('aria-busy');});}
+  if(window.__itemsSplit&&typeof loadAllItems==='function'){
+    buttons.forEach(function(b){b.disabled=true;b.setAttribute('aria-busy','true');});
+    loadAllItems(function(){try{ready();}finally{finish();}});
+  }else ready();
+}
+el('btnCsv').onclick=function(){exportItemsCsv();};
 
 /* ==================== F21 政策档（2026-11-05 第 3 批）====================
    数据源 biz-radar/data.policy.js（window.DATA_POLICY），need('policy') 点开才加载。
@@ -5309,8 +5327,8 @@ function ex550(){
   /* ── 找商机：①投放库。走原 btnCsv（=LAST，当前 tab 聚合标签内的结果），
         与改造前的行为完全一致，只是现在明确写在「找商机」这一页。 ── */
   if(tid==='p-items'){
-    var b=document.getElementById('btnCsv');
-    if(b){b.click();toast550('已导出①投放库（当前「全部/能投/已出结果」标签内的结果）');return;}
+    exportItemsCsv(function(n){toast550('已导出当前筛选结果 · '+n+' 条（与列表、统计、分页同源）');});
+    return;
   }
 
   /* ── 同业与伙伴：竞争实力榜 + 联合体伙伴榜，两个都导（本页就是一个页签两个榜） ── */
@@ -11704,8 +11722,10 @@ function boot_main(){
      刻意**不阻塞首屏**：卡片先出来让用户有事干，也比盯着白屏等 10 秒强。
      ⚠ 不要改成先 loadAllItems 再 render：那样首屏时间 = 两块 600KB 的下载时间，
        而用户已经抱怨过「上传这么慢」了。 */
-  if ((F.bk || 'all') === 'all' && window.__itemsSplit) {
-    loadAllItems(function () { render(); refreshFilterCounts(); });
+  if (window.__itemsSplit) {
+    /* P1-A 默认“能投的标”也要补齐 rest；否则首屏切片会漏掉后续可投项目。 */
+    if ((F.bk || 'tender') === 'all') loadAllItems(function () { render(); refreshFilterCounts(); });
+    else if ((F.bk || 'tender') !== 'lead') loadChunk('rest', function () { render(); refreshFilterCounts(); });
   }
   renderPlat();    // 平台导航（纯静态，很轻）
   refreshTabCounts();
@@ -12471,6 +12491,13 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
         if(sc.fwd==='q'){
           if(window.F){window.F.q=(v||'').trim();window.F.page=1;}
           if(typeof window.render==='function')window.render();
+          /* P1-A：搜索、统计、分页与导出都必须覆盖完整①库，不能停在首屏分块。 */
+          if(window.__itemsSplit&&typeof window.loadAllItems==='function'){
+            window.loadAllItems(function(){
+              if(typeof window.render==='function')window.render();
+              syncQn548(i);
+            });
+          }
           syncQn548(i);
           setTimeout(function(){syncQn548(i);},40);
           return;
@@ -12506,7 +12533,8 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
              ||(window.DATA_CORE&&window.DATA_CORE.meta&&window.DATA_CORE.meta.total)
              ||(window.meta&&window.meta.total)||0;
         var hit=m?m[1]:'0';
-        cc.textContent=tot?('命中 '+hit+' / '+tot):('命中 '+hit+' 条');
+        cc.textContent='当前条件命中 '+hit+' 条';
+        cc.title='列表、分页、统计与导出共用同一筛选结果；全库共 '+tot+' 条';
       }
       function clear544(i){
         var sc=SCOPE544[i]||SCOPE544[0];
