@@ -110,9 +110,28 @@ MIN_USD = 3000000   # 300 万美元
 
 
 def main():
+    # §5.115：备案双源——浙江 tzxm（结构化接口）+ 安徽发改委季度目录（HTML 表）
     p = os.path.join(ROOT, 'raw', 'invest_odi.json')
     d = json.load(open(p, encoding='utf-8'))
-    items = d['items']
+    items = list(d['items'])
+    p_ah = os.path.join(ROOT, 'raw', 'invest_odi_ah.json')
+    n_ah = 0
+    if os.path.exists(p_ah):
+        try:
+            d_ah = json.load(open(p_ah, encoding='utf-8'))
+            seen = {(x.get('name'), x.get('date')) for x in items}
+            for x in (d_ah.get('items') or []):
+                k = (x.get('name'), x.get('date'))
+                if k in seen:      # 双源去重（同名同日视为同一备案）
+                    continue
+                seen.add(k)
+                x.setdefault('src', '安徽省发展改革委（依申请公开目录·境外投资备案）')
+                items.append(x)
+                n_ah += 1
+        except Exception as e:
+            print('  ⚠ 安徽备案读取失败：%s' % e)
+    print('浙江 %d 条 + 安徽新并入 %d 条 = %d 条'
+          % (len(d['items']), n_ah, len(items)))
     from collections import Counter
     cnt = Counter()
     for x in items:
