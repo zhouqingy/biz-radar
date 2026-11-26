@@ -1,7 +1,37 @@
 {
- "updated": "2026-11-26 03:26",
- "n": 70,
+ "updated": "2026-11-26 05:32",
+ "n": 74,
  "items": [
+  {
+   "title": "中国有色集团与华为签署战略合作框架协议",
+   "url": "https://news.goalfore.cn/latest/detail/109332.html",
+   "summary": "11月24日，中国有色集团与华为公司在东莞签署战略合作框架协议，标志着双方合作迈入全方位、深层次、宽领域的新阶段，共同开启产业资源与数智技术深度融合的崭新篇章。 签约仪式前，双方围绕产业链供应链协同、数智化建设及矿山本质安全、人工智能等领域开展座谈交流。",
+   "date": "2026-11-26",
+   "datetime": "2026-11-26 00:00",
+   "src": "国复咨询",
+   "kw": "watchlist",
+   "sc": 4,
+   "tier": "W",
+   "tierwhy": "命中企业名单：中国有色",
+   "sem": "KEEP",
+   "semwhy": "名单企业动向（用户 11-23 勾选）",
+   "chan": "watchlist"
+  },
+  {
+   "title": "中国交建签约多米尼加Domicem水泥厂码头泊位工程",
+   "url": "https://news.goalfore.cn/topstories/detail/101850.html",
+   "summary": "该项目是中国交建在多米尼加承接的首个工程项目，也是依托康克玛特属地优势签约的首个EPC项目。 码头采用钢结构栈桥设计，自岸向海延伸约503米，所在海域平均水深约18米，设置两个泊位，可满足两艘载重吨6万吨以下散货船同时靠泊作业。",
+   "date": "2026-11-26",
+   "datetime": "2026-11-26 00:00",
+   "src": "国复咨询",
+   "kw": "autoE:国复咨询",
+   "sc": 4,
+   "tier": "E",
+   "tierwhy": "企业动向：签约（水泥）",
+   "sem": "KEEP",
+   "semwhy": "E档（企业海外动向，主档未过）",
+   "chan": "autoE"
+  },
   {
    "title": "埃尼哈萨克斯坦曼格斯套120兆瓦燃气电站投产",
    "url": "https://news.goalfore.cn/latest/detail/109306.html",
@@ -18,6 +48,21 @@
    "chan": "auto"
   },
   {
+   "title": "Aurubis美国再生金属冶炼厂产能爬坡推迟至2028年下半年",
+   "url": "https://news.smm.cn/live/detail/O5M4VBBMTZDD4QPUMS5WSGW4RWWRDYICRUX63LY",
+   "summary": "德国铜生产商Aurubis表示，由于美国佐治亚州Richmond再生金属冶炼厂的旋转熔炼设备部分支撑组件需要进行改造，该厂产能爬坡进度将进一步延迟，预计于2028年下半年完成技术爬坡。 相关设备改造预计耗时约六个月，并将在各熔炉之间分阶段进行。",
+   "date": "2026-11-26",
+   "datetime": "2026-11-26 00:00",
+   "src": "SMM上海有色网",
+   "kw": "auto:SMM上海有色网",
+   "sc": 6,
+   "tier": "A",
+   "tierwhy": "客户行业建厂：冶炼/铜",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "auto"
+  },
+  {
    "title": "湖南安装签约哈萨克斯坦阿拉木图固废处置发电项目",
    "url": "https://news.goalfore.cn/latest/detail/109313.html",
    "summary": "近日，湖南安装与老客户军信环保（阿拉木图）有限公司签约哈萨克斯坦阿拉木图市固废科技处置发电项目。 该项目是继平江垃圾发电项目圆满履约之后，湖南安装承接的首个海外项目。",
@@ -28,6 +73,21 @@
    "sc": 8,
    "tier": "S",
    "tierwhy": "工程含：固废",
+   "sem": "KEEP",
+   "semwhy": "未命中已启用的过滤规则",
+   "chan": "auto"
+  },
+  {
+   "title": "2027 年印尼肥料公司 将Mamuju蒸汽发电厂转让给国电",
+   "url": "https://www.shangbaoindonesia.com/read/2026/11/26/economy-1795666341",
+   "summary": "【本报讯】印尼肥料公司（Pupuk Indonesia） 计划， 2027 年将把西苏拉威西 Mamuju 蒸汽发电厂 (PLTU) 的所有权转让给国电公司（PLN），2 x 25 兆瓦 (MW) 发电厂的转让是该公司精简计划部分。",
+   "date": "2026-11-26",
+   "datetime": "2026-11-26 00:00",
+   "src": "印尼商报",
+   "kw": "auto:印尼商报",
+   "sc": 8,
+   "tier": "S",
+   "tierwhy": "工程含：蒸汽",
    "sem": "KEEP",
    "semwhy": "未命中已启用的过滤规则",
    "chan": "auto"
