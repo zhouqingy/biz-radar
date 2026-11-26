@@ -1415,7 +1415,7 @@ tr.ovg-row:hover td{background:#f7fbff}
 .pf-tb td.st,.pf-tb td.w{color:var(--tx2);font-size:11.5px;word-break:break-word}
 .pf-tb .pf-ctrl{color:var(--tx3);font-size:10.5px}
 .pf-tags{margin-top:5px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-.pf-s{font-size:10px;padding:1px 6px;border-radius:3px;border:1px solid;white-space:nowrap;font-weight:400}
+.pf-s{font-size:10px;padding:1px 6px;border-radius:3px;border:1px solid #dfe4ec;color:#5a6270;background:#fafbfd;white-space:nowrap;font-weight:400}
 .pf-s-lib{color:#1e7a46;background:#eefaf2;border-color:#c6e9d5}
 .pf-s-prov{color:#1053c9;background:#eef4ff;border-color:#cddcf7}
 .pf-s-probe{color:#8a5a00;background:#fff8e8;border-color:#f0dfb8}
@@ -9798,12 +9798,13 @@ function openClientProf(name){
       h+='<div class="pf-tablewrap" style="margin-top:8px"><table class="pf-table"><thead><tr>'+
          '<th>日期</th><th>项目</th><th>金额</th><th>业主</th><th>原文</th></tr></thead><tbody>'+
          hits.slice(0,10).map(function(r){
-           return '<tr><td class="d">'+esc(r.d||'—')+'</td>'+
+           return '<tr><td class="d">'+esc((r.d&&r.d!=='—')?r.d:'')+'</td>'+
              '<td class="p"><b>'+esc(r.p||'')+'</b>'+(r.s?'<div class="pf-tags"><span class="pf-s">'+esc(r.s)+'</span></div>':'')+'</td>'+
              '<td class="a">'+(r.a?esc(r.a):'<span class="pm-na">—</span>')+'</td>'+
              '<td class="w">'+esc(r.who||'—')+'</td>'+
              '<td>'+(r.u?'<a class="lk" href="'+esc(r.u)+'" target="_blank" rel="noopener nofollow">↗</a>':'<span class="pm-na">—</span>')+'</td></tr>';
          }).join('')+'</tbody></table></div>';
+      if(hits.some(function(r){return !r.d||r.d==='—'})) h+='<div class="pf-more" style="color:var(--tx3)">日期留空＝海外基地 / 群组清单（非单次中标事件，故无日期）</div>';
       if(hits.length>10) h+='<div class="pf-more">另有 '+(hits.length-10)+' 条，点「在商机库搜它的全部记录」看全量</div>';
     }
   }else{
