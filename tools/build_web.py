@@ -1654,6 +1654,17 @@ def _load_oversea_extra():
 
 _OVS_FLASH, _OVS_ODI = _load_oversea_extra()
 
+# 2026-11-26 用户确认三栏边界：政策 / 项目 / 竞争情报。
+# 原始采集不删，仅在展示产物中路由；①库 judge 不参与新闻栏目判定。
+from news_rules import route_trends, clean_digest
+TRENDS, PROJECT_NEWS, TREND_ARCHIVE = route_trends(TRENDS)
+_digest_items, DIGEST_ARCHIVE = clean_digest(digest.get('items', []), IND.get('competitors', []))
+digest = dict(digest, items=_digest_items, archived=len(DIGEST_ARCHIVE))
+NEWS_ROUTE = {'policy': len(TRENDS), 'project': len(PROJECT_NEWS),
+              'trendArchived': len(TREND_ARCHIVE), 'digestArchived': len(DIGEST_ARCHIVE)}
+print('新闻路由：政策 %d · 项目 %d · 动态归档 %d；精选 %d · 精选归档 %d' % (
+    len(TRENDS), len(PROJECT_NEWS), len(TREND_ARCHIVE), len(_digest_items), len(DIGEST_ARCHIVE)))
+
 data = {
     'metals': {'updated': METALS[0]['date'] if METALS else '',
                'at': time.strftime('%H:%M') if METALS else '',
@@ -1664,6 +1675,8 @@ data = {
     'overseaOdi': _OVS_ODI,
     'wechat': wechat,
     'digest': digest,
+    'projectNews': PROJECT_NEWS,
+    'newsRoute': NEWS_ROUTE,
     'meta': {
         # 页面展示用：真实构建时刻。用户判断“今天有没有更新”只看这个。
         'updated': _build_day,
@@ -2033,7 +2046,7 @@ if os.path.exists(_ency_path):
 _graph_mod = {'graph': data['graph']} if 'graph' in data else {}
 # 2026-11-04：overseaFlash / overseaOdi 必须进这个白名单，否则文件写得再对，
 # 前端也永远读不到（本文件的 dump 只输出白名单里的键）。
-_news = {k: data[k] for k in ('trends', 'digest', 'wechat', 'overseas',
+_news = {k: data[k] for k in ('trends', 'projectNews', 'newsRoute', 'digest', 'wechat', 'overseas',
                               'overseaFlash', 'overseaOdi') if k in data}
 _chunk_total, _chunk_meta = dump_item_chunks()
 _extra = {'chunks': _chunk_meta}

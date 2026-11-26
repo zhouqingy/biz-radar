@@ -105,6 +105,12 @@ def metrics(root, scope):
         core_total = int(meta.get('total') or 0)
         if core_total != chunk_total:
             raise GateError('core.meta.total=%d，但三块①库合计=%d' % (core_total, chunk_total))
+        declared = {str(x.get('name') or ''): int(x.get('n') or 0) for x in (meta.get('chunks') or [])}
+        actual = {x['file'].replace('data.chunk-', '').replace('.js', ''): x['count']
+                  for x in blocks if x['file'].startswith('data.chunk-')}
+        for name, count in actual.items():
+            if declared.get(name) != count:
+                raise GateError('分块元数据不一致：%s 声明=%s，实际=%d' % (name, declared.get(name), count))
         max_item_date = max((x for x in dates if x), default='')
         out['items'] = {'total': core_total, 'dataAsOf': str(meta.get('dataAsOf') or ''),
                         'latestItemDate': max_item_date, 'blocks': blocks}

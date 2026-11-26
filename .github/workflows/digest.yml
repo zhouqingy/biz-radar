@@ -30,6 +30,7 @@ on:
       - '.github/workflows/digest.yml'   # 改工作流本身也要跑一次，否则「修完重跑还是失败」
       - 'tools/merge_digest.py'
       - 'tools/mine_rival_news.py'
+      - 'tools/news_rules.py'
       - 'tools/release_manifest.py'
 
 permissions:
@@ -98,8 +99,9 @@ jobs:
           d = json.loads(s[s.index('{'):s.rindex('}') + 1])
           dg = d.get('digest') or {}
           print('data.js digest   %d 条  更新于 %s' % (len(dg.get('items') or []), dg.get('updated')))
-          if len(dg.get('items') or []) < 20:
-              print('❌ 页面 digest 少于 20 条，疑似被清空，本次不提交'); sys.exit(1)
+          if not dg.get('items'):
+              print('❌ 页面 digest 为空，本次不提交'); sys.exit(1)
+          # 2026-11-26 起以质量为准，不再用“至少20条”诱导低价值条目凑数。
           ns = open('data.news.js', encoding='utf-8').read()
           nd = json.loads(ns[ns.index('{'):ns.rindex('}') + 1]).get('digest') or {}
           assert nd == dg, 'data.news.js 与 data.js 的 digest 不一致'

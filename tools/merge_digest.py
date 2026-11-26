@@ -70,10 +70,17 @@ def main():
         keys.append(n)
         kept.append(x)
 
+    # 2026-11-26：精选只保留主业竞对动作、可核验官网来源，并补 URL 日期。
+    from news_rules import clean_digest
+    s0 = open(DATA, encoding='utf-8').read()
+    competitors = json.loads(s0[s0.find('{'):s0.rfind('}') + 1]).get('competitors', [])
+    kept, archived = clean_digest(kept, competitors)
+    print('精选口径过滤：保留 %d 条，归档 %d 条（原始 rival/wechat 文件不删）' % (len(kept), len(archived)))
+
     # 只替换 digest 字段，其余业务模块保持原值；绝不用 merged.snapshot 重建整站。
     # data.js 是整包回退，data.news.js 是页面实际懒加载模块，两者必须同事务更新。
     payload = {'updated': time.strftime('%Y-%m-%d %H:%M'),
-               'n_src': rv.get('n_src', 0), 'items': kept}
+               'n_src': rv.get('n_src', 0), 'archived': len(archived), 'items': kept}
     json.dump(payload, open(os.path.join(RAW, 'digest.json'), 'w', encoding='utf-8'),
               ensure_ascii=False, indent=1)
 

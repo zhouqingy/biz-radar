@@ -3155,7 +3155,7 @@ function refreshTabCounts(){
      那个数字点进去已经看不到了，挂着只会让人以为还有一栏没找到。 */
   _setTab('p-client',  ((D.domStat&&D.domStat.total)||0)+arr(D.clients).length);
   _setTab('p-trend',   arr(D.trends).length);
-  _setTab('p-wechat',  (((D.digest||{}).items||[]).length+((D.wechat||{}).items||[]).length));
+  _setTab('p-wechat',  (((D.digest||{}).items||[]).length));
   _setTab('p-plat',    arr(D.platforms).length);
   /* 规划前瞻：数据没拉过就是 0（页签不显示数字，见下面的 0 处理），
      点进去 need('plan') 到位后会再调一次本函数。 */
@@ -5378,31 +5378,23 @@ function ex550(){
     return;
   }
 
-  /* ── 行业动态 · 政策档：业务信号趋势（trends）── */
+  /* ── 政策动态：与当前分类筛选、页内搜索同源 ── */
   if(tid==='p-trend'){
     var head4=['标题','日期','分类','来源','摘要','原文'];
-    var arr4=(D.trends||[]).filter(function(x){return hit(x,['title','tag','desc','source','date']);});
+    var arr4=(typeof overallPolicyList==='function'?overallPolicyList():(D.trends||[]).filter(function(x){return hit(x,['title','tag','desc','source','date']);}));
     save(arr4.map(function(x){return [x.title,x.date,x.tag,x.source,x.desc,x.url];}),head4,
-      '商机雷达_行业动态_'+(stamp()||'')+'.csv','新闻池 '+(D.trends||[]).length+' 条');
+      '商机雷达_政策动态_'+(stamp()||'')+'.csv','当前筛选 '+arr4.length+' 条');
     return;
   }
 
-  /* ── 情报精选：竞对官网情报 + 微信快讯流 ── */
+  /* ── 竞争情报：与当前等级／分类筛选、页内搜索同源 ── */
   if(tid==='p-wechat'){
     var head5=['来源','等级','分类','日期','标题','来源单位','原文'];
     var out5=[];
-    var dg=(D.digest&&D.digest.items)||[];
-    dg.forEach(function(x){
-      if(!hit(x,['t','tag','level','src','d']))return;
-      out5.push(['竞对官网',x.level,x.tag,x.d,x.t,x.src,x.url]);
-    });
-    var wx=(D.wechat&&D.wechat.items)||[];
-    wx.forEach(function(x){
-      if(!hit(x,['t','d']))return;
-      out5.push(['微信快讯','','',x.d,x.t,'',x.url]);
-    });
-    save(out5,head5,'商机雷达_情报精选_'+(stamp()||'')+'.csv',
-      '竞对官网 '+dg.length+' 条 / 微信快讯 '+wx.length+' 条');
+    var dg=(typeof overallDigestList==='function'?overallDigestList():((D.digest&&D.digest.items)||[]).filter(function(x){return hit(x,['t','tag','level','src','d']);}));
+    dg.forEach(function(x){out5.push([x.srcKind||'竞对官网',x.level,x.tag,x.d,x.t,x.src,x.url]);});
+    save(out5,head5,'商机雷达_竞争情报_'+(stamp()||'')+'.csv',
+      '当前筛选 '+dg.length+' 条；微信标题快讯不混入竞争情报导出');
     return;
   }
 
@@ -5462,8 +5454,8 @@ function syncTop550(){
     else if(tid==='p-rival'){n=(D.competitors||[]).length+(D.partners||[]).length;label='导出同业 '+n;}
     else if(tid==='p-client'){n=(D.clients||[]).length;label='导出客户 '+n;}
     else if(tid==='p-overseas'){n=(D.overseas||[]).length+(D.overseaOdi||[]).length;label='导出海外 '+n;}
-    else if(tid==='p-trend'){n=(D.trends||[]).length;label='导出动态 '+n;}
-    else if(tid==='p-wechat'){n=((D.digest&&D.digest.items)||[]).length+((D.wechat&&D.wechat.items)||[]).length;label='导出情报 '+n;}
+    else if(tid==='p-trend'){n=(typeof overallPolicyList==='function'?overallPolicyList():(D.trends||[])).length;label='导出政策 '+n;}
+    else if(tid==='p-wechat'){n=(typeof overallDigestList==='function'?overallDigestList():((D.digest&&D.digest.items)||[])).length;label='导出情报 '+n;}
     else if(tid==='p-plat'){n=(D.platforms||[]).length;label='导出平台 '+n;}
     else if(tid==='p-plan'){n=(W.DATA_PLAN||{}).n||0;label='导出规划 '+n;}
     else{label='导出 CSV';c.style.opacity='.45';c.title='本页（口径说明）没有可导出的数据表';}
@@ -13073,3 +13065,323 @@ details.a-plancue summary{cursor:pointer;font-size:12.5px;color:var(--tx2);font-
    flex-wrap 让最后一行自己均分剩余宽度，视觉最满。 */
 
 </style>
+<style id="p1bDialogMobileCss">
+/* P1-B：统一弹窗行为 + 移动端工作流。保留所有业务容器、函数与数据契约。 */
+body.p1b-dialog-open,body.p1b-nav-open,body.p1b-side-open,body.p1b-filter-open{overflow:hidden!important}
+body.p1b-dialog-open #aMain,body.p1b-nav-open #aMain,
+body.p1b-side-open #aMain,body.p1b-filter-open #aMain{overflow:hidden!important}
+.ui-dialog{box-sizing:border-box;overscroll-behavior:contain}
+.ui-dialog .ep-wrap,.ui-dialog .mh-wrap,.ui-dialog .wkbox{min-width:0;max-width:100%;outline:none}
+.ui-dialog .ep-wrap,.ui-dialog .mh-wrap{max-height:calc(100dvh - 56px);overflow:auto;overscroll-behavior:contain}
+.ui-dialog .ep-head>div:first-child,.ui-dialog .mh-head>div:first-child{min-width:0}
+.ui-dialog .ep-title,.ui-dialog .ep-idline{overflow-wrap:anywhere}
+.ui-dialog img,.ui-dialog svg{max-width:100%}
+#aNavOpen,#aSideOpen,#aNavClose,#aSideClose,#p1bFilterClose,#aMobileMask{display:none}
+#aNavOpen,#aSideOpen{align-items:center;justify-content:center;white-space:nowrap}
+#aNavClose,#aSideClose,#p1bFilterClose{border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink2);cursor:pointer}
+#aMobileMask{position:fixed;inset:0;z-index:9400;background:rgba(15,23,42,.48);backdrop-filter:blur(2px)}
+body.p1b-nav-open #aMobileMask,body.p1b-side-open #aMobileMask,body.p1b-filter-open #aMobileMask{display:block}
+body.p1b-filter-open #aMobileMask{z-index:7900}
+@media(max-width:1200px){
+  #aSideOpen{display:inline-flex!important}
+  #aSide{display:flex!important;visibility:hidden;pointer-events:none;transform:translateX(105%);
+    transition:transform .2s ease,visibility .2s;width:min(300px,88vw);z-index:9500;box-shadow:-12px 0 36px rgba(15,23,42,.18)}
+  body.p1b-side-open #aSide{visibility:visible;pointer-events:auto;transform:translateX(0)}
+  #aSideClose{display:block;position:sticky;top:0;align-self:flex-end;flex:0 0 auto;padding:5px 10px;z-index:2}
+}
+@media(max-width:900px){
+  #aNavOpen{display:inline-flex!important}
+  #aNav{display:flex!important;visibility:hidden;pointer-events:none;transform:translateX(-105%);
+    transition:transform .2s ease,visibility .2s;width:min(310px,86vw);z-index:9500;box-shadow:12px 0 36px rgba(15,23,42,.18)}
+  body.p1b-nav-open #aNav{visibility:visible;pointer-events:auto;transform:translateX(0)}
+  #aNavClose{display:block;position:sticky;top:0;align-self:flex-end;flex:0 0 auto;padding:5px 10px;z-index:2}
+}
+@media(min-width:641px) and (max-width:1400px){
+  #p-items>#aRow551{flex-wrap:wrap;gap:8px;justify-content:flex-start!important}
+  #p-items>#aRow551>.a-tabq{flex:1 1 100%!important;max-width:100%!important}
+  #aRow551>#wares{flex:1 1 100%!important;max-width:100%!important;overflow-x:auto!important;padding-bottom:2px!important}
+  #p-items>#aRow552{flex-wrap:wrap;gap:6px 10px}
+  #aRow552>#rbar{flex:1 1 100%;max-width:100%;flex-wrap:wrap!important}
+  #aRow552>#rbar .rb-focus{margin-left:0!important}
+  .a-kpipop551{width:92vw;right:auto;left:0}
+}
+@media(max-width:640px){
+  #aMain{left:0!important;right:0!important;width:100vw;max-width:100vw;overflow-x:hidden!important}
+  #aMain>.hd,#aMain>.wrap,#aMain .panel,#p-items,#aRow551,#aRow552{min-width:0!important;max-width:100%!important}
+  #aMain>.wrap{padding:8px 9px 32px!important}
+  #aMain .a-top{gap:6px;padding:7px 0}
+  #aMain .a-top button{height:34px;padding:0 9px;font-size:11px}
+  #aMain .a-top .a-qbox::after{display:none}
+  #aMain .a-qscope{font-size:12px!important;white-space:nowrap}
+  #aMain .a-who>.org,#aMain .a-who>.av,#aMain .a-who>span:not(.a-opt){display:none!important}
+  #aMain .a-who{gap:0!important}
+  #aMain .a-scope{flex-wrap:wrap;gap:3px;line-height:1.4;padding:5px 0}
+  #aMain .a-scope>span:not(:first-child){display:none}
+  #p-items>#aRow551{gap:7px!important}
+  #p-items>#aRow551>.a-tabq{flex:1 1 100%!important;width:100%!important}
+  #aRow551>.a-tabq>.a-tabq-in{min-width:0!important;width:100%!important}
+  #aRow551>.a-tabq input{min-width:0!important}
+  #aRow551>#wares{max-width:100%!important;width:100%!important;overflow-x:auto!important;overscroll-behavior-x:contain}
+  #aRow551>#wares>.ware{height:32px!important;padding:0 10px!important}
+  #p-items>#aRow552{gap:7px!important}
+  #aRow552>#rbar{flex-wrap:wrap!important;gap:5px 8px!important;max-width:100%!important}
+  #aRow552>#rbar .rb-main{white-space:normal!important;line-height:1.45}
+  #aRow552>#rbar .rload{white-space:normal!important;flex:1 1 100%;line-height:1.45}
+  #aRow552>#rbar .rside{flex:1 1 100%;white-space:normal!important;border-left:0!important;padding-left:0!important}
+  #aRow552>#rbar .rb-focus{margin-left:0!important}
+  #aRow552>#rbar .rhint{max-width:100%!important}
+  #aMain .a-kpipop551{position:fixed;left:12px;right:12px;top:110px;width:auto!important;max-width:none!important;max-height:72dvh;overflow:auto}
+  #aMain .a-kpipop551 .kpis>.kpi{flex:1 1 96px!important}
+  #aMain .pj{grid-template-columns:18px 3px minmax(0,1fr) auto!important;
+    grid-template-rows:auto auto auto!important;gap:3px 8px!important;
+    padding:10px 7px!important;min-width:0!important;max-width:100%!important}
+  #aMain .pj::before{grid-column:1;grid-row:1/span 3}
+  #aMain .pj::after{grid-column:2;grid-row:1/span 3}
+  #aMain .pj-t{grid-column:3;grid-row:1;min-width:0;white-space:normal!important;
+    display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;
+    overflow:hidden!important;text-overflow:clip!important;line-height:1.45!important}
+  #aMain .pj-t .go{white-space:normal!important}
+  #aMain .pj-money{grid-column:4;grid-row:1;align-self:start;max-width:86px;white-space:nowrap}
+  #aMain .pj-snip{grid-column:3/5;grid-row:2;min-width:0;white-space:normal!important;
+    display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:1;line-clamp:1;
+    overflow:hidden!important;text-overflow:clip!important}
+  #aMain .pj-meta{grid-column:3/5;grid-row:3;justify-self:start;text-align:left;
+    min-width:0;max-width:100%!important;white-space:normal!important;overflow:visible!important;
+    text-overflow:clip!important;line-height:1.45!important}
+  #aMain .pj-meta .mi{white-space:normal!important;overflow-wrap:anywhere}
+  #aMain .cgrid,#aMain .news{grid-template-columns:minmax(0,1fr)!important}
+  #aMain .a-tabq{max-width:100%!important;min-width:0!important}
+  #aMain .a-tabq-in{min-width:0!important}
+  #aMain .frow>label,body>.fbar .frow>label{flex:0 0 auto!important;max-width:100%!important;box-sizing:border-box}
+  #aMain .fbar.a-show,body>.fbar.a-show{display:block!important;position:fixed;left:0;right:0;bottom:0;top:auto;z-index:8000;
+    max-height:82dvh;overflow:auto;border-radius:16px 16px 0 0!important;padding:42px 12px 18px!important;
+    margin:0!important;background:var(--card)!important;color:var(--ink)!important;border:1px solid var(--line)!important;
+    box-shadow:0 -16px 45px rgba(15,23,42,.25);overscroll-behavior:contain}
+  body>.fbar.a-show .fhead{display:flex;flex-wrap:wrap;gap:7px;padding:6px 0}
+  body>.fbar.a-show .fbody{background:var(--card)}
+  #p1bFilterClose{display:block;position:absolute;right:12px;top:9px;padding:4px 11px}
+  .ui-dialog{padding:10px 6px!important;align-items:flex-start!important}
+  .ui-dialog .ep-wrap,.ui-dialog .mh-wrap,.ui-dialog .wkbox{max-height:calc(100dvh - 20px);border-radius:11px}
+  .ui-dialog .ep-wrap{padding:14px 13px 18px}
+  .ui-dialog .wkbox{height:calc(100dvh - 20px);max-height:none}
+  .ui-dialog .wkhead{gap:6px;padding:10px}
+  .ui-dialog .wkhead>span:nth-child(2){display:none}
+  .ui-dialog .wkbody{padding:12px;font-size:12px}
+  .ui-dialog .ep-x{position:sticky;top:0}
+  .ui-dialog .ep-sec,.ui-dialog .prof-sec{overflow-x:auto;max-width:100%}
+}
+</style>
+<script id="p1bDialogMobileJs">
+(function(){
+  'use strict';
+  var IDS=['encyProfBox','uniProfBox','wkMask','mhBox'],stack=[],focusMap={};
+  function box(id){return document.getElementById(id)}
+  function visible(b){return b&&getComputedStyle(b).display!=='none'}
+  function dialogs(){return IDS.map(box).filter(visible)}
+  function label(b){
+    var t=b.querySelector('.ep-title,.mh-title,.wkhead b');
+    b.setAttribute('aria-label',((t&&t.textContent)||'对话窗口').trim());
+  }
+  function syncDialogs(){
+    var open=dialogs();
+    open.forEach(function(b){
+      b.classList.add('ui-dialog');b.setAttribute('role','dialog');b.setAttribute('aria-modal','true');
+      b.setAttribute('tabindex','-1');label(b);
+      if(stack.indexOf(b)<0){
+        stack.push(b);focusMap[b.id]=document.activeElement;b.scrollTop=0;
+        setTimeout(function(){
+          if(!visible(b))return;
+          var f=b.querySelector('.ep-x,.mh-x,.wkhead button,button,[href],input,select,textarea');
+          try{(f||b).focus({preventScroll:true})}catch(e){}
+        },30);
+      }
+    });
+    stack=stack.filter(function(b){return open.indexOf(b)>=0});
+    document.body.classList.toggle('p1b-dialog-open',open.length>0);
+    if(!open.length){
+      Object.keys(focusMap).forEach(function(id){
+        var f=focusMap[id];if(f&&f.isConnected)try{f.focus({preventScroll:true})}catch(e){}
+      });focusMap={};
+    }
+  }
+  function closeDialog(b){
+    if(!b)return;
+    if(b.id==='uniProfBox'&&typeof window.closeUniProf==='function')window.closeUniProf();
+    else if(b.id==='encyProfBox'&&typeof window.encyProfClose==='function')window.encyProfClose();
+    else if(b.id==='mhBox'&&typeof window.mhClose==='function')window.mhClose();
+    else b.style.display='none';
+    setTimeout(syncDialogs,0);
+  }
+  function closeDrawers(){
+    document.body.classList.remove('p1b-nav-open','p1b-side-open','p1b-filter-open');
+    var fb=document.getElementById('fbar');if(fb)fb.classList.remove('a-show');
+    var n=document.getElementById('aNavOpen'),s=document.getElementById('aSideOpen'),f=document.getElementById('aFilter');
+    if(n)n.setAttribute('aria-expanded','false');if(s)s.setAttribute('aria-expanded','false');
+    if(f&&innerWidth<=640)f.setAttribute('aria-expanded','false');
+  }
+  function onKey(e){
+    var open=dialogs(),top=open.length?stack[stack.length-1]:null;
+    if((e.key==='Escape'||e.keyCode===27)&&(top||document.body.classList.contains('p1b-nav-open')||document.body.classList.contains('p1b-side-open')||document.body.classList.contains('p1b-filter-open'))){
+      e.preventDefault();e.stopImmediatePropagation();if(top)closeDialog(top);else closeDrawers();return;
+    }
+    if(e.key==='Tab'&&top){
+      var all=[].slice.call(top.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')).filter(function(x){
+        return !x.disabled&&x.getClientRects().length&&getComputedStyle(x).visibility!=='hidden';
+      });
+      if(!all.length){e.preventDefault();top.focus();return;}
+      var first=all[0],last=all[all.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+    }
+  }
+  function initDialogs(){
+    IDS.forEach(function(id){var b=box(id);if(!b)return;
+      b.classList.add('ui-dialog');
+      new MutationObserver(syncDialogs).observe(b,{attributes:true,attributeFilter:['style'],childList:true,subtree:false});
+    });
+    document.addEventListener('keydown',onKey,true);syncDialogs();
+  }
+  function makeButton(id,text,title){
+    var b=document.createElement('button');b.type='button';b.id=id;b.textContent=text;b.title=title;
+    b.setAttribute('aria-label',title);b.setAttribute('aria-expanded','false');return b;
+  }
+  function setDrawer(kind,show){
+    var fb=document.getElementById('fbar');if(fb)fb.classList.remove('a-show');
+    document.body.classList.remove('p1b-nav-open','p1b-side-open','p1b-filter-open');
+    document.body.classList.toggle('p1b-'+kind+'-open',show);
+    var b=document.getElementById(kind==='nav'?'aNavOpen':'aSideOpen');if(b)b.setAttribute('aria-expanded',show?'true':'false');
+    var f=document.getElementById('aFilter');if(f)f.setAttribute('aria-expanded','false');
+  }
+  function initMobile(){
+    var top=document.querySelector('#aMain .a-top');if(!top||document.getElementById('aNavOpen'))return;
+    var navBtn=makeButton('aNavOpen','菜单','打开功能导航'),sideBtn=makeButton('aSideOpen','行情','打开金属价格行情');
+    top.insertBefore(navBtn,top.firstChild);var who=top.querySelector('.a-who');top.insertBefore(sideBtn,who||null);
+    var mask=document.createElement('div');mask.id='aMobileMask';mask.setAttribute('aria-hidden','true');document.body.appendChild(mask);
+    var nav=document.getElementById('aNav'),side=document.getElementById('aSide');
+    var nc=makeButton('aNavClose','关闭','关闭功能导航'),sc=makeButton('aSideClose','关闭','关闭金属价格行情');
+    if(nav)nav.insertBefore(nc,nav.firstChild);if(side)side.insertBefore(sc,side.firstChild);
+    navBtn.onclick=function(){setDrawer('nav',!document.body.classList.contains('p1b-nav-open'))};
+    sideBtn.onclick=function(){setDrawer('side',!document.body.classList.contains('p1b-side-open'))};
+    nc.onclick=closeDrawers;sc.onclick=closeDrawers;mask.onclick=closeDrawers;
+    var fb=document.getElementById('fbar'),af=document.getElementById('aFilter');
+    if(fb){
+      var home=document.createComment('p1b-filter-home');fb.parentNode.insertBefore(home,fb);
+      var fc=makeButton('p1bFilterClose','关闭筛选','关闭筛选面板');fb.appendChild(fc);fc.onclick=closeDrawers;
+      var syncFilter=function(){
+        var on=innerWidth<=640&&fb.classList.contains('a-show');
+        if(on&&fb.parentNode!==document.body)document.body.appendChild(fb);
+        else if(!on&&fb.parentNode===document.body&&home.parentNode)home.parentNode.insertBefore(fb,home.nextSibling);
+        document.body.classList.toggle('p1b-filter-open',on);
+        if(on){document.body.classList.remove('p1b-nav-open','p1b-side-open');navBtn.setAttribute('aria-expanded','false');sideBtn.setAttribute('aria-expanded','false');}
+        if(af)af.setAttribute('aria-expanded',on?'true':'false');
+      };
+      new MutationObserver(syncFilter).observe(fb,{attributes:true,attributeFilter:['class']});syncFilter();
+    }
+    document.addEventListener('click',function(e){
+      if(e.target.closest&&e.target.closest('#aNav [data-i],#aMore [data-i]'))setTimeout(closeDrawers,20);
+    });
+    document.addEventListener('click',function(e){
+      if(e.target.closest&&e.target.closest('.a-mr[data-code]'))closeDrawers();
+    },true);
+    window.addEventListener('resize',function(){if(innerWidth>1200)closeDrawers()});
+    window.p1bCloseDrawers=closeDrawers;
+  }
+  function ready(){
+    initDialogs();
+    var n=0,t=setInterval(function(){initMobile();if(document.getElementById('aNavOpen')||++n>60)clearInterval(t)},200);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready);else ready();
+})();
+</script>
+<style id="overallNewsFormalCss">
+/* 2026-11-26：三栏边界 + P1-C 正式界面。 */
+#aMain .a-who,#aNav>.a-note,#aNav .a-plangrp,#aNav .a-sep[data-p1c-plan]{display:none!important}
+#aMain #p-trend #tSigKpi,#aMain #p-trend #sigFold,#aMain #p-trend #wxTip,
+#aMain #p-wechat #wxFold{display:none!important}
+#aMain #p-trend .sect,#aMain #p-wechat .sect{margin-bottom:6px}
+.pjnews-summary{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+.pjnews-summary span{padding:4px 9px;border:1px solid var(--line);border-radius:12px;background:#f8fafc;font-size:12px;color:var(--tx2)}
+.pjnews-group{margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--tx2)}
+.pjnews-item{padding:10px 2px;border-bottom:1px solid var(--line);line-height:1.55}
+.pjnews-item h4{margin:0 0 5px;font-size:13.5px;font-weight:600}
+.pjnews-item h4 a{color:var(--tx)}
+.pjnews-item .m{display:flex;gap:9px;flex-wrap:wrap;color:var(--tx3);font-size:11.5px}
+.pjnews-item .w{margin-top:4px;color:var(--tx3);font-size:12px}
+.pjnews-stage{display:inline-block;padding:1px 6px;border-radius:8px;background:#eef4ff;color:#2b5ea7;font-size:10.5px}
+@media(max-width:640px){.pjnews-item{padding:10px 0}.pjnews-summary{gap:5px}.pjnews-summary span{font-size:11px;padding:3px 7px}}
+</style>
+<script id="overallNewsFormalJs">
+(function(){
+  'use strict';
+  function text(elm,value){if(elm)elm.textContent=value}
+  function pageQuery(i){var p=document.getElementById(TABS[i][0]),q=p&&p.querySelector('.a-tabq input');return q?q.value.trim().toLowerCase():''}
+  function queryHit(x,fields,q){return !q||fields.map(function(k){return String(x[k]||'').toLowerCase()}).join(' ').indexOf(q)>=0}
+  window.overallPolicyList=function(){var q=pageQuery(4);return (D.trends||[]).filter(function(x){return (!tTag.size||tTag.has(x.tag))&&queryHit(x,['title','tag','desc','source','date'],q)})};
+  window.overallDigestList=function(){var q=pageQuery(5);return ((D.digest||{}).items||[]).filter(function(x){return (!dgTag.size||dgTag.has(x.tag))&&(!dgLv.size||dgLv.has(x.level))&&queryHit(x,['t','tag','level','src','d','sum'],q)})};
+  function reapplySearch(i){var p=document.getElementById(TABS[i][0]),q=p&&p.querySelector('.a-tabq input');if(q&&q.value.trim())q.dispatchEvent(new Event('input',{bubbles:true}))}
+  document.addEventListener('input',function(e){if(e.target&&e.target.closest&&e.target.closest('.a-tabq'))setTimeout(syncTop550,0)});
+  document.addEventListener('click',function(e){if(e.target&&e.target.closest&&e.target.closest('.a-tabq-x'))setTimeout(syncTop550,30)});
+  function formalUi(){
+    if(window.TABS){TABS[4][1]='政策动态';TABS[5][1]='竞争情报';}
+    document.querySelectorAll('[data-i="4"] span').forEach(function(x){if(x.textContent.indexOf('行业动态')>=0)x.textContent='政策动态'});
+    document.querySelectorAll('[data-i="5"] span').forEach(function(x){if(x.textContent.indexOf('情报')>=0)x.textContent='竞争情报'});
+    var ts=document.querySelector('#p-trend .sect');
+    if(ts)ts.innerHTML='政策动态 <small>正式政策 · 政策解读 · 电力市场规则</small> <span id="newsCnt" style="font-weight:400;color:var(--tx3)"></span>';
+    var ds=document.querySelector('#p-wechat .sect');
+    if(ds)ds.innerHTML='竞争情报 <small id="dgMeta"></small>';
+    var hint=document.querySelector('#p-wechat .hint');
+    if(hint)hint.innerHTML='<b>这里看“谁在行动”</b>：竞对、伙伴和重点客户在燃煤火电、煤气／余热／热电、储能及海外用能配套上的重要中标、签约与建设动作。'+
+      '项目阶段统一在「找商机 → 项目情况」查看；政策统一在「政策动态」查看。<span class="lv S">S</span> 有明确规模或海外项目，<span class="lv A">A</span> 为主业相关重要动作。';
+    document.querySelectorAll('#aNav .a-sep').forEach(function(x){if(x.textContent.indexOf('规划中')===0)x.setAttribute('data-p1c-plan','1')});
+    document.querySelectorAll('#lossFold summary').forEach(function(x){x.childNodes.forEach(function(n){if(n.nodeType===3)n.textContent=n.textContent.replace(/F09\s*·?\s*/g,'')})});
+    document.querySelectorAll('[title]').forEach(function(x){if(x.title)x.title=x.title.replace(/F0[0-9]\s*/g,'').replace(/F[123][0-9]\s*/g,'')});
+  }
+  window.sigNote544=function(){
+    var sm=document.querySelector('#p-trend .sect small');if(!sm)return;
+    var n=window.D&&D.trends?D.trends.length:0;sm.textContent='正式政策 · 政策解读 · 电力市场规则 · '+n+' 条';
+  };
+  pjNewsRender=function(){
+    var wrap=el('pjWrap');if(!wrap)return;
+    if(!window.DATA_NEWS){wrap.innerHTML='<div class="empty">项目动态加载中，请稍候。</div>';return;}
+    var list=(D.projectNews||[]).map(function(x){
+      var j=sigJudge(x);j.x=x;
+      if(!j.sig){var p=projJudge(x);j.proj=true;j.lvl=p.lvl||'mid';j.segcn=p.segcn||j.segcn||'项目进展';j.why=p.why||j.why;}
+      else j.proj=true;
+      if(!j.lvl)j.lvl='mid';return j;
+    });
+    var groups={strong:[],mid:[],weak:[]};list.forEach(function(j){groups[j.lvl].push(j)});
+    Object.keys(groups).forEach(function(k){groups[k].sort(function(a,b){return (b.x.date||'').localeCompare(a.x.date||'')})});
+    text(el('pjCnt'),'· 共 '+list.length+' 条');
+    var summary=document.querySelector('#projNewsFold>summary');
+    if(summary)summary.innerHTML='项目动态 · 按阶段（前期 / 招中标 / 建设 / 投产） <span id="pjCnt" style="font-weight:400;color:var(--tx3)">· 共 '+list.length+' 条</span>';
+    var html='<div class="pjnews-summary"><span>全部 '+list.length+'</span><span>已动土／投产 '+groups.strong.length+'</span><span>前期与招中标 '+groups.mid.length+'</span><span>仅意向 '+groups.weak.length+'</span></div>';
+    [['strong','已动土 / 已投产'],['mid','前期与招中标'],['weak','仅意向']].forEach(function(pair){
+      var arr=groups[pair[0]];if(!arr.length)return;
+      html+='<div class="pjnews-group">'+pair[1]+' · '+arr.length+' 条</div>';
+      html+=arr.map(function(j){var x=j.x,title=esc(x.title||'');
+        return '<div class="pjnews-item"><h4>'+(x.url?'<a href="'+esc(x.url)+'" target="_blank" rel="noopener">'+title+' ↗</a>':title)+'</h4>'+
+          '<div class="m"><span class="pjnews-stage">'+esc(j.segcn||'项目进展')+'</span><span>'+esc(x.source||'来源待核')+'</span><span>'+esc(x.date||'日期待核')+'</span></div>'+
+          (j.why?'<div class="w">'+esc(j.why)+'</div>':'')+'</div>';
+      }).join('');
+    });
+    wrap.innerHTML=html||'<div class="empty">暂无项目动态</div>';
+  };
+  var trendsBase=renderTrends;
+  renderTrends=function(){if(el('f-tg')&&!el('f-tg').children.length)buildTrendFilter();trendsBase();reapplySearch(4);syncTop550();};
+  var digestBase=renderDigest;
+  renderDigest=function(){
+    digestBase();
+    var dg=D.digest||{},items=overallDigestList(),all=dg.items||[],srcs={};all.forEach(function(x){srcs[x.src]=1});
+    text(el('dgMeta'),(dg.updated?'内容更新 '+dg.updated:'')+' · 当前 '+items.length+' / '+all.length+' 条 · '+Object.keys(srcs).length+' 家单位 · '+(dg.archived||0)+' 条低相关归档');
+    document.querySelectorAll('#dgGrid .ncard').forEach(function(c){var spans=c.querySelectorAll('.ns>span');var last=spans[spans.length-1];if(last&&!last.textContent.trim())last.textContent='日期待核';});
+    reapplySearch(5);syncTop550();
+  };
+  function boot(){
+    formalUi();
+    var n=0,t=setInterval(function(){formalUi();if(document.querySelector('#aNavList .a-ni')||++n>40)clearInterval(t)},150);
+    setTimeout(sigNote544,3600);setTimeout(sigNote544,9100);
+    var fold=document.getElementById('projNewsFold');if(fold&&fold.open)pjNewsRender();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+</script>
