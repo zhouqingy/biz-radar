@@ -52,6 +52,7 @@ import biz_rules as BR
 import pick_odi as PO
 import seg_match as SM          # 业务层级（12 类口径在 seg_biz.py）
 import oversea_manual as OM      # 复用 norm_url / summarize，避免两套实现
+import industry_leads as IL      # 产业投资线索与邮件共用同一分类，不进①库判定
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(ROOT, 'raw')
@@ -70,6 +71,7 @@ PRE_KW = ('电厂', '电站', '电力', '用电', '发电', '自备', '余热', 
           '数据中心', '算力', 'IDC', '淡化', '垃圾焚烧', '焚烧发电',
           '工业园', '产业园', '园区',
           '投产', '开工', '签约', '中标', '开工建', '扩建', '新建', '建成',
+          '拟投', '拟建', '磋商', '意向', '备忘录', '备案', '核准', '奠基', '投资', '布局',
           'EPC', '总包', '承包', '亿美元', '亿元')
 
 # 明确不看的：光伏/风电/储能电站（我们不做电源投资），矿业纯开采，政策党务
@@ -543,6 +545,11 @@ def main():
 
         def _e_fallback():
             n = x['title'] + ' ' + (summ or '')
+            # 产业投资是新展示层：拟投/磋商/备案/核准也可跟踪，但不等于①库能投。
+            lead = IL.evaluate({'title': x['title'], 'summary': summ, 'url': x['url']}, WATCH)
+            if lead.get('ok'):
+                return '产业投资：%s / %s / %s' % (
+                    lead['leadIndustry'], lead['leadStage'], lead['energyOpportunity'])
             if any(w in n for w in PO.X_W) or any(w in n for w in PO.THERMO_FALSE):
                 return None
             act = [w for w in E_ACT if w in n]
@@ -631,6 +638,14 @@ def main():
         })
         print('  ✓ [%s] %s | %s' % (tier, date or '????-??-??', x['title'][:44]))
         time.sleep(0.6)
+
+    # 给所有通道统一补产业字段；名单、S/A、E档都走同一分类，避免采集与邮件两套口径。
+    for _row in keep:
+        _lead = IL.enrich(_row, WATCH)
+        if _lead:
+            _row.update(dict((k, v) for k, v in _lead.items() if k in (
+                'leadKey', 'leadActor', 'leadIndustry', 'leadStage', 'leadGeo',
+                'energyOpportunity', 'sourceStatus')))
 
     # 跨源转载去重：同一条新闻在商报和国复都出现，只留先到的
     _seen_t = set()

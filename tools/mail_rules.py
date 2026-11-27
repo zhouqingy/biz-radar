@@ -5,6 +5,7 @@ import datetime as dt
 import difflib
 import re
 
+import industry_leads as IL
 from news_rules import (
     POLICY_DOC, POLICY_VERB, PROJECT_ENTITY, core_relevance, is_policy, is_project, text_of,
 )
@@ -158,14 +159,31 @@ def daily_routes(snapshot, today=None):
     policies30 = recent([x for x in snapshot['policies'] if formal_policy(x)], 30, today)
     digest30 = recent(snapshot['digest'], 30, today)
     used = set(root_key(title_of(x)) for x in biz3 + ov7)
+    # 新增“产业投资线索”：近30天有新投资或状态变化；同项目只留最新阶段。
+    industry_all, industry_audit = IL.latest(
+        snapshot.get('industryPool') or [], snapshot.get('industryOwners') or ())
+    main_lead_keys = set()
+    for row in ov7:
+        enriched = IL.enrich(row, snapshot.get('industryOwners') or ())
+        if enriched:
+            main_lead_keys.add(enriched['leadKey'])
+    industry30 = recent([x for x in industry_all if x['leadKey'] not in main_lead_keys], 30, today)
+    industry30 = unique(industry30, used)
+    used.update(root_key(title_of(x)) for x in industry30)
     projects7 = unique(projects7, used)
     used.update(root_key(title_of(x)) for x in projects7)
     digest30 = unique(digest30, used)
     return {
         'biz3': unique(biz3)[:10], 'watch7': [], 'oversea7': unique(ov7)[:12],
+        'industry30': industry30,
         'projects7': projects7[:8], 'policies30': unique(policies30)[:6],
         'digest30': digest30[:6], 'market7': unique(market7),
         'reviewBiz': unique(biz_review)[:10], 'reviewOversea': unique(ov_review)[:8],
+        'industryAudit': {
+            'pool': len(snapshot.get('industryPool') or []),
+            'qualifiedLatest': len(industry_all), 'recent30': len(industry30),
+            'excludedRows': industry_audit,
+        },
         'overseaAudit': {
             'main': len(ov_main), 'market': len(ov_market), 'archive': len(ov_archive),
             'archiveRows': [{'title': title_of(x), 'reason': why} for x, why in ov_archive],

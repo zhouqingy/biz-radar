@@ -140,6 +140,8 @@ def table(rows, kind='news', empty='本时间窗无符合条件的新增，不�
         return '<p style="color:#7a8494;font-size:12.5px;margin:4px 0">%s</p>' % esc(empty)
     if kind == 'biz':
         heads = ('日期', '项目/标题', '地区', '金额', '档位')
+    elif kind == 'lead':
+        heads = ('日期', '产业投资线索', '阶段 / 能源配套 / 核验')
     else:
         heads = ('日期', '项目/标题', '来源/分类')
     out = ['<table role="presentation" style="border-collapse:collapse;width:100%;table-layout:fixed">',
@@ -148,6 +150,11 @@ def table(rows, kind='news', empty='本时间窗无符合条件的新增，不�
         if kind == 'biz':
             amount = row.get('amtTxt') or (('%g 亿' % row['amt']) if row.get('amt') else '—')
             cells = (date_of(row), link(row), row.get('rg') or row.get('city') or '—', amount, (row.get('g') or '—').upper())
+        elif kind == 'lead':
+            label = '%s · %s · %s · %s' % (
+                row.get('leadStage') or '阶段待核', row.get('leadIndustry') or '高耗能产业',
+                row.get('energyOpportunity') or '能源配套待核', row.get('sourceStatus') or '待核')
+            cells = (date_of(row) or '待核', link(row), label)
         else:
             label = row.get('src') or row.get('s') or row.get('source') or row.get('tag') or row.get('chan') or '—'
             if row.get('is_old'):
@@ -195,8 +202,8 @@ def frame(snapshot, subtitle, sections, warning=''):
             '<p style="font-size:12px;margin:0 0 14px"><a href="https://zhouqingy.github.io/biz-radar/" style="color:#0f4a9e">打开完整平台</a>（政策、项目、竞争情报与①库均按同一快照）</p>')
     head %= (esc(subtitle), TODAY.isoformat(), source, len(snapshot['items']), esc(snapshot['meta'].get('dataAsOf') or '—'), snapshot['sha256'][:12])
     tail = ('<p style="font-size:11px;color:#8792a5;border-top:1px solid #e6ebf2;padding-top:10px;margin-top:18px">'
-            '出海主区只收“可确认中资主体 + 主业能源设施 + 具体项目动作”；纯市场新闻仅在“市场参考”展示，非主业及无明确中资主体项目不进入主区。'
-            '①库能投判定仍由 biz_rules.judge() 统一执行。</p></div>')
+            '出海主区只收“可确认中资主体 + 主业能源设施 + 具体项目动作”；产业投资线索只表示潜在能源配套方向，拟投/磋商不等于正式落地，也不进入①库。'
+            '纯市场新闻仅在“市场参考”展示；①库能投判定仍由 biz_rules.judge() 统一执行。</p></div>')
     return head + warning + ''.join(sections) + tail
 
 
@@ -216,6 +223,8 @@ def daily_content(snapshot):
         section('近 3 天新增 A/B 商机', routes['biz3'], 'biz'),
         section('重点关注项目近 7 天动态', routes['watch7'], 'news', '近 7 天无重点关注主业项目新动态。'),
         section('中资出海项目近 7 天', routes['oversea7']),
+        section('产业投资线索｜潜在能源配套（近 30 天）', routes['industry30'], 'lead',
+                '近 30 天无新增或状态变化的中资高耗能产业投资线索。'),
         section('项目情况近 7 天', routes['projects7']),
         section('政策动态近 30 天', routes['policies30'], 'news', '近 30 天无新政策入库；旧政策不在邮件里冒充新增，请查平台政策档。'),
         section('竞争情报近 30 天', routes['digest30']),
@@ -223,8 +232,8 @@ def daily_content(snapshot):
         section('4～10 天前商机回顾', routes['reviewBiz'], 'biz'),
         section('4～10 天前出海回顾', routes['reviewOversea']),
     ]
-    names = ('近3天A/B商机', '重点关注7天', '中资出海7天', '项目情况7天', '政策30天', '竞争情报30天', '市场参考7天', '商机回顾', '出海回顾')
-    keys = ('biz3', 'watch7', 'oversea7', 'projects7', 'policies30', 'digest30', 'market7', 'reviewBiz', 'reviewOversea')
+    names = ('近3天A/B商机', '重点关注7天', '中资出海7天', '产业投资线索30天', '项目情况7天', '政策30天', '竞争情报30天', '市场参考7天', '商机回顾', '出海回顾')
+    keys = ('biz3', 'watch7', 'oversea7', 'industry30', 'projects7', 'policies30', 'digest30', 'market7', 'reviewBiz', 'reviewOversea')
     lines = ['商机雷达每日简报 %s' % TODAY, '①库 %d 条，公告截止 %s' % (len(snapshot['items']), snapshot['meta'].get('dataAsOf'))]
     lines += ['', '数据提醒：' + '；'.join(al)] if al else []
     for name, key in zip(names, keys):
@@ -260,11 +269,13 @@ def weekly_content(snapshot):
     sections = [
         section('本周 A/B 商机（按金额）', unique(biz7)[:15], 'biz'),
         section('本周中资出海项目', routes['oversea7']),
+        section('产业投资线索｜潜在能源配套（近 30 天）', routes['industry30'], 'lead'),
         section('本周项目情况', routes['projects7']),
         section('近 30 天政策动态', routes['policies30']),
         section('近 30 天竞争情报', routes['digest30']),
     ]
     counts = {'weeklyBiz': len(unique(biz7)[:15]), 'oversea7': len(routes['oversea7']),
+              'industry30': len(routes['industry30']),
               'projects7': len(routes['projects7']), 'policies30': len(routes['policies30']), 'digest30': len(routes['digest30'])}
     text = '商机雷达周报 %s\n' % TODAY + '\n'.join(plain_line(x) for x in unique(biz7)[:15] + routes['oversea7'])
     return frame(snapshot, '每周汇总', sections), text, counts

@@ -39,6 +39,7 @@ jobs:
             echo "::error::缺少 MAIL_USER / MAIL_PASS；本任务不假装发送成功"
             exit 1
           fi
+          python verify_industry_leads.py
           python send_daily.py --dry --output-dir "$RUNNER_TEMP/mail-preview" --tag 日报
 
       - name: 实发日报、重大插发与周一报

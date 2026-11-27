@@ -80,8 +80,12 @@ def load_snapshot():
         'source': ('repo:' + root) if root else 'online:' + SITE_URL,
         'meta': meta, 'core': core, 'items': items, 'news': news, 'digest': digest,
         'oversea': news.get('overseaFlash') or [],
+        # 产业投资既可能在快讯池，也可能已经挂在客户项目卡；两处合并后按项目键取最新状态。
+        'industryPool': (news.get('overseaFlash') or []) + (news.get('overseas') or []),
+        'industryOwners': tuple(x.get('name') for x in (news.get('overseas') or []) if x.get('name')),
         'policies': news.get('trends') or [], 'projects': news.get('projectNews') or [],
         'counts': {'items': total, 'overseaRaw': len(news.get('overseaFlash') or []),
+                   'industryRaw': len((news.get('overseaFlash') or []) + (news.get('overseas') or [])),
                    'policies': len(news.get('trends') or []),
                    'projects': len(news.get('projectNews') or []), 'digest': len(digest)},
         'blocks': counts,

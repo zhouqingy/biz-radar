@@ -1618,6 +1618,11 @@ def _load_oversea_extra():
                     _it['tier'] = x.get('tier')
                 if x.get('chan'):
                     _it['chan'] = x.get('chan')
+                # 产业投资线索字段随每日重建保留，邮件和后续项目状态跟踪不依赖临时计算。
+                for _lead_field in ('leadKey', 'leadActor', 'leadIndustry', 'leadStage',
+                                    'leadGeo', 'energyOpportunity', 'sourceStatus'):
+                    if x.get(_lead_field):
+                        _it[_lead_field] = x.get(_lead_field)
                 if ov_industry_drop(_it['t'] + ' ' + _it['m']):
                     _ov_indrop[0] += 1
                     continue
