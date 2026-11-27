@@ -54,6 +54,29 @@ import seg_match as SM          # 业务层级（12 类口径在 seg_biz.py）
 import oversea_manual as OM      # 复用 norm_url / summarize，避免两套实现
 import industry_leads as IL      # 产业投资线索与邮件共用同一分类，不进①库判定
 
+# 产业线索字段：由本机 IL.enrich() 打上的「中资主体/行业/阶段/能源机会」。
+# 2026-11-27 §5.122 事故：CI 用的 industry_leads.py 是旧版（本地那些识别修复没推），
+# 采集时 enrich() 打不全，于是**这条新闻整份数据被重写**，17 条线索静静消失
+# （线上速览从 19 条掉回 5 条）。修代码之前，至少不能再让旧分类器抹掉新分类器的成果。
+LEAD_FIELDS = ('leadKey', 'leadActor', 'leadIndustry', 'leadStage',
+               'leadGeo', 'energyOpportunity', 'sourceStatus')
+
+
+def _keep_lead_fields(row):
+    """旧条目缺线索字段、而当前分类器认得出它时，补上，别跟着覆盖一起丢。
+    只增不减：已有字段一律不动，避免旧分类器的错判盖掉对的。"""
+    if row.get('leadKey'):
+        return row
+    try:
+        lead = IL.enrich(row, WATCH)
+    except Exception:
+        return row
+    if lead:
+        for k in LEAD_FIELDS:
+            if lead.get(k):
+                row[k] = lead[k]
+    return row
+
 ROOT = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(ROOT, 'raw')
 FLASH = os.path.join(RAW, 'oversea_flash.json')
@@ -684,7 +707,8 @@ def main():
             old = json.load(open(FLASH, encoding='utf-8'))
         except Exception:
             pass
-    merged = {OM.norm_url(x.get('url')): x for x in old.get('items', [])}
+    merged = {OM.norm_url(x.get('url')): _keep_lead_fields(x)
+              for x in old.get('items', [])}
     # 与存量库做同题去重（2026-11-23 §5.105 用户要求「不要同一条新闻出现多次」）：
     # 不同网站转载同一事件标题高度相似，跨源 title 去重只管本轮候选，
     # 这里补上「与库里已有条目」的同题判定，转载晚到的不再重复入库。
