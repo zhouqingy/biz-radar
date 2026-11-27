@@ -65,6 +65,19 @@ def day(value):
     return m.group(1) if m else ''
 
 
+# 金属历史端点容忍度（2026-11-27）：新浪不同品种日 K 落库时间不一致，
+# 允许「落后 1 个自然日 + 最多 3 个品种」，超出即视为真抓取失败。
+MAX_STALE_DAYS = 3
+MAX_STALE_SYMBOLS = 3
+
+
+def date_of(text):
+    try:
+        return dt.date.fromisoformat(str(text))
+    except Exception:
+        return dt.date(1970, 1, 1)
+
+
 def latest(rows):
     dates = [day(x.get('d') or x.get('date')) for x in (rows or []) if isinstance(x, dict)]
     return max((x for x in dates if x), default='')
@@ -143,12 +156,31 @@ def metrics(root, scope):
         hist = read_js(os.path.join(root, 'data.metalhist.js'))
         series = hist.get('s') or {}
         ends = sorted({day(v.get('end')) for v in series.values() if day(v.get('end'))})
+        # 2026-11-27 修：原来要求「所有品种端点必须完全一致」，任一品种当天未固化
+        #   （新浪不同品种日 K 落库时间不一致，如 SN 沪锡常晚于其余品种）就整轮判红，
+        #   结果是 20 个品种全都不发布，比缺一个更糟。
+        #   现口径：以最新端点为基准，允许少量品种落后 1 个交易日；超出即判红。
+        #   —— 仍有下限保护：真正的抓取失败会造成大面积或长期落后，不会被放过。
+        stale = {}
         if len(ends) > 1:
-            detail = sorted('%s(%s)：%s' % (code, v.get('n') or '未命名', day(v.get('end')))
-                            for code, v in series.items())
-            raise GateError('金属历史端点不一致：%s；品种明细：%s' % (ends, '、'.join(detail)))
+            newest = ends[-1]
+            older = ends[:-1]
+            if len(older) > 1 or (newest and older and
+                                   (date_of(newest) - date_of(older[-1])).days > MAX_STALE_DAYS):
+                detail = sorted('%s(%s)：%s' % (code, v.get('n') or '未命名', day(v.get('end')))
+                                for code, v in series.items())
+                raise GateError('金属历史端点不一致：%s；品种明细：%s' % (ends, '、'.join(detail)))
+            stale = {code: day(v.get('end')) for code, v in series.items()
+                     if day(v.get('end')) != newest}
+            if len(stale) > MAX_STALE_SYMBOLS:
+                raise GateError('金属历史落后品种过多（%d 个 > 上限 %d）：%s'
+                                % (len(stale), MAX_STALE_SYMBOLS, stale))
+            print('::warning::金属历史有 %d 个品种落后于最新端点 %s：%s（不阻断发布）'
+                  % (len(stale), newest, stale))
         out['metals'] = {'count': len(items), 'updated': day(metals.get('updated')),
                          'historyCount': len(series), 'historyEnds': ends,
+                         'historyLatest': ends[-1] if ends else None,
+                         'historyStale': stale,
                          'historyGenerated': day(hist.get('updated'))}
     return out
 
