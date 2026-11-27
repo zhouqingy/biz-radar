@@ -1,6 +1,6 @@
 {
- "updated": "2026-11-26 15:04",
- "n_src": 18,
+ "updated": "2026-11-27 09:13",
+ "n_src": 17,
  "items": [
   {
    "t": "中国能建江苏院勘察设计的华能灌云400兆瓦海上光伏项目开工",
@@ -115,6 +115,15 @@
    "url": "http://www.zepdi.ceec.net.cn/art/2026/10/12/art_17582_2528858.html",
    "d": "2026-10-12",
    "src": "中国能源建设集团浙江省电力设计院有限公司（中国能建浙江院）",
+   "srcKind": "官网",
+   "tag": "开工投产",
+   "level": "A"
+  },
+  {
+   "t": "2026-10-08 华新莫桑比克栋多日产3000吨水泥窑线项目投产",
+   "url": "http://www.huaxincem.com/view/7065.html",
+   "d": "2026-10-08",
+   "src": "华新水泥股份有限公司（水泥出海·中亚/非洲）",
    "srcKind": "官网",
    "tag": "开工投产",
    "level": "A"
@@ -345,8 +354,8 @@
    "level": "S"
   },
   {
-   "t": "宝钢德盛能源环保部65MW热电联产汽轮机设备维修[中标候选人公示]",
-   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001003/018001003003/20261126/4491a550-0b43-41d5-ba94-550ae18b62ff.html",
+   "t": "动力总厂80MW机组脱硝精准喷氨系统升级项目[中标候选人公示]",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001001/018001001003/20261127/5c349101-6e56-4c69-8d06-d39810da8923.html",
    "d": "",
    "src": "中国二十冶集团有限公司",
    "srcKind": "官网",
@@ -387,33 +396,6 @@
    "src": "中国能源建设集团安徽省电力设计院有限公司（中国能建安徽院）",
    "srcKind": "官网",
    "tag": "开工投产",
-   "level": "A"
-  },
-  {
-   "t": "核电机组投产高增长将启动 附股",
-   "url": "https://www.cfi.net.cn/p20261125000171.html",
-   "d": "",
-   "src": "无锡华光环保能源集团股份有限公司（含华光环保能源（西安）设计研究院有限公司）",
-   "srcKind": "官网",
-   "tag": "开工投产",
-   "level": "A"
-  },
-  {
-   "t": "中钢天澄打造柳钢又一绿色工程，EPC总承包转炉三次除尘项目投产",
-   "url": "http://www.tianchengep.com/news_detail/16242913.html",
-   "d": "",
-   "src": "中钢集团天澄环保科技股份有限公司（中钢天澄）",
-   "srcKind": "官网",
-   "tag": "开工投产",
-   "level": "A"
-  },
-  {
-   "t": "中钢天澄运用自主技术EPC总承包华菱涟钢超低排放项目，打造绿色生态钢城",
-   "url": "http://www.tianchengep.com/news_detail/16242844.html",
-   "d": "",
-   "src": "中钢集团天澄环保科技股份有限公司（中钢天澄）",
-   "srcKind": "官网",
-   "tag": "行业动向",
    "level": "A"
   },
   {
@@ -642,7 +624,7 @@
    "level": "A"
   },
   {
-   "t": "赋能皖江绿能发展 京城环保中标...",
+   "t": "赋能皖江绿能发展 京城环保中标合肥热电项目",
    "url": "https://www.bmei.com/index.php/News/newsArt/id/2357",
    "d": "",
    "src": "北京京城环保股份有限公司",
@@ -680,15 +662,6 @@
   {
    "t": "光大生态环境设计院中标孝昌县生活垃圾发电烟气超低排放改造总承包项目 [详细]",
    "url": "https://www.chinaxdsb.com/article/87983.html",
-   "d": "",
-   "src": "申能环境科技有限公司",
-   "srcKind": "官网",
-   "tag": "中标签约",
-   "level": "A"
-  },
-  {
-   "t": "1.05亿！重庆市巴南区惠民污水处理厂改扩建工程中标候选人公示",
-   "url": "https://www.chinaxdsb.com/article/87988.html",
    "d": "",
    "src": "申能环境科技有限公司",
    "srcKind": "官网",
@@ -741,8 +714,8 @@
    "level": "A"
   },
   {
-   "t": "焦化废水处理出水水质改善项目[中标候选人公示]",
-   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001001/018001001003/20261125/8b8d6c0e-2aaa-439e-a185-f1e9d4a761d3.html",
+   "t": "蒙自奥特斯维光伏发电有限公司逆变器技改及箱变缺陷治理公开招标[中标候选人公示]",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001001/018001001003/20261127/5d32d031-bbca-4baa-b951-9475d4e7551f.html",
    "d": "",
    "src": "中国二十冶集团有限公司",
    "srcKind": "官网",
@@ -750,8 +723,8 @@
    "level": "A"
   },
   {
-   "t": "能环部南区发电厂前区综合整治EPC总承包工程[中标候选人公示]",
-   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001001/018001001003/20261124/5d5a1054-529b-44cd-a67a-cbb567c312fa.html",
+   "t": "山东钢铁集团日照有限公司中厚板厂新建工业垃圾池项目[中标候选人公示]",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001001/018001001003/20261127/59b06c72-81ce-4a58-b55b-89592a750d5b.html",
    "d": "",
    "src": "中国二十冶集团有限公司",
    "srcKind": "官网",
@@ -759,8 +732,8 @@
    "level": "A"
   },
   {
-   "t": "宝山基地能环部四号制氢站吸附剂[中标候选人公示]",
-   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001002/018001002003/20261126/d3a214d6-42f4-41fb-8931-75ab3a00509e.html",
+   "t": "焦化废水处理出水水质改善项目中标结果公告",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001001/018001001004/20261127/e1f1eacf-a1ec-455a-b6f3-d06e01de4116.html",
    "d": "",
    "src": "中国二十冶集团有限公司",
    "srcKind": "官网",
@@ -768,8 +741,35 @@
    "level": "A"
   },
   {
-   "t": "宝武水务科技有限公司江西分公司新钢焦化酚氰废水深度处理药剂总包[中标候选人公示]",
-   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001002/018001002003/20261126/ab59f685-0dfd-454b-a0e7-332a182ffe5a.html",
+   "t": "能环部煤气柜安全仪表SIS系统之施工总承包中标结果公告",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001001/018001001004/20261127/bbfb16d2-578f-4b9b-a429-219b093231a1.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "武钢有限炼钢厂2026年12月-2027年11月脱硫搅拌桨公开招标[中标候选人公示]",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001002/018001002003/20261127/d4223e53-6430-4acc-9acf-8b0fec0634c2.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "改善M-3#、4#煤气电除尘器更新改造_除尘器公开招标[中标候选人公示]",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001002/018001002003/20261127/9efbc9a8-5771-4c09-96c7-fd1893374638.html",
+   "d": "",
+   "src": "中国二十冶集团有限公司",
+   "srcKind": "官网",
+   "tag": "中标签约",
+   "level": "A"
+  },
+  {
+   "t": "宝钢股份硅钢工艺水冷却用变频低温螺杆冷水机组中标结果公告",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001002/018001002004/20261127/d25d8a12-3a3a-4df0-9c95-fb4eeabd4b61.html",
    "d": "",
    "src": "中国二十冶集团有限公司",
    "srcKind": "官网",
@@ -786,8 +786,8 @@
    "level": "A"
   },
   {
-   "t": "山东钢铁集团日照有限公司金海分公司LNG、煤气净化充装站车辆管理系统升级改造项目中标结果公告",
-   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001003/018001003004/20261126/ccc6864d-bb36-4b5a-abdd-b31a55bd8a8d.html",
+   "t": "2027年华欣环保工程机械用车承揽项目中标结果公告",
+   "url": "https://www.baohuabidding.cn/shbhgjzb/jyxx/018001/018001003/018001003004/20261127/f3daab35-2fe9-43b6-aff7-7258b292fbc4.html",
    "d": "",
    "src": "中国二十冶集团有限公司",
    "srcKind": "官网",

@@ -37,16 +37,16 @@
       "sha256": "a9730667641fe6941584351105a1c43cdc0c97a189ea277389a813bed8def98e"
     },
     "data.js": {
-      "bytes": 2275601,
-      "sha256": "9dccd7280c3d4a86da85f704d6350db526fd930159665acfabd8272b6e7a3c23"
+      "bytes": 2276123,
+      "sha256": "f9e2231d3ef9de5a537d384122267576d1a768fa0dbfe531c0db1d5beb2ecf90"
     },
     "data.metalhist.js": {
       "bytes": 361281,
       "sha256": "21336b1667627896b06771d6c22843c6e0861ccb7e2dd24f30166fe1545f33bc"
     },
     "data.news.js": {
-      "bytes": 449976,
-      "sha256": "862d9c9faa3ede0671a1c48cb8433eea11158f5ddaaeb459c3839b2a74702e2f"
+      "bytes": 450498,
+      "sha256": "377a69a6091a606a7141ab544e7615d5f82b66ae4f40d55bc4de54d6c1aac68c"
     },
     "data.org.js": {
       "bytes": 824126,
@@ -79,8 +79,8 @@
   },
   "modules": {
     "digest": {
-      "count": 20,
-      "updated": "2026-11-26 15:04"
+      "count": 22,
+      "updated": "2026-11-27 09:13"
     },
     "metals": {
       "count": 20,
@@ -94,9 +94,9 @@
   },
   "run": {
     "attempt": "1",
-    "baseSha": "9743059b83f923a9232dbf7a546e4397df0fa6b6",
-    "builtAt": "2026-11-26T15:04:05+00:00",
-    "id": "45844532821",
+    "baseSha": "ff7796c0615f6954535c1ec5bf00a08c1dba193e",
+    "builtAt": "2026-11-27T09:13:18+00:00",
+    "id": "45971134438",
     "scope": "digest",
     "sourceHealth": "rival=success",
     "workflow": "情报精选刷新（每周一）"
