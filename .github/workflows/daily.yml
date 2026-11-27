@@ -625,17 +625,19 @@ jobs:
             exit 0
           fi
 
+          # 2026-11-27 §5.121：基线必须在 commit **之前**取。
+          #   §5.120 先把 GITHUB_SHA 换成 git rev-parse HEAD，但取在了 commit 之后，
+          #   拿到的是本次刚建的提交 sha，跟远端永远不等 —— run 45976911424 实测
+          #   报了「77122aa1 → b5f69a5e44」，其实 77122aa1 是它自己刚 commit 的。
+          #   base = 本次真正开始构建时的 main；commit 只是把产物挂在它后面。
+          #   本地已用真实 git 仓库验证两种场景：无并发 → 通过；有人抢先推 → 拦下。
+          base=$(git rev-parse HEAD)
           git commit -m "自动更新 $(date -u '+%Y-%m-%d %H:%M') UTC"
 
           # 发布期间若出现任何新提交，明确失败并重新跑，绝不用 ours 把对方改动冲掉。
-          # 2026-11-27 §5.120：基线从「事件 sha」改成「实际检出的 HEAD」。
-          #   GITHUB_SHA 是排队前的事件 sha，检出已改 ref: main 后会与之不等，
-          #   再拿它比对必然误判成「基线已变化」。改判 HEAD 后语义不变：
-          #   只要**本次真正开始构建之后**远端又前进了，照样拒绝推送。
-          local=$(git rev-parse HEAD)
           remote=$(git ls-remote origin refs/heads/main | awk '{print $1}')
-          if [ "$remote" != "$local" ]; then
-            echo "::error::发布基线已变化：${local} → ${remote}；本次不推，请在最新 main 上重跑"
+          if [ "$remote" != "$base" ]; then
+            echo "::error::发布基线已变化：${base} → ${remote}；本次不推，请在最新 main 上重跑"
             exit 1
           fi
           git push origin HEAD:main
