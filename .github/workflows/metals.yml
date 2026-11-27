@@ -98,7 +98,11 @@ jobs:
 
       - name: 2.8) 固定本次交易日
         id: date
-        run: echo "today=$(date -u '+%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+        # 2026-11-27 修复：原来用 date -u（UTC）。metals 工作日 18:12 UTC 跑 =
+        # 北京次日 02:12，抓到的行情已是北京当天，闸门却拿 UTC 前一天比，
+        # 必然报「当日行情不是 11-26：11-27」并整轮判红（11-26 就是这么失败的）。
+        # 交易日一律按北京日期判定，与数据源 updated 对齐。
+        run: echo "today=$(TZ=Asia/Shanghai date '+%Y-%m-%d')" >> "$GITHUB_OUTPUT"
 
       - name: 3) 自检与防回退清单
         env:
