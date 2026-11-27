@@ -6,7 +6,12 @@
 流程：raw/weekly/*.json（本周新检索结果）
       → build_data.py（清洗/分类/去重/分级）→ merged.json
       → build_web.py（聚合 + 抓金属行情 + 注入版本号）→ /workspace/biz-radar/data.js
+      → build_changes.py（F31 本周变化，只读扫三块）→ data.changes.js + 本周变化.html
+      → healthcheck.py（数据体检 + 自动刷新 p-help 快照）→ 数据质量体检.html/.json
       → publish.js 发布到原链接（网址不变）
+
+⚠ 全量重建后必须重跑体检：healthcheck.py 会替换 index.html 里
+  HEALTH_SNAPSHOT_BEGIN/END 之间的快照，页面数字一律来自脚本，禁止手工填写。
 
 用法：
     python3.11 update_weekly.py              # 重建 + 发布
@@ -15,6 +20,11 @@
 """
 import json, os, re, subprocess, sys, time, shutil
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+# 开工必读（2026-11-05 用户要求）：全量重建会重新判标、重分级、重算关注档，
+# 是所有数据操作里影响面最大的一步。没读《00-公司业务口径.md》就重建 = 污染数据库。
+from preflight import require_briefing
+require_briefing('update_weekly.py')
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE = '/workspace/biz-radar'
@@ -278,18 +288,30 @@ if os.path.exists(os.path.join(ROOT, 'biz_crawl.py')):
                  '--out', _out], quiet=True)
         except Exception as e:
             print('    [WARN] biz_crawl %s 失败：%s' % (_site, e))
-print('\n[1/4] 清洗 / 分类 / 去重 / 分级 ...')
+print('\n[1/6] 清洗 / 分类 / 去重 / 分级 ...')
 run([PY, 'build_data.py'])
-print('\n[2/4] 从 A/B 级项目挖掘对手 / 伙伴 ...')
+print('\n[2/6] 从 A/B 级项目挖掘对手 / 伙伴 ...')
 run([PY, 'mine_units.py'])
-print('\n[3/4] 合并新增单位（自动去重）...')
+print('\n[3/6] 合并新增单位（自动去重）...')
 run([PY, 'merge_units.py'])
 # 微信线索并入档案：文件不存在或技能缺失时静默跳过，不阻断主流程
 if os.path.exists(os.path.join(ROOT, 'raw', 'wechat_leads.json')):
     print('\n[3.5] 微信线索并入单位档案 / 行业动态 ...')
     run([PY, 'merge_wechat.py'], quiet=True)
-print('\n[4/4] 聚合 / 抓取金属行情 / 生成 data.js ...')
+print('\n[4/6] 聚合 / 抓取金属行情 / 生成 data.js ...')
 run([PY, 'build_web.py'])
+# F31 本周变化：build_web.py 刚把三个 chunk 重写完，这里紧接着按当前库重算四类。
+# 用户 2026-11-05：「数据是每次都需要更新的…今天招标明天就出结果，状态会一直变化，
+# 也会有漏项」。放在 build_web 之后，保证 changes 与当轮 chunk 是同一批数据，不会错位。
+print('\n[5/6] 本周变化四类（F31 · 只读扫三块，不改主数据）...')
+run([PY, 'build_changes.py'])
+# 数据质量体检（F32）：生成报告 + 自动刷新 p-help 快照（页面数字一律来自脚本）。
+# 用 try/except 兜底：体检脚本异常不该卡住整轮发布，但必须把告警打出来。
+print('\n[6/6] 数据质量体检（F32 · 报告 + 页面快照同步）...')
+try:
+    run([PY, 'healthcheck.py'])
+except SystemExit:
+    print('   [WARN] 体检脚本返回非零，本轮发布继续；请单独跑 healthcheck.py 排查')
 
 # 3. 结果摘要
 d = load_site_data()

@@ -154,12 +154,39 @@ def summarize(text, limit=140):
 # ⚠ 不截半句：截断会把「5MW余热发电」这种关键口径切掉一半，反而更糟。
 
 
+# ── E 档「企业动向」判定（2026-11-19 §5.70 用户拍板）───────────────────
+# 用户原话：「不用加那个行业动态……另外有企业海外动向的也可以加，比如这样的
+#   https://mp.weixin.qq.com/s/UGQB5HJJMXPoCWWcxx0QCA（中策越南轮胎工厂投资签约）」
+# 判定：具体企业 + 建厂动作双命中（与 oversea_sources.py 的 E 档保持同一套词）。
+# ⚠ 只影响出海速览展示层，不进 ①库、不碰 judge()/semantic_drop() 本身。
+E_ACT = ('建厂', '投产', '开工', '奠基', '签约', '扩建', '扩产',
+         '新工厂', '新基地', '投资建设', '投资设立', '落成')
+E_OBJ = PO.A_W + ('工厂', '生产基地', '产业园', '工业园', '生态园',
+                  '制造基地', '产线', '生产线')
+
+
+def e_tier(t, s):
+    n = t + ' ' + (s or '')
+    if any(w in n for w in PO.X_W) or any(w in n for w in PO.THERMO_FALSE):
+        return None
+    act = [w for w in E_ACT if w in n]
+    obj = [w for w in E_OBJ if w in n]
+    if act and obj:
+        return 'E', '企业动向：%s（%s）' % ('、'.join(act[:2]), '、'.join(obj[:2]))
+    return None
+
+
 def classify(item):
     """过唯一规则源 + 备案口径定档，返回 (drop, code, why, tier, tierwhy)。"""
     t = item.get('title') or ''
     s = item.get('summary') or item.get('text', '')[:300]
     drop, code, why = BR.semantic_drop(t)
     tier, tierwhy = PO.judge(t + ' ' + s)
+    # §5.70：主档没过的，补一道「企业动向」判定
+    if tier not in ('S', 'A'):
+        e = e_tier(t, s)
+        if e:
+            tier, tierwhy = e
     return drop, code, why, tier, tierwhy
 
 
@@ -253,9 +280,18 @@ def main():
               % (rec['date'] or '????-??-??', rec['src'][:12], rec['title'][:40],
                  rec['sem'], rec['tier'] or '-'))
         if drop:
-            print('     ⚠ 被 semantic_drop 判删（%s %s）—— 按口径不入库' % (code, why))
-            failed.append((u, 'semantic_drop:' + code))
-            continue
+            # §5.70 用户拍板的例外：手动投喂条目若判成「企业动向」（E 档，动作+对象
+            # 双命中、X_W 已拦），则 N5「年产」这类产线误杀在**速览层**放行 ——
+            # 用户给的样例（中策越南工厂）就命中 N5。仅限本通道，①库语义过滤不动。
+            if tier == 'E':
+                print('     ⚠ semantic_drop 判删（%s %s），但 E 档企业动向例外放行（§5.70）'
+                      % (code, why))
+                rec['sem'] = 'KEEP-E'
+                rec['semwhy'] = '企业动向例外（§5.70 用户拍板，原判删 %s %s）' % (code, why)
+            else:
+                print('     ⚠ 被 semantic_drop 判删（%s %s）—— 按口径不入库' % (code, why))
+                failed.append((u, 'semantic_drop:' + code))
+                continue
         added.append(rec)
         have.add(u)
 
@@ -282,7 +318,11 @@ def main():
     cut = time.strftime('%Y-%m-%d', time.localtime(time.time() - 120 * 86400))
     items = [x for x in items if (x.get('date') or '') >= cut]
 
-    out = {'updated': time.strftime('%Y-%m-%d %H:%M'), 'n': len(items), 'items': items}
+    # 2026-11-27 §5.123：保留其它顶层字段（classifier / leadQc …）。
+    #   写盘方只写自己认识的键，正是「旧分类器整份覆盖」的同型 bug。
+    out = {k: v for k, v in flash.items() if k != 'items'}
+    out.update({'updated': time.strftime('%Y-%m-%d %H:%M'),
+                'n': len(items), 'items': items})
     os.makedirs(RAW, exist_ok=True)
     json.dump(out, open(FLASH, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print('\n写入 %s：新增 %d / 跳过 %d / 失败 %d / 标死链 %d → 合计 %d 条'
@@ -306,7 +346,11 @@ def combine(recent):
     items = sorted(merged.values(),
                    key=lambda y: (y.get('datetime') or y.get('date') or '', -int(y.get('sc') or 0)),
                    reverse=True)
-    out = {'updated': time.strftime('%Y-%m-%d %H:%M'), 'n': len(items), 'items': items}
+    # 2026-11-27 §5.123：保留其它顶层字段（classifier / leadQc …）。
+    #   写盘方只写自己认识的键，正是「旧分类器整份覆盖」的同型 bug。
+    out = {k: v for k, v in cur.items() if k != 'items'}
+    out.update({'updated': time.strftime('%Y-%m-%d %H:%M'),
+                'n': len(items), 'items': items})
     json.dump(out, open(FLASH, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print('人工通道合并：%d → %d 条（+%d）' % (n0, len(items), len(items) - n0))
     return out

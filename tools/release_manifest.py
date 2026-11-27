@@ -127,8 +127,15 @@ def metrics(root, scope):
         max_item_date = max((x for x in dates if x), default='')
         out['items'] = {'total': core_total, 'dataAsOf': str(meta.get('dataAsOf') or ''),
                         'latestItemDate': max_item_date, 'blocks': blocks}
-        out['overseaFlash'] = {'count': len(news.get('overseaFlash') or []),
-                               'latestDate': latest(news.get('overseaFlash'))}
+        # 2026-11-27 §5.123：产业投资线索（海外机会 · 项目线索视图）单独计数。
+        #   事故背景：raw 里 81 条新闻、22 条线索，被 CI 用旧分类器整份重写后
+        #   变成 78 条新闻、6 条线索 —— 条数只掉 3 条，旧的 count 检查完全看不出来，
+        #   但页面上「项目线索」整个视图空了。必须按 leadKey 计数单独防回退。
+        _flash = news.get('overseaFlash') or []
+        _leads = [x for x in _flash if str(x.get('leadKey') or '').strip()]
+        out['overseaFlash'] = {'count': len(_flash), 'leads': len(_leads),
+                               'leadsLatest': latest(_leads) if _leads else '',
+                               'latestDate': latest(_flash)}
         changes = read_js(os.path.join(root, 'data.changes.js'))
         kpi = changes.get('kpi') or {}
         changes_total = int(kpi.get('libTotal') or 0)
@@ -229,6 +236,24 @@ def check_regressions(old, new, scope):
         b = int((new_modules.get('plan') or {}).get('count') or 0)
         if a and b < a * 0.70:
             errors.append('规划前瞻条数骤降超过 30%%：%d → %d' % (a, b))
+        # 2026-11-27 §5.123：产业投资线索防回退（本次事故的直接护栏）。
+        #   线索条数取决于分类器能识别多少中资主体，一旦 CI 跑在旧版
+        #   industry_leads.py 上，新闻还在、线索全没，页面「项目线索」视图直接空。
+        #   阈值取 60%：正常的每日波动不会腰斩；分类器回退、raw 被覆盖会。
+        a = int((old_modules.get('overseaFlash') or {}).get('leads') or 0)
+        b = int((new_modules.get('overseaFlash') or {}).get('leads') or 0)
+        if a >= 5 and b < a * 0.60:
+            if b == 0:
+                errors.append('产业投资线索归零：上次 %d 条，本次 0 条'
+                              '（排查 industry_leads.py 版本、raw/oversea_flash.json 是否被整份重写）' % a)
+            else:
+                errors.append('产业投资线索骤降超过 40%%：%d → %d'
+                              '（排查 industry_leads.py 是否为仓库最新版、raw/oversea_flash.json 是否被整份重写）'
+                              % (a, b))
+        # 即使上一版清单里还没有 leads 指标（首次上线本检查），也不允许「有新闻、零线索」。
+        _nf = int((new_modules.get('overseaFlash') or {}).get('count') or 0)
+        if _nf >= 20 and b == 0:
+            errors.append('产业投资线索为 0：速览 %d 条新闻一条都没识别出线索，分类器疑似失效' % _nf)
     if scope in ('daily', 'digest'):
         a = int((old_modules.get('digest') or {}).get('count') or 0)
         b = int((new_modules.get('digest') or {}).get('count') or 0)

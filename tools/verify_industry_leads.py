@@ -19,6 +19,20 @@ def check_fixtures():
         ({'title': '印尼镍冶炼厂利用率下降'}, False, ''),
         ({'title': '中企在津巴布韦签署钢铁厂建设备忘录'}, True, '签约/框架'),
         ({'title': '某中资数据中心在巴淡备案，拟配套柴油发电和储能'}, True, '备案/核准'),
+        # 2026-11-27 补采暴露的通用盲区：蒙古国、钢铁厂配套水泥厂、A股主体、
+        # “拟扩建”阶段、省级企业全称、PCB 高耗能制造。
+        ({'title': '中色股份入围蒙古国额尔登特铜冶炼项目，正在进一步谈判'},
+         True, '拟投/磋商'),
+        ({'title': '中资鼎森钢铁投资津巴布韦曼希泽20万吨水泥厂即将投产'},
+         True, '投产/扩建'),
+        ({'title': '风神股份公告埃及轮胎扩能项目，总投资26.81亿元'},
+         True, '投产/扩建'),
+        ({'title': '字节跳动拟扩建巴西AI数据中心二期，中国云厂商投资超100亿美元'},
+         True, '拟投/磋商'),
+        ({'title': '湖南力宇签署马来西亚沙巴130MW液冷AI智算中心合作备忘录'},
+         True, '签约/框架'),
+        ({'title': '胜宏科技公告向泰国越南基地增资15亿美元，建设高阶PCB厂房'},
+         True, '签约/框架'),
     ]
     for row, wanted, stage in cases:
         result = IL.evaluate(row)
@@ -39,7 +53,7 @@ def check_snapshot():
     assert all(x.get('leadStage') and x.get('energyOpportunity') and x.get('sourceStatus') for x in rows)
     assert len(snapshot['items']) == snapshot['counts']['items'], '①库快照被改动'
     return {
-        'fixtures': 8,
+        'fixtures': 14,
         'snapshotItems': len(snapshot['items']),
         'industryPool': routes['industryAudit']['pool'],
         'qualifiedLatest': routes['industryAudit']['qualifiedLatest'],
@@ -53,7 +67,7 @@ def check_snapshot():
 
 if __name__ == '__main__':
     count = check_fixtures()
-    assert count == 8
+    assert count == 14
     report = check_snapshot()
     out = os.environ.get('INDUSTRY_VERIFY_OUT')
     if out:

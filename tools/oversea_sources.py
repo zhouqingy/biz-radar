@@ -34,6 +34,7 @@ Azure IP 更是从第一天就在它的黑名单里 —— 这也是「8 天还�
     python3 oversea_sources.py --dry       # 只看命中，不写盘
     python3 oversea_sources.py --days 14   # 只看最近 14 天
 """
+import hashlib
 import html as _html
 import json
 import os
@@ -60,6 +61,16 @@ import industry_leads as IL      # 产业投资线索与邮件共用同一分类
 # （线上速览从 19 条掉回 5 条）。修代码之前，至少不能再让旧分类器抹掉新分类器的成果。
 LEAD_FIELDS = ('leadKey', 'leadActor', 'leadIndustry', 'leadStage',
                'leadGeo', 'energyOpportunity', 'sourceStatus')
+
+
+def _classifier_fingerprint():
+    """industry_leads.py 的内容指纹（sha256 前 8 位）。用于回答「这盘数据是谁产出的」。"""
+    try:
+        here = os.path.dirname(os.path.abspath(__file__))
+        data = open(os.path.join(here, 'industry_leads.py'), 'rb').read()
+        return hashlib.sha256(data).hexdigest()[:8]
+    except Exception:
+        return ''
 
 
 def _keep_lead_fields(row):
@@ -737,7 +748,15 @@ def main():
     items = [x for x in items if (x.get('date') or '') >= cut60]
 
     os.makedirs(RAW, exist_ok=True)
-    json.dump({'updated': time.strftime('%Y-%m-%d %H:%M'), 'n': len(items), 'items': items},
+    # 2026-11-27 §5.123：给产物盖「分类器指纹」。事故里最难判断的一点是
+    #   「这 78 条是谁产出的」——日志早滚没了，只能靠反推。以后看这个字段即可：
+    #   classifier 与仓库最新 industry_leads.py 不一致，就说明这轮是旧分类器跑的。
+    _lead_n = sum(1 for x in items if str(x.get('leadKey') or '').strip())
+    json.dump({'updated': time.strftime('%Y-%m-%d %H:%M'), 'n': len(items),
+               'classifier': _classifier_fingerprint(),
+               'leadQc': {'leads': _lead_n,
+                          'ratio': round(_lead_n / len(items), 3) if items else 0},
+               'items': items},
               open(FLASH, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     # ⚠ 必须再跑一次人工投喂通道，且合并过程只在内存里做、只写一次盘。
     #   踩过的坑：A 先写盘 → B 自己读盘再写一次 → 后写的把先写的覆盖，

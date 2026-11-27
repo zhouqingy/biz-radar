@@ -1,6 +1,11 @@
 {
  "updated": "2026-11-27 15:16",
  "n": 81,
+ "classifier": "90d921c1",
+ "leadQc": {
+  "leads": 15,
+  "ratio": 0.185
+ },
  "items": [
   {
    "title": "阿尔及利亚热镀锌项目投产",
