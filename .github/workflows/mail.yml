@@ -1,11 +1,12 @@
 name: 商机雷达每日邮件
 
 on:
-  schedule:
-    - cron: '0 6 * * *'  # 每天 14:00 北京时间
+  # 2026-11-27：取消独立 cron。原 '0 6 * * *' 连续多日不触发（schedule 无运行记录），
+  # 手动补发又造成同日多封。改为由「每日更新」在发布并回读成功后 dispatch 触发，
+  # 日报与页面永远同一份快照，一天一封。手动补发仍走 workflow_dispatch。
   workflow_dispatch:
   repository_dispatch:
-    types: [manual-mail]
+    types: [manual-mail, daily-publish]
 
 permissions:
   contents: write

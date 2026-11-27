@@ -1,0 +1,17 @@
+{
+  "updated": "2026-11-27",
+  "daily": [
+    "3072871455@qq.com"
+  ],
+  "weekly_owner": [
+    "3072871455@qq.com"
+  ],
+  "team_weekly": [
+    "15031@ccepc.com",
+    "99677@ccepc.com",
+    "15016@ccepc.com",
+    "34090@ccepc.com",
+    "10083@ccepc.com"
+  ],
+  "policy": "daily 为本人每日一份；team_weekly 为同事名单，每周一份，必须经本人审核通过并显式加 --i-approve-team 才会发出，默认不自动群发。"
+}

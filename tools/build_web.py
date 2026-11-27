@@ -2054,6 +2054,12 @@ _graph_mod = {'graph': data['graph']} if 'graph' in data else {}
 _news = {k: data[k] for k in ('trends', 'projectNews', 'newsRoute', 'digest', 'wechat', 'overseas',
                               'overseaFlash', 'overseaOdi') if k in data}
 _chunk_total, _chunk_meta = dump_item_chunks()
+# 2026-11-27 修复：每日更新连续卡在 5.5「分块元数据不一致」。
+# 前端读 core.chunks，闸门 tools/release_manifest.py 读 core.meta.chunks；
+# 此前只写根级，meta 里没有 chunks，闸门拿到 lead 声明=None、实际=373，直接判红不推送，
+# 于是采集到的数据永远发不出去（线上连续多日停在旧日期）。两处必须同一份真实声明。
+if isinstance(data.get('meta'), dict):
+    data['meta']['chunks'] = _chunk_meta
 _extra = {'chunks': _chunk_meta}
 # 四库一平台信用代码（2026-10-22）：只有进「深度档案」才用得上，
 # 单独一个模块，不塞进 core——它是 1500 条 × 200 字节，塞 core 会让首屏多等 300KB。

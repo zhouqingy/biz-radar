@@ -33,6 +33,14 @@ OWNER = '3072871455@qq.com'
 TODAY = dt.date.today()
 STATE_PATH = os.environ.get('MAIL_STATE') or os.path.join(HERE, 'raw', 'mail_state.json')
 DELIVERY_LOG = os.environ.get('MAIL_DELIVERY_LOG') or os.path.join(HERE, 'raw', 'mail_delivery_log.jsonl')
+RECIPIENTS_PATH = os.environ.get('MAIL_RECIPIENTS') or os.path.join(HERE, 'raw', 'mail_recipients.json')
+
+
+def recipients_table():
+    if not os.path.isfile(RECIPIENTS_PATH):
+        return {}
+    with open(RECIPIENTS_PATH, encoding='utf-8') as handle:
+        return json.load(handle)
 
 
 def esc(value):
@@ -142,8 +150,10 @@ def table(rows, kind='news', empty='本时间窗无符合条件的新增，不�
         heads = ('日期', '项目/标题', '地区', '金额', '档位')
     elif kind == 'lead':
         heads = ('日期', '产业投资线索', '阶段 / 能源配套 / 核验')
+    elif kind == 'digest':
+        heads = ('日期', '情报/标题', '来源')
     else:
-        heads = ('日期', '项目/标题', '来源/分类')
+        heads = ('日期', '新闻标题（不限地域）', '类型/来源')
     out = ['<table role="presentation" style="border-collapse:collapse;width:100%;table-layout:fixed">',
            '<tr>' + ''.join('<th style="border-bottom:1px solid #dce3ed;padding:6px 5px;text-align:left;font-size:12px;background:#f4f7fb">%s</th>' % x for x in heads) + '</tr>']
     for row in rows:
@@ -155,8 +165,12 @@ def table(rows, kind='news', empty='本时间窗无符合条件的新增，不�
                 row.get('leadStage') or '阶段待核', row.get('leadIndustry') or '高耗能产业',
                 row.get('energyOpportunity') or '能源配套待核', row.get('sourceStatus') or '待核')
             cells = (date_of(row) or '待核', link(row), label)
+        elif kind == 'digest':
+            label = row.get('src') or row.get('s') or row.get('source') or row.get('tag') or row.get('chan') or '—'
+            cells = (date_of(row) or '待核', link(row), label)
         else:
             label = row.get('src') or row.get('s') or row.get('source') or row.get('tag') or row.get('chan') or '—'
+            label = '新闻 · ' + str(label)
             if row.get('is_old'):
                 label = str(label) + ' · 前报'
             if not date_of(row):
@@ -202,6 +216,8 @@ def frame(snapshot, subtitle, sections, warning=''):
             '<p style="font-size:12px;margin:0 0 14px"><a href="https://zhouqingy.github.io/biz-radar/" style="color:#0f4a9e">打开完整平台</a>（政策、项目、竞争情报与①库均按同一快照）</p>')
     head %= (esc(subtitle), TODAY.isoformat(), source, len(snapshot['items']), esc(snapshot['meta'].get('dataAsOf') or '—'), snapshot['sha256'][:12])
     tail = ('<p style="font-size:11px;color:#8792a5;border-top:1px solid #e6ebf2;padding-top:10px;margin-top:18px">'
+            '<b>两类来源请分开读：</b>「平台商机更新」来自①库，已按江浙沪皖（钢铁不受地域限制）收录，带档位与金额；'
+            '「行业新闻」来自公开新闻，不限地域、只做内容归类，未做商机判定，不代表可投。'
             '出海主区只收“可确认中资主体 + 主业能源设施 + 具体项目动作”；产业投资线索只表示潜在能源配套方向，拟投/磋商不等于正式落地，也不进入①库。'
             '纯市场新闻仅在“市场参考”展示；①库能投判定仍由 biz_rules.judge() 统一执行。</p></div>')
     return head + warning + ''.join(sections) + tail
@@ -220,20 +236,25 @@ def daily_content(snapshot):
     if al:
         warning = '<div style="background:#fff7e6;border:1px solid #ebc56d;padding:9px 12px;margin:0 0 14px;font-size:12px"><b>数据提醒</b><br>%s</div>' % '<br>'.join(esc(x) for x in al)
     sections = [
-        section('近 3 天新增 A/B 商机', routes['biz3'], 'biz'),
+        section('平台商机更新｜近 3 天 A/B 档（江浙沪皖已收录）', routes['biz3'], 'biz'),
+        section('平台商机更新｜近 7 天其余新增（江浙沪皖已收录）', routes['plat7'], 'biz',
+                '近 7 天除上述 A/B 档外，无其他新增收录。'),
         section('重点关注项目近 7 天动态', routes['watch7'], 'news', '近 7 天无重点关注主业项目新动态。'),
         section('中资出海项目近 7 天', routes['oversea7']),
         section('产业投资线索｜潜在能源配套（近 30 天）', routes['industry30'], 'lead',
                 '近 30 天无新增或状态变化的中资高耗能产业投资线索。'),
-        section('项目情况近 7 天', routes['projects7']),
-        section('政策动态近 30 天', routes['policies30'], 'news', '近 30 天无新政策入库；旧政策不在邮件里冒充新增，请查平台政策档。'),
-        section('竞争情报近 30 天', routes['digest30']),
+        section('行业新闻｜项目动态（近 7 天，不限地域）', routes['projects7'], 'news',
+                '近 7 天无符合主业范围的项目类新闻。'),
+        section('行业新闻｜政策动态（近 30 天，不限地域）', routes['policies30'], 'news', '近 30 天无新政策；旧政策不在邮件里冒充新增，请查平台政策档。'),
+        section('竞争情报近 30 天', routes['digest30'], 'digest'),
         section('市场参考（非项目级）', routes['market7'], 'news', '近 7 天无需要保留的主业市场参考。'),
         section('4～10 天前商机回顾', routes['reviewBiz'], 'biz'),
         section('4～10 天前出海回顾', routes['reviewOversea']),
     ]
-    names = ('近3天A/B商机', '重点关注7天', '中资出海7天', '产业投资线索30天', '项目情况7天', '政策30天', '竞争情报30天', '市场参考7天', '商机回顾', '出海回顾')
-    keys = ('biz3', 'watch7', 'oversea7', 'industry30', 'projects7', 'policies30', 'digest30', 'market7', 'reviewBiz', 'reviewOversea')
+    names = ('平台·近3天A/B商机', '平台·近7天其余新增', '重点关注7天', '中资出海7天', '产业投资线索30天',
+             '新闻·项目动态7天', '新闻·政策30天', '竞争情报30天', '市场参考7天', '商机回顾', '出海回顾')
+    keys = ('biz3', 'plat7', 'watch7', 'oversea7', 'industry30', 'projects7', 'policies30', 'digest30',
+            'market7', 'reviewBiz', 'reviewOversea')
     lines = ['商机雷达每日简报 %s' % TODAY, '①库 %d 条，公告截止 %s' % (len(snapshot['items']), snapshot['meta'].get('dataAsOf'))]
     lines += ['', '数据提醒：' + '；'.join(al)] if al else []
     for name, key in zip(names, keys):
@@ -266,19 +287,28 @@ def weekly_content(snapshot):
     routes = daily_routes(snapshot, TODAY)
     biz7 = recent([x for x in snapshot['items'] if (x.get('g') or '').upper() in ('A', 'B')], 7, TODAY)
     biz7.sort(key=lambda x: x.get('amt') or 0, reverse=True)
+    plat_week = unique(list(unique(biz7)) + list(routes.get('plat7') or []))[:15]
     sections = [
-        section('本周 A/B 商机（按金额）', unique(biz7)[:15], 'biz'),
+        section('平台商机更新｜本周（江浙沪皖已收录，按金额）', plat_week, 'biz'),
         section('本周中资出海项目', routes['oversea7']),
         section('产业投资线索｜潜在能源配套（近 30 天）', routes['industry30'], 'lead'),
-        section('本周项目情况', routes['projects7']),
-        section('近 30 天政策动态', routes['policies30']),
-        section('近 30 天竞争情报', routes['digest30']),
+        section('行业新闻｜项目动态（近 7 天，不限地域）', routes['projects7'], 'news'),
+        section('行业新闻｜政策动态（近 30 天，不限地域）', routes['policies30'], 'news'),
+        section('竞争情报近 30 天', routes['digest30'], 'digest'),
     ]
-    counts = {'weeklyBiz': len(unique(biz7)[:15]), 'oversea7': len(routes['oversea7']),
+    counts = {'weeklyBiz': len(plat_week), 'oversea7': len(routes['oversea7']),
               'industry30': len(routes['industry30']),
               'projects7': len(routes['projects7']), 'policies30': len(routes['policies30']), 'digest30': len(routes['digest30'])}
-    text = '商机雷达周报 %s\n' % TODAY + '\n'.join(plain_line(x) for x in unique(biz7)[:15] + routes['oversea7'])
-    return frame(snapshot, '每周汇总', sections), text, counts
+    names = ('平台商机更新（本周）', '中资出海7天', '产业投资线索30天',
+             '新闻·项目动态7天', '新闻·政策30天', '竞争情报30天')
+    keys = ('weeklyBiz', 'oversea7', 'industry30', 'projects7', 'policies30', 'digest30')
+    lines = ['商机雷达周报 %s' % TODAY,
+             '①库 %d 条，公告截止 %s' % (len(snapshot['items']), snapshot['meta'].get('dataAsOf'))]
+    for name, key in zip(names, keys):
+        rows = plat_week if key == 'weeklyBiz' else routes[key]
+        lines += ['', '【%s】%d 条' % (name, len(rows))]
+        lines += [plain_line(x) for x in rows] or ['无']
+    return frame(snapshot, '每周汇总', sections), '\n'.join(lines), counts
 
 
 def output_preview(directory, mode, subject, text, html_body, snapshot, counts, routes=None):
@@ -297,6 +327,10 @@ def output_preview(directory, mode, subject, text, html_body, snapshot, counts, 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--to', default=OWNER)
+    parser.add_argument('--group', choices=('daily', 'team'), default='',
+                        help='daily=本人每日；team=同事每周（需 --i-approve-team）')
+    parser.add_argument('--i-approve-team', action='store_true',
+                        help='确认已由本人审核，才允许向同事名单发送')
     parser.add_argument('--tag', default='审')
     parser.add_argument('--dry', action='store_true', help='只生成预览，绝不发送或写已发状态')
     parser.add_argument('--weekly', action='store_true')
@@ -306,6 +340,21 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.mail:
         args.to = args.mail
+    if args.group:
+        cfg = recipients_table()
+        key = 'daily' if args.group == 'daily' else 'team_weekly'
+        roster = [x for x in (cfg.get(key) or []) if x]
+        if not roster:
+            print('NO_RECIPIENTS 收件人表缺少 %s' % key)
+            return 2
+        if args.group == 'team':
+            if not args.i_approve_team:
+                print('TEAM_NOT_APPROVED 同事名单需本人审核通过后加 --i-approve-team 才发送；当前名单 %d 人：%s'
+                      % (len(roster), ','.join(roster)))
+                return 2
+            args.weekly = True
+        args.to = ','.join(roster)
+        print('RECIPIENTS %s %s' % (key, ','.join(roster)))
     mode = 'weekly' if args.weekly else ('spot' if args.spot else 'daily')
     recipients = [x.strip() for x in args.to.split(',') if x.strip()]
     snapshot = load_snapshot()

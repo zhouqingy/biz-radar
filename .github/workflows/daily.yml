@@ -636,6 +636,23 @@ jobs:
           python tools/release_manifest.py verify-online --root "$GITHUB_WORKSPACE" --scope daily
 
       # ══════════════════════════════════════════════════════════════
+      # 6.6) 发布成功后触发日报（2026-11-27 新增）
+      # ══════════════════════════════════════════════════════════════
+      # 原因：mail.yml 原来的 '0 6 * * *' 定时多次无运行记录（11-27 14:00 整点没触发），
+      # 只能手动补发，又导致同一天发两封。改成由发布链触发后，
+      # 「页面发布了」和「日报发出去了」是同一个事实，不会再出现页面新、邮件旧或反之。
+      - name: 6.6) 发布成功后触发日报
+        if: steps.gate.outputs.ok == 'true' && steps.rebuild_gate.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api "repos/${{ github.repository }}/dispatches" \
+            -f event_type=daily-publish \
+            -f client_payload[source]=daily-update \
+            -f client_payload[sha]="${{ github.sha }}"
+          echo "已触发日报：daily-publish @ ${{ github.sha }}"
+
+      # ══════════════════════════════════════════════════════════════
       # 7) 采集健康判定（2026-11-13 新增 · 防「全绿但零新增」）
       # ══════════════════════════════════════════════════════════════
       # 11-09~11-13 连续 5 天：run 全 success，但 data.core.js 的 total 一直 900、

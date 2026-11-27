@@ -28,7 +28,9 @@ MAIL_CORE_POSITIVE = (
     '焚烧发电', '生物质', '燃气', '天然气', 'LNG', '海水淡化', '集中供热', '供热', '供汽',
     '动力岛', '能源岛', '能源站', '柴油发电', '分布式能源', '源网荷储', '微电网',
 )
-POLICY_EXCLUDE = ('股份', '集团公司', '有限公司董事长', '院长', '调研监管', '背后的需求', '新增平均')
+POLICY_EXCLUDE = ('股份', '集团公司', '有限公司董事长', '院长', '调研监管', '背后的需求', '新增平均',
+                  # 与能源主业无关的专项规划/生态环保议题，避免占用政策栏目。
+                  '土壤', '地下水', '农业农村', '耕地', '黑臭水体', '排污许可', '危废')
 
 
 def title_of(x):
@@ -155,9 +157,19 @@ def daily_routes(snapshot, today=None):
     ov_review = [x for x in ov_main
                  if (today - dt.timedelta(days=10)).isoformat() <= date_of(x)
                  < (today - dt.timedelta(days=3)).isoformat()]
+    # 平台侧：①库近7天全部档位（A/B/C），补足“近3天A/B”之外的本周收录；
+    # ①库本身已限定江浙沪皖或钢铁主业，这里不再另判地域，只展示库内地区字段。
+    plat = [x for x in snapshot['items'] if (x.get('g') or '').upper() in ('A', 'B', 'C')]
+    biz3_keys = set(root_key(title_of(x)) for x in biz3)
+    plat7 = [x for x in recent(plat, 7, today) if root_key(title_of(x)) not in biz3_keys]
+    plat7.sort(key=lambda x: ((x.get('g') or '') != 'A', -(x.get('amt') or 0), date_of(x)))
+    # 新闻侧：行业新闻，只按内容类型筛，不限地域，且不参与商机判定。
     projects7 = recent([x for x in snapshot['projects'] if project_news(x)], 7, today)
     policies30 = recent([x for x in snapshot['policies'] if formal_policy(x)], 30, today)
-    digest30 = recent(snapshot['digest'], 30, today)
+    # 竞争情报只放竞对/伙伴的主业动作；「中企在某国承建」属海外项目，归出海口径，不在此栏重复。
+    OVERSEA_IN_DIGEST = ('中企在', '中资在', '中企承建', '中资承建', '中企签约')
+    digest30 = recent([x for x in snapshot['digest']
+                       if not any(k in title_of(x) for k in OVERSEA_IN_DIGEST)], 30, today)
     used = set(root_key(title_of(x)) for x in biz3 + ov7)
     # 新增“产业投资线索”：近30天有新投资或状态变化；同项目只留最新阶段。
     industry_all, industry_audit = IL.latest(
@@ -174,7 +186,8 @@ def daily_routes(snapshot, today=None):
     used.update(root_key(title_of(x)) for x in projects7)
     digest30 = unique(digest30, used)
     return {
-        'biz3': unique(biz3)[:10], 'watch7': [], 'oversea7': unique(ov7)[:12],
+        'biz3': unique(biz3)[:10], 'plat7': unique(plat7)[:10], 'watch7': [],
+        'oversea7': unique(ov7)[:12],
         'industry30': industry30,
         'projects7': projects7[:8], 'policies30': unique(policies30)[:6],
         'digest30': digest30[:6], 'market7': unique(market7),
