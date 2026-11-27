@@ -10,7 +10,7 @@
     },
     "data.changes.js": {
       "bytes": 43285,
-      "sha256": "9c5f41d2a069f34c1f29dc3f460ee791128f0f8b12dd9473b8832b47bd0be151"
+      "sha256": "8b0464ab214ab6582383371c3c12162fa80dd945aec01d8bc64c9eba0517ea88"
     },
     "data.chunk-lead.js": {
       "bytes": 264803,
@@ -22,7 +22,7 @@
     },
     "data.core.js": {
       "bytes": 17752,
-      "sha256": "15958aec28f95291daee41af7738ad250e7117fe569028d8382a16372cc190bc"
+      "sha256": "6a3c43fc9834f1561876fa38868378e74437a01317604079804285f67b2e6760"
     },
     "data.entprobe.js": {
       "bytes": 1013545,
@@ -30,23 +30,23 @@
     },
     "data.graph.js": {
       "bytes": 330952,
-      "sha256": "b55555d0425922b063d1a27d1501bbe2de9e9775d2d7bb4d348ed1cb06530079"
+      "sha256": "1e6cb4a6696a273300cdc063f635beccf65806a7bcbf065f7a41d981544a74bd"
     },
     "data.items.js": {
       "bytes": 29006,
       "sha256": "f304ecec1adbbf9cb43b643277f149843b2b013faae7b35062898a63996a51bc"
     },
     "data.js": {
-      "bytes": 2261862,
-      "sha256": "10edaaadf7bca715f960520080bbfc0ac696ff030f21d5907a846d1ed5feaa5f"
+      "bytes": 2273813,
+      "sha256": "22c14526a98433407c7c008562ad0dbf6713e2b31b55f4c142a9a007e9017989"
     },
     "data.metalhist.js": {
       "bytes": 361369,
       "sha256": "39183d35b0376c07859df6994f26cec14397e7688d0458b961174249659e53e3"
     },
     "data.news.js": {
-      "bytes": 463618,
-      "sha256": "911e7b5ef354fce8d009bf39102d46f61e4faae278d33f949070a2e1e4844779"
+      "bytes": 475569,
+      "sha256": "fabd52b55048bb710242541c3d4a0be02738919b5f093fcdb841e3e33463732f"
     },
     "data.org.js": {
       "bytes": 819964,
@@ -74,7 +74,7 @@
     },
     "index.html": {
       "bytes": 863883,
-      "sha256": "73132ece8d3e659fd40f2d654cbd5019516dc0797d43c4f93821464a453608c9"
+      "sha256": "6c93e7580f42d33c20e8f2a06b90b1083d688284ce9616c2519a630541f5f050"
     }
   },
   "modules": {
@@ -88,7 +88,7 @@
     },
     "health": {
       "errors": 0,
-      "generated": "2026-11-27 11:04",
+      "generated": "2026-11-27 12:00",
       "warnings": 2
     },
     "items": {
@@ -122,8 +122,10 @@
       "updated": "2026-11-27"
     },
     "overseaFlash": {
-      "count": 78,
-      "latestDate": "2026-11-27"
+      "count": 92,
+      "latestDate": "2026-11-27",
+      "leads": 21,
+      "leadsLatest": "2026-11-24"
     },
     "plan": {
       "count": 153,
@@ -133,11 +135,11 @@
   "run": {
     "attempt": "1",
     "baseSha": "c30316a2283b365278b7502b4d8a5bfb3ef49d05",
-    "builtAt": "2026-11-27T11:23:19+00:00",
-    "id": "45989903101",
-    "scope": "metals",
-    "sourceHealth": "spot=success,history=success",
-    "workflow": "金属行情刷新（交易日）"
+    "builtAt": "2026-11-27T12:00:15+00:00",
+    "id": "45989930885",
+    "scope": "daily",
+    "sourceHealth": "",
+    "workflow": "商机雷达每日更新"
   },
   "schema": 1
 }
