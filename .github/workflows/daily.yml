@@ -54,6 +54,13 @@ jobs:
           # 必须是 0（完整历史）。写成 1 的话下面 pull --rebase 会失败：
           # 「fatal: refusing to merge unrelated histories」或直接 rebase 不动。
           fetch-depth: 0
+          # 2026-11-27 §5.120：显式取 main 最新，不取事件快照 sha。
+          #   今天 17:08 那次就是栽在这：repository_dispatch 在 ff7796c061 上排队，
+          #   排了 6 分钟才真正开跑，期间 digest 推了 17da8ce440，于是检出还是旧 sha，
+          #   第 30 步拿 GITHUB_SHA 比对 remote 直接判「发布基线已变化」，40 分钟白跑。
+          #   concurrency 锁是生效的（digest 跑完 daily 才开始），问题不在锁，
+          #   在于「事件 sha」不等于「真正开跑时的 main」。取 main 即对齐。
+          ref: main
 
       - name: 装 Python
         uses: actions/setup-python@v5
@@ -621,9 +628,14 @@ jobs:
           git commit -m "自动更新 $(date -u '+%Y-%m-%d %H:%M') UTC"
 
           # 发布期间若出现任何新提交，明确失败并重新跑，绝不用 ours 把对方改动冲掉。
+          # 2026-11-27 §5.120：基线从「事件 sha」改成「实际检出的 HEAD」。
+          #   GITHUB_SHA 是排队前的事件 sha，检出已改 ref: main 后会与之不等，
+          #   再拿它比对必然误判成「基线已变化」。改判 HEAD 后语义不变：
+          #   只要**本次真正开始构建之后**远端又前进了，照样拒绝推送。
+          local=$(git rev-parse HEAD)
           remote=$(git ls-remote origin refs/heads/main | awk '{print $1}')
-          if [ "$remote" != "${GITHUB_SHA}" ]; then
-            echo "::error::发布基线已变化：${GITHUB_SHA} → ${remote}；本次不推，请在最新 main 上重跑"
+          if [ "$remote" != "$local" ]; then
+            echo "::error::发布基线已变化：${local} → ${remote}；本次不推，请在最新 main 上重跑"
             exit 1
           fi
           git push origin HEAD:main
