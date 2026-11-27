@@ -9,20 +9,20 @@
       "sha256": "8e3710f077697b22fe845b9b148ac9760bb4051b441703811c4d8549eaa8a632"
     },
     "data.changes.js": {
-      "bytes": 43759,
-      "sha256": "bf5bb480c82bef590597572f2c4bbded9f5d6fabe7d01ac02d355f7c2ada2638"
+      "bytes": 43285,
+      "sha256": "9c5f41d2a069f34c1f29dc3f460ee791128f0f8b12dd9473b8832b47bd0be151"
     },
     "data.chunk-lead.js": {
-      "bytes": 263472,
-      "sha256": "96c17cba3cb50e3be670f01cbde60acb8542051e4a9503f19620a09ca7509785"
+      "bytes": 264803,
+      "sha256": "0d2143a6bd8f6088c13e775cca1ffceac941acf0d231ba0cb945d50a80380bee"
     },
     "data.chunk-rest.js": {
-      "bytes": 240123,
-      "sha256": "fff8c40f784d04dce35015001733a87badfe103b8949551d1140bb5f1a9aaac9"
+      "bytes": 240130,
+      "sha256": "149b00d9be54593f5e20e47d95fcf36e96ec94aeb500a4a8daa2cb3cb6115d30"
     },
     "data.core.js": {
-      "bytes": 19701,
-      "sha256": "127b2612bd39b63a4df1cef3bd497e8b7de24812282961d638c4557948a58446"
+      "bytes": 17752,
+      "sha256": "8fed6809daaaf6a06d741b5390f56327bbe1ccdf34fb3b092008410b645f3571"
     },
     "data.entprobe.js": {
       "bytes": 1013545,
@@ -30,35 +30,35 @@
     },
     "data.graph.js": {
       "bytes": 330952,
-      "sha256": "3abc9e3eadeec421c7b5d6488fe87a55249544f2ed85abfedf6a6c6b52c1caf0"
+      "sha256": "b55555d0425922b063d1a27d1501bbe2de9e9775d2d7bb4d348ed1cb06530079"
     },
     "data.items.js": {
       "bytes": 29006,
-      "sha256": "a9730667641fe6941584351105a1c43cdc0c97a189ea277389a813bed8def98e"
+      "sha256": "f304ecec1adbbf9cb43b643277f149843b2b013faae7b35062898a63996a51bc"
     },
     "data.js": {
-      "bytes": 2276123,
-      "sha256": "f9e2231d3ef9de5a537d384122267576d1a768fa0dbfe531c0db1d5beb2ecf90"
+      "bytes": 2261862,
+      "sha256": "10edaaadf7bca715f960520080bbfc0ac696ff030f21d5907a846d1ed5feaa5f"
     },
     "data.metalhist.js": {
       "bytes": 361281,
       "sha256": "21336b1667627896b06771d6c22843c6e0861ccb7e2dd24f30166fe1545f33bc"
     },
     "data.news.js": {
-      "bytes": 450498,
-      "sha256": "377a69a6091a606a7141ab544e7615d5f82b66ae4f40d55bc4de54d6c1aac68c"
+      "bytes": 463618,
+      "sha256": "911e7b5ef354fce8d009bf39102d46f61e4faae278d33f949070a2e1e4844779"
     },
     "data.org.js": {
-      "bytes": 824126,
-      "sha256": "883464b8064df3e15adf1c24cc9d9e9a1ec872cbed17b05754e0c922a78aed07"
+      "bytes": 819964,
+      "sha256": "365f98f8e826b8f04415b852a5e7084e274e09eefd98d4c2cd8ae7e40b71ee73"
     },
     "data.ovprofile.js": {
-      "bytes": 99540,
-      "sha256": "d4acc8018b384fb26dbf6873bb9591137c293a97a2a8f6581a8656e4d86e9fec"
+      "bytes": 57920,
+      "sha256": "d6fd81f1ba7af4f0a9dece53199b48f17fc5fbde2b4e577e4ddbb69523ba668d"
     },
     "data.plan.js": {
       "bytes": 100506,
-      "sha256": "342676e3f7a068de9b2be7cdefa835bf5a389eeb6de045e1c049cfcbdde65e88"
+      "sha256": "667ad7b41d263ff770b7c8b2761d8264623116c0606e0ad2a8dda351d97dc44e"
     },
     "data.policy.js": {
       "bytes": 33162,
@@ -74,13 +74,41 @@
     },
     "index.html": {
       "bytes": 863883,
-      "sha256": "d975493179d9d5290414f6dbb86eb7eed85dde6d0a5a52d7b389a982515c1997"
+      "sha256": "73132ece8d3e659fd40f2d654cbd5019516dc0797d43c4f93821464a453608c9"
     }
   },
   "modules": {
+    "changes": {
+      "asOf": "2026-11-27",
+      "libTotal": 730
+    },
     "digest": {
       "count": 22,
       "updated": "2026-11-27 09:13"
+    },
+    "health": {
+      "errors": 0,
+      "generated": "2026-11-27 11:04",
+      "warnings": 2
+    },
+    "items": {
+      "blocks": [
+        {
+          "count": 29,
+          "file": "data.items.js"
+        },
+        {
+          "count": 375,
+          "file": "data.chunk-lead.js"
+        },
+        {
+          "count": 326,
+          "file": "data.chunk-rest.js"
+        }
+      ],
+      "dataAsOf": "2026-11-27",
+      "latestItemDate": "2026-11-27",
+      "total": 730
     },
     "metals": {
       "count": 20,
@@ -89,17 +117,27 @@
         "2026-11-26"
       ],
       "historyGenerated": "2026-11-26",
-      "updated": "2026-11-26"
+      "historyLatest": "2026-11-26",
+      "historyStale": {},
+      "updated": "2026-11-27"
+    },
+    "overseaFlash": {
+      "count": 78,
+      "latestDate": "2026-11-27"
+    },
+    "plan": {
+      "count": 153,
+      "gen": "2026-11-27"
     }
   },
   "run": {
     "attempt": "1",
-    "baseSha": "ff7796c0615f6954535c1ec5bf00a08c1dba193e",
-    "builtAt": "2026-11-27T09:13:18+00:00",
-    "id": "45971134438",
-    "scope": "digest",
-    "sourceHealth": "rival=success",
-    "workflow": "情报精选刷新（每周一）"
+    "baseSha": "f2940c174c0c3d5b34ff3b3c7980ccb274642542",
+    "builtAt": "2026-11-27T11:04:47+00:00",
+    "id": "45982450216",
+    "scope": "daily",
+    "sourceHealth": "",
+    "workflow": "商机雷达每日更新"
   },
   "schema": 1
 }
