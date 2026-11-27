@@ -63,9 +63,10 @@ def load_state():
     try:
         with open(STATE_PATH, encoding='utf-8') as f:
             data = json.load(f)
-        return {'sent': data.get('sent') or {}, 'spot': data.get('spot') or {}}
+        return {'sent': data.get('sent') or {}, 'spot': data.get('spot') or {},
+                'daily': data.get('daily') or {}}
     except FileNotFoundError:
-        return {'sent': {}, 'spot': {}}
+        return {'sent': {}, 'spot': {}, 'daily': {}}
 
 
 def save_state(state):
@@ -73,12 +74,39 @@ def save_state(state):
     cutoff = (TODAY - dt.timedelta(days=14)).isoformat()
     state['sent'] = {k: v for k, v in state['sent'].items() if v >= cutoff}
     state['spot'] = {k: v for k, v in state['spot'].items() if v >= cutoff}
+    # 2026-11-27 §5.124：daily 只留最近一次，用于「同一天只发一封」硬锁。
+    dl = state.get('daily') or {}
+    if dl.get('date') and dl['date'] < (TODAY - dt.timedelta(days=7)).isoformat():
+        state['daily'] = {}
     state['updated'] = dt.datetime.now().isoformat(timespec='seconds')
     temp = STATE_PATH + '.tmp'
     with open(temp, 'w', encoding='utf-8') as f:
         json.dump(state, f, ensure_ascii=False, indent=2, sort_keys=True)
         f.write('\n')
     os.replace(temp, STATE_PATH)
+
+
+def daily_gate(state, snapshot, force=False):
+    """同一天只发一封日报，且不发「数据还没更新」的旧快照。
+
+    2026-11-27 §5.124 事故：当天 mail 跑了 4 次（14:19 / 14:47 / 19:05 / 20:00），
+    4 封主题完全相同的日报进了同一个收件箱；前 2 封用的还是 dataAsOf=11-26 的旧数据。
+    根因：`--tag 日报` 没有任何幂等判断，daily 每成功一次就触发一次 mail。
+    判据两条：① 快照数据日期必须等于今天（否则是旧数据，不值得发）；
+              ② 今天已经发过就不再发。`--force` 可人工强发。
+    """
+    today = TODAY.isoformat()
+    as_of = str((snapshot.get('meta') or {}).get('dataAsOf') or '')[:10]
+    if force:
+        return True, ''
+    last = state.get('daily') or {}
+    if last.get('date') == today:
+        return False, 'ALREADY_SENT 今日 %s 已发过（asOf=%s，messageId %s）；如需重发加 --force' % (
+            today, last.get('asOf') or '—', (last.get('messageId') or '—'))
+    if as_of and as_of < today:
+        return False, 'DATA_STALE 快照 dataAsOf=%s 早于今天 %s（数据尚未更新），不发旧数据；dataAsOf 推进后会自动发' % (
+            as_of, today)
+    return True, ''
 
 
 def delivery_record(mode, status, subject='', recipients=None, error='', snapshot=None, counts=None, message_ids=None):
@@ -332,6 +360,8 @@ def main(argv=None):
     parser.add_argument('--i-approve-team', action='store_true',
                         help='确认已由本人审核，才允许向同事名单发送')
     parser.add_argument('--tag', default='审')
+    parser.add_argument('--force', action='store_true',
+                        help='忽略「同一天只发一封」硬锁与数据日期校验，人工强发')
     parser.add_argument('--dry', action='store_true', help='只生成预览，绝不发送或写已发状态')
     parser.add_argument('--weekly', action='store_true')
     parser.add_argument('--spot', action='store_true')
@@ -380,6 +410,13 @@ def main(argv=None):
     if args.dry:
         print('DRY_OK %s %s' % (mode, json.dumps(counts, ensure_ascii=False)))
         return 0
+    if mode == 'daily':
+        ok, why = daily_gate(load_state(), snapshot, force=args.force)
+        if not ok:
+            print(why)
+            write_delivery(delivery_record(mode, 'skipped', why, recipients,
+                                           snapshot=snapshot, counts=counts))
+            return 0
     message_ids = []
     try:
         for recipient in recipients:
@@ -389,6 +426,10 @@ def main(argv=None):
         return 1
     state = load_state()
     if mode == 'daily':
+        state['daily'] = {'date': TODAY.isoformat(),
+                          'at': dt.datetime.now().isoformat(timespec='seconds'),
+                          'asOf': str((snapshot.get('meta') or {}).get('dataAsOf') or ''),
+                          'messageId': message_ids[0] if message_ids else ''}
         for row in routes['oversea7']:
             state['sent'][root_key(title_of(row))] = TODAY.isoformat()
     elif mode == 'spot':

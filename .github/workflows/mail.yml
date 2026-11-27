@@ -22,6 +22,10 @@ jobs:
     steps:
       - name: 检出正式数据与同一生成入口
         uses: actions/checkout@v4
+        with:
+          # 2026-11-27 §5.124：与 daily.yml 同型问题——排队后事件 sha 会落后于 main。
+          # 邮件必须基于当前 main 的快照，否则发的是排队时刻的旧数据。
+          ref: main
 
       - name: 装 Python
         uses: actions/setup-python@v5
@@ -67,12 +71,20 @@ jobs:
             echo "状态和回执无变化"
             exit 0
           fi
-          remote=$(git ls-remote origin refs/heads/main | awk '{print $1}')
-          if [ "$remote" != "${GITHUB_SHA}" ]; then
-            echo "::error::发送后仓库基线变化：${GITHUB_SHA} → ${remote}；邮件回执未推，请人工核查"
-            exit 1
-          fi
+          # 2026-11-27 §5.124：回执必须推上去，否则 mail_state.json 里「今天已发」的
+          #   记录丢了，明天的「同日一封」硬锁就失效（这是今天连发 4 封的直接成因之一）。
+          #   只动 mail_state.json / mail_delivery_log.jsonl 两个文件，rebase 冲突面极小，
+          #   所以基线变了不拒推，而是 rebase 到最新 main 再推；真冲突才报错交人工。
+          base=$(git rev-parse HEAD)
           git commit -m "邮件发送回执 $(date -u '+%Y-%m-%d %H:%M') UTC [skip ci]"
+          remote=$(git ls-remote origin refs/heads/main | awk '{print $1}')
+          if [ "$remote" != "$base" ]; then
+            echo "基线已前进：${base} → ${remote}，先 rebase 再推回执"
+            git pull --rebase origin main || {
+              echo "::error::回执 rebase 冲突，请人工处理；本次邮件已发出，state 未落库"
+              exit 1
+            }
+          fi
           git push origin HEAD:main
 
       - name: 上传邮件预览和发送回执
