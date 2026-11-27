@@ -22,7 +22,7 @@
     },
     "data.core.js": {
       "bytes": 17752,
-      "sha256": "8fed6809daaaf6a06d741b5390f56327bbe1ccdf34fb3b092008410b645f3571"
+      "sha256": "15958aec28f95291daee41af7738ad250e7117fe569028d8382a16372cc190bc"
     },
     "data.entprobe.js": {
       "bytes": 1013545,
@@ -41,8 +41,8 @@
       "sha256": "10edaaadf7bca715f960520080bbfc0ac696ff030f21d5907a846d1ed5feaa5f"
     },
     "data.metalhist.js": {
-      "bytes": 361281,
-      "sha256": "21336b1667627896b06771d6c22843c6e0861ccb7e2dd24f30166fe1545f33bc"
+      "bytes": 361369,
+      "sha256": "39183d35b0376c07859df6994f26cec14397e7688d0458b961174249659e53e3"
     },
     "data.news.js": {
       "bytes": 463618,
@@ -114,10 +114,10 @@
       "count": 20,
       "historyCount": 20,
       "historyEnds": [
-        "2026-11-26"
+        "2026-11-27"
       ],
-      "historyGenerated": "2026-11-26",
-      "historyLatest": "2026-11-26",
+      "historyGenerated": "2026-11-27",
+      "historyLatest": "2026-11-27",
       "historyStale": {},
       "updated": "2026-11-27"
     },
@@ -132,12 +132,12 @@
   },
   "run": {
     "attempt": "1",
-    "baseSha": "f2940c174c0c3d5b34ff3b3c7980ccb274642542",
-    "builtAt": "2026-11-27T11:04:47+00:00",
-    "id": "45982450216",
-    "scope": "daily",
-    "sourceHealth": "",
-    "workflow": "商机雷达每日更新"
+    "baseSha": "c30316a2283b365278b7502b4d8a5bfb3ef49d05",
+    "builtAt": "2026-11-27T11:23:19+00:00",
+    "id": "45989903101",
+    "scope": "metals",
+    "sourceHealth": "spot=success,history=success",
+    "workflow": "金属行情刷新（交易日）"
   },
   "schema": 1
 }
