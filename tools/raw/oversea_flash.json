@@ -1,6 +1,11 @@
 {
  "updated": "2026-11-27 11:46",
  "n": 92,
+ "classifier": "90d921c1",
+ "leadQc": {
+  "leads": 21,
+  "ratio": 0.228
+ },
  "items": [
   {
    "title": "晶澳等四方投资2.1亿美元在埃及建设ATUM太阳能产业园",

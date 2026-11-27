@@ -222,9 +222,16 @@ def main():
             print('  [%d] %s | %s | %s' % (x['sc'], x['date'], x['src'][:12], x['title'][:56]))
         return
     old = {}
+    meta = {}
     if os.path.exists(OUT):
         try:
-            for x in json.load(open(OUT, encoding='utf-8')).get('items', []):
+            _prev = json.load(open(OUT, encoding='utf-8'))
+            # 2026-11-27 §5.123：这是第三个会整份重写 oversea_flash.json 的脚本。
+            #   事故当晚实测：3.9a 写上的 classifier/leadQc 被本步覆盖掉，顶层只剩
+            #   updated/n/items。写盘方各写各的键，是同一类 bug 的第三次出现，
+            #   所以这里把上一个文件的其它顶层字段原样带过去。
+            meta = {k: v for k, v in _prev.items() if k != 'items'}
+            for x in _prev.get('items', []):
                 old[x['url']] = x
         except Exception:
             pass
@@ -234,8 +241,9 @@ def main():
     # 只留 60 天内的，防止无限膨胀
     cut = time.strftime('%Y-%m-%d', time.localtime(time.time() - 60 * 86400))
     merged = [x for x in merged if (x.get('date') or '') >= cut]
-    json.dump({'updated': time.strftime('%Y-%m-%d %H:%M'), 'n': len(merged),
-               'items': merged}, open(OUT, 'w', encoding='utf-8'),
+    meta.update({'updated': time.strftime('%Y-%m-%d %H:%M'), 'n': len(merged),
+                 'items': merged})
+    json.dump(meta, open(OUT, 'w', encoding='utf-8'),
               ensure_ascii=False, indent=1)
     print('写入 %s（含历史累计 %d 条）' % (OUT, len(merged)))
 

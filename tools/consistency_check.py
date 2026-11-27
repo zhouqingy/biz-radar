@@ -35,6 +35,7 @@ TRACKED = (
     'collect_v4.py',
     'oversea_sources.py',
     'oversea_manual.py',
+    'mine_oversea_wechat.py',
     'build_data.py',
     'build_web.py',
     'update_weekly.py',
